@@ -258,6 +258,8 @@ vtkCocoaRenderWindow::~vtkCocoaRenderWindow()
 //----------------------------------------------------------------------------
 void vtkCocoaRenderWindow::Finalize()
 {
+  this->TriggerExitEvent();
+
   if(this->OffScreenInitialized)
     {
     this->OffScreenInitialized = 0;
