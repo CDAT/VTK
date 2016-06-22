@@ -54,15 +54,17 @@
 // as in the NullPointsStrategy).
 
 // .SECTION See Also
-// vtkProbeFilter vtkGaussianSplatter vtkCheckerboardSplatter
-// vtkShepardMethod vtkVoronoiKernel vtkShepardKernel vtkGaussianKernel
-// vtkSPHKernel
+// vtkPointInterpolator2D vtkProbeFilter vtkGaussianSplatter
+// vtkCheckerboardSplatter vtkShepardMethod vtkVoronoiKernel vtkShepardKernel
+// vtkGaussianKernel vtkSPHKernel
 
 #ifndef vtkPointInterpolator_h
 #define vtkPointInterpolator_h
 
 #include "vtkFiltersPointsModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkStdString.h"        // For vtkStdString ivars
+#include <vector> //For STL vector
 
 class vtkAbstractPointLocator;
 class vtkIdList;
@@ -105,9 +107,9 @@ public:
   vtkGetObjectMacro(Locator,vtkAbstractPointLocator);
 
   // Description:
-  // Specify an interpolation kernel. By default a vtkVoronoiKernel is used
-  // (i.e., closest point). The interpolation kernel changes the basis of the
-  // interpolation.
+  // Specify an interpolation kernel. By default a vtkLinearKernel is used
+  // (i.e., linear combination of closest points). The interpolation kernel
+  // changes the basis of the interpolation.
   void SetKernel(vtkInterpolationKernel *kernel);
   vtkGetObjectMacro(Kernel,vtkInterpolationKernel);
 
@@ -124,10 +126,10 @@ public:
   // nearby points to interpolate from) is empty. If the strategy is set to
   // MaskPoints, then an output array is created that marks points as being
   // valid (=1) or null (invalid =0) (and the NullValue is set as well). If
-  // the strategy is set to NullValue, then the output data value(s) are set
-  // to the NullPoint value (specified in the output point data). Finally,
-  // the default strategy ClosestPoint is to simply use the closest point to
-  // perform the interpolation.
+  // the strategy is set to NullValue (this is the default), then the output
+  // data value(s) are set to the NullPoint value (specified in the output
+  // point data). Finally, the strategy ClosestPoint is to simply use the
+  // closest point to perform the interpolation.
   vtkSetMacro(NullPointsStrategy,int);
   vtkGetMacro(NullPointsStrategy,int);
   void SetNullPointsStrategyToMaskPoints()
@@ -142,8 +144,8 @@ public:
   // each input point. This vtkCharArray is placed into the output of the filter,
   // with a non-zero value for a valid point, and zero otherwise. The name of
   // this masking array is specified here.
-  vtkSetStringMacro(ValidPointsMaskArrayName);
-  vtkGetStringMacro(ValidPointsMaskArrayName);
+  vtkSetMacro(ValidPointsMaskArrayName, vtkStdString);
+  vtkGetMacro(ValidPointsMaskArrayName, vtkStdString);
 
   // Description:
   // Specify the null point value. When a null point is encountered then all
@@ -151,6 +153,48 @@ public:
   // null value is set to zero.
   vtkSetMacro(NullValue,double);
   vtkGetMacro(NullValue,double);
+
+  // Description:
+  // Adds an array to the list of arrays which are to be excluded from the
+  // interpolation process.
+  void AddExcludedArray(const vtkStdString &excludedArray)
+    {
+    this->ExcludedArrays.push_back(excludedArray);
+    this->Modified();
+    }
+
+  // Description:
+  // Clears the contents of excluded array list.
+  void ClearExcludedArrays()
+    {
+    this->ExcludedArrays.clear();
+    this->Modified();
+    }
+
+  // Description:
+  // Return the number of excluded arrays.
+  int GetNumberOfExcludedArrays()
+    {return static_cast<int>(this->ExcludedArrays.size());}
+
+  // Description:
+  // Return the name of the ith excluded array.
+  const char* GetExcludedArray(int i)
+    {
+      if ( i < 0 || i >= static_cast<int>(this->ExcludedArrays.size()) )
+        {
+        return NULL;
+        }
+      return this->ExcludedArrays[i].c_str();
+    }
+
+  // Description:
+  // If enabled, then input arrays that are non-real types (i.e., not float
+  // or double) are promoted to float type on output. This is because the
+  // interpolation process may not be well behaved when integral types are
+  // combined using interpolation weights.
+  vtkSetMacro(PromoteOutputArrays, bool);
+  vtkBooleanMacro(PromoteOutputArrays, bool);
+  vtkGetMacro(PromoteOutputArrays, bool);
 
   // Description:
   // Indicate whether to shallow copy the input point data arrays to the
@@ -173,6 +217,10 @@ public:
   vtkBooleanMacro(PassFieldArrays, bool);
   vtkGetMacro(PassFieldArrays, bool);
 
+  // Description:
+  // Get the MTime of this object also considering the locator and kernel.
+  unsigned long GetMTime();
+
 protected:
   vtkPointInterpolator();
   ~vtkPointInterpolator();
@@ -182,8 +230,12 @@ protected:
 
   int NullPointsStrategy;
   double NullValue;
-  char* ValidPointsMaskArrayName;
+  vtkStdString ValidPointsMaskArrayName;
   vtkCharArray *ValidPointsMask;
+
+  std::vector<vtkStdString> ExcludedArrays;
+
+  bool PromoteOutputArrays;
 
   bool PassCellArrays;
   bool PassPointArrays;
@@ -197,13 +249,13 @@ protected:
     vtkInformationVector *);
 
   // Description:
-  // Equivalent to calling BuildFieldList(); InitializeForProbing(); DoProbing().
-  void Probe(vtkDataSet *input, vtkDataSet *source, vtkDataSet *output);
+  // Virtual for specialized subclass(es)
+  virtual void Probe(vtkDataSet *input, vtkDataSet *source, vtkDataSet *output);
 
   // Description:
   // Call at end of RequestData() to pass attribute data respecting the
   // PassCellArrays, PassPointArrays, PassFieldArrays flags.
-  void PassAttributeData(
+  virtual void PassAttributeData(
     vtkDataSet* input, vtkDataObject* source, vtkDataSet* output);
 
   // Description:

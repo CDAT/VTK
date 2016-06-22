@@ -38,6 +38,7 @@
 
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkTypeTraits.h" // For type traits
 
 #include "vtkMathConfigure.h" // For <cmath> and VTK_HAS_ISNAN etc.
 
@@ -69,6 +70,13 @@ class vtkMathInternal;
 class vtkMinimalStandardRandomSequence;
 class vtkBoxMuellerRandomSequence;
 
+namespace vtk_detail
+{
+// forward declaration
+template <typename OutT>
+void RoundDoubleToIntegralIfNecessary(double val, OutT* ret);
+} // end namespace vtk_detail
+
 class VTKCOMMONCORE_EXPORT vtkMath : public vtkObject
 {
 public:
@@ -96,6 +104,17 @@ public:
     return static_cast<int>( f + ( f >= 0.0 ? 0.5 : -0.5 ) ); }
   static int Round(double f) {
     return static_cast<int>( f + ( f >= 0.0 ? 0.5 : -0.5 ) ); }
+
+  // Description:
+  // Round a double to type OutT if OutT is integral, otherwise simply clamp
+  // the value to the output range.
+  template <typename OutT>
+  static void RoundDoubleToIntegralIfNecessary(double val, OutT* ret)
+  {
+    // Can't specialize template methods in a template class, so we move the
+    // implementations to a external namespace.
+    vtk_detail::RoundDoubleToIntegralIfNecessary(val, ret);
+  }
 
   // Description:
   // Rounds a double to the nearest integer not greater than itself.
@@ -1173,7 +1192,6 @@ inline void vtkMath::Cross(const double x[3], const double y[3], double z[3])
   z[0] = Zx; z[1] = Zy; z[2] = Zz;
 }
 
-//BTX
 //----------------------------------------------------------------------------
 template<class T>
 inline double vtkDeterminant3x3(T A[3][3])
@@ -1182,7 +1200,6 @@ inline double vtkDeterminant3x3(T A[3][3])
          A[2][0] * A[0][1] * A[1][2] - A[0][0] * A[2][1] * A[1][2] -
          A[1][0] * A[0][1] * A[2][2] - A[2][0] * A[1][1] * A[0][2];
 }
-//ETX
 
 //----------------------------------------------------------------------------
 inline double vtkMath::Determinant3x3(float A[3][3])
@@ -1294,6 +1311,30 @@ inline double vtkMath::ClampAndNormalizeValue(double value,
 
   return result;
 }
+
+namespace vtk_detail
+{
+// Can't specialize templates inside a template class, so we move the impl here.
+template <typename OutT>
+void RoundDoubleToIntegralIfNecessary(double val, OutT* ret)
+{ // OutT is integral -- clamp and round
+  val = vtkMath::Max(val, static_cast<double>(vtkTypeTraits<OutT>::Min()));
+  val = vtkMath::Min(val, static_cast<double>(vtkTypeTraits<OutT>::Max()));
+  *ret = static_cast<OutT>((val >= 0.0) ? (val + 0.5) : (val - 0.5));
+}
+template <>
+inline void RoundDoubleToIntegralIfNecessary(double val, double* retVal)
+{ // OutT is double: passthrough
+  *retVal = val;
+}
+template <>
+inline void RoundDoubleToIntegralIfNecessary(double val, float* retVal)
+{ // OutT is float -- just clamp
+  val = vtkMath::Max(val, static_cast<double>(vtkTypeTraits<float>::Min()));
+  val = vtkMath::Min(val, static_cast<double>(vtkTypeTraits<float>::Max()));
+  *retVal = static_cast<float>(val);
+}
+} // end namespace vtk_detail
 
 //-----------------------------------------------------------------------------
 #if defined(VTK_HAS_ISINF) || defined(VTK_HAS_STD_ISINF)

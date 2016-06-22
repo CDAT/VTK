@@ -14,24 +14,26 @@
 =========================================================================*/
 #include "vtkGPUVolumeRayCastMapper.h"
 
-#include "vtkObjectFactory.h"
-#include "vtkImageData.h"
-#include "vtkPointData.h"
-#include "vtkCellData.h"
-#include "vtkDataArray.h"
-#include "vtkTimerLog.h"
-#include "vtkImageResample.h"
-#include "vtkVolume.h"
-#include "vtkVolumeProperty.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
+#include <vtkCamera.h>
+#include <vtkCellData.h>
+#include <vtkCommand.h> // for VolumeMapperRender{Start|End|Progress}Event
+#include <vtkContourValues.h>
+#include <vtkDataArray.h>
+#include <vtkGPUInfo.h>
+#include <vtkGPUInfoList.h>
+#include <vtkImageData.h>
+#include <vtkImageResample.h>
+#include <vtkMultiThreader.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkRenderer.h>
+#include <vtkRendererCollection.h>
+#include <vtkRenderWindow.h>
+#include <vtkTimerLog.h>
+#include <vtkVolume.h>
+#include <vtkVolumeProperty.h>
+
 #include <cassert>
-#include "vtkCommand.h" // for VolumeMapperRender{Start|End|Progress}Event
-#include "vtkCamera.h"
-#include "vtkRendererCollection.h"
-#include "vtkMultiThreader.h"
-#include "vtkGPUInfoList.h"
-#include "vtkGPUInfo.h"
 
 // Return NULL if no override is supplied.
 vtkAbstractObjectFactoryNewMacro(vtkGPUVolumeRayCastMapper)
@@ -45,7 +47,11 @@ vtkGPUVolumeRayCastMapper::vtkGPUVolumeRayCastMapper()
   this->MinimumImageSampleDistance = 1.0;
   this->MaximumImageSampleDistance = 10.0;
   this->RenderToImage              = 0;
+  this->DepthImageScalarType       = VTK_FLOAT;
+  this->ClampDepthToBackface       = 0;
   this->UseJittering               = 1;
+  this->UseDepthPass               = 0;
+  this->DepthPassContourValues     = NULL;
   this->SampleDistance             = 1.0;
   this->SmallVolumeRender          = 0;
   this->BigTimeToDraw              = 0.0;
@@ -104,6 +110,11 @@ vtkGPUVolumeRayCastMapper::~vtkGPUVolumeRayCastMapper()
   this->SetMaskInput(NULL);
   this->SetTransformedInput(NULL);
   this->LastInput = NULL;
+
+  if (this->DepthPassContourValues)
+    {
+    this->DepthPassContourValues->Delete();
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -373,8 +384,7 @@ int vtkGPUVolumeRayCastMapper::ValidateRender(vtkRenderer *ren,
       }
     }
 
-  int numberOfComponents = 0;
-  numberOfComponents = scalars->GetNumberOfComponents();
+  int numberOfComponents = goodSoFar ? scalars->GetNumberOfComponents() : 0;
 
 #ifdef VTK_OPENGL2
   // This mapper supports anywhere from 1-4 components. Number of components
@@ -682,4 +692,33 @@ void vtkGPUVolumeRayCastMapper::SetMaskTypeToBinary()
 void vtkGPUVolumeRayCastMapper::SetMaskTypeToLabelMap()
 {
   this->MaskType = vtkGPUVolumeRayCastMapper::LabelMapMaskType;
+}
+
+//----------------------------------------------------------------------------
+vtkContourValues* vtkGPUVolumeRayCastMapper::GetDepthPassContourValues()
+{
+  if (!this->DepthPassContourValues)
+    {
+    this->DepthPassContourValues = vtkContourValues::New();
+    }
+
+  return this->DepthPassContourValues;
+}
+
+//----------------------------------------------------------------------------
+void vtkGPUVolumeRayCastMapper::SetDepthImageScalarTypeToUnsignedChar()
+{
+  this->SetDepthImageScalarType(VTK_UNSIGNED_CHAR);
+}
+
+//----------------------------------------------------------------------------
+void vtkGPUVolumeRayCastMapper::SetDepthImageScalarTypeToUnsignedShort()
+{
+  this->SetDepthImageScalarType(VTK_UNSIGNED_SHORT);
+}
+
+//----------------------------------------------------------------------------
+void vtkGPUVolumeRayCastMapper::SetDepthImageScalarTypeToFloat()
+{
+  this->SetDepthImageScalarType(VTK_FLOAT);
 }

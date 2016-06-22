@@ -387,6 +387,11 @@ vtkScalarBarActor::~vtkScalarBarActor()
 //----------------------------------------------------------------------------
 int vtkScalarBarActor::RenderOverlay(vtkViewport* viewport)
 {
+  if (!this->RebuildLayoutIfNeeded(viewport))
+    {
+    return 0;
+    }
+
   int renderedSomething = 0;
 
   // Is the viewport's RenderWindow capturing GL2PS-special props? We'll need
@@ -486,11 +491,8 @@ int vtkScalarBarActor::RenderOverlay(vtkViewport* viewport)
   return renderedSomething;
 }
 
-//----------------------------------------------------------------------------
-int vtkScalarBarActor::RenderOpaqueGeometry(vtkViewport* viewport)
+int vtkScalarBarActor::RebuildLayoutIfNeeded(vtkViewport* viewport)
 {
-  int renderedSomething = 0;
-
   if (!this->LookupTable)
     {
     vtkWarningMacro(<< "Need a mapper to render a scalar bar");
@@ -561,6 +563,18 @@ int vtkScalarBarActor::RenderOpaqueGeometry(vtkViewport* viewport)
     {
     this->RebuildLayout(viewport);
     }
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkScalarBarActor::RenderOpaqueGeometry(vtkViewport* viewport)
+{
+  if (!this->RebuildLayoutIfNeeded(viewport))
+    {
+    return 0;
+    }
+
+  int renderedSomething = 0;
 
   // Everything is built, just have to render
   if (this->Title != NULL)
@@ -2295,7 +2309,7 @@ int vtkScalarBarActor::PlaceAnnotationsVertically(
                                             ctr); \
   ll[1] = lpts->InsertNextPoint(xl1, ctr, 0.); \
   llines->InsertNextCell(2, ll); \
-  llcolors->InsertNextTupleValue(this->P->AnnotationColors[j].GetData()); \
+  llcolors->InsertNextTypedTuple(this->P->AnnotationColors[j].GetData()); \
   if (upCum < ctr + hh) upCum = ctr + hh; \
   if (dnCum > ctr - hh) dnCum = ctr - hh;
 
@@ -2541,7 +2555,7 @@ struct vtkScalarBarHLabelPlacer
       pt = pts->InsertNextPoint(label.Anchor[0], other.Y[0], 0.);
       lines->InsertCellPoint(pt);
       lines->InsertNextCell(2);
-      colors->InsertNextTupleValue(color.GetData());
+      colors->InsertNextTypedTuple(color.GetData());
       curY = other.Y[1];
       pt = pts->InsertNextPoint(label.Anchor[0], curY, 0.);
       lines->InsertCellPoint(pt);
@@ -2558,7 +2572,7 @@ struct vtkScalarBarHLabelPlacer
 
     // I. Insert first vertex near swatch:
     lines->InsertNextCell(2);
-    colors->InsertNextTupleValue(color.GetData());
+    colors->InsertNextTypedTuple(color.GetData());
     double curY = this->Y0 + this->Dir * this->Pad / 2.;
     pt = pts->InsertNextPoint(label.Anchor[0], curY, 0.);
     lines->InsertCellPoint(pt);

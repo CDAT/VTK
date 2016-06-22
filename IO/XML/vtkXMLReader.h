@@ -49,10 +49,10 @@ public:
   vtkGetStringMacro(FileName);
 
   // Description:
-  // Enable writing to an InputString instead of the default, a file.
-  vtkSetMacro(ReadFromInputString,int);
-  vtkGetMacro(ReadFromInputString,int);
-  vtkBooleanMacro(ReadFromInputString,int);
+  // Enable reading from an InputString instead of the default, a file.
+  vtkSetMacro(ReadFromInputString, int);
+  vtkGetMacro(ReadFromInputString, int);
+  vtkBooleanMacro(ReadFromInputString, int);
   void SetInputString(std::string s) { this->InputString = s; }
 
   // Description:
@@ -125,13 +125,13 @@ public:
   // Set/get the ErrorObserver for the internal reader
   // This is useful for applications that want to catch error messages.
   void SetReaderErrorObserver(vtkCommand *);
-  vtkGetObjectMacro(ReaderErrorObserver,vtkCommand);
+  vtkGetObjectMacro(ReaderErrorObserver, vtkCommand);
 
   // Description:
   // Set/get the ErrorObserver for the internal xml parser
   // This is useful for applications that want to catch error messages.
   void SetParserErrorObserver(vtkCommand *);
-  vtkGetObjectMacro(ParserErrorObserver,vtkCommand);
+  vtkGetObjectMacro(ParserErrorObserver, vtkCommand);
 
 protected:
   vtkXMLReader();
@@ -217,10 +217,8 @@ protected:
   void SetDataArraySelections(vtkXMLDataElement* eDSA,
                               vtkDataArraySelection* sel);
 
-//BTX
   int SetFieldDataInfo(vtkXMLDataElement *eDSA, int association,
   int numTuples, vtkInformationVector *(&infoVector));
-//ETX
 
   // Check whether the given array element is an enabled array.
   int PointDataArrayIsEnabled(vtkXMLDataElement* ePDA);
@@ -229,6 +227,10 @@ protected:
   // Callback registered with the SelectionObserver.
   static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
                                         void* clientdata, void* calldata);
+
+  // Give concrete classes an option to squeeze any output arrays
+  // at the end of RequestData.
+  virtual void SqueezeOutputArrays(vtkDataObject*) {}
 
   // The vtkXMLDataParser instance used to hide XML reading details.
   vtkXMLDataParser* XMLParser;

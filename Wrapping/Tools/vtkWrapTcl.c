@@ -1093,6 +1093,9 @@ int main(int argc, char *argv[])
   FILE *fp;
   int i,j,k;
 
+  /* pre-define a macro to identify the language */
+  vtkParse_DefineMacro("__VTK_WRAP_TCL__", 0);
+
   /* get command-line args and parse the header file */
   file_info = vtkParse_Main(argc, argv);
 
@@ -1119,9 +1122,10 @@ int main(int argc, char *argv[])
     }
 
   /* get the hierarchy info for accurate typing */
-  if (options->HierarchyFileName)
+  if (options->HierarchyFileNames)
     {
-    hierarchyInfo = vtkParseHierarchy_ReadFile(options->HierarchyFileName);
+    hierarchyInfo = vtkParseHierarchy_ReadFiles(
+      options->NumberOfHierarchyFileNames, options->HierarchyFileNames);
     if (hierarchyInfo)
       {
       /* resolve using declarations within the header files */

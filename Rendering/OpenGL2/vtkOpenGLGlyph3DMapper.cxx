@@ -323,7 +323,7 @@ void vtkOpenGLGlyph3DMapper::Render(
   vtkBitArray *maskArray = 0;
   if (this->Masking)
     {
-    maskArray = vtkBitArray::SafeDownCast(this->GetMaskArray(dataset));
+    maskArray = vtkArrayDownCast<vtkBitArray>(this->GetMaskArray(dataset));
     if (maskArray == 0)
       {
       vtkDebugMacro(<<"masking is enabled but there is no mask array. Ignore masking.");
@@ -664,7 +664,7 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
 
       if (colors)
         {
-        colors->GetTupleValue(inPtId, &(entry->Colors[entry->NumberOfPoints*4]));
+        colors->GetTypedTuple(inPtId, &(entry->Colors[entry->NumberOfPoints*4]));
         }
 
       // scale data if appropriate

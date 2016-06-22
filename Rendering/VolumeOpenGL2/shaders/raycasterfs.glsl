@@ -71,6 +71,8 @@ uniform vec4 in_volume_bias;
 
 //VTK::ComputeRayDirection::Dec
 
+//VTK::Picking::Dec
+
 /// We support only 8 clipping planes for now
 /// The first value is the size of the data array for clipping
 /// planes (origin, normal)
@@ -101,7 +103,9 @@ void main()
 
   //VTK::Clipping::Init
 
-  //VTK::RenderToImage::Depth::Init
+  //VTK::RenderToImage::Init
+
+  //VTK::DepthPass::Init
 
   /// For all samples along the ray
   while (!g_exit)
@@ -118,7 +122,9 @@ void main()
 
     //VTK::Shading::Impl
 
-    //VTK::RenderToImage::Depth::Impl
+    //VTK::RenderToImage::Impl
+
+    //VTK::DepthPass::Impl
 
     /// Advance ray
     g_dataPos += g_dirStep;
@@ -136,10 +142,14 @@ void main()
 
   //VTK::Shading::Exit
 
+  //VTK::Picking::Exit
+
   g_fragColor.r = g_fragColor.r * in_scale + in_bias * g_fragColor.a;
   g_fragColor.g = g_fragColor.g * in_scale + in_bias * g_fragColor.a;
   g_fragColor.b = g_fragColor.b * in_scale + in_bias * g_fragColor.a;
   gl_FragData[0] = g_fragColor;
 
-  //VTK::RenderToImage::Depth::Exit
+  //VTK::RenderToImage::Exit
+
+  //VTK::DepthPass::Exit
   }

@@ -20,13 +20,13 @@
 #include "vtkDataSet.h"
 #include "vtkPointData.h"
 #include "vtkMath.h"
+#include "vtkMathUtilities.h"
 
 vtkStandardNewMacro(vtkShepardKernel);
 
 //----------------------------------------------------------------------------
 vtkShepardKernel::vtkShepardKernel()
 {
-  this->Radius = 1.0;
   this->PowerParameter = 2.0;
 }
 
@@ -39,21 +39,15 @@ vtkShepardKernel::~vtkShepardKernel()
 
 //----------------------------------------------------------------------------
 vtkIdType vtkShepardKernel::
-ComputeBasis(double x[3], vtkIdList *pIds)
-{
-  this->Locator->FindPointsWithinRadius(this->Radius, x, pIds);
-  return pIds->GetNumberOfIds();
-}
-
-//----------------------------------------------------------------------------
-vtkIdType vtkShepardKernel::
-ComputeWeights(double x[3], vtkIdList *pIds, vtkDoubleArray *weights)
+ComputeWeights(double x[3], vtkIdList *pIds, vtkDoubleArray *prob,
+               vtkDoubleArray *weights)
 {
   vtkIdType numPts = pIds->GetNumberOfIds();
   int i;
   vtkIdType id;
-  double d, y[3], sum = 0.0;
+  double d, y[3], sum=0.0;
   weights->SetNumberOfTuples(numPts);
+  double *p = (prob ? prob->GetPointer(0) : NULL);
   double *w = weights->GetPointer(0);
 
   for (i=0; i<numPts; ++i)
@@ -68,7 +62,7 @@ ComputeWeights(double x[3], vtkIdList *pIds, vtkDoubleArray *weights)
       {
       d = pow(sqrt(vtkMath::Distance2BetweenPoints(x,y)), this->PowerParameter);
       }
-    if ( d == 0.0 ) //precise hit on existing point
+    if ( vtkMathUtilities::FuzzyCompare(d, 0.0, std::numeric_limits<double>::epsilon()*256.0 )) //precise hit on existing point
       {
       pIds->SetNumberOfIds(1);
       pIds->SetId(0,id);
@@ -78,15 +72,18 @@ ComputeWeights(double x[3], vtkIdList *pIds, vtkDoubleArray *weights)
       }
     else
       {
-      w[i] = 1.0 / d;
+      w[i] = (p ? p[i]/d : 1.0/d); //take into account probability if provided
       sum += w[i];
       }
     }//over all points
 
   // Normalize
-  for (i=0; i<numPts; ++i)
+  if ( this->NormalizeWeights && sum != 0.0 )
     {
-    w[i] /= sum;
+    for (i=0; i<numPts; ++i)
+      {
+      w[i] /= sum;
+      }
     }
 
   return numPts;
@@ -97,7 +94,6 @@ void vtkShepardKernel::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
-  os << indent << "Radius: " << this->Radius << "\n";
   os << indent << "Power Parameter: "
-     << this->PowerParameter << "\n";
+     << this->GetPowerParameter() << "\n";
 }

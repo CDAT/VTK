@@ -17,29 +17,33 @@
 // .SECTION Description
 // vtkInterpolationKernel specifies an abstract interface for interpolation
 // kernels. An interpolation kernel is used to produce an interpolated data
-// value from the data in a local neighborhood surounding a point X. For
-// example, given the N nearest points surrounding X, the interpolation
-// kernel provides N weights, which when combined with the N data values
-// associated with the nearest points, produces a data value at point X.
+// value at a point X from the points + data in a local neighborhood
+// surounding X. For example, given the N nearest points surrounding X, the
+// interpolation kernel provides N weights, which when combined with the N
+// data values associated with these nearest points, produces an interpolated
+// data value at point X.
 //
 // Note that various kernel initialization methods are provided. The basic
 // method requires providing a point locator to accelerate neigborhood
 // queries. Some kernels may refer back to the original dataset, or the point
-// attribute data associated with the dataset.
+// attribute data associated with the dataset. The initialization method
+// enables different styles of initialization and is kernel-dependent.
 //
 // Typically the kernels are invoked in two parts: first, the basis is
-// computed using the supplied point locator and dataset. These are the
+// computed using the supplied point locator and dataset. This basis is a
+// local footprint of point surrounding a poitnX. In this footprint are the
 // neighboring points used to compute the interpolation weights. Then, the
 // weights are computed from points forming the basis. However, advanced
 // users can develop their own basis, skipping the ComputeBasis() method, and
 // then invoke ComputeWeights() directly.
 
 // .SECTION Caveats
-// The ComputeWeights() method is thread safe.
+// The ComputeBasis() and ComputeWeights() methods must be thread safe as they
+// are used in threaded algorithms.
 
 // .SECTION See Also
-// vtkPointInterpolator vtkGaussianKernel vtkSPHKernel vtkShepardKernel
-// vtkVoronoiKernel
+// vtkPointInterpolator vtkPointInterpolator2D vtkGeneralizedKernel
+// vtkGaussianKernel vtkSPHKernel vtkShepardKernel vtkVoronoiKernel
 
 
 #ifndef vtkInterpolationKernel_h
@@ -59,8 +63,8 @@ class VTKFILTERSPOINTS_EXPORT vtkInterpolationKernel : public vtkObject
 {
 public:
   // Description:
-  // Standard methods for type and printing.
-  vtkTypeMacro(vtkInterpolationKernel,vtkObject);
+  // Standard method for type and printing.
+  vtkAbstractTypeMacro(vtkInterpolationKernel, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -84,12 +88,14 @@ public:
   vtkBooleanMacro(RequiresInitialization, bool);
 
   // Description:
-  // Given a point x, determine the points around x which form an
-  // interpolation basis. The user must provide the vtkIdList pids, which will
-  // be dynamically resized as necessary. The method returns the number of
-  // points in the basis. Typically this method is called before
-  // ComputeBasis().
-  virtual vtkIdType ComputeBasis(double x[3], vtkIdList *pIds) = 0;
+  // Given a point x (and optional associated point id), determine the points
+  // around x which form an interpolation basis. The user must provide the
+  // vtkIdList pIds, which will be dynamically resized as necessary. The
+  // method returns the number of points in the basis. Typically this method
+  // is called before ComputeWeights(). Note that ptId is optional in most
+  // cases, although in some kernels it is used to facilitate basis
+  // computation.
+  virtual vtkIdType ComputeBasis(double x[3], vtkIdList *pIds, vtkIdType ptId=0) = 0;
 
   // Description:
   // Given a point x, and a list of basis points pIds, compute interpolation

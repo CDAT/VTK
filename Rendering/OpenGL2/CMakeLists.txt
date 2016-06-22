@@ -47,8 +47,9 @@ set(Module_SRCS
   vtkOpenGLPolyDataMapper.cxx
   vtkOpenGLPolyDataMapper2D.cxx
   vtkOpenGLProperty.cxx
-  vtkOpenGLRenderWindow.cxx
+  vtkOpenGLRenderPass.cxx
   vtkOpenGLRenderUtilities.cxx
+  vtkOpenGLRenderWindow.cxx
   vtkOpenGLRenderer.cxx
   vtkOpenGLShaderCache.cxx
   vtkOpenGLTextActor.cxx
@@ -59,9 +60,7 @@ set(Module_SRCS
   vtkOpenGLVertexBufferObject.cxx
   vtkOverlayPass.cxx
   vtkPointFillPass.cxx
-  vtkRenderPass.cxx
   vtkRenderPassCollection.cxx
-  vtkRenderState.cxx
   vtkRenderStepsPass.cxx
   vtkSSAAPass.cxx
   vtkSequencePass.cxx
@@ -81,6 +80,7 @@ set(Module_SRCS
 if (NOT DEFINED OPENGL_ES_VERSION)
   set(Module_SRCS ${Module_SRCS}
     vtkDataTransferHelper.cxx
+    vtkDualDepthPeelingPass.cxx # Needs GL_MAX
     vtkFrameBufferObject2.cxx
     vtkPixelBufferObject.cxx
     vtkRenderbuffer.cxx
@@ -88,6 +88,7 @@ if (NOT DEFINED OPENGL_ES_VERSION)
 else()
   if (${OPENGL_ES_VERSION} MATCHES 3.0)
     set(Module_SRCS ${Module_SRCS}
+      vtkDualDepthPeelingPass.cxx # Needs GL_MAX
       vtkFrameBufferObject2.cxx
       vtkPixelBufferObject.cxx
       vtkRenderbuffer.cxx
@@ -115,7 +116,6 @@ set_source_files_properties(
   vtkOpenGLVertexArrayObject
   vtkOpenGLVertexBufferObject
   vtkPixelBufferObject
-  vtkRenderState
   vtkRenderbuffer
   vtkTextureObject
   vtkTextureUnitManager
@@ -132,8 +132,6 @@ set_source_files_properties(
 set_source_files_properties(
   vtkOpenGLGL2PSHelper
   vtkOpenGLRenderWindow
-  vtkRenderPass
-  vtkRenderState
   ABSTRACT
   )
 

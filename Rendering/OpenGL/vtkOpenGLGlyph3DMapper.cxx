@@ -399,7 +399,7 @@ void vtkOpenGLGlyph3DMapper::Render(
 
   if (this->Masking)
     {
-    maskArray = vtkBitArray::SafeDownCast(this->GetMaskArray(dataset));
+    maskArray = vtkArrayDownCast<vtkBitArray>(this->GetMaskArray(dataset));
     if (maskArray == 0)
       {
       vtkDebugMacro(<<"masking is enabled but there is no mask array. Ignore masking.");
@@ -588,7 +588,7 @@ void vtkOpenGLGlyph3DMapper::Render(
       else if (colors)
         {
         unsigned char rgba[4];
-        colors->GetTupleValue(inPtId, rgba);
+        colors->GetTypedTuple(inPtId, rgba);
         glColor4ub(rgba[0], rgba[1], rgba[2], rgba[3]);
         }
       //glFinish(); // for debug

@@ -18,8 +18,8 @@
 // .SECTION Description
 // vtkCellQuality computes one or more functions of (geometric) quality for each
 // cell of a mesh.  The per-cell quality is added to the mesh's cell data, in an
-// array named "Quality." Cell types not supported by this filter or undefined
-// quality of supported cell types will have an entry of 0.
+// array named "CellQuality." Cell types not supported by this filter or undefined
+// quality of supported cell types will have an entry of -1.
 //
 // .SECTION Caveats
 // Most quadrilateral quality functions are intended for planar quadrilaterals
@@ -39,7 +39,7 @@ class vtkPoints;
 
 class VTKFILTERSVERDICT_EXPORT vtkCellQuality : public vtkDataSetAlgorithm
 {
-  //BTX
+
   enum
     {
     NONE = 0,
@@ -75,7 +75,6 @@ class VTKFILTERSVERDICT_EXPORT vtkCellQuality : public vtkDataSetAlgorithm
     VOLUME,
     WARPAGE
     };
-  //ETX
 
 public:
   void PrintSelf (ostream&, vtkIndent);

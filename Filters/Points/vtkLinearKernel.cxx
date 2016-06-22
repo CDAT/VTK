@@ -23,7 +23,6 @@ vtkStandardNewMacro(vtkLinearKernel);
 //----------------------------------------------------------------------------
 vtkLinearKernel::vtkLinearKernel()
 {
-  this->Radius = 1.0;
 }
 
 
@@ -35,23 +34,39 @@ vtkLinearKernel::~vtkLinearKernel()
 
 //----------------------------------------------------------------------------
 vtkIdType vtkLinearKernel::
-ComputeBasis(double x[3], vtkIdList *pIds)
-{
-  this->Locator->FindPointsWithinRadius(this->Radius, x, pIds);
-  return pIds->GetNumberOfIds();
-}
-
-//----------------------------------------------------------------------------
-vtkIdType vtkLinearKernel::
-ComputeWeights(double*, vtkIdList *pIds, vtkDoubleArray *weights)
+ComputeWeights(double*, vtkIdList *pIds, vtkDoubleArray *prob,
+               vtkDoubleArray *weights)
 {
   vtkIdType numPts = pIds->GetNumberOfIds();
-  double w = 1.0 / static_cast<double>(numPts);
-
+  double *p = (prob ? prob->GetPointer(0) : NULL);
   weights->SetNumberOfTuples(numPts);
-  for (vtkIdType i=0; i < numPts; ++i)
+  double *w = weights->GetPointer(0);
+  double weight = 1.0 / static_cast<double>(numPts);
+
+  if ( ! prob ) //standard linear interpolation
     {
-    weights->SetValue(i,w);
+    for (vtkIdType i=0; i < numPts; ++i)
+      {
+      w[i] = weight;
+      }
+    }
+
+  else //weight by probability
+    {
+    double sum=0.0;
+    for (vtkIdType i=0; i < numPts; ++i)
+      {
+      w[i] = weight * p[i];
+      sum += w[i];
+      }
+    // Now normalize
+    if ( this->NormalizeWeights && sum != 0.0 )
+      {
+      for (vtkIdType i=0; i < numPts; ++i)
+        {
+        w[i] /= sum;
+        }
+      }
     }
 
   return numPts;
@@ -61,5 +76,4 @@ ComputeWeights(double*, vtkIdList *pIds, vtkDoubleArray *weights)
 void vtkLinearKernel::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
-
 }

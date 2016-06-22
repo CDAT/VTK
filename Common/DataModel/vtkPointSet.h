@@ -100,15 +100,13 @@ public:
 
   // Description:
   // Overwritten to handle the data/locator loop
-  virtual void Register(vtkObjectBase* o);
-  virtual void UnRegister(vtkObjectBase* o);
+  void Register(vtkObjectBase* o) VTK_OVERRIDE;
+  void UnRegister(vtkObjectBase* o) VTK_OVERRIDE;
 
-  //BTX
   // Description:
   // Retrieve an instance of this class from an information object.
   static vtkPointSet* GetData(vtkInformation* info);
   static vtkPointSet* GetData(vtkInformationVector* v, int i=0);
-  //ETX
 
 protected:
   vtkPointSet();
@@ -117,7 +115,7 @@ protected:
   vtkPoints *Points;
   vtkPointLocator *Locator;
 
-  virtual void ReportReferences(vtkGarbageCollector*);
+  void ReportReferences(vtkGarbageCollector*) VTK_OVERRIDE;
 private:
 
   void Cleanup();
