@@ -36,30 +36,37 @@ vtkCxxSetObjectMacro(vtkCookieCutFilter,Loop,vtkPoints);
 //----------------------------------------------------------------------------
 namespace {
 
-  // Infrastructure for interaction
+  // Note on parametric coordinates: Given a sequence of lines segments
+  // (vi,vi+1) that form a primitive (polyline or polygon), the parametric
+  // coordinates along the primitive is [i,i+1). Any point (like an intersection
+  // point on the segment) is i+t, where 0 <= t <= 1.
+
+
+  // Infrastructure for cropping-----------------------------------------
   struct SortPoint
   {
-    double T; //parametric coordinate
-    double X[3]; // physical location
+    double Tp; //parametric coordinate along primitive (line or polygon)
+    double Tl; //parametric coordinate along loop (cokkie cutter)
+    double X[3]; //position of point
     int Type; //classification (boundary, vertex)
     enum TypeEnum {BOUNDARY=0,VERTEX=1};
-    SortPoint(double t, double x[3], int type) :
-      T(t), Type(type)
+    SortPoint(double tp, double tl, double x[3], int type) :
+      Tp(tp), Tl(tl), Type(type)
     {
       X[0]=x[0]; X[1]=x[1]; X[2]=x[2];
     }
   };
 
-  // Special sort operation on parametric coordinate
+  // Special sort operation on primitive parametric coordinate
   bool PointSorter(SortPoint const& lhs, SortPoint const& rhs)
   {
-    return lhs.T < rhs.T;
+    return lhs.Tp < rhs.Tp;
   }
 
   // Vectors are used to hold points.
   typedef std::vector<SortPoint> SortPointType;
 
-  // Process a polyline
+  // Process a polyline-------------------------------------------------------
   void CropLine(vtkIdType cellId, vtkIdType npts, vtkIdType *pts, vtkPoints *inPts,
                 vtkPolygon *poly, double *p, double bds[6], double n[3],
                 vtkCellData *inCellData, vtkPoints *outPts,
@@ -82,7 +89,7 @@ namespace {
     {
       t = static_cast<double>(i);
       inPts->GetPoint(pts[i],x);
-      sortedPoints.push_back(SortPoint(t,x,SortPoint::VERTEX));
+      sortedPoints.push_back(SortPoint(t,0.0,x,SortPoint::VERTEX));
     }
 
     // Now insert any intersection points
@@ -100,8 +107,9 @@ namespace {
         if ( vtkLine::Intersection(x0,x1,y0,y1,u,v) == 2 )
         {
           numInts++;
-          t = static_cast<double>(i) + u;
-          sortedPoints.push_back(SortPoint(t,x,SortPoint::BOUNDARY));
+          u += static_cast<double>(i);
+          v += static_cast<double>(j);
+          sortedPoints.push_back(SortPoint(u,v,x,SortPoint::BOUNDARY));
         }
       }//intersect all line segments that form the loop
     }//for all line segments that make up this polyline
@@ -147,7 +155,9 @@ namespace {
     if ( (!(numInts % 2) && endType != startType) ||
          ((numInts % 2) && endType == startType) )
     {
-      return; //topological inconsistency
+      // Topological inconsistency, throw it out. In the future TODO, clean
+      // up sortedPoints array to make it topologically consistent.
+      return;
     }
 
     //If here, then pieces of the intersected line are spit out. Also it means at
@@ -181,6 +191,93 @@ namespace {
       startIdx = endIdx;
     }//over all sorted points
   }//CropLine
+
+  // Process a polyon--------------------------------------------------------
+  void CropPoly(vtkIdType cellId, vtkIdType npts, vtkIdType *pts, vtkPoints *inPts,
+                vtkPolygon *poly, double *p, double bds[6], double n[3],
+                vtkCellData *inCellData, vtkPoints *outPts,
+                vtkCellArray *outPolys, vtkCellData *outCellData)
+  {
+    // Make sure that this is a valid polygon
+    if ( npts < 3 )
+    {
+      return;
+    }
+
+    // Create a vector of points with parametric coordinates, etc. which will
+    // be sorted later. The tricky part is getting the classification of each
+    // point correctly.
+    // First insert all of the points defining the polygon
+    vtkIdType i, j, newPtId, newCellId;
+    double t, u, v, x[3], x0[3], x1[3], y0[3], y1[3];
+    SortPointType sortedPoints;
+    for (i=0; i < npts; ++i)
+    {
+      t = static_cast<double>(i);
+      inPts->GetPoint(pts[i],x);
+      sortedPoints.push_back(SortPoint(t,0.0,x,SortPoint::VERTEX));
+    }
+
+    // Now insert any intersection points
+    vtkIdType numInts=0, numLoopPts=poly->Points->GetNumberOfPoints();
+    for (numInts=0, i=0; i < npts; ++i)
+    {
+      inPts->GetPoint(pts[i],x0);
+      inPts->GetPoint(pts[(i+1)%npts],x1);
+
+      // Traverse polygon loop intersecting each polygon segment
+      for (j=0; j < numLoopPts; ++j)
+      {
+        poly->Points->GetPoint(j,y0);
+        poly->Points->GetPoint((j+1)%numLoopPts,y1);
+        if ( vtkLine::Intersection(x0,x1,y0,y1,u,v) == 2 )
+        {
+          numInts++;
+          u += static_cast<double>(i);
+          v += static_cast<double>(j);
+          sortedPoints.push_back(SortPoint(u,v,x,SortPoint::BOUNDARY));
+        }
+      }//intersect all line segments that form the loop
+    }//for all line segments that make up this polygon
+
+    // Okay sort that sucker and determine the classification of the
+    // first point. This will set us up for later processing.
+    vtkIdType num = sortedPoints.size();
+    std::sort(sortedPoints.begin(), sortedPoints.end(), &PointSorter);
+
+    // Move to first interior point and determine classification
+    vtkIdType startIdx=0;
+    while ( sortedPoints[startIdx].Type == SortPoint::BOUNDARY )
+    {
+      startIdx++;
+    }
+    bool currentClass = false; //outside
+    if ( vtkPolygon::PointInPolygon(sortedPoints[startIdx].X, numLoopPts, p, bds, n) == 1 )
+    {
+      currentClass = true; //the first point is inside the clip polygon
+    }
+
+    // If no intersection points, then the polygon is either entirely in or
+    // entirely out
+    if ( numInts == 0 )
+    {
+      if ( currentClass == false )
+      {
+        return; //completely outside
+      }
+      else //whole polygon is output
+      {
+        newCellId = outPolys->InsertNextCell(npts);
+        for (i=0; i < npts; ++i)
+        {
+          newPtId = outPts->InsertNextPoint(inPts->GetPoint(pts[i]));
+          outPolys->InsertCellPoint(newPtId);
+          outCellData->CopyData(inCellData,cellId,newCellId);
+        }
+      }
+    }//no intersections
+
+  }//CropPoly
 
 } //anonymous namespace
 
@@ -300,10 +397,13 @@ int vtkCookieCutFilter::RequestData(
     for (cellId=0, inPolys->InitTraversal();
          inPolys->GetNextCell(npts,pts); ++cellId)
     {
+      CropPoly(cellId, npts,pts,inPts,
+               poly,p,bds,n,inCellData,
+               outPts,outPolys,outCellData);
     }
     output->SetPolys(outPolys);
     outPolys->Delete();
-  }//if line cells
+  }//if polygonal cells
 
   // Clean up
   output->SetPoints(outPts);
