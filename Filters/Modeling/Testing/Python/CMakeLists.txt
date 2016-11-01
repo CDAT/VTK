@@ -7,7 +7,8 @@ vtk_add_test_python(
   TestBandedContourFilter.py
   TestBandedContourFilter2.py
   TestBoxFunction.py
-  TestCookieCutFilter.py
+  TestCookieCutter.py
+  TestCookieCutter2.py
   TestImageMarchingCubes.py
   TestRibbonAndTube.py
   TestRuledSurface.py
