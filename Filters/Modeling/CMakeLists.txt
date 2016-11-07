@@ -2,6 +2,7 @@ set(Module_SRCS
   vtkAdaptiveSubdivisionFilter.cxx
   vtkBandedPolyDataContourFilter.cxx
   vtkButterflySubdivisionFilter.cxx
+  vtkContourLoopExtraction.cxx
   vtkCookieCutter.cxx
   vtkDijkstraGraphGeodesicPath.cxx
   vtkDijkstraImageGeodesicPath.cxx

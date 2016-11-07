@@ -83,10 +83,42 @@ namespace {
       tj = sortedPoints[j].Tp;
 
       delT = tj - static_cast<double>(static_cast<int>(ti));
-      if ( delT <= 0.0001 ) //arbitrary epsilon
+      if ( delT <= 0.001 ) //arbitrary epsilon
       {
         sortedPoints.erase(sortedPoints.begin()+j);
         sortedPoints[i].Type = SortPoint::INTERSECTION;
+      }
+      else
+      {
+        ++i;
+      }
+    }
+    return static_cast<int>(sortedPoints.size());
+  }
+
+  // Clean up list of intersections -----------------------------------------
+  // The points are assumed sorted in parametric coordinates, closed loop
+  int CleanSortedPolygon(vtkIdType npts, SortPointType &sortedPoints)
+  {
+    if ( sortedPoints.size() < 2 )
+    {
+      return static_cast<int>(sortedPoints.size());
+    }
+
+    int i, j;
+    double ti, tj;
+    size_t num;
+    for ( i=0; i < sortedPoints.size(); )
+    {
+      num = sortedPoints.size();
+      j = (i + 1) % num;
+      ti = sortedPoints[i].Tp;
+      tj = sortedPoints[j].Tp;
+      tj = (tj < ti ? tj += static_cast<double>(npts) : tj);
+
+      if ( (tj-ti) <= 0.001 ) //arbitrary epsilon
+      {
+        sortedPoints.erase(sortedPoints.begin()+j);
       }
       else
       {
@@ -106,31 +138,88 @@ namespace {
     outCD->CopyData(inCD,cellId,newCellId);
   }
 
-  // Compute interval-------------------------------------------------------
-  // Compute the number of points between two parametric coordinates in modulo
-  // coordinates around a polygon, and provide the information necessary to
-  // extract points.
-  int ComputeTRange(double dir, int npts, double t0, double t1,
-                    int &idx, int &inc)
-  {
-    int i = static_cast<int>(t0);
-    int j = static_cast<int>(t1);
+  // What type of segment are we processing
+  enum SegmentType {Poly, Loop};
 
-    if ( dir > 0.0 ) //forward direction
+  // Compute interval-------------------------------------------------------
+  // Compute the number of points between two parametric coordinates in
+  // modulo coordinates around a polygon, and provide the information
+  // necessary to extract points. The trick is going in the right
+  // direction. The "orient" variableindicates whether the loop and polygon
+  // are oriented in the same way which is important for certina operations.
+  int ComputeTRange(double orient, int npts, int num, SortPointType &sortedPoints,
+                    vtkIdType spi, vtkIdType spj, SegmentType type, int &idx, int &inc)
+  {
+    int i, j;
+
+    // We alsways go around the polygon in the positive direction. Hence we
+    // look at the parametric coordinates Tp.
+    if ( type == SegmentType::Poly )
     {
+      i = static_cast<int>(sortedPoints[spi].Tp);
+      j = static_cast<int>(sortedPoints[spj].Tp);
+
+      // always move in the forward directions
       inc = 1;
       idx = (i+1) % npts;
       j = ( j < i ? j+npts : j ); //modulo forward
-      return (j - i);
-    }
-    else //reverse direction
-    {
-      inc = (-1);
-      idx = i;
-      i = ( i < j ? i+npts : i );
-      return (i - j);
-    }
+      if ( num != 2 || i != j )
+      {
+        return (j - i);
+      }
+      // A specical case exists when it's not clear whether the return around
+      // the loop is along the (i,j) edge or around the cutting loop. This
+      // only occurs when the loop cuts the same polygon segment(i==j) in
+      // two places.
+      else
+      {
+        if ( orient > 0.0 )
+        {
+          if ( sortedPoints[0].Tl < sortedPoints[1].Tl )
+          {
+            idx = (i + 1) % npts;
+            return npts;
+          }
+          else
+          {
+            return 0;
+          }
+        }
+        else //loops are in opposite directions
+        {
+          if ( sortedPoints[0].Tl > sortedPoints[1].Tl )
+          {
+            idx = (i + 1) % npts;
+            return npts;
+          }
+          else
+          {
+            return 0;
+          }
+        }
+      }
+    }//if processing the polygon
 
+    // Else if processing the cutting loop, use Tl
+    else // type == SegmentType::Loop
+    {
+      i = static_cast<int>(sortedPoints[spi].Tl);
+      j = static_cast<int>(sortedPoints[spj].Tl);
+      if ( orient > 0.0 ) //forward direction
+      {
+        inc = 1;
+        idx = (i+1) % npts;
+        j = ( j < i ? j+npts : j ); //modulo forward
+        return (j - i);
+      }
+      else //reverse direction
+      {
+        inc = (-1);
+        idx = i;
+        i = ( i < j ? i+npts : i );
+        return (i - j);
+      }
+    }//around cutting loop
   }
 
   // Process a polyline-------------------------------------------------------
@@ -336,6 +425,10 @@ namespace {
       }
       return;
     }//if no intersections
+    else
+    {
+      num = CleanSortedPolygon(npts,sortedPoints);
+    }
 
     // If a weird degenerate case occurs where the number of intersections is
     // not even, then the polygon can be nestled into the "corner" of the
@@ -378,19 +471,23 @@ namespace {
     // operation. It is much faster and more reliable than PointInPolygon()
     // tests.
     //
-    // Theoretically this code can extract more than one loop (i.e., output
-    // polygon).
-    double dir;
+    // Currently this code extract one loop (polygon) as a result of the
+    // intersection. TODO in the future modify the code to extract multiple
+    // polygons.
     int uMin, uMax, vMin, vMax, numInsertedPoints=0;
-    double pNormal[3], vx[3], vy[3], vxy[3];
+    double orient, pNormal[3], vx[3], vy[3], vxy[3];
     vtkPolygon::ComputeNormal(inPts,npts,pts,pNormal);
-    dir = ( vtkMath::Dot(n,pNormal) > 0.0 ? 1.0 : -1.0 );
+
+    // Orientation of the two loops with respect to one another.
+    orient = ( vtkMath::Dot(n,pNormal) > 0.0 ? 1.0 : -1.0 );
+
+    // Begin the process of inserting cell points. Initially insert the
+    // number of intersections and then update it later.
     newCellId = outPolys->InsertNextCell(num);
-    int loopStartIdx, idx, inc, numToInsert, ii;
+    int idx, inc, numToInsert, ii;
     for ( i=0; i < num; ++i )
     {
-      // Start the current loop here; the next interection point.
-      loopStartIdx = i;
+      // Start the current loop here; grab the next interection point.
       j = (i+1) % num;
 
       // Insert this intersection point
@@ -419,10 +516,10 @@ namespace {
       // Choose which segment to traverse, and insert points interior
       // to the segment
       vtkMath::Cross(vx,vy,vxy);
-      if ( (dir*vtkMath::Dot(vxy,pNormal)) <= 0 )
+      if ( (orient*vtkMath::Dot(vxy,pNormal)) <= 0 )
       {
-        numToInsert = ComputeTRange(1.0, npts, sortedPoints[i].Tp, sortedPoints[j].Tp,
-                                    idx, inc);
+        numToInsert = ComputeTRange(orient, npts, num, sortedPoints, i, j,
+                                    SegmentType::Poly, idx, inc);
         for ( ii=0; ii < numToInsert; ++ii )
         {
           numInsertedPoints++;
@@ -433,8 +530,8 @@ namespace {
       }
       else
       {
-        numToInsert = ComputeTRange(dir, numLoopPts, sortedPoints[i].Tl, sortedPoints[j].Tl,
-                                    idx, inc);
+        numToInsert = ComputeTRange(orient, numLoopPts, num, sortedPoints,
+                                    i, j, SegmentType::Loop, idx, inc);
         for ( ii=0; ii < numToInsert; ++ii )
         {
           numInsertedPoints++;
@@ -603,8 +700,7 @@ int vtkCookieCutter::RequestData(
     // Now process polygons
     if ( inPolys->GetNumberOfCells() > 0 )
     {
-      for (cellId=0, inPolys->InitTraversal();
-           inPolys->GetNextCell(npts,pts); ++cellId)
+      for (inPolys->InitTraversal(); inPolys->GetNextCell(npts,pts); ++cellId)
       {
         CropPoly(cellId, npts,pts,inPts,
                  poly,p,bds,n,inCellData,

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import vtk
+from vtk.test import Testing
 from vtk.util.misc import vtkGetDataRoot
+VTK_DATA_ROOT = vtkGetDataRoot()
 
 # create planes
 # Create the RenderWindow, Renderer
@@ -12,12 +14,39 @@ renWin.AddRenderer( ren )
 iren = vtk.vtkRenderWindowInteractor()
 iren.SetRenderWindow(renWin)
 
-# create pipeline. Use a plane source to create an array
-# of points; then glyph them. Then cookie cut the glphs.
+# Create pipeline. generate contours from terrain data.
 #
+lut = vtk.vtkLookupTable()
+lut.SetHueRange(0.6, 0)
+lut.SetSaturationRange(1.0, 0)
+lut.SetValueRange(0.5, 1.0)
+
+# Read the data: a height field results
+demReader = vtk.vtkDEMReader()
+demReader.SetFileName(VTK_DATA_ROOT + "/Data/SainteHelens.dem")
+demReader.Update()
+
+lo = demReader.GetOutput().GetScalarRange()[0]
+hi = demReader.GetOutput().GetScalarRange()[1]
+
+# Generate contours
+contours = vtk.vtkFlyingEdges2D()
+contours.SetInputConnection(demReader.GetOutputPort())
+contours.SetValue(0, (hi + lo)/2.0)
+
+# Contruct loops
+loops = vtk.vtkContourLoopExtraction()
+loops.SetInputConnection(contours.GetOutputPort())
+loops.Update()
+bds = loops.GetOutput().GetBounds()
+
+# Place glyphs inside polygons
 plane = vtk.vtkPlaneSource()
 plane.SetXResolution(25)
 plane.SetYResolution(25)
+plane.SetOrigin(bds[0],bds[2],bds[4]);
+plane.SetPoint1(bds[1],bds[2],bds[4]);
+plane.SetPoint2(bds[0],bds[3],bds[4]);
 
 # Custom glyph
 glyphData = vtk.vtkPolyData()
@@ -72,83 +101,47 @@ glyphPolys.InsertCellPoint(3)
 glyph = vtk.vtkGlyph3D()
 glyph.SetInputConnection(plane.GetOutputPort())
 glyph.SetSourceData(glyphData)
-glyph.SetScaleFactor( 0.02 )
+glyph.SetScaleFactor( 100 )
 
-# Create multiple loops for cookie cutting
-loops = vtk.vtkPolyData()
-loopPts = vtk.vtkPoints()
-loopPolys = vtk.vtkCellArray()
-loops.SetPoints(loopPts)
-loops.SetPolys(loopPolys)
-
-loopPts.SetNumberOfPoints(16)
-loopPts.SetPoint(0, -0.35,0.0,0.0)
-loopPts.SetPoint(1, 0,-0.35,0.0)
-loopPts.SetPoint(2, 0.35,0.0,0.0)
-loopPts.SetPoint(3, 0.0,0.35,0.0)
-
-loopPts.SetPoint(4, -0.35,-0.10,0.0)
-loopPts.SetPoint(5, -0.35,-0.35,0.0)
-loopPts.SetPoint(6, -0.10,-0.35,0.0)
-
-loopPts.SetPoint(7, 0.35,-0.10,0.0)
-loopPts.SetPoint(8, 0.35,-0.35,0.0)
-loopPts.SetPoint(9, 0.10,-0.35,0.0)
-
-loopPts.SetPoint(10, 0.35,0.10,0.0)
-loopPts.SetPoint(11, 0.35,0.35,0.0)
-loopPts.SetPoint(12, 0.10,0.35,0.0)
-
-loopPts.SetPoint(13, -0.35,0.10,0.0)
-loopPts.SetPoint(14, -0.35,0.35,0.0)
-loopPts.SetPoint(15, -0.10,0.35,0.0)
-
-loopPolys.InsertNextCell(4)
-loopPolys.InsertCellPoint(0)
-loopPolys.InsertCellPoint(1)
-loopPolys.InsertCellPoint(2)
-loopPolys.InsertCellPoint(3)
-
-loopPolys.InsertNextCell(3)
-loopPolys.InsertCellPoint(4)
-loopPolys.InsertCellPoint(5)
-loopPolys.InsertCellPoint(6)
-
-loopPolys.InsertNextCell(3)
-loopPolys.InsertCellPoint(7)
-loopPolys.InsertCellPoint(8)
-loopPolys.InsertCellPoint(9)
-
-loopPolys.InsertNextCell(3)
-loopPolys.InsertCellPoint(10)
-loopPolys.InsertCellPoint(11)
-loopPolys.InsertCellPoint(12)
-
-loopPolys.InsertNextCell(3)
-loopPolys.InsertCellPoint(13)
-loopPolys.InsertCellPoint(14)
-loopPolys.InsertCellPoint(15)
+ids = vtk.vtkIdFilter()
+ids.SetInputConnection(glyph.GetOutputPort())
+ids.Update()
 
 cookie = vtk.vtkCookieCutter()
-cookie.SetInputConnection(glyph.GetOutputPort())
-cookie.SetLoopsData(loops)
+cookie.SetInputConnection(ids.GetOutputPort())
+cookie.SetLoopsConnection(loops.GetOutputPort())
+
+tri = vtk.vtkTriangleFilter()
+tri.SetInputConnection(cookie.GetOutputPort())
 
 mapper = vtk.vtkPolyDataMapper()
-mapper.SetInputConnection(cookie.GetOutputPort())
+mapper.SetInputConnection(tri.GetOutputPort())
+mapper.ScalarVisibilityOff()
 
 actor = vtk.vtkActor()
 actor.SetMapper(mapper)
 
+# Show the loop
 loopMapper = vtk.vtkPolyDataMapper()
-loopMapper.SetInputData(loops)
+loopMapper.SetInputConnection(loops.GetOutputPort())
 
 loopActor = vtk.vtkActor()
 loopActor.SetMapper(loopMapper)
-loopActor.GetProperty().SetColor(1,0,0)
 loopActor.GetProperty().SetRepresentationToWireframe()
 
 ren.AddActor(actor)
 ren.AddActor(loopActor)
+
+# Picking support
+picker = vtk.vtkCellPicker()
+def printCellId(widget, event_string):
+    pickedId = picker.GetCellId()
+    cellId = cookie.GetOutput().GetCellData().GetScalars().GetValue(pickedId)
+    print pickedId, cellId
+    print cookie.GetOutput().GetCell(pickedId)
+
+iren.SetPicker(picker)
+picker.AddObserver("EndPickEvent", printCellId)
 
 renWin.Render()
 #iren.Start()
