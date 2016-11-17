@@ -213,6 +213,7 @@ void vtkOpenGLGL2PSHelperImpl::ProcessTransformFeedback(
   assert("In bounds." && data == dataEnd);
 }
 
+
 //------------------------------------------------------------------------------
 void vtkOpenGLGL2PSHelperImpl::DrawString(const std::string &str,
                                           vtkTextProperty *tprop,
