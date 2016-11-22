@@ -3905,6 +3905,7 @@ static int gl2psPDFgroupListWriteGStateResources(void)
 {
   GL2PSpdfgroup *gro;
   GL2PSprimitive* prim;
+  float op = 1;
   int offs = 0;
   int i;
   int index = 0;
@@ -3923,7 +3924,11 @@ static int gl2psPDFgroupListWriteGStateResources(void)
     }
 
     prim = *(GL2PSprimitive**)gl2psListPointer(gro->ptrlist, i);
-    float op = prim->verts[0].rgba[3];
+    if (prim && prim->verts && prim->verts->rgba)
+    {
+      op = prim->verts[0].rgba[3];
+    }
+
     printf("opacity is %f ", op);
     offs += fprintf(gl2ps->stream, "/GS%d <<\n /CA %f\n /ca %f\n >>\n", i, op, op);
   }
