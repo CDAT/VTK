@@ -3506,9 +3506,9 @@ static void gl2psPutPDFText(GL2PSstring *text, int cnt, GLfloat x, GLfloat y)
   }
 }
 
-static void gl2psPutPDFSpecial(int index, GL2PSstring *text)
+static void gl2psPutPDFSpecial(int prim, int sec, GL2PSstring *text)
 {
-  gl2ps->streamlength += gl2psPrintf("/GS%d gs\n", index);
+  gl2ps->streamlength += gl2psPrintf("/GS%d%d gs\n", prim, sec);
   gl2ps->streamlength += gl2psPrintf("%s\n", text->str);
 }
 
@@ -3891,7 +3891,7 @@ static void gl2psPDFgroupListWriteMainStream(void)
 
       for(j = 0; j <= lastel; ++j){
         prim = *(GL2PSprimitive**)gl2psListPointer(gro->ptrlist, j);
-        gl2psPutPDFSpecial(j, prim->data.text);
+        gl2psPutPDFSpecial(i, j, prim->data.text);
       }
     default:
       break;
@@ -3907,8 +3907,9 @@ static int gl2psPDFgroupListWriteGStateResources(void)
   GL2PSprimitive* prim;
   float op = 1;
   int offs = 0;
-  int i;
+  int i, j;
   int index = 0;
+  int lastel;
 
   offs += fprintf(gl2ps->stream,
                   "/ExtGState\n"
@@ -3923,14 +3924,19 @@ static int gl2psPDFgroupListWriteGStateResources(void)
       index = gro->gsno;
     }
 
-    prim = *(GL2PSprimitive**)gl2psListPointer(gro->ptrlist, i);
-    if (prim && prim->verts && prim->verts->rgba)
-    {
-      op = prim->verts[0].rgba[3];
-    }
+    lastel = gl2psListNbr(gro->ptrlist) - 1;
+    if(lastel < 0)
+      continue;
 
-    printf("opacity is %f ", op);
-    offs += fprintf(gl2ps->stream, "/GS%d <<\n /CA %f\n /ca %f\n >>\n", i, op, op);
+    for(j = 0; j <= lastel; ++j)
+    {
+      prim = *(GL2PSprimitive**)gl2psListPointer(gro->ptrlist, j);
+      if (prim->type == GL2PS_SPECIAL)
+      {
+      op = prim->verts[0].rgba[3];
+      offs += fprintf(gl2ps->stream, "/GS%d%d <<\n /CA %f\n /ca %f\n >>\n", i, j, op, op);
+      }
+    }
   }
   offs += fprintf(gl2ps->stream, ">>\n");
   return offs;
