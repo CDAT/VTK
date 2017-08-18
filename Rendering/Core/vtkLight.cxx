@@ -14,10 +14,12 @@
 =========================================================================*/
 #include "vtkLight.h"
 
+#include "vtkInformation.h"
 #include "vtkMath.h"
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
 
+vtkCxxSetObjectMacro(vtkLight, Information, vtkInformation);
 vtkCxxSetObjectMacro(vtkLight,TransformMatrix,vtkMatrix4x4);
 
 //----------------------------------------------------------------------------
@@ -62,18 +64,24 @@ vtkLight::vtkLight()
 
   this->LightType = VTK_LIGHT_TYPE_SCENE_LIGHT;
 
-  this->TransformMatrix = NULL;
+  this->TransformMatrix = nullptr;
 
   this->ShadowAttenuation = 1.0;
+
+  this->Information = vtkInformation::New();
+  this->Information->Register(this);
+  this->Information->Delete();
 }
 
 vtkLight::~vtkLight()
 {
-  if(this->TransformMatrix != NULL)
+  if(this->TransformMatrix != nullptr)
   {
       this->TransformMatrix->UnRegister(this);
-      this->TransformMatrix = NULL;
+      this->TransformMatrix = nullptr;
   }
+
+  this->SetInformation(nullptr);
 }
 
 // ----------------------------------------------------------------------------
@@ -104,7 +112,7 @@ vtkLight *vtkLight::ShallowClone()
   result->LightType=this->LightType;
 
   result->TransformMatrix=this->TransformMatrix;
-  if(result->TransformMatrix!=0)
+  if(result->TransformMatrix!=nullptr)
   {
     result->TransformMatrix->Register(result);
   }
@@ -285,7 +293,7 @@ void vtkLight::PrintSelf(ostream& os, vtkIndent indent)
   }
 
   os << indent << "TransformMatrix: ";
-  if(this->TransformMatrix != NULL)
+  if(this->TransformMatrix != nullptr)
   {
     os << this->TransformMatrix << "\n";
   }

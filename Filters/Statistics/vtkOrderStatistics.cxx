@@ -87,8 +87,6 @@ void vtkOrderStatistics::SetQuantileDefinition( int qd )
 
   this->QuantileDefinition =  static_cast<vtkOrderStatistics::QuantileDefinitionType>( qd );
   this->Modified();
-
-  return;
 }
 
 // ----------------------------------------------------------------------
@@ -207,7 +205,7 @@ void vtkOrderStatistics::Learn( vtkTable* inData,
       if ( this->Quantize )
       {
         // Retrieve achieved histogram size
-        vtkIdType Nq = histogram.size();
+        vtkIdType Nq = static_cast<vtkIdType>(histogram.size());
 
         // If histogram is too big, quantization will have to occur
         while ( Nq > this->MaximumHistogramSize )
@@ -232,7 +230,7 @@ void vtkOrderStatistics::Learn( vtkTable* inData,
           }
 
           // Update histogram size for conditional clause
-          Nq = histogram.size();
+          Nq = static_cast<vtkIdType>(histogram.size());
         }
       }
 
@@ -306,8 +304,6 @@ void vtkOrderStatistics::Learn( vtkTable* inData,
     histogramTab->Delete();
     row->Delete();
   } // rit
-
-  return;
 }
 
 // ----------------------------------------------------------------------
@@ -962,7 +958,7 @@ void vtkOrderStatistics::SelectAssessFunctor( vtkTable* outData,
                                               vtkStringArray* rowNames,
                                               AssessFunctor*& dfunc )
 {
-  dfunc = 0;
+  dfunc = nullptr;
   vtkMultiBlockDataSet* inMeta = vtkMultiBlockDataSet::SafeDownCast( inMetaDO );
   if ( ! inMeta )
   {

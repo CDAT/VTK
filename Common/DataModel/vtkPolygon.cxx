@@ -93,7 +93,7 @@ bool vtkPolygon::IsConvex()
 //
 
 // Compute the polygon normal from a points list, and a list of point ids
-// that index into the points list. Parameter pts can be NULL, indicating that
+// that index into the points list. Parameter pts can be nullptr, indicating that
 // the polygon indexing is {0, 1, ..., numPts-1}. This version will handle
 // non-convex  polygons.
 void vtkPolygon::ComputeNormal(vtkPoints *p, int numPts, vtkIdType *pts,
@@ -188,7 +188,7 @@ void vtkPolygon::ComputeNormal(vtkIdTypeArray *ids, vtkPoints *p, double n[3])
 // will handle non-convex polygons.
 void vtkPolygon::ComputeNormal(vtkPoints *p, double *n)
 {
-  return vtkPolygon::ComputeNormal(p,p->GetNumberOfPoints(),NULL,n);
+  return vtkPolygon::ComputeNormal(p,p->GetNumberOfPoints(),nullptr,n);
 }
 
 //----------------------------------------------------------------------------
@@ -237,7 +237,7 @@ void vtkPolygon::ComputeNormal (int numPts, double *pts, double n[3])
 
 //----------------------------------------------------------------------------
 // Determine whether or not a polygon is convex from a points list and a list
-// of point ids that index into the points list. Parameter pts can be NULL,
+// of point ids that index into the points list. Parameter pts can be nullptr,
 // indicating that the polygon indexing is {0, 1, ..., numPts-1}.
 bool vtkPolygon::IsConvex(vtkPoints *p, int numPts, vtkIdType *pts)
 {
@@ -319,7 +319,7 @@ bool vtkPolygon::IsConvex(vtkIdTypeArray *ids, vtkPoints *p)
 //----------------------------------------------------------------------------
 bool vtkPolygon::IsConvex(vtkPoints *p)
 {
-  return vtkPolygon::IsConvex(p, p->GetNumberOfPoints(), NULL);
+  return vtkPolygon::IsConvex(p, p->GetNumberOfPoints(), nullptr);
 }
 
 //----------------------------------------------------------------------------
@@ -560,8 +560,6 @@ void vtkPolygon::InterpolateFunctionsUsingMVC(double x[3], double *weights)
   {
     weights[i] /= sum;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -840,19 +838,16 @@ int vtkPolygon::PointInPolygon (double x[3], int numPts, double *pts,
 //
 int vtkPolygon::Triangulate(vtkIdList *outTris)
 {
-  int success;
-  double *bounds, d;
+  const double *bounds = this->GetBounds();
 
-  bounds = this->GetBounds();
-
-  d = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-           (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-           (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
+  double d = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
+                  (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
+                  (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
   this->Tolerance = VTK_POLYGON_TOLERANCE * d;
   this->SuccessfulTriangulation = 1;
 
   this->Tris->Reset();
-  success = this->EarCutTriangulation();
+  int success = this->EarCutTriangulation();
 
   if ( !success ) //degenerate triangle encountered
   {
@@ -1439,16 +1434,15 @@ void vtkPolygon::Contour(double value, vtkDataArray *cellScalars,
                          vtkCellData *outCd)
 {
   int i, success;
-  double *bounds, d;
   int p1, p2, p3;
 
   this->TriScalars->SetNumberOfTuples(3);
 
-  bounds = this->GetBounds();
+  const double *bounds = this->GetBounds();
 
-  d = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-           (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-           (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
+  double d = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
+                  (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
+                  (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
   this->Tolerance = VTK_POLYGON_TOLERANCE * d;
   this->SuccessfulTriangulation = 1;
   this->ComputeNormal(this->Points, this->Normal);
@@ -1694,15 +1688,14 @@ void vtkPolygon::Clip(double value, vtkDataArray *cellScalars,
                       int insideOut)
 {
   int i, success;
-  double *bounds, d;
   int p1, p2, p3;
 
   this->TriScalars->SetNumberOfTuples(3);
 
-  bounds = this->GetBounds();
-  d = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-           (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-           (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
+  const double *bounds = this->GetBounds();
+  double d = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
+                  (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
+                  (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
   this->Tolerance = VTK_POLYGON_TOLERANCE * d;
 
   this->SuccessfulTriangulation = 1;

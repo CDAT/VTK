@@ -76,7 +76,7 @@ vtkAxisFollower::vtkAxisFollower() : vtkFollower()
   this->ScreenOffsetVector[0]     = 0.0;
   this->ScreenOffsetVector[1]     = 10.0;
 
-  this->Axis                      = NULL;
+  this->Axis                      = nullptr;
 
   this->TextUpsideDown          = -1;
   this->VisibleAtCurrentViewAngle = -1;
@@ -397,7 +397,7 @@ void vtkAxisFollower::ComputerAutoCenterTranslation(
     return;
   }
 
-  double *bounds = this->GetMapper()->GetBounds();
+  const double *bounds = this->GetMapper()->GetBounds();
 
   // Offset by half of width.
   double halfWidth  = (bounds[1] - bounds[0]) * 0.5 * this->Scale[0];
@@ -423,8 +423,6 @@ void vtkAxisFollower::ComputerAutoCenterTranslation(
   {
     // Do nothing.
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------
@@ -609,7 +607,7 @@ void vtkAxisFollower::Render(vtkRenderer *ren)
 void vtkAxisFollower::ShallowCopy(vtkProp *prop)
 {
   vtkAxisFollower *f = vtkAxisFollower::SafeDownCast(prop);
-  if ( f != NULL )
+  if ( f != nullptr )
   {
     this->SetAutoCenter(f->GetAutoCenter());
     this->SetEnableDistanceLOD(f->GetEnableDistanceLOD());

@@ -171,11 +171,11 @@ namespace
     Attribute(vtkAbstractArray* array) : AttributeBase()
     {
       this->Array = vtkArrayType::SafeDownCast(array);
-      assert(this->Array != NULL);
+      assert(this->Array != nullptr);
       this->Value.resize(this->Array->GetNumberOfComponents());
     }
 
-    void StreamHeader(std::ostream& out) const
+    void StreamHeader(std::ostream& out) const VTK_OVERRIDE
     {
       std::string s = this->Array->GetName();
       std::replace(s.begin(), s.end(), ' ', '_');
@@ -191,7 +191,7 @@ namespace
       }
     }
 
-    void StreamData(std::ostream& out, vtkIdType index) const
+    void StreamData(std::ostream& out, vtkIdType index) const VTK_OVERRIDE
     {
       assert(index < this->Array->GetNumberOfTuples());
 
@@ -262,7 +262,7 @@ namespace
       }
     };
 
-    Attributes() : Hdr(NULL) { this->Hdr.Atts = this; }
+    Attributes() : Hdr(nullptr) { this->Hdr.Atts = this; }
     virtual ~Attributes()
     {
       for (AttIt it=this->AttVec.begin(); it != this->AttVec.end(); ++it)
@@ -298,13 +298,13 @@ namespace
 //----------------------------------------------------------------------------
 vtkHoudiniPolyDataWriter::vtkHoudiniPolyDataWriter()
 {
-  this->FileName = NULL;
+  this->FileName = nullptr;
 }
 
 //----------------------------------------------------------------------------
 vtkHoudiniPolyDataWriter::~vtkHoudiniPolyDataWriter()
 {
-  this->SetFileName(NULL);
+  this->SetFileName(nullptr);
 }
 
 //----------------------------------------------------------------------------

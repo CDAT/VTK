@@ -17,6 +17,7 @@
 
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLBufferObject.h"
+#include "vtkOpenGLVertexBufferObject.h"
 #include "vtkShaderProgram.h"
 
 #include <map>
@@ -254,6 +255,18 @@ void vtkOpenGLVertexArrayObject::ReleaseGraphicsResources()
   this->Internal->ReleaseGraphicsResources();
 }
 
+bool vtkOpenGLVertexArrayObject::AddAttributeArray(
+  vtkShaderProgram *program,
+  vtkOpenGLVertexBufferObject *buffer,
+  const std::string &name,
+  int offset, bool normalize)
+{
+  return this->AddAttributeArrayWithDivisor(
+    program, buffer, name, offset,
+    buffer->Stride, buffer->DataType, buffer->NumberOfComponents,
+    normalize, 0, false);
+}
+
 bool vtkOpenGLVertexArrayObject::AddAttributeArrayWithDivisor(vtkShaderProgram *program,
                                           vtkOpenGLBufferObject *buffer,
                                           const std::string &name,
@@ -287,7 +300,7 @@ bool vtkOpenGLVertexArrayObject::AddAttributeArrayWithDivisor(vtkShaderProgram *
     return false;
   }
 
-  // Perform initalization if necessary, ensure program matches VAOs.
+  // Perform initialization if necessary, ensure program matches VAOs.
   if (this->Internal->HandleProgram == 0)
   {
     this->Internal->HandleProgram = static_cast<GLuint>(program->GetHandle());

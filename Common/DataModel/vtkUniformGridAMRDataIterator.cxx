@@ -31,7 +31,7 @@ public:
 
   void Initialize(const std::vector<int>* numBlocks)
   {
-    assert(numBlocks && numBlocks->size()>=1);
+    assert(numBlocks && !numBlocks->empty());
     this->Level = 0;
     this->Index = -1;
     this->NumBlocks =  numBlocks;
@@ -81,7 +81,7 @@ public:
   AMRLoadedDataIndexIterator(){}
   void Initialize(const std::vector<int>* numBlocks, const vtkAMRDataInternals::BlockList* dataBlocks)
   {
-    assert(numBlocks && numBlocks->size()>=1);
+    assert(numBlocks && !numBlocks->empty());
     this->Level = 0;
     this->InternalIdx = -1;
     this->NumBlocks =  numBlocks;
@@ -111,9 +111,9 @@ vtkStandardNewMacro(vtkUniformGridAMRDataIterator);
 vtkUniformGridAMRDataIterator::vtkUniformGridAMRDataIterator()
 {
   this->Information = vtkSmartPointer<vtkInformation>::New();
-  this->AMR = NULL;
-  this->AMRData = NULL;
-  this->AMRInfo = NULL;
+  this->AMR = nullptr;
+  this->AMRData = nullptr;
+  this->AMRInfo = nullptr;
 }
 
 vtkUniformGridAMRDataIterator::~vtkUniformGridAMRDataIterator()

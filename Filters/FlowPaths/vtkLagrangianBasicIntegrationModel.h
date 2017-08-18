@@ -84,7 +84,7 @@ class VTKFILTERSFLOWPATHS_EXPORT vtkLagrangianBasicIntegrationModel :
 {
 public:
   vtkTypeMacro(vtkLagrangianBasicIntegrationModel, vtkFunctionSet);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   typedef enum SurfaceType
   {
@@ -111,7 +111,7 @@ public:
    * in found this will call
    * FunctionValues(vtkDataSet* detaSet, vtkIdType cellId, double* x, double* f)
    */
-  virtual int FunctionValues(double* x, double* f);
+  int FunctionValues(double* x, double* f) VTK_OVERRIDE;
 
   //@{
   /**
@@ -122,6 +122,14 @@ public:
    */
   virtual void SetLocator(vtkAbstractCellLocator* locator);
   vtkGetObjectMacro(Locator, vtkAbstractCellLocator);
+  //@}
+
+  //@{
+  /**
+   * Get the state of the current locators
+   */
+  vtkGetMacro(LocatorsBuilt, bool);
+  vtkSetMacro(LocatorsBuilt, bool);
   //@}
 
   /**
@@ -169,7 +177,7 @@ public:
 
   /**
    * Interact the current particle with a surfaces
-   * Return a particle to record as interaction point if not NULL
+   * Return a particle to record as interaction point if not nullptr
    * Uses SurfaceType array from the intersected surface cell
    * to compute the interaction.
    * MODEL :
@@ -318,7 +326,7 @@ public:
    * xcur is the current particle variables
    * xnext is the next particle variable
    * t is the current integration time
-   * delT is the timeStep, wich is also an output for adaptative algorithm
+   * delT is the timeStep, which is also an output for adaptative algorithm
    * delTActual is the time step output corresponding to the actual movement of the particle
    * minStep is the minimum step time for adaptative algorithm
    * maxStep is the maximum step time for adaptative algorithm
@@ -346,7 +354,7 @@ public:
 
   /**
    * Enable model post process on output
-   * Return true if sucessfull, false otherwise
+   * Return true if sucessful, false otherwise
    * Empty and Always return true with basic model
    */
   virtual bool FinalizeOutputs(vtkPolyData* vtkNotUsed(particlePathsOutput),
@@ -365,7 +373,7 @@ public:
 
 protected:
   vtkLagrangianBasicIntegrationModel();
-  virtual ~vtkLagrangianBasicIntegrationModel();
+  ~vtkLagrangianBasicIntegrationModel() VTK_OVERRIDE;
 
   /**
    * Actually compute the integration model velocity field
@@ -460,13 +468,14 @@ protected:
    * values for each leaf of each dataset of surface
    * nComponents could be retrived with arrayName but is
    * given for simplication purposes.
-   * it is your responsability to initialize all components of
+   * it is your responsibility to initialize all components of
    * defaultValues[nComponent]
    */
   virtual void ComputeSurfaceDefaultValues(const char* arrayName, vtkDataSet* dataset,
                                              int nComponent, double* defaultValues);
 
   vtkAbstractCellLocator* Locator;
+  bool LocatorsBuilt;
   vtkAbstractCellLocator* LastLocator;
   vtkLocatorsType* Locators;
 

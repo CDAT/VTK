@@ -55,7 +55,7 @@ class VTKRENDERINGANNOTATION_EXPORT vtkPolarAxesActor : public vtkActor
 {
 public:
   vtkTypeMacro(vtkPolarAxesActor, vtkActor);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Instantiate object with label format "6.3g" and the number of labels
@@ -67,9 +67,9 @@ public:
   /**
    * Draw the polar axes
    */
-  virtual int RenderOpaqueGeometry(vtkViewport*);
-  virtual int RenderOverlay(vtkViewport*);
-  virtual int RenderTranslucentPolygonalGeometry(vtkViewport*) { return 0; };
+  int RenderOpaqueGeometry(vtkViewport*) VTK_OVERRIDE;
+  int RenderOverlay(vtkViewport*) VTK_OVERRIDE;
+  int RenderTranslucentPolygonalGeometry(vtkViewport*) VTK_OVERRIDE { return 0; };
   //@}
 
   //@{
@@ -253,7 +253,7 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow*);
+  void ReleaseGraphicsResources(vtkWindow*) VTK_OVERRIDE;
 
   //@{
   /**
@@ -678,7 +678,7 @@ public:
    * sure that the min's are less than the max's.
    */
   vtkSetVector6Macro(Bounds, double);
-  double* GetBounds();
+  double* GetBounds() VTK_OVERRIDE;
   void GetBounds(
     double& xmin, double& xmax, double& ymin, double& ymax, double& zmin, double& zmax);
   void GetBounds(double bounds[6]);
@@ -694,7 +694,7 @@ public:
 
 protected:
   vtkPolarAxesActor();
-  ~vtkPolarAxesActor();
+  ~vtkPolarAxesActor() VTK_OVERRIDE;
 
   /**
    * Check consistency of vtkPolarAxesActor members.
@@ -780,7 +780,7 @@ protected:
   std::string FindExponentAndAdjustValues(std::list<double>& valuesList);
 
   /**
-   * Yield a string array whith the float part of each values. 0.01e-2 -> 0.0001
+   * Yield a string array with the float part of each values. 0.01e-2 -> 0.0001
    */
   void GetSignificantPartFromValues(vtkStringArray* valuesStr, std::list<double>& valuesList);
 
@@ -978,7 +978,7 @@ protected:
   int EnableViewAngleLOD;
 
   /**
-   * This determines at what view angle to geometry will make the geometry not visibile.
+   * This determines at what view angle to geometry will make the geometry not visible.
    * Default is 0.3.
    */
   double ViewAngleLODThreshold;
@@ -1082,12 +1082,12 @@ protected:
   int PolarArcsVisibility;
 
   /**
-   * Visibility of the inner axes (overriden to 0 if RadialAxesVisibility is set to 0)
+   * Visibility of the inner axes (overridden to 0 if RadialAxesVisibility is set to 0)
    */
   int DrawRadialGridlines;
 
   /**
-   * Visibility of the inner arcs (overriden to 0 if PolarArcsVisibility is set to 0)
+   * Visibility of the inner arcs (overridden to 0 if PolarArcsVisibility is set to 0)
    */
   int DrawPolarArcsGridlines;
 

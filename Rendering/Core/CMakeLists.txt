@@ -64,7 +64,6 @@ set(Module_SRCS
   vtkProp3DFollower.cxx
   vtkPropAssembly.cxx
   vtkPropCollection.cxx
-  vtkPropPicker3D.cxx
   vtkProp.cxx
   vtkProperty2D.cxx
   vtkProperty.cxx
@@ -74,12 +73,14 @@ set(Module_SRCS
   vtkRendererSource.cxx
   vtkRenderPass.cxx
   vtkRenderState.cxx
+  vtkRenderTimerLog.cxx
   vtkRenderWindowCollection.cxx
   vtkRenderWindow.cxx
   vtkRenderWindowInteractor.cxx
   vtkRenderWindowInteractor3D.cxx
   vtkSelectVisiblePoints.cxx
   vtkShaderDeviceAdapter2.cxx
+  vtkSkybox.cxx
   vtkTextActor.cxx
   vtkTextActor3D.cxx
   vtkTexture.cxx
@@ -214,6 +215,6 @@ endif()
 
 vtk_module_library(vtkRenderingCore ${Module_SRCS})
 
-if (VTK_USE_OFFSCREEN)
-  target_compile_definitions(vtkRenderingCore PRIVATE -DVTK_USE_OFFSCREEN)
+if (VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN)
+  target_compile_definitions(vtkRenderingCore PRIVATE -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN)
 endif()

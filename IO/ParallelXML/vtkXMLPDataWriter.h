@@ -35,7 +35,7 @@ class VTKIOPARALLELXML_EXPORT vtkXMLPDataWriter : public vtkXMLWriter
 {
 public:
   vtkTypeMacro(vtkXMLPDataWriter,vtkXMLWriter);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -65,6 +65,14 @@ public:
 
   //@{
   /**
+   * Get/Set whether to use a subdirectory to store the pieces
+   */
+  vtkSetMacro(UseSubdirectory, bool);
+  vtkGetMacro(UseSubdirectory, bool);
+  //@}
+
+  //@{
+  /**
    * Get/Set whether the writer should write the summary file that
    * refers to all of the pieces' individual files.
    * This is on by default. Note that only the first process writes
@@ -90,12 +98,12 @@ public:
    * Overridden to handle passing the CONTINUE_EXECUTING() flags to the
    * executive.
    */
-  virtual int ProcessRequest(vtkInformation* request,
-    vtkInformationVector** inputVector, vtkInformationVector* outputVector);
+  int ProcessRequest(vtkInformation* request,
+    vtkInformationVector** inputVector, vtkInformationVector* outputVector) VTK_OVERRIDE;
 
 protected:
   vtkXMLPDataWriter();
-  ~vtkXMLPDataWriter();
+  ~vtkXMLPDataWriter() VTK_OVERRIDE;
 
   /**
    * Overridden to make appropriate piece request from upstream.
@@ -104,7 +112,7 @@ protected:
     vtkInformationVector **inputVector, vtkInformationVector *outputVector);
 
   // Override writing method from superclass.
-  virtual int WriteInternal();
+  int WriteInternal() VTK_OVERRIDE;
 
   // Subclasses can override this method to collect information between ranks
   // before writing the summary file. This method is called on all ranks while
@@ -113,12 +121,12 @@ protected:
 
   virtual vtkXMLWriter* CreatePieceWriter(int index)=0;
 
-  virtual void WritePrimaryElementAttributes(ostream &os, vtkIndent indent);
-  int WriteData();
+  void WritePrimaryElementAttributes(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  int WriteData() VTK_OVERRIDE;
   virtual void WritePData(vtkIndent indent);
   virtual void WritePPieceAttributes(int index);
 
-  char* CreatePieceFileName(int index, const char* path=0);
+  char* CreatePieceFileName(int index, const char* path=nullptr);
   void SplitFileName();
   virtual int WritePiece(int index);
 
@@ -133,6 +141,7 @@ protected:
   int NumberOfPieces;
   int GhostLevel;
   int WriteSummaryFile;
+  bool UseSubdirectory;
 
   char* PathName;
   char* FileNameBase;

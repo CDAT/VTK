@@ -43,9 +43,9 @@ public:
   /**
    * Evaluate plane equation for point x[3].
    */
+  using vtkImplicitFunction::EvaluateFunction;
+  void EvaluateFunction(vtkDataArray* input, vtkDataArray* output) VTK_OVERRIDE;
   double EvaluateFunction(double x[3]) VTK_OVERRIDE;
-  double EvaluateFunction(double x, double y, double z)
-    {return this->vtkImplicitFunction::EvaluateFunction(x, y, z); } ;
   //@}
 
   /**
@@ -150,6 +150,7 @@ private:
   void operator=(const vtkPlane&) VTK_DELETE_FUNCTION;
 };
 
+// Generally the normal should be normalized
 inline double vtkPlane::Evaluate(double normal[3],
                                  double origin[3], double x[3])
 {
@@ -157,6 +158,7 @@ inline double vtkPlane::Evaluate(double normal[3],
          normal[2]*(x[2]-origin[2]);
 }
 
+// Assumes normal is normalized
 inline double vtkPlane::DistanceToPlane(double x[3], double n[3], double p0[3])
 {
 #define vtkPlaneAbs(x) ((x)<0?-(x):(x))
@@ -165,5 +167,3 @@ inline double vtkPlane::DistanceToPlane(double x[3], double n[3], double p0[3])
 }
 
 #endif
-
-

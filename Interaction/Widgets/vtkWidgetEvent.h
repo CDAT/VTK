@@ -39,7 +39,7 @@ public:
    * Standard macros.
    */
   vtkTypeMacro(vtkWidgetEvent,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   /**
@@ -69,7 +69,12 @@ public:
     Up,
     Down,
     Left,
-    Right
+    Right,
+    Select3D,
+    EndSelect3D,
+    Move3D,
+    AddPoint3D,
+    AddFinalPoint3D
   };
 
   //@{
@@ -82,7 +87,7 @@ public:
 
 protected:
   vtkWidgetEvent() {}
-  virtual ~vtkWidgetEvent() {}
+  ~vtkWidgetEvent() VTK_OVERRIDE {}
 
 private:
   vtkWidgetEvent(const vtkWidgetEvent&) VTK_DELETE_FUNCTION;

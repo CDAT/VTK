@@ -29,7 +29,7 @@ class VTKWEBCORE_EXPORT vtkWebInteractionEvent : public vtkObject
 public:
   static vtkWebInteractionEvent* New();
   vtkTypeMacro(vtkWebInteractionEvent, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   enum MouseButton
   {
@@ -88,7 +88,7 @@ public:
 
 protected:
   vtkWebInteractionEvent();
-  ~vtkWebInteractionEvent();
+  ~vtkWebInteractionEvent() override;
 
   unsigned int Buttons;
   unsigned int Modifiers;

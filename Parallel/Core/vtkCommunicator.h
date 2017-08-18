@@ -53,7 +53,7 @@ class VTKPARALLELCORE_EXPORT vtkCommunicator : public vtkObject
 public:
 
   vtkTypeMacro(vtkCommunicator, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -1261,8 +1261,8 @@ public:
    */
   virtual int ComputeGlobalBounds(int processorId, int numProcesses,
                                   vtkBoundingBox *bounds,
-                                  int *rightHasBounds = 0,
-                                  int *leftHasBounds = 0,
+                                  int *rightHasBounds = nullptr,
+                                  int *leftHasBounds = nullptr,
                                   int hasBoundsTag = 288402,
                                   int localBoundsTag = 288403,
                                   int globalBoundsTag = 288404);
@@ -1301,7 +1301,7 @@ protected:
   int ReadDataArray(vtkDataArray *object);
 
   vtkCommunicator();
-  ~vtkCommunicator();
+  ~vtkCommunicator() VTK_OVERRIDE;
 
   // Internal methods called by Send/Receive(vtkDataObject *... ) above.
   int SendElementalDataObject(vtkDataObject* data, int remoteHandle, int tag);

@@ -29,7 +29,7 @@ vtkStandardNewMacro(vtkHyperOctreeDepth);
 //----------------------------------------------------------------------------
 vtkHyperOctreeDepth::vtkHyperOctreeDepth()
 {
-  this->GeneratedDepths = 0;
+  this->GeneratedDepths = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -38,7 +38,7 @@ vtkHyperOctreeDepth::~vtkHyperOctreeDepth()
   if (this->GeneratedDepths)
   {
     this->GeneratedDepths->Delete();
-    this->GeneratedDepths = 0;
+    this->GeneratedDepths = nullptr;
   }
 }
 
@@ -60,13 +60,13 @@ int vtkHyperOctreeDepth::RequestData(vtkInformation *vtkNotUsed(request),
   this->Output->ShallowCopy(this->Input);
 
   int MaximumLevel = inInfo->Get(vtkHyperOctree::LEVELS());
-  vtkIdType fact=(1<<(MaximumLevel-1));
+  vtkIdType fact=static_cast<vtkIdType>(1)<<(MaximumLevel-1);
   vtkIdType maxNumberOfCells=fact*fact;
 
   if (this->GeneratedDepths)
   {
     this->GeneratedDepths->Delete();
-    this->GeneratedDepths = 0;
+    this->GeneratedDepths = nullptr;
   }
   this->GeneratedDepths = vtkIntArray::New();
   this->GeneratedDepths->SetNumberOfComponents(1);

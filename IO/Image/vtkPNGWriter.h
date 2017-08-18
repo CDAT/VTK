@@ -37,12 +37,12 @@ class VTKIOIMAGE_EXPORT vtkPNGWriter : public vtkImageWriter
 public:
   static vtkPNGWriter *New();
   vtkTypeMacro(vtkPNGWriter,vtkImageWriter);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * The main interface which triggers the writer to start.
    */
-  virtual void Write();
+  void Write() VTK_OVERRIDE;
 
   //@{
   /**
@@ -67,7 +67,7 @@ public:
 
   //@{
   /**
-   * When writing to memory this is the result, it will be NULL until the
+   * When writing to memory this is the result, it will be nullptr until the
    * data is written the first time
    */
   virtual void SetResult(vtkUnsignedCharArray*);
@@ -100,11 +100,10 @@ public:
 
 protected:
   vtkPNGWriter();
-  ~vtkPNGWriter();
+  ~vtkPNGWriter() VTK_OVERRIDE;
 
   void WriteSlice(vtkImageData *data, int* uExtent);
   int CompressionLevel;
-  unsigned int WriteToMemory;
   vtkUnsignedCharArray *Result;
   FILE *TempFP;
   class vtkInternals;

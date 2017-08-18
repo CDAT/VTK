@@ -55,14 +55,14 @@ public:
   vtkTypeMacro(vtkUnstructuredGridPreIntegration,
                        vtkUnstructuredGridVolumeRayIntegrator);
   static vtkUnstructuredGridPreIntegration *New();
-  virtual void PrintSelf(ostream &os, vtkIndent indent);
+  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
 
-  virtual void Initialize(vtkVolume *volume, vtkDataArray *scalars);
+  void Initialize(vtkVolume *volume, vtkDataArray *scalars) VTK_OVERRIDE;
 
-  virtual void Integrate(vtkDoubleArray *intersectionLengths,
+  void Integrate(vtkDoubleArray *intersectionLengths,
                          vtkDataArray *nearIntersections,
                          vtkDataArray *farIntersections,
-                         float color[4]);
+                         float color[4]) VTK_OVERRIDE;
 
   //@{
   /**
@@ -119,7 +119,7 @@ public:
 
   /**
    * Get an entry (RGBA) in one of the pre-integration tables.  The tables
-   * are built when Intialize is called.
+   * are built when Initialize is called.
    */
   float *GetTableEntry(double scalar_front, double scalar_back, double lenth,
                        int component = 0);
@@ -134,7 +134,7 @@ public:
 
 protected:
   vtkUnstructuredGridPreIntegration();
-  ~vtkUnstructuredGridPreIntegration();
+  ~vtkUnstructuredGridPreIntegration() VTK_OVERRIDE;
 
   vtkUnstructuredGridVolumeRayIntegrator *Integrator;
 

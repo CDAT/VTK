@@ -89,7 +89,7 @@ class VTKIOEXPORT_EXPORT vtkGL2PSExporter : public vtkExporter
 public:
   static vtkGL2PSExporter *New();
   vtkTypeMacro(vtkGL2PSExporter, vtkExporter)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -116,7 +116,7 @@ public:
 
   //@{
   /**
-   * Set the title for the output, if supported. If NULL, "VTK GL2PS Export" is
+   * Set the title for the output, if supported. If nullptr, "VTK GL2PS Export" is
    * used.
    */
   vtkSetStringMacro(Title);
@@ -348,7 +348,7 @@ public:
 
 protected:
   vtkGL2PSExporter();
-  ~vtkGL2PSExporter();
+  ~vtkGL2PSExporter() VTK_OVERRIDE;
 
   int GetGL2PSOptions();
   int GetGL2PSSort();

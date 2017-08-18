@@ -50,7 +50,7 @@ class VTKIOENSIGHT_EXPORT vtkGenericEnSightReader : public vtkMultiBlockDataSetA
 public:
   static vtkGenericEnSightReader *New();
   vtkTypeMacro(vtkGenericEnSightReader, vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -113,7 +113,7 @@ public:
   const char* GetComplexDescription(int n);
 
   /**
-   * Get the nth description of a particular variable type.  Returns NULL if no
+   * Get the nth description of a particular variable type.  Returns nullptr if no
    * variable of this type exists in this data set.
    * SCALAR_PER_NODE = 0; VECTOR_PER_NODE = 1;
    * TENSOR_SYMM_PER_NODE = 2; SCALAR_PER_ELEMENT = 3;
@@ -277,15 +277,15 @@ vtkGenericEnSightReader* GetReader() { return this->Reader; }
 
 protected:
   vtkGenericEnSightReader();
-  ~vtkGenericEnSightReader();
+  ~vtkGenericEnSightReader() VTK_OVERRIDE;
 
-  virtual int FillOutputPortInformation(int port, vtkInformation* info);
-  virtual int RequestInformation(vtkInformation*,
+  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*,
                                  vtkInformationVector**,
-                                 vtkInformationVector*);
-  virtual int RequestData(vtkInformation*,
+                                 vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*,
                           vtkInformationVector**,
-                          vtkInformationVector*);
+                          vtkInformationVector*) VTK_OVERRIDE;
 
   /**
    * Clear data structures such that setting a new case file name works.

@@ -187,11 +187,7 @@ protected:
   vtkInformation* InformationCache;
 
   vtkInformation* GenericRequest;
-  vtkInformation* DataObjectRequest;
   vtkInformation* InformationRequest;
-  vtkInformation* UpdateExtentRequest;
-  vtkInformation* DataRequest;
-
 
   void ResetPipelineInformation(int port, vtkInformation*) VTK_OVERRIDE;
 

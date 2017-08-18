@@ -52,7 +52,7 @@ public:
    * to create it
    */
   virtual const char* Name();
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   virtual bool CanHandle(const char* NameString);
@@ -93,7 +93,7 @@ public:
                          vtkTextCodec::OutputIterator& output) = 0;
 
   /**
-   * convinience method to take data from the stream and put it into a
+   * convenience method to take data from the stream and put it into a
    * vtkUnicodeString.
    */
   vtkUnicodeString ToUnicode(istream & inputStream);
@@ -107,7 +107,7 @@ public:
 
 protected:
   vtkTextCodec();
-  ~vtkTextCodec();
+  ~vtkTextCodec() VTK_OVERRIDE;
 
 private:
   vtkTextCodec(const vtkTextCodec &) VTK_DELETE_FUNCTION;

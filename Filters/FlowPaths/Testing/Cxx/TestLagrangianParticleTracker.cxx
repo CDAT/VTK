@@ -194,10 +194,10 @@ int TestLagrangianParticleTracker(int, char*[])
 
   // Put in tracker
   vtkNew<vtkLagrangianParticleTracker> tracker;
-  tracker->SetIntegrator(NULL);
-  tracker->SetIntegrationModel(NULL);
+  tracker->SetIntegrator(nullptr);
+  tracker->SetIntegrationModel(nullptr);
   tracker->Print(cout);
-  if (tracker->GetSource() != 0 || tracker->GetSurface() != 0)
+  if (tracker->GetSource() != nullptr || tracker->GetSurface() != nullptr)
   {
     std::cerr << "Incorrect Input Initialization" << std::endl;
     return EXIT_FAILURE;

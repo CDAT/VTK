@@ -143,14 +143,15 @@ vtkEGLRenderWindow::vtkEGLRenderWindow()
   this->ScreenSize[1] = 1080;
   // this is initialized in vtkRenderWindow
   // so we don't need to initialize on else
-#ifdef VTK_USE_OFFSCREEN_EGL
-  this->DeviceIndex = VTK_EGL_DEVICE_INDEX;
-#endif
+  this->DeviceIndex = VTK_DEFAULT_EGL_DEVICE_INDEX;
+
 #if ANDROID
-  this->UsePBuffer = false;
+  this->OffScreenRendering = false;
 #else
-  this->UsePBuffer = true;
+  // this is an offscreen-only window otherwise.
+  this->OffScreenRendering = true;
 #endif
+
   this->IsPointSpriteBugTested = false;
   this->IsPointSpriteBugPresent_ = false;
 }
@@ -283,10 +284,8 @@ void vtkEGLRenderWindow::ResizeWindow(int width, int height)
    */
   EGLint surfaceType, clientAPI;
   const EGLint* contextAttribs;
-  if (this->UsePBuffer)
+  if (this->OffScreenRendering)
   {
-    // technically UsePBuffer does not require OPENGL
-    // but for now we leave it as combined
     surfaceType = EGL_PBUFFER_BIT;
     clientAPI = EGL_OPENGL_BIT;
     contextAttribs = NULL;
@@ -294,22 +293,13 @@ void vtkEGLRenderWindow::ResizeWindow(int width, int height)
   else
   {
     surfaceType = EGL_WINDOW_BIT;
-  #ifdef EGL_OPENGL_ES3_BIT
-    clientAPI = EGL_OPENGL_ES3_BIT;
-    const EGLint contextES3[] =
-      {
-      EGL_CONTEXT_CLIENT_VERSION, 3,
-      EGL_NONE
-      };
-  #else
     clientAPI = EGL_OPENGL_ES2_BIT;
-    const EGLint contextES3[] =
+    const EGLint contextES2[] =
       {
       EGL_CONTEXT_CLIENT_VERSION, 2,
       EGL_NONE
       };
-  #endif
-    contextAttribs = contextES3;
+    contextAttribs = contextES2;
   }
   const EGLint configs[] = {
     EGL_SURFACE_TYPE, surfaceType,
@@ -317,7 +307,7 @@ void vtkEGLRenderWindow::ResizeWindow(int width, int height)
     EGL_GREEN_SIZE, 8,
     EGL_RED_SIZE, 8,
     EGL_ALPHA_SIZE, 8,
-    EGL_DEPTH_SIZE, 16,
+    EGL_DEPTH_SIZE, 8,
     EGL_RENDERABLE_TYPE, clientAPI,
     EGL_NONE
   };
@@ -344,7 +334,7 @@ void vtkEGLRenderWindow::ResizeWindow(int width, int height)
       }
     EGLint major = 0, minor = 0;
     vtkEGLDisplayInitializationHelper::Initialize(impl->Display, &major, &minor);
-    if (this->UsePBuffer)
+    if (this->OffScreenRendering)
     {
       if (major <= 1 && minor < 4)
       {
@@ -388,18 +378,10 @@ void vtkEGLRenderWindow::ResizeWindow(int width, int height)
   {
       eglDestroySurface(impl->Display, impl->Surface);
   }
-  if (this->UsePBuffer)
-  {
-    impl->Surface =
-      eglCreatePbufferSurface(impl->Display, config, surface_attribs);
-    this->Mapped = 0;
-  }
-  else
-  {
-    impl->Surface =
-      eglCreateWindowSurface(impl->Display, config, impl->Window, NULL);
-    this->Mapped = 1;
-  }
+  impl->Surface = this->OffScreenRendering ?
+    eglCreatePbufferSurface(impl->Display, config, surface_attribs):
+    eglCreateWindowSurface(impl->Display, config, impl->Window, NULL);
+  this->Mapped = 1;
   this->OwnWindow = 1;
 
   this->MakeCurrent();
@@ -415,7 +397,7 @@ void vtkEGLRenderWindow::DestroyWindow()
 {
   vtkInternals* impl = this->Internals;
   this->ReleaseGraphicsResources(this);
-  if (this->OwnWindow && impl->Display != EGL_NO_DISPLAY)
+  if (this->OwnWindow && this->Mapped && impl->Display != EGL_NO_DISPLAY)
   {
     // make sure all other code knows we're not mapped anymore
     this->Mapped = 0;
@@ -455,6 +437,12 @@ void vtkEGLRenderWindow::WindowInitialize (void)
   }
 
   this->OpenGLInit();
+
+  // for offscreen EGL always turn on point sprites
+  if (this->OffScreenRendering)
+  {
+    glEnable(GL_POINT_SPRITE);
+  }
 }
 
 // Initialize the rendering window.
@@ -560,7 +548,8 @@ void vtkEGLRenderWindow::PrintSelf(ostream& os, vtkIndent indent)
 void vtkEGLRenderWindow::MakeCurrent()
 {
   vtkInternals* impl = this->Internals;
-  if(impl->Display != EGL_NO_DISPLAY &&
+  if(this->Mapped &&
+     impl->Display != EGL_NO_DISPLAY &&
      impl->Context != EGL_NO_CONTEXT &&
      impl->Surface != EGL_NO_SURFACE)
   {
@@ -643,6 +632,18 @@ void* vtkEGLRenderWindow::GetGenericContext()
 {
   vtkInternals* impl = this->Internals;
   return impl->Context;
+}
+
+//----------------------------------------------------------------------------
+void vtkEGLRenderWindow::SetOffScreenRendering (int)
+{
+  // this is determined at compile time: ANDROID -> 0, otherwise -> 1
+}
+
+//----------------------------------------------------------------------------
+int vtkEGLRenderWindow::GetOffScreenRendering ()
+{
+  return this->OffScreenRendering;
 }
 
 //----------------------------------------------------------------------------

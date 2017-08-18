@@ -77,7 +77,7 @@ class VTKRENDERINGCORE_EXPORT vtkRenderWindowInteractor : public vtkObject
 public:
   static vtkRenderWindowInteractor *New();
   vtkTypeMacro(vtkRenderWindowInteractor,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -96,7 +96,7 @@ public:
    * This Method detects loops of RenderWindow-Interactor,
    * so objects are freed properly.
    */
-  virtual void UnRegister(vtkObjectBase *o);
+  void UnRegister(vtkObjectBase *o) VTK_OVERRIDE;
 
   /**
    * Start the event loop. This is provided so that you do not have to
@@ -430,7 +430,7 @@ public:
   {
     if (pointerIndex >= VTKI_MAX_POINTERS)
     {
-      return NULL;
+      return nullptr;
     }
     return this->EventPositions[pointerIndex];
   }
@@ -438,7 +438,7 @@ public:
   {
     if (pointerIndex >= VTKI_MAX_POINTERS)
     {
-      return NULL;
+      return nullptr;
     }
     return this->LastEventPositions[pointerIndex];
   }
@@ -596,7 +596,7 @@ public:
                            int ctrl=0, int shift=0,
                            char keycode=0,
                            int repeatcount=0,
-                           const char* keysym=0)
+                           const char* keysym=nullptr)
   {
       this->SetEventInformation(x,y,ctrl,shift,keycode,repeatcount,keysym,0);
   }
@@ -627,7 +627,7 @@ public:
                            int ctrl=0, int shift=0,
                            char keycode=0,
                            int repeatcount=0,
-                           const char* keysym=0)
+                           const char* keysym=nullptr)
   {
       this->SetEventInformationFlipY(x,y,ctrl,shift,keycode,repeatcount,keysym,0);
   }
@@ -641,7 +641,7 @@ public:
                               int shift=0,
                               char keycode=0,
                               int repeatcount=0,
-                              const char* keysym=0)
+                              const char* keysym=nullptr)
   {
       this->ControlKey = ctrl;
       this->ShiftKey = shift;
@@ -725,6 +725,10 @@ public:
   virtual void KeyReleaseEvent();
   virtual void CharEvent();
   virtual void ExitEvent();
+  virtual void FourthButtonPressEvent();
+  virtual void FourthButtonReleaseEvent();
+  virtual void FifthButtonPressEvent();
+  virtual void FifthButtonReleaseEvent();
   //@}
 
   //@{
@@ -783,7 +787,7 @@ public:
 
 protected:
   vtkRenderWindowInteractor();
-  ~vtkRenderWindowInteractor();
+  ~vtkRenderWindowInteractor() VTK_OVERRIDE;
 
   vtkRenderWindow       *RenderWindow;
   vtkInteractorObserver *InteractorStyle;
@@ -848,7 +852,7 @@ protected:
    * declaration is done here to avoid doing so in the superclass vtkObject.
    */
   friend class vtkInteractorObserver;
-  void GrabFocus(vtkCommand *mouseEvents, vtkCommand *keypressEvents=NULL)
+  void GrabFocus(vtkCommand *mouseEvents, vtkCommand *keypressEvents=nullptr)
     {this->Superclass::InternalGrabFocus(mouseEvents,keypressEvents);}
   void ReleaseFocus()
     {this->Superclass::InternalReleaseFocus();}

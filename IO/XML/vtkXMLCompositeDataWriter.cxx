@@ -20,6 +20,7 @@
 #include "vtkDataObjectTreeIterator.h"
 #include "vtkErrorCode.h"
 #include "vtkExecutive.h"
+#include "vtkFieldData.h"
 #include "vtkGarbageCollector.h"
 #include "vtkHierarchicalBoxDataSet.h"
 #include "vtkImageData.h"
@@ -57,7 +58,7 @@ public:
   vtkSmartPointer<vtkXMLDataElement> Root;
   std::vector<int> DataTypes;
 
-  // Get the default extension for the dataset_type. Will return NULL if an
+  // Get the default extension for the dataset_type. Will return nullptr if an
   // extension cannot be determined.
   const char* GetDefaultFileExtensionForDataSet(int dataset_type)
   {
@@ -77,7 +78,7 @@ public:
     {
       return iter->second->GetDefaultFileExtension();
     }
-    return NULL;
+    return nullptr;
   }
 };
 
@@ -93,7 +94,7 @@ vtkXMLCompositeDataWriter::vtkXMLCompositeDataWriter()
   this->ProgressObserver->SetCallback(&vtkXMLCompositeDataWriter::ProgressCallbackFunction);
   this->ProgressObserver->SetClientData(this);
 
-  this->InputInformation = 0;
+  this->InputInformation = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -184,7 +185,7 @@ int vtkXMLCompositeDataWriter::RequestData(vtkInformation*,
   if (!compositeData)
   {
     vtkErrorMacro("No hierarchical input has been provided. Cannot write");
-    this->InputInformation = 0;
+    this->InputInformation = nullptr;
     return 0;
   }
 
@@ -198,7 +199,7 @@ int vtkXMLCompositeDataWriter::RequestData(vtkInformation*,
   {
     vtkErrorMacro("Writer called with no FileName set.");
     this->SetErrorCode(vtkErrorCode::NoFileNameError);
-    this->InputInformation = 0;
+    this->InputInformation = nullptr;
     return 0;
   }
 
@@ -238,14 +239,14 @@ int vtkXMLCompositeDataWriter::RequestData(vtkInformation*,
                            this->GetNumberOfInputConnections(0)
                            + this->WriteMetaFile);
     int retVal = this->WriteMetaFileIfRequested();
-    this->InputInformation = 0;
+    this->InputInformation = nullptr;
     return retVal;
   }
 
   // We have finished writing.
   this->UpdateProgressDiscrete(1);
 
-  this->InputInformation = 0;
+  this->InputInformation = nullptr;
   return 1;
 }
 
@@ -324,6 +325,22 @@ int vtkXMLCompositeDataWriter::WriteData()
     this->Internal->Root->PrintXML(os, indent);
   }
 
+  int dataMode = this->DataMode;
+  if (dataMode == vtkXMLWriter::Ascii)
+  {
+    this->DataMode = vtkXMLWriter::Ascii;
+  }
+  else
+  {
+    this->DataMode = vtkXMLWriter::Binary;
+  }
+  vtkFieldData *fieldData = this->GetInput()->GetFieldData();
+  if (fieldData && fieldData->GetNumberOfArrays())
+  {
+    this->WriteFieldDataInline(fieldData, indent);
+  }
+  this->DataMode = dataMode;
+
   return this->EndFile();
 }
 
@@ -379,7 +396,7 @@ const char* vtkXMLCompositeDataWriter::GetDataSetName()
     this->InputInformation->Get(vtkDataObject::DATA_OBJECT()));
   if (!hdInput)
   {
-    return 0;
+    return nullptr;
   }
   return hdInput->GetClassName();
 }
@@ -438,9 +455,9 @@ void vtkXMLCompositeDataWriter::CreateWriters(vtkCompositeDataSet* hdInput)
   {
     vtkSmartPointer<vtkXMLWriter>& writer = this->Internal->Writers[i];
     vtkDataSet* ds = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
-    if (ds == NULL)
+    if (ds == nullptr)
     {
-      writer = NULL;
+      writer = nullptr;
       continue;
     }
 
@@ -474,7 +491,7 @@ vtkXMLWriter* vtkXMLCompositeDataWriter::GetWriter(int index)
   {
     return this->Internal->Writers[index].GetPointer();
   }
-  return 0;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -498,7 +515,7 @@ void vtkXMLCompositeDataWriter::SplitFileName()
   }
 
   // Split the extension from the file name.
-  pos = name.find_last_of(".");
+  pos = name.find_last_of('.');
   if (pos != name.npos)
   {
     this->Internal->FilePrefix = name.substr(0, pos);
@@ -589,5 +606,5 @@ void vtkXMLCompositeDataWriter::RemoveWrittenFiles(const char* SubDirectory)
 {
   this->RemoveADirectory(SubDirectory);
   this->DeleteAFile();
-  this->InputInformation = 0;
+  this->InputInformation = nullptr;
 }

@@ -43,8 +43,8 @@ public:
 
   vtkFOInfo() {
     this->Attachment = 0;
-    this->Texture = NULL;
-    this->Renderbuffer = NULL;
+    this->Texture = nullptr;
+    this->Renderbuffer = nullptr;
     this->CreatedByFO = false;
     this->ZSlice = 0;
     this->Attached = false;
@@ -60,12 +60,12 @@ public:
     if (this->Texture)
     {
       this->Texture->Delete();
-      this->Texture = NULL;
+      this->Texture = nullptr;
     }
     if (this->Renderbuffer)
     {
       this->Renderbuffer->Delete();
-      this->Renderbuffer = NULL;
+      this->Renderbuffer = nullptr;
     }
     this->Attachment = 0;
     this->CreatedByFO = false;
@@ -144,16 +144,16 @@ public:
       return;
     }
     this->Attached = false;
-    val->Register(0);
+    val->Register(nullptr);
     if (this->Texture)
     {
       this->Texture->Delete();
-      this->Texture = NULL;
+      this->Texture = nullptr;
     }
     if (this->Renderbuffer)
     {
       this->Renderbuffer->Delete();
-      this->Renderbuffer = NULL;
+      this->Renderbuffer = nullptr;
     }
     this->Texture = val;
     this->Mode = mode;
@@ -173,16 +173,16 @@ public:
       return;
     }
     this->Attached = false;
-    val->Register(0);
+    val->Register(nullptr);
     if (this->Texture)
     {
       this->Texture->Delete();
-      this->Texture = NULL;
+      this->Texture = nullptr;
     }
     if (this->Renderbuffer)
     {
       this->Renderbuffer->Delete();
-      this->Renderbuffer = NULL;
+      this->Renderbuffer = nullptr;
     }
     this->Renderbuffer = val;
     this->Mode = mode;
@@ -256,17 +256,17 @@ vtkOpenGLFramebufferObject::~vtkOpenGLFramebufferObject()
   {
     this->ResourceCallback->Release();
     delete this->ResourceCallback;
-    this->ResourceCallback = NULL;
+    this->ResourceCallback = nullptr;
   }
   delete this->DrawDepthBuffer;
   delete this->ReadDepthBuffer;
   for (foIter i = this->DrawColorBuffers.begin();
-    i != this->DrawColorBuffers.end(); i++)
+    i != this->DrawColorBuffers.end(); ++i)
   {
     delete i->second;
   }
   for (foIter i = this->ReadColorBuffers.begin();
-    i != this->ReadColorBuffers.end(); i++)
+    i != this->ReadColorBuffers.end(); ++i)
   {
     delete i->second;
   }
@@ -355,7 +355,7 @@ void vtkOpenGLFramebufferObject::ReleaseGraphicsResources(vtkWindow *win)
   this->DestroyDepthBuffer(win);
   this->DestroyColorBuffers(win);
   this->DestroyFBO();
-  this->Context = NULL;
+  this->Context = nullptr;
   this->Modified();
 }
 
@@ -383,7 +383,7 @@ void vtkOpenGLFramebufferObject::SetContext(vtkRenderWindow *rw)
     vtkErrorMacro("Context does not support the required extensions");
     return;
   }
-  // intialize
+  // initialize
   this->Context=renWin;
   this->Context->MakeCurrent();
   this->CreateFBO();
@@ -459,7 +459,7 @@ void vtkOpenGLFramebufferObject::UpdateSize()
   // loop through all attachments and
   // verify they are of the same size.
   for (foIter i = this->DrawColorBuffers.begin();
-    i != this->DrawColorBuffers.end(); i++)
+    i != this->DrawColorBuffers.end(); ++i)
   {
     if (!i->second->CreatedByFO && i->second->IsSet())
     {
@@ -480,7 +480,7 @@ void vtkOpenGLFramebufferObject::UpdateSize()
     }
   }
   for (foIter i = this->ReadColorBuffers.begin();
-    i != this->ReadColorBuffers.end(); i++)
+    i != this->ReadColorBuffers.end(); ++i)
   {
     if (!i->second->CreatedByFO && i->second->IsSet())
     {
@@ -570,12 +570,12 @@ void vtkOpenGLFramebufferObject::Resize(int width, int height)
   // loop through all attachments and
   // verify they are of the same size.
   for (foIter i = this->DrawColorBuffers.begin();
-    i != this->DrawColorBuffers.end(); i++)
+    i != this->DrawColorBuffers.end(); ++i)
   {
     i->second->Resize(this->LastSize);
   }
   for (foIter i = this->ReadColorBuffers.begin();
-    i != this->ReadColorBuffers.end(); i++)
+    i != this->ReadColorBuffers.end(); ++i)
   {
     i->second->Resize(this->LastSize);
   }
@@ -793,12 +793,12 @@ void vtkOpenGLFramebufferObject::Attach()
   {
     // attach all buffers if not already attached
     for (foIter i = this->DrawColorBuffers.begin();
-      i != this->DrawColorBuffers.end(); i++)
+      i != this->DrawColorBuffers.end(); ++i)
     {
       i->second->Attach();
     }
     for (foIter i = this->ReadColorBuffers.begin();
-      i != this->ReadColorBuffers.end(); i++)
+      i != this->ReadColorBuffers.end(); ++i)
     {
       i->second->Attach();
     }
@@ -924,12 +924,12 @@ void vtkOpenGLFramebufferObject::DestroyDepthBuffer(vtkWindow *)
 void vtkOpenGLFramebufferObject::DestroyColorBuffers(vtkWindow *)
 {
   for (foIter i = this->DrawColorBuffers.begin();
-    i != this->DrawColorBuffers.end(); i++)
+    i != this->DrawColorBuffers.end(); ++i)
   {
     i->second->Clear();
   }
   for (foIter i = this->ReadColorBuffers.begin();
-    i != this->ReadColorBuffers.end(); i++)
+    i != this->ReadColorBuffers.end(); ++i)
   {
     i->second->Clear();
   }
@@ -1036,7 +1036,7 @@ void vtkOpenGLFramebufferObject::RemoveColorAttachment(
     if (i != this->DrawColorBuffers.end())
     {
       delete i->second;
-      i->second = NULL;
+      i->second = nullptr;
       this->DrawColorBuffers.erase(i);
     }
   }
@@ -1047,7 +1047,7 @@ void vtkOpenGLFramebufferObject::RemoveColorAttachment(
     if (i != this->ReadColorBuffers.end())
     {
       delete i->second;
-      i->second = NULL;
+      i->second = nullptr;
       this->ReadColorBuffers.erase(i);
     }
   }
@@ -1534,10 +1534,7 @@ int vtkOpenGLFramebufferObject::CheckFrameBufferStatus(unsigned int mode)
 
 //----------------------------------------------------------------------------
 int vtkOpenGLFramebufferObject::Blit(
-        int srcExt[4],
-        int destExt[4],
-        unsigned int bits,
-        unsigned int mapping)
+  const int srcExt[4], const int destExt[4], unsigned int bits, unsigned int mapping)
 {
   glBlitFramebuffer(
         (GLint)srcExt[0],
@@ -1622,7 +1619,7 @@ vtkPixelBufferObject *vtkOpenGLFramebufferObject::DownloadColor1(
       break;
     default:
       vtkErrorMacro("Inavlid channel");
-      return NULL;
+      return nullptr;
   }
 
   return this->Download(
@@ -1686,7 +1683,7 @@ void vtkOpenGLFramebufferObject::Download(
         extentSize[1],
         oglFormat,
         oglType,
-        NULL);
+        nullptr);
 
   vtkOpenGLStaticCheckErrorMacro("failed at glReadPixels");
 

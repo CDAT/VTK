@@ -230,7 +230,7 @@ int ilog2(unsigned int n)
 
 /**
 An interface to a random number generator. We can't use
-c stdlib since we're not gauranteed to get consistent.
+c stdlib since we're not guaranteed to get consistent.
 sequences across platform or library version and that
 would prevent consistent output during regression tests.
 */
@@ -366,7 +366,7 @@ private:
         int seed);
 
   // Description:
-  // A way of controling the probability (from 0.0 to 1.0) that you
+  // A way of controlling the probability (from 0.0 to 1.0) that you
   // generate values. returns 1 if you should generate a value.
   // for example this is used to control the frequency of impulse
   // noise.
@@ -2369,7 +2369,7 @@ bool vtkSurfaceLICPainter::NeedToRenderGeometry(
 //----------------------------------------------------------------------------
 bool vtkSurfaceLICPainter::NeedToUpdateCommunicator()
 {
-  // no comm or externally modfied paramters
+  // no comm or externally modfied parameters
   if ( this->Internals->CommunicatorNeedsUpdate
     || this->Internals->ContextNeedsUpdate
     || this->Internals->OutputDataNeedsUpdate
@@ -2576,7 +2576,7 @@ void vtkSurfaceLICPainter::RenderInternal(
     #endif
     // create a communicator that contains only ranks
     // that have visible data. In parallel this is a
-    // collective operation accross all ranks. In
+    // collective operation across all ranks. In
     // serial this is a no-op.
     this->CreateCommunicator();
     #ifdef vtkSurfaceLICPainterTIME

@@ -60,7 +60,7 @@ class VTKRENDERINGPARALLEL_EXPORT vtkParallelRenderManager : public vtkObject
 {
 public:
   vtkTypeMacro(vtkParallelRenderManager, vtkObject);
-  virtual void PrintSelf(ostream &os, vtkIndent indent);
+  virtual void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Builds a vtkRenderWindow compatible with this render manager.  The
@@ -322,20 +322,20 @@ public:
                             const int fullImageSize[2],
                             vtkUnsignedCharArray *reducedImage,
                             const int reducedImageSize[2],
-                            const int fullImageViewport[4] = NULL,
-                            const int reducedImageViewport[4] = NULL);
+                            const int fullImageViewport[4] = nullptr,
+                            const int reducedImageViewport[4] = nullptr);
   static void MagnifyImageNearest(vtkUnsignedCharArray *fullImage,
                                   const int fullImageSize[2],
                                   vtkUnsignedCharArray *reducedImage,
                                   const int reducedImageSize[2],
-                                  const int fullImageViewport[4] = NULL,
-                                  const int reducedImageViewport[4] = NULL);
+                                  const int fullImageViewport[4] = nullptr,
+                                  const int reducedImageViewport[4] = nullptr);
   static void MagnifyImageLinear(vtkUnsignedCharArray *fullImage,
                                  const int fullImageSize[2],
                                  vtkUnsignedCharArray *reducedImage,
                                  const int reducedImageSize[2],
-                                 const int fullImageViewport[4] = NULL,
-                                 const int reducedImageViewport[4] = NULL);
+                                 const int fullImageViewport[4] = nullptr,
+                                 const int reducedImageViewport[4] = nullptr);
   //@}
 
   //@{

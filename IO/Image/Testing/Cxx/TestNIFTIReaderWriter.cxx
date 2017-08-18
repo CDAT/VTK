@@ -118,7 +118,7 @@ static void TestDisplay(vtkRenderWindow *renwin, const char *infile)
   cam2->SetFocalPoint(center2[0], center2[1], center2[2]);
   cam2->SetPosition(center2[0] + 100.0, center2[1], center2[2]);
 
-  renwin->SetSize(size[0] + size[2], size[1]);
+  renwin->SetSize((size[0] + size[2]) / 2 * 2, size[1] / 2 * 2); // keep size even
   renwin->AddRenderer(ren1.GetPointer());
   renwin->AddRenderer(ren2.GetPointer());
 };
@@ -129,7 +129,7 @@ static double TestReadWriteRead(
 {
   // read a NIFTI file
   vtkNew<vtkNIFTIImageReader> reader;
-  if (infile2 == 0)
+  if (infile2 == nullptr)
   {
     reader->SetFileName(infile);
   }
@@ -334,7 +334,7 @@ int TestNIFTIReaderWriter(int argc, char *argv[])
   // perform the read/write test
   for (int i = 0; i < 5; i++)
   {
-    char *infile2 = 0;
+    char *infile2 = nullptr;
     char *infile =
       vtkTestUtilities::ExpandDataFileName(argc, argv, testfiles[i][0]);
     bool planarRGB = (i == 2);

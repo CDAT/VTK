@@ -31,31 +31,11 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLGlyph3DHelper : public vtkOpenGLPolyDa
 public:
   static vtkOpenGLGlyph3DHelper* New();
   vtkTypeMacro(vtkOpenGLGlyph3DHelper, vtkOpenGLPolyDataMapper)
-  void PrintSelf(ostream& os, vtkIndent indent);
-
-  void SetModelTransform(float *matrix)
-  {
-    this->ModelTransformMatrix = matrix;
-  }
-
-  void SetModelNormalTransform(float *matrix)
-  {
-    this->ModelNormalMatrix = matrix;
-  }
-
-  void SetModelColor(unsigned char *color)
-  {
-    this->ModelColor = color;
-  }
-
-  void SetUseFastPath(bool fastpath)
-  {
-    this->UseFastPath = fastpath;
-    this->UsingInstancing = false;
-  }
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
-   * Fast path for rendering glyphs comprised of only one type of primative
+   * Fast path for rendering glyphs comprised of only one type of primitive
+   * Must set this->CurrentInput explicitly before calling.
    */
   void GlyphRender(vtkRenderer* ren, vtkActor* actor, vtkIdType numPts,
       std::vector<unsigned char> &colors, std::vector<float> &matrices,
@@ -67,11 +47,11 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow *window);
+  void ReleaseGraphicsResources(vtkWindow *window) VTK_OVERRIDE;
 
 protected:
   vtkOpenGLGlyph3DHelper();
-  ~vtkOpenGLGlyph3DHelper();
+  ~vtkOpenGLGlyph3DHelper() VTK_OVERRIDE;
 
   // special opengl 32 version that uses instances
   void GlyphRenderInstances(vtkRenderer* ren, vtkActor* actor, vtkIdType numPts,
@@ -82,59 +62,43 @@ protected:
   /**
    * Create the basic shaders before replacement
    */
-  virtual void GetShaderTemplate(
+  void GetShaderTemplate(
     std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
 
   //@{
   /**
    * Perform string replacments on the shader templates
    */
-  virtual void ReplaceShaderPicking(
+  void ReplaceShaderPicking(
     std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
-  virtual void ReplaceShaderColor(
+    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void ReplaceShaderColor(
     std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
-  virtual void ReplaceShaderNormal(
+    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void ReplaceShaderNormal(
     std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
-  virtual void ReplaceShaderClip(
+    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void ReplaceShaderClip(
     std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
-  virtual void ReplaceShaderPositionVC(
+    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void ReplaceShaderPositionVC(
     std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
   //@}
-
-  /**
-   * Set the shader parameteres related to the Camera
-   */
-  virtual void SetCameraShaderParameters(
-    vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
-
-  /**
-   * Set the shader parameteres related to the property
-   */
-  virtual void SetPropertyShaderParameters(
-    vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
 
   /**
    * Set the shader parameteres related to the actor/mapper
    */
-  virtual void SetMapperShaderParameters(
-    vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  void SetMapperShaderParameters(
+    vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
 
-  bool UseFastPath;
   bool UsingInstancing;
-
-  float* ModelTransformMatrix;
-  float* ModelNormalMatrix;
-  unsigned char* ModelColor;
 
   vtkOpenGLBufferObject *NormalMatrixBuffer;
   vtkOpenGLBufferObject *MatrixBuffer;
   vtkOpenGLBufferObject *ColorBuffer;
+  vtkTimeStamp InstanceBuffersBuildTime;
   vtkTimeStamp InstanceBuffersLoadTime;
 
 

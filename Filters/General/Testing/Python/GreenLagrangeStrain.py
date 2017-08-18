@@ -9,7 +9,8 @@ try:
     import numpy
 except ImportError:
     print("WARNING: This test requires NumPy: http://http://www.numpy.org/")
-    sys.exit(0)
+    from vtk.test import Testing
+    Testing.skip()
 import vtk
 
 
@@ -47,7 +48,7 @@ ugrid_hex.GetPointData().SetActiveVectors("displacement")
 # Test a few deformation gradients
 F_lst  = []
 
-# Simple extentions
+# Simple extensions
 F_lst += [numpy.array([[2,0,0],
                        [0,1,0],
                        [0,0,1]])]

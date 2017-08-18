@@ -68,12 +68,12 @@ public:
   void SetTypedComponent(vtkIdType tupleIdx, int compIdx, ValueType value)
   { this->Array->SetTypedComponent(tupleIdx,compIdx,value); }
 
-  void *GetVoidPointer(vtkIdType valueIdx)
+  void *GetVoidPointer(vtkIdType valueIdx) VTK_OVERRIDE
   { return this->Array->GetVoidPointer(valueIdx); }
 
 protected:
   vtkTestDataArray() { this->Array = ArrayType::New(); }
-  ~vtkTestDataArray() { this->Array->Delete(); }
+  ~vtkTestDataArray() override { this->Array->Delete(); }
 
   bool AllocateTuples(vtkIdType numTuples)
   { return this->Array->Allocate(numTuples) != 0; }

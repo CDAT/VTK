@@ -80,7 +80,7 @@ vtkShaderProgram::vtkShaderProgram()
   this->GeometryShader = vtkShader::New();
   this->GeometryShader->SetType(vtkShader::Geometry);
 
-  this->TransformFeedback = NULL;
+  this->TransformFeedback = nullptr;
 
   this->Compiled = false;
   this->NumberOfOutputs = 0;
@@ -91,7 +91,7 @@ vtkShaderProgram::vtkShaderProgram()
   this->Linked = false;
   this->Bound = false;
 
-  this->FileNamePrefixForDebugging = NULL;
+  this->FileNamePrefixForDebugging = nullptr;
 }
 
 vtkShaderProgram::~vtkShaderProgram()
@@ -100,24 +100,24 @@ vtkShaderProgram::~vtkShaderProgram()
   if (this->VertexShader)
   {
     this->VertexShader->Delete();
-    this->VertexShader = NULL;
+    this->VertexShader = nullptr;
   }
   if (this->FragmentShader)
   {
     this->FragmentShader->Delete();
-    this->FragmentShader = NULL;
+    this->FragmentShader = nullptr;
   }
   if (this->GeometryShader)
   {
     this->GeometryShader->Delete();
-    this->GeometryShader = NULL;
+    this->GeometryShader = nullptr;
   }
   if (this->TransformFeedback)
   {
     this->TransformFeedback->Delete();
-    this->TransformFeedback = NULL;
+    this->TransformFeedback = nullptr;
   }
-  this->SetFileNamePrefixForDebugging(NULL);
+  this->SetFileNamePrefixForDebugging(nullptr);
 }
 
 // Process the string, and return a version with replacements.
@@ -292,12 +292,12 @@ bool vtkShaderProgram::DetachShader(const vtkShader *shader)
 
 void vtkShaderProgram::ClearMaps()
 {
-  for (IterT i = this->UniformLocs.begin(); i != this->UniformLocs.end(); i++)
+  for (IterT i = this->UniformLocs.begin(); i != this->UniformLocs.end(); ++i)
   {
     free(const_cast<char *>(i->first));
   }
   this->UniformLocs.clear();
-  for (IterT i = this->AttributeLocs.begin(); i != this->AttributeLocs.end(); i++)
+  for (IterT i = this->AttributeLocs.begin(); i != this->AttributeLocs.end(); ++i)
   {
     free(const_cast<char *>(i->first));
   }
@@ -346,7 +346,7 @@ bool vtkShaderProgram::Link()
     if (length > 1)
     {
       char *logMessage = new char[length];
-      glGetProgramInfoLog(static_cast<GLuint>(this->Handle), length, NULL, logMessage);
+      glGetProgramInfoLog(static_cast<GLuint>(this->Handle), length, nullptr, logMessage);
       this->Error = logMessage;
       delete[] logMessage;
     }
@@ -358,7 +358,7 @@ bool vtkShaderProgram::Link()
 
 bool vtkShaderProgram::Bind()
 {
-  if (this->FileNamePrefixForDebugging != NULL && this->FileNamePrefixForDebugging[0] != 0)
+  if (this->FileNamePrefixForDebugging != nullptr && this->FileNamePrefixForDebugging[0] != 0)
   {
     const char* exts[3] = { "VS.glsl", "FS.glsl", "GS.glsl" };
     vtkShader* shaders[3] = { this->VertexShader, this->FragmentShader, this->GeometryShader };
@@ -425,7 +425,7 @@ int vtkShaderProgram::CompileShader()
     return 0;
   }
 #ifdef GL_GEOMETRY_SHADER
-  if (this->GetGeometryShader()->GetSource().size() > 0 &&
+  if (!this->GetGeometryShader()->GetSource().empty() &&
       !this->GetGeometryShader()->Compile())
   {
     int lineNum = 1;
@@ -441,7 +441,7 @@ int vtkShaderProgram::CompileShader()
     vtkErrorMacro(<< this->GetGeometryShader()->GetError());
     return 0;
   }
-  if (this->GetGeometryShader()->GetSource().size() > 0 &&
+  if (!this->GetGeometryShader()->GetSource().empty() &&
       !this->AttachShader(this->GetGeometryShader()))
   {
     vtkErrorMacro(<< this->GetError());
@@ -836,7 +836,7 @@ bool vtkShaderProgram::SetAttributeArrayInternal(
 
 inline int vtkShaderProgram::FindAttributeArray(const char *cname)
 {
-  if (cname == NULL || !this->Linked)
+  if (cname == nullptr || !this->Linked)
   {
     return -1;
   }
@@ -860,7 +860,7 @@ inline int vtkShaderProgram::FindAttributeArray(const char *cname)
 
 inline int vtkShaderProgram::FindUniform(const char *cname)
 {
-  if (cname == NULL || !this->Linked)
+  if (cname == nullptr || !this->Linked)
   {
     return -1;
   }

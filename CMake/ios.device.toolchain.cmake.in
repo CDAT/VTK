@@ -1,5 +1,12 @@
 set(CMAKE_SYSTEM_NAME Darwin)
 
+if(POLICY CMP0011)
+  cmake_policy(SET CMP0011 NEW)
+endif()
+if(POLICY CMP0012)
+  cmake_policy(SET CMP0012 NEW)
+endif()
+
 # Set developer directory
 execute_process(COMMAND /usr/bin/xcode-select -print-path
                 OUTPUT_VARIABLE XCODE_DEVELOPER_DIR
@@ -25,10 +32,10 @@ set(CMAKE_OSX_ARCHITECTURES @CMAKE_CC_ARCH@)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -miphoneos-version-min=8.0 -fvisibility=hidden -fvisibility-inlines-hidden")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -miphoneos-version-min=8.0 -fvisibility=hidden -fvisibility-inlines-hidden")
 
-# Enbed bitcode, if requested
+# Embed bitcode, if requested
 if (@IOS_EMBED_BITCODE@)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode")
 endif()
 
 set(CMAKE_OSX_ARCHITECTURES "${CMAKE_OSX_ARCHITECTURES}" CACHE STRING "osx architectures")

@@ -71,13 +71,19 @@ int vtkWrap_IsPODPointer(ValueInfo *val)
 {
   unsigned int t = (val->Type & VTK_PARSE_BASE_TYPE);
   return (t != VTK_PARSE_CHAR && vtkWrap_IsNumeric(val) &&
-          vtkWrap_IsPointer(val));
+          vtkWrap_IsPointer(val) && (val->Type & VTK_PARSE_ZEROCOPY) == 0);
+}
+
+int vtkWrap_IsZeroCopyPointer(ValueInfo *val)
+{
+  return (vtkWrap_IsPointer(val) && (val->Type & VTK_PARSE_ZEROCOPY) != 0);
 }
 
 int vtkWrap_IsVTKObject(ValueInfo *val)
 {
   unsigned int t = (val->Type & VTK_PARSE_UNQUALIFIED_TYPE);
   return (t == VTK_PARSE_OBJECT_PTR &&
+          !val->IsEnum &&
           val->Class[0] == 'v' && strncmp(val->Class, "vtk", 3) == 0);
 }
 
@@ -86,6 +92,7 @@ int vtkWrap_IsSpecialObject(ValueInfo *val)
   unsigned int t = (val->Type & VTK_PARSE_UNQUALIFIED_TYPE);
   return ((t == VTK_PARSE_OBJECT ||
            t == VTK_PARSE_OBJECT_REF) &&
+          !val->IsEnum &&
           val->Class[0] == 'v' && strncmp(val->Class, "vtk", 3) == 0);
 }
 
@@ -999,6 +1006,7 @@ void vtkWrap_DeclareVariable(
         aType == VTK_PARSE_CHAR_PTR &&
         val->Value &&
         strcmp(val->Value, "0") != 0 &&
+        strcmp(val->Value, "nullptr") != 0 &&
         strcmp(val->Value, "NULL") != 0)
     {
       fprintf(fp,"const ");
@@ -1024,15 +1032,17 @@ void vtkWrap_DeclareVariable(
      * other refs are passed by value */
     if (aType == VTK_PARSE_CHAR_PTR ||
         aType == VTK_PARSE_VOID_PTR ||
-        aType == VTK_PARSE_OBJECT_PTR ||
-        aType == VTK_PARSE_OBJECT_REF ||
-        aType == VTK_PARSE_OBJECT ||
-        vtkWrap_IsQtObject(val))
+        (!val->IsEnum &&
+         (aType == VTK_PARSE_OBJECT_PTR ||
+          aType == VTK_PARSE_OBJECT_REF ||
+          aType == VTK_PARSE_OBJECT ||
+          vtkWrap_IsQtObject(val))))
     {
       fprintf(fp, "*");
     }
     /* arrays of unknown size are handled via pointers */
     else if (val->CountHint || vtkWrap_IsPODPointer(val) ||
+             vtkWrap_IsZeroCopyPointer(val) ||
              (vtkWrap_IsArray(val) && val->Value))
     {
       fprintf(fp, "*");
@@ -1081,16 +1091,17 @@ void vtkWrap_DeclareVariable(
     }
     else if (aType == VTK_PARSE_CHAR_PTR ||
              aType == VTK_PARSE_VOID_PTR ||
-             aType == VTK_PARSE_OBJECT_PTR ||
-             aType == VTK_PARSE_OBJECT_REF ||
-             aType == VTK_PARSE_OBJECT ||
-             vtkWrap_IsQtObject(val))
+             (!val->IsEnum &&
+              (aType == VTK_PARSE_OBJECT_PTR ||
+               aType == VTK_PARSE_OBJECT_REF ||
+               aType == VTK_PARSE_OBJECT ||
+               vtkWrap_IsQtObject(val))))
     {
-      fprintf(fp, " = NULL");
+      fprintf(fp, " = nullptr");
     }
     else if (val->CountHint || vtkWrap_IsPODPointer(val))
     {
-      fprintf(fp, " = NULL");
+      fprintf(fp, " = nullptr");
     }
     else if (aType == VTK_PARSE_BOOL)
     {

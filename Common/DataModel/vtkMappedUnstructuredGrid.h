@@ -69,7 +69,7 @@
  * Note that since the implementation class is used as a compile-time template
  * parameter in vtkMappedUnstructuredGrid, the above methods do not need be
  * virtuals. The compiler will statically bind the calls, making dynamic vtable
- * lookups unneccessary and giving a slight performance boost.
+ * lookups unnecessary and giving a slight performance boost.
  *
  * Adapting a filter or algorithm to safely traverse the
  * vtkMappedUnstructuredGrid's topology requires removing calls the following
@@ -157,25 +157,26 @@ public:
   typedef CellIterator CellIteratorType;
 
   // Virtuals from various base classes:
-  void PrintSelf(ostream &os, vtkIndent indent);
-  void CopyStructure(vtkDataSet *pd);
-  void ShallowCopy(vtkDataObject *src);
-  vtkIdType GetNumberOfCells();
-  vtkCell* GetCell(vtkIdType cellId);
-  void GetCell(vtkIdType cellId, vtkGenericCell *cell);
-  int GetCellType(vtkIdType cellId);
-  void GetCellPoints(vtkIdType cellId, vtkIdList *ptIds);
-  vtkCellIterator* NewCellIterator();
-  void GetPointCells(vtkIdType ptId, vtkIdList *cellIds);
-  int GetMaxCellSize();
-  void GetIdsOfCellsOfType(int type, vtkIdTypeArray *array);
-  int IsHomogeneous();
-  void Allocate(vtkIdType numCells, int extSize = 1000);
-  vtkIdType InsertNextCell(int type, vtkIdList *ptIds);
-  vtkIdType InsertNextCell(int type, vtkIdType npts, vtkIdType *ptIds);
+  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void CopyStructure(vtkDataSet *pd) VTK_OVERRIDE;
+  void ShallowCopy(vtkDataObject *src) VTK_OVERRIDE;
+  vtkIdType GetNumberOfCells() VTK_OVERRIDE;
+  using vtkDataSet::GetCell;
+  vtkCell* GetCell(vtkIdType cellId) VTK_OVERRIDE;
+  void GetCell(vtkIdType cellId, vtkGenericCell *cell) VTK_OVERRIDE;
+  int GetCellType(vtkIdType cellId) VTK_OVERRIDE;
+  void GetCellPoints(vtkIdType cellId, vtkIdList *ptIds) VTK_OVERRIDE;
+  vtkCellIterator* NewCellIterator() VTK_OVERRIDE;
+  void GetPointCells(vtkIdType ptId, vtkIdList *cellIds) VTK_OVERRIDE;
+  int GetMaxCellSize() VTK_OVERRIDE;
+  void GetIdsOfCellsOfType(int type, vtkIdTypeArray *array) VTK_OVERRIDE;
+  int IsHomogeneous() VTK_OVERRIDE;
+  void Allocate(vtkIdType numCells, int extSize = 1000) VTK_OVERRIDE;
+  vtkIdType InsertNextCell(int type, vtkIdList *ptIds) VTK_OVERRIDE;
+  vtkIdType InsertNextCell(int type, vtkIdType npts, vtkIdType *ptIds) VTK_OVERRIDE;
   vtkIdType InsertNextCell(int type, vtkIdType npts, vtkIdType *ptIds,
-                           vtkIdType nfaces, vtkIdType *faces);
-  void ReplaceCell(vtkIdType cellId, int npts, vtkIdType *pts);
+                           vtkIdType nfaces, vtkIdType *faces) VTK_OVERRIDE;
+  void ReplaceCell(vtkIdType cellId, int npts, vtkIdType *pts) VTK_OVERRIDE;
   vtkMTimeType GetMTime() VTK_OVERRIDE;
 
   void SetImplementation(ImplementationType *impl);
@@ -183,7 +184,7 @@ public:
 
 protected:
   vtkMappedUnstructuredGrid();
-  ~vtkMappedUnstructuredGrid();
+  ~vtkMappedUnstructuredGrid() VTK_OVERRIDE;
 
   // For convenience...
   typedef vtkMappedUnstructuredGrid<Implementation, CellIterator> ThisType;
@@ -218,7 +219,7 @@ protected: \
     this->SetImplementation(i); \
     i->Delete(); \
   } \
-  ~_className() {} \
+  ~_className() override {} \
 private: \
   _className(const _className&); \
   void operator=(const _className&); \
@@ -239,7 +240,7 @@ protected: \
     this->SetImplementation(i); \
     i->Delete(); \
   } \
-  ~_className() {} \
+  ~_className() override {} \
 private: \
   _className(const _className&); \
   void operator=(const _className&); \
@@ -256,7 +257,7 @@ public: \
   static _className* New(); \
 protected: \
   _className() {} \
-  ~_className() {} \
+  ~_className() override {} \
 private: \
   _className(const _className&); \
   void operator=(const _className&); \
@@ -271,7 +272,7 @@ public: \
   static _className* New(); \
 protected: \
   _className() {} \
-  ~_className() {} \
+  ~_className() override {} \
 private: \
   _className(const _className&); \
   void operator=(const _className&); \

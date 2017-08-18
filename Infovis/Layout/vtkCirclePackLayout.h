@@ -59,7 +59,7 @@ public:
     static vtkCirclePackLayout *New();
 
     vtkTypeMacro(vtkCirclePackLayout,vtkTreeAlgorithm);
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
     //@{
     /**
@@ -93,7 +93,7 @@ public:
      * If cinfo[3] is provided, then (Xcenter, Ycenter, Radius) of the circle
      * containing pnt[2] will be returned.
      */
-    vtkIdType FindVertex(double pnt[2], double *cinfo=0);
+    vtkIdType FindVertex(double pnt[2], double *cinfo=nullptr);
 
     /**
      * Return the Xcenter, Ycenter, and Radius of the
@@ -104,16 +104,16 @@ public:
     /**
      * Get the modification time of the layout algorithm.
      */
-    virtual vtkMTimeType GetMTime();
+    vtkMTimeType GetMTime() VTK_OVERRIDE;
 
 protected:
     vtkCirclePackLayout();
-    ~vtkCirclePackLayout();
+    ~vtkCirclePackLayout() VTK_OVERRIDE;
 
     char * CirclesFieldName;
     vtkCirclePackLayoutStrategy* LayoutStrategy;
 
-    int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+    int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
 
 private:
 

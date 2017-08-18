@@ -71,7 +71,7 @@ class VTKFILTERSPOINTS_EXPORT vtkEuclideanClusterExtraction : public vtkPolyData
 {
 public:
   vtkTypeMacro(vtkEuclideanClusterExtraction,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Construct with default extraction mode to extract largest clusters.
@@ -89,7 +89,7 @@ public:
   //@{
   /**
    * Turn on/off connectivity based on scalar value. If on, points are
-   * connected only if the are proximal AND the scalar value of a candiate
+   * connected only if the are proximal AND the scalar value of a candidate
    * point falls in the scalar range specified. Of course input point scalar
    * data must be provided.
    */
@@ -191,7 +191,7 @@ public:
 
 protected:
   vtkEuclideanClusterExtraction();
-  ~vtkEuclideanClusterExtraction();
+  ~vtkEuclideanClusterExtraction() VTK_OVERRIDE;
 
   double Radius; //connection radius
   bool ColorClusters; //boolean turns on/off scalar gen for separate clusters
@@ -208,9 +208,9 @@ protected:
   vtkAbstractPointLocator *Locator;
 
   // Configure the pipeline
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *);
-  virtual int FillInputPortInformation(int port, vtkInformation *info);
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
 
   // Internal method for propagating connected waves.
   void InsertIntoWave(vtkIdList *wave, vtkIdType ptId);

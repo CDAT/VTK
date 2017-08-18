@@ -22,9 +22,9 @@
  * isoparametric shape function. The cell includes a mid-edge node. The
  * ordering of the thirteen points defining the cell is point ids (0-4,5-12)
  * where point ids 0-4 are the five corner vertices of the pyramid; followed
- * by eight midedge nodes (5-12). Note that these midedge nodes correspond lie
+ * by eight midedge nodes (5-12). Note that these midedge nodes lie
  * on the edges defined by (0,1), (1,2), (2,3), (3,0), (0,4), (1,4), (2,4),
- * (3,4).
+ * (3,4), respectively. The parametric location of vertex #4 is [0, 0, 1].
  *
  * @sa
  * vtkQuadraticEdge vtkQuadraticTriangle vtkQuadraticTetra
@@ -161,8 +161,25 @@ protected:
   vtkDoubleArray   *CellScalars;
   vtkDoubleArray   *Scalars; //used to avoid New/Delete in contouring/clipping
 
+  //@{
+  /**
+   * This method adds in a point at the center of the quadrilateral face
+   * and then interpolates values to that point. In order to do this it
+   * also resizes certain member variable arrays. For safety should call
+   * ResizeArrays() after the results of Subdivide() are not needed anymore.
+   **/
   void Subdivide(vtkPointData *inPd, vtkCellData *inCd, vtkIdType cellId,
     vtkDataArray *cellScalars);
+  //@}
+  //@{
+  /**
+   * Resize the superclasses' member arrays to newSize where newSize should either be
+   * 13 or 14. Call with 13 to reset the reallocation done in the Subdivide()
+   * method or call with 14 to add one extra tuple for the generated point in
+   * Subdivice. For efficiency it only resizes the superclasses' arrays.
+   **/
+  void ResizeArrays(vtkIdType newSize);
+  //@}
 
 private:
   vtkQuadraticPyramid(const vtkQuadraticPyramid&) VTK_DELETE_FUNCTION;

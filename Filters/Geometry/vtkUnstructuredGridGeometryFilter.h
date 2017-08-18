@@ -85,6 +85,16 @@ public:
 
   //@{
   /**
+   * Turn on/off clipping of ghost cells with type
+   * vtkDataSetAttributes::DUPLICATECELL. Defaults to on.
+   */
+  vtkSetMacro(DuplicateGhostCellClipping,int);
+  vtkGetMacro(DuplicateGhostCellClipping,int);
+  vtkBooleanMacro(DuplicateGhostCellClipping,int);
+  //@}
+
+  //@{
+  /**
    * Specify the minimum point id for point id selection.
    */
   vtkSetClampMacro(PointMinimum,vtkIdType,0,VTK_ID_MAX);
@@ -161,7 +171,7 @@ public:
   /**
    * If PassThroughCellIds or PassThroughPointIds is on, then these ivars
    * control the name given to the field in which the ids are written into.  If
-   * set to NULL, then vtkOriginalCellIds or vtkOriginalPointIds (the default)
+   * set to nullptr, then vtkOriginalCellIds or vtkOriginalPointIds (the default)
    * is used, respectively.
    */
   vtkSetStringMacro(OriginalCellIdsName);
@@ -212,6 +222,7 @@ protected:
   int PointClipping;
   int CellClipping;
   int ExtentClipping;
+  int DuplicateGhostCellClipping;
 
   int PassThroughCellIds;
   int PassThroughPointIds;

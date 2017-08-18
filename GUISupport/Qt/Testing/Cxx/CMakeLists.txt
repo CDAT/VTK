@@ -7,6 +7,24 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestQtTreeModelAdapter.cxx
   )
 
+vtk_add_test_cxx(${vtk-module}CxxTests tests
+  NO_VALID
+  TestQtSwapWindows.cxx
+  )
+
+if(VTK_QT_VERSION VERSION_GREATER "4" AND
+    VTK_RENDERING_BACKEND STREQUAL "OpenGL2")
+  vtk_add_test_cxx(${vtk-module}CxxTests tests
+    TestQVTKOpenGLWidget.cxx
+    TestQVTKOpenGLWidgetWithDisabledInteractor.cxx
+    TestQVTKOpenGLWidgetWithMSAA.cxx
+    )
+  vtk_add_test_cxx(${vtk-module}CxxTests tests
+    NO_VALID
+    TestQVTKOpenGLWidgetPicking.cxx
+    )
+endif()
+
 if(WIN32)
   vtk_add_test_cxx(${vtk-module}CxxTests tests
     NO_VALID

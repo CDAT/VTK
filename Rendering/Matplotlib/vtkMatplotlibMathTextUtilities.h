@@ -43,11 +43,11 @@ class VTKRENDERINGMATPLOTLIB_EXPORT vtkMatplotlibMathTextUtilities :
 {
 public:
   vtkTypeMacro(vtkMatplotlibMathTextUtilities, vtkMathTextUtilities);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   static vtkMatplotlibMathTextUtilities *New();
 
-  virtual bool IsAvailable();
+  virtual bool IsAvailable() VTK_OVERRIDE;
 
   /**
    * Given a text property and a string, get the bounding box {xmin, xmax,
@@ -57,10 +57,10 @@ public:
    * Returns true on success, false otherwise.
    */
   bool GetBoundingBox(vtkTextProperty *tprop, const char *str, int dpi,
-                      int bbox[4]);
+                      int bbox[4]) VTK_OVERRIDE;
 
   bool GetMetrics(vtkTextProperty *tprop, const char *str, int dpi,
-                  vtkTextRenderer::Metrics &metrics);
+                  vtkTextRenderer::Metrics &metrics) VTK_OVERRIDE;
 
   /**
    * Render the given string @a str into the vtkImageData @a data with a
@@ -73,7 +73,7 @@ public:
    * options.
    */
   bool RenderString(const char *str, vtkImageData *data, vtkTextProperty *tprop,
-                    int dpi, int textDims[2] = NULL);
+                    int dpi, int textDims[2] = NULL) VTK_OVERRIDE;
 
   /**
    * Parse the MathText expression in str and fill path with a contour of the
@@ -82,7 +82,7 @@ public:
    * options.
    */
   bool StringToPath(const char *str, vtkPath *path, vtkTextProperty *tprop,
-                    int dpi);
+                    int dpi) VTK_OVERRIDE;
 
   //@{
   /**
@@ -90,8 +90,8 @@ public:
    * to be a power of two. Default is true, but this member will be set
    * appropriately when GL is inited.
    */
-  vtkSetMacro(ScaleToPowerOfTwo, bool);
-  vtkGetMacro(ScaleToPowerOfTwo, bool);
+  void SetScaleToPowerOfTwo(bool val) VTK_OVERRIDE;
+  bool GetScaleToPowerOfTwo() VTK_OVERRIDE;
   //@}
 
 protected:

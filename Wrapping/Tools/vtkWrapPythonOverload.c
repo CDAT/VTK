@@ -142,6 +142,7 @@ static char vtkWrapPython_FormatChar(unsigned int argtype)
 #else
       typeChar = 'I';
 #endif
+      break;
     case VTK_PARSE_ID_TYPE:
 #ifdef VTK_USE_64BIT_IDS
       typeChar = 'k';
@@ -526,7 +527,7 @@ void vtkWrapPython_OverloadMethodDef(
     }
 
     fprintf(fp,
-            "  {NULL, Py%s_%s%s, METH_VARARGS%s,\n"
+            "  {nullptr, Py%s_%s%s, METH_VARARGS%s,\n"
             "   \"%s\"},\n",
             classname, theOccurrence->Name,
             occSuffix,
@@ -541,7 +542,7 @@ void vtkWrapPython_OverloadMethodDef(
   }
 
   fprintf(fp,
-          "  {NULL, NULL, 0, NULL}\n"
+          "  {nullptr, nullptr, 0, nullptr}\n"
           "};\n");
 
   if (all_legacy)
@@ -686,7 +687,7 @@ void vtkWrapPython_OverloadMasterMethod(
           currentFunction->Name);
 
   fprintf(fp,
-          "  return NULL;\n"
+          "  return nullptr;\n"
           "}\n"
           "\n");
 

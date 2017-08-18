@@ -35,7 +35,7 @@ class VTKIOLEGACY_EXPORT vtkStructuredPointsWriter : public vtkDataWriter
 public:
   static vtkStructuredPointsWriter *New();
   vtkTypeMacro(vtkStructuredPointsWriter,vtkDataWriter);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -45,13 +45,28 @@ public:
   vtkImageData* GetInput(int port);
   //@}
 
+  //@{
+  /**
+  * When WriteExtent is on, vtkStructuredPointsWriter writes
+  * data extent in the output file. Otherwise, it writes dimensions.
+  * The only time this option is useful is when the extents do
+  * not start at (0, 0, 0). This is an options to support writing
+  * of older formats while still using a newer VTK.
+  */
+  vtkSetMacro(WriteExtent, bool);
+  vtkGetMacro(WriteExtent, bool);
+  vtkBooleanMacro(WriteExtent, bool);
+  //@}
+
 protected:
-  vtkStructuredPointsWriter() {}
-  ~vtkStructuredPointsWriter() {}
+  vtkStructuredPointsWriter() : WriteExtent(false) {}
+  ~vtkStructuredPointsWriter() VTK_OVERRIDE {}
 
-  void WriteData();
+  void WriteData() VTK_OVERRIDE;
 
-  virtual int FillInputPortInformation(int port, vtkInformation *info);
+  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+
+  bool WriteExtent;
 
 private:
   vtkStructuredPointsWriter(const vtkStructuredPointsWriter&) VTK_DELETE_FUNCTION;

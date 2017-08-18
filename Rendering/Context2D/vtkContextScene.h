@@ -48,7 +48,7 @@ class VTKRENDERINGCONTEXT2D_EXPORT vtkContextScene : public vtkObject
 {
 public:
   vtkTypeMacro(vtkContextScene, vtkObject);
-  virtual void PrintSelf(ostream &os, vtkIndent indent);
+  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Creates a 2D Painter object.
@@ -226,7 +226,7 @@ public:
   /**
    * Check whether the scene has a transform.
    */
-  bool HasTransform() { return this->Transform != 0; }
+  bool HasTransform() { return this->Transform != nullptr; }
 
   /**
    * Enum of valid selection modes for charts in the scene
@@ -241,7 +241,7 @@ public:
 
 protected:
   vtkContextScene();
-  ~vtkContextScene();
+  ~vtkContextScene() VTK_OVERRIDE;
 
   /**
    * Process a rubber band selection event.

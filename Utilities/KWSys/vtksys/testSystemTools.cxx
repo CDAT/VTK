@@ -6,11 +6,13 @@
 #pragma warning(disable : 4786)
 #endif
 
+#include KWSYS_HEADER(FStream.hxx)
 #include KWSYS_HEADER(SystemTools.hxx)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
+#include "FStream.hxx.in"
 #include "SystemTools.hxx.in"
 #endif
 
@@ -33,7 +35,6 @@
 typedef unsigned short mode_t;
 #endif
 
-//----------------------------------------------------------------------------
 static const char* toUnixPaths[][2] = {
   { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
   { "/usr/lo cal/bin/pa sswd", "/usr/lo cal/bin/pa sswd" },
@@ -53,7 +54,8 @@ static const char* toUnixPaths[][2] = {
   { 0, 0 }
 };
 
-static bool CheckConvertToUnixSlashes(std::string input, std::string output)
+static bool CheckConvertToUnixSlashes(std::string const& input,
+                                      std::string const& output)
 {
   std::string result = input;
   kwsys::SystemTools::ConvertToUnixSlashes(result);
@@ -65,14 +67,14 @@ static bool CheckConvertToUnixSlashes(std::string input, std::string output)
   return true;
 }
 
-//----------------------------------------------------------------------------
 static const char* checkEscapeChars[][4] = { { "1 foo 2 bar 2", "12", "\\",
                                                "\\1 foo \\2 bar \\2" },
                                              { " {} ", "{}", "#", " #{#} " },
                                              { 0, 0, 0, 0 } };
 
-static bool CheckEscapeChars(std::string input, const char* chars_to_escape,
-                             char escape_char, std::string output)
+static bool CheckEscapeChars(std::string const& input,
+                             const char* chars_to_escape, char escape_char,
+                             std::string const& output)
 {
   std::string result = kwsys::SystemTools::EscapeChars(
     input.c_str(), chars_to_escape, escape_char);
@@ -84,7 +86,6 @@ static bool CheckEscapeChars(std::string input, const char* chars_to_escape,
   return true;
 }
 
-//----------------------------------------------------------------------------
 static bool CheckFileOperations()
 {
   bool res = true;
@@ -130,6 +131,19 @@ static bool CheckFileOperations()
   if (kwsys::SystemTools::FileLength(testBinFile) != 766) {
     std::cerr << "Problem with FileLength - incorrect length for: "
               << testBinFile << std::endl;
+    res = false;
+  }
+
+  kwsys::SystemTools::Stat_t buf;
+  if (kwsys::SystemTools::Stat(testTxtFile.c_str(), &buf) != 0) {
+    std::cerr << "Problem with Stat - unable to stat text file: "
+              << testTxtFile << std::endl;
+    res = false;
+  }
+
+  if (kwsys::SystemTools::Stat(testBinFile, &buf) != 0) {
+    std::cerr << "Problem with Stat - unable to stat bin file: " << testBinFile
+              << std::endl;
     res = false;
   }
 
@@ -454,7 +468,6 @@ static bool CheckFileOperations()
   return res;
 }
 
-//----------------------------------------------------------------------------
 static bool CheckStringOperations()
 {
   bool res = true;
@@ -570,85 +583,6 @@ static bool CheckStringOperations()
     res = false;
   }
 
-#ifdef _WIN32
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") !=
-      L"\\\\?\\L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\""
-              << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "L:/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
-      L"\\\\?\\L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"L:/Local Mojo/Hex Power Pack/Iffy Voodoo\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "\\\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") !=
-      L"\\\\?\\UNC\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\""
-              << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath(
-        "//Foo/Local Mojo/Hex Power Pack/Iffy Voodoo") !=
-      L"\\\\?\\UNC\\Foo\\Local Mojo\\Hex Power Pack\\Iffy Voodoo") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"//Foo/Local Mojo/Hex Power Pack/Iffy Voodoo\""
-              << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("//") != L"//") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"//\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\") !=
-      L"\\\\.\\") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\X") !=
-      L"\\\\.\\X") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\X\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\X:") !=
-      L"\\\\?\\X:") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\X:\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("\\\\.\\X:\\") !=
-      L"\\\\?\\X:\\") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"\\\\.\\X:\\\"" << std::endl;
-    res = false;
-  }
-
-  if (kwsys::SystemTools::ConvertToWindowsExtendedPath("NUL") !=
-      L"\\\\.\\NUL") {
-    std::cerr << "Problem with ConvertToWindowsExtendedPath "
-              << "\"NUL\"" << std::endl;
-    res = false;
-  }
-
-#endif
-
   if (kwsys::SystemTools::ConvertToWindowsOutputPath(
         "L://Local Mojo/Hex Power Pack/Iffy Voodoo") !=
       "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\"") {
@@ -676,8 +610,6 @@ static bool CheckStringOperations()
 
   return res;
 }
-
-//----------------------------------------------------------------------------
 
 static bool CheckPutEnv(const std::string& env, const char* name,
                         const char* value)
@@ -826,6 +758,30 @@ static bool CheckGetPath()
   return res;
 }
 
+static bool CheckGetFilenameName()
+{
+  const char* windowsFilepath = "C:\\somewhere\\something";
+  const char* unixFilepath = "/somewhere/something";
+
+  std::string expectedFilename = "something";
+
+  bool res = true;
+  std::string filename = kwsys::SystemTools::GetFilenameName(windowsFilepath);
+  if (filename != expectedFilename) {
+    std::cerr << "GetFilenameName(" << windowsFilepath << ") yielded "
+              << filename << " instead of " << expectedFilename << std::endl;
+    res = false;
+  }
+
+  filename = kwsys::SystemTools::GetFilenameName(unixFilepath);
+  if (filename != expectedFilename) {
+    std::cerr << "GetFilenameName(" << unixFilepath << ") yielded " << filename
+              << " instead of " << expectedFilename << std::endl;
+    res = false;
+  }
+  return res;
+}
+
 static bool CheckFind()
 {
   bool res = true;
@@ -857,7 +813,55 @@ static bool CheckFind()
   return res;
 }
 
-//----------------------------------------------------------------------------
+static bool CheckGetLineFromStream()
+{
+  const std::string fileWithFiveCharsOnFirstLine(TEST_SYSTEMTOOLS_SOURCE_DIR
+                                                 "/README.rst");
+
+  kwsys::ifstream file(fileWithFiveCharsOnFirstLine.c_str(), std::ios::in);
+
+  if (!file) {
+    std::cerr << "Problem opening: " << fileWithFiveCharsOnFirstLine
+              << std::endl;
+    return false;
+  }
+
+  std::string line;
+  bool has_newline = false;
+  bool result;
+
+  file.seekg(0, std::ios::beg);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  if (!result || line.size() != 5) {
+    std::cerr << "First line does not have five characters: " << line.size()
+              << std::endl;
+    return false;
+  }
+
+  file.seekg(0, std::ios::beg);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  if (!result || line.size() != 5) {
+    std::cerr << "First line does not have five characters after rewind: "
+              << line.size() << std::endl;
+    return false;
+  }
+
+  bool ret = true;
+
+  for (size_t size = 1; size <= 5; ++size) {
+    file.seekg(0, std::ios::beg);
+    result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                   static_cast<long>(size));
+    if (!result || line.size() != size) {
+      std::cerr << "Should have read " << size << " characters but got "
+                << line.size() << std::endl;
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
 int testSystemTools(int, char* [])
 {
   bool res = true;
@@ -892,6 +896,10 @@ int testSystemTools(int, char* [])
   res &= CheckGetPath();
 
   res &= CheckFind();
+
+  res &= CheckGetLineFromStream();
+
+  res &= CheckGetFilenameName();
 
   return res ? 0 : 1;
 }

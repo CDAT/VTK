@@ -82,13 +82,13 @@ public:
    * Evaluate the velocity field, f, at (x, y, z, t).
    * For now, t is ignored.
    */
-  virtual int FunctionValues(double* x, double* u);
+  int FunctionValues(double* x, double* u) VTK_OVERRIDE;
   int FunctionValuesAtT(int T, double* x, double* u);
   //@}
 
   /**
    * If you want to work with an arbitrary vector array, then set its name
-   * here. By default this is NULL and the filter will use the active vector
+   * here. By default this is nullptr and the filter will use the active vector
    * array.
    */
   void SelectVectors(const char *fieldName)
@@ -157,7 +157,7 @@ public:
 
 protected:
   vtkTemporalInterpolatedVelocityField();
-  ~vtkTemporalInterpolatedVelocityField();
+  ~vtkTemporalInterpolatedVelocityField() VTK_OVERRIDE;
 
   int FunctionValues(vtkDataSet* ds, double* x, double* f);
   virtual void SetVectorsSelection(const char *v);

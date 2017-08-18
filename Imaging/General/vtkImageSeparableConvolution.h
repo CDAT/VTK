@@ -19,7 +19,7 @@
  * vtkImageSeparableConvolution performs a convolution along the X, Y,
  * and Z axes of an image, based on the three different 1D convolution
  * kernels.  The kernels must be of odd size, and are considered to be
- * centered at (int)((kernelsize - 1) / 2.0 ).  If a kernel is NULL,
+ * centered at (int)((kernelsize - 1) / 2.0 ).  If a kernel is nullptr,
  * that dimension is skipped.  This filter is designed to efficiently
  * convolve separable filters that can be decomposed into 1 or more 1D
  * convolutions.  It also handles arbitrarly large kernel sizes, and
@@ -57,30 +57,30 @@ public:
   virtual void SetZKernel(vtkFloatArray*);
   vtkGetObjectMacro ( ZKernel, vtkFloatArray );
 
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Overload standard modified time function. If kernel arrays are modified,
    * then this object is modified as well.
    */
-  vtkMTimeType GetMTime();
+  vtkMTimeType GetMTime() VTK_OVERRIDE;
 
 protected:
   vtkImageSeparableConvolution();
-  ~vtkImageSeparableConvolution();
+  ~vtkImageSeparableConvolution() VTK_OVERRIDE;
 
   vtkFloatArray* XKernel;
   vtkFloatArray* YKernel;
   vtkFloatArray* ZKernel;
 
-  virtual int IterativeRequestData(vtkInformation*,
+  int IterativeRequestData(vtkInformation*,
                                    vtkInformationVector**,
-                                   vtkInformationVector*);
+                                   vtkInformationVector*) VTK_OVERRIDE;
 
-  virtual int IterativeRequestInformation(vtkInformation* in,
-                                          vtkInformation* out);
-  virtual int IterativeRequestUpdateExtent(vtkInformation* in,
-                                           vtkInformation* out);
+  int IterativeRequestInformation(vtkInformation* in,
+                                          vtkInformation* out) VTK_OVERRIDE;
+  int IterativeRequestUpdateExtent(vtkInformation* in,
+                                           vtkInformation* out) VTK_OVERRIDE;
 
 private:
   vtkImageSeparableConvolution(const vtkImageSeparableConvolution&) VTK_DELETE_FUNCTION;

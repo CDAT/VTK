@@ -324,8 +324,8 @@ endmacro()
 
 macro(init_module_vars)
   verify_vtk_module_is_set()
-  set(${vtk-module}-targets VTKTargets)
-  set(${vtk-module}-targets-install "${VTK_INSTALL_PACKAGE_DIR}/VTKTargets.cmake")
+  set(${vtk-module}-targets ${VTK_INSTALL_EXPORT_NAME})
+  set(${vtk-module}-targets-install "${VTK_INSTALL_PACKAGE_DIR}/${VTK_INSTALL_EXPORT_NAME}.cmake")
   set(${vtk-module}-targets-build "${VTK_BINARY_DIR}/VTKTargets.cmake")
 endmacro()
 
@@ -353,13 +353,19 @@ macro(_vtk_build_module _module)
   add_subdirectory("${${_module}_SOURCE_DIR}" "${${_module}_BINARY_DIR}")
 endmacro()
 
+include(vtkTargetLinkLibrariesWithDynamicLookup)
+
 # Build all modules.
 foreach(kit IN LISTS vtk_modules_and_kits)
   if(_${kit}_is_kit)
     set(_vtk_build_as_kit ${kit})
     set(kit_srcs)
+    set(_optional_python_link)
     foreach(kit_module IN LISTS _${kit}_modules)
       list(APPEND kit_srcs $<TARGET_OBJECTS:${kit_module}Objects>)
+      if(${kit_module}_OPTIONAL_PYTHON_LINK)
+        set(_optional_python_link 1)
+      endif()
     endforeach()
 
     configure_file("${_VTKModuleMacros_DIR}/vtkKit.cxx.in"
@@ -398,6 +404,10 @@ foreach(kit IN LISTS vtk_modules_and_kits)
     target_link_libraries(${kit}
       LINK_PRIVATE ${kit_priv}
       LINK_PUBLIC  ${kit_pub})
+    if(_optional_python_link)
+      vtk_module_load(vtkPython)
+      vtk_target_link_libraries_with_dynamic_lookup(${kit} LINK_PUBLIC ${vtkPython_LIBRARIES})
+    endif()
     vtk_target(${kit})
   else()
     if(VTK_ENABLE_KITS)
@@ -467,7 +477,7 @@ set(VTK_CONFIG_CODE "${VTK_CONFIG_CODE}
 set(VTK_MODULES_DIR \"\${VTK_INSTALL_PREFIX}/${VTK_INSTALL_PACKAGE_DIR}/Modules\")")
 set(VTK_CONFIG_CMAKE_DIR "\${VTK_INSTALL_PREFIX}/${VTK_INSTALL_PACKAGE_DIR}")
 set(VTK_CONFIG_TARGETS_CONDITION "")
-set(VTK_CONFIG_TARGETS_FILE "\${VTK_INSTALL_PREFIX}/${VTK_INSTALL_PACKAGE_DIR}/VTKTargets.cmake")
+set(VTK_CONFIG_TARGETS_FILE "\${VTK_INSTALL_PREFIX}/${VTK_INSTALL_PACKAGE_DIR}/${VTK_INSTALL_EXPORT_NAME}.cmake")
 set(VTK_CONFIG_MODULE_API_FILE "\${VTK_INSTALL_PREFIX}/${VTK_INSTALL_PACKAGE_DIR}/vtkModuleAPI.cmake")
 set(VTK_CONFIG_INSTALLED TRUE)
 configure_file(CMake/VTKConfig.cmake.in CMakeFiles/VTKConfig.cmake @ONLY)
@@ -507,6 +517,7 @@ if (NOT VTK_INSTALL_NO_DEVELOPMENT)
                 CMake/vtkObjectFactory.h.in
                 CMake/vtkPythonPackages.cmake
                 CMake/vtkPythonWrapping.cmake
+                CMake/vtkTargetLinkLibrariesWithDynamicLookup.cmake
                 CMake/vtkTclWrapping.cmake
                 CMake/vtkThirdParty.cmake
                 CMake/vtkWrapHierarchy.cmake
@@ -525,8 +536,8 @@ if (NOT VTK_INSTALL_NO_DEVELOPMENT)
   else()
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "# No targets!")
     configure_file(${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in
-                   ${VTK_BINARY_DIR}/CMakeFiles/VTKTargets.cmake @ONLY)
-    install(FILES ${VTK_BINARY_DIR}/CMakeFiles/VTKTargets.cmake
+                   ${VTK_BINARY_DIR}/CMakeFiles/${VTK_INSTALL_EXPORT_NAME}.cmake @ONLY)
+    install(FILES ${VTK_BINARY_DIR}/CMakeFiles/${VTK_INSTALL_EXPORT_NAME}.cmake
             DESTINATION ${VTK_INSTALL_PACKAGE_DIR})
   endif()
 endif()

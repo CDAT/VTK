@@ -124,6 +124,9 @@ class vtkTransform;
 #define VTK_LINEAR_RESLICE  1
 #define VTK_CUBIC_RESLICE   2
 
+// Private.
+#define VTK_IMAGE_PLANE_WIDGET_MAX_TEXTBUFF   128
+
 class VTKINTERACTIONWIDGETS_EXPORT vtkImagePlaneWidget : public vtkPolyDataSourceWidget
 {
 public:
@@ -133,25 +136,25 @@ public:
   static vtkImagePlaneWidget *New();
 
   vtkTypeMacro(vtkImagePlaneWidget,vtkPolyDataSourceWidget);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
    * Methods that satisfy the superclass' API.
    */
-  virtual void SetEnabled(int);
-  virtual void PlaceWidget(double bounds[6]);
-  void PlaceWidget()
+  void SetEnabled(int) VTK_OVERRIDE;
+  void PlaceWidget(double bounds[6]) VTK_OVERRIDE;
+  void PlaceWidget() VTK_OVERRIDE
     {this->Superclass::PlaceWidget();}
   void PlaceWidget(double xmin, double xmax, double ymin, double ymax,
-                   double zmin, double zmax)
+                   double zmin, double zmax) VTK_OVERRIDE
     {this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax);}
   //@}
 
   /**
    * Set the vtkImageData* input for the vtkImageReslice.
    */
-  void SetInputConnection(vtkAlgorithmOutput* aout);
+  void SetInputConnection(vtkAlgorithmOutput* aout) VTK_OVERRIDE;
 
   //@{
   /**
@@ -307,13 +310,13 @@ public:
    * to have the initial placement follow suit.  Or, make changes after the
    * widget has been initialised and call UpdatePlacement() to realise.
    */
-  vtkPolyDataAlgorithm* GetPolyDataAlgorithm();
+  vtkPolyDataAlgorithm* GetPolyDataAlgorithm() VTK_OVERRIDE;
 
   /**
    * Satisfies superclass API.  This will change the state of the widget to
    * match changes that have been made to the underlying vtkPolyDataSource
    */
-  void UpdatePlacement(void);
+  void UpdatePlacement(void) VTK_OVERRIDE;
 
   /**
    * Convenience method to get the texture used by this widget.  This can be
@@ -547,7 +550,7 @@ public:
 
 protected:
   vtkImagePlaneWidget();
-  ~vtkImagePlaneWidget();
+  ~vtkImagePlaneWidget() VTK_OVERRIDE;
 
   int TextureVisibility;
 
@@ -602,7 +605,7 @@ protected:
   virtual void OnMiddleButtonUp();
   virtual void OnRightButtonDown();
   virtual void OnRightButtonUp();
-  virtual void OnChar();
+  void OnChar() VTK_OVERRIDE;
 
   virtual void StartCursor();
   virtual void StopCursor();
@@ -642,7 +645,7 @@ protected:
   vtkAbstractPropPicker *PlanePicker;
 
   // Register internal Pickers within PickingManager
-  virtual void RegisterPickers();
+  void RegisterPickers() VTK_OVERRIDE;
 
   // for negative window values.
   void InvertTable();
@@ -694,7 +697,7 @@ protected:
 
   // The text to display W/L, image data
   vtkTextActor *TextActor;
-  char          TextBuff[128];
+  char          TextBuff[VTK_IMAGE_PLANE_WIDGET_MAX_TEXTBUFF];
   void          GenerateText();
   void          ManageTextDisplay();
   void          ActivateText(int);

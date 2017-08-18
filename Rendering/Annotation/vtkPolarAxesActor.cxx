@@ -267,7 +267,7 @@ vtkPolarAxesActor::vtkPolarAxesActor()
   // By default show angle units (degrees)
   this->RadialUnits = true;
 
-  this->Camera = NULL;
+  this->Camera = nullptr;
 
   // Default text screen size
   this->ScreenSize = 10.0;
@@ -303,7 +303,7 @@ vtkPolarAxesActor::vtkPolarAxesActor()
   this->EnableViewAngleLOD = 1;
   this->ViewAngleLODThreshold = .3;
 
-  this->RadialAxes = NULL;
+  this->RadialAxes = nullptr;
 
   // Properties of the last radial axe, with default color black
   this->LastRadialAxisProperty = vtkProperty::New();
@@ -364,15 +364,15 @@ vtkPolarAxesActor::vtkPolarAxesActor()
 
   // Default title for polar axis (sometimes also called "Radius")
   this->PolarAxisTitle = new char[16];
-  sprintf(this->PolarAxisTitle, "%s", "Radial Distance");
+  snprintf(this->PolarAxisTitle, 16, "%s", "Radial Distance");
 
   this->PolarLabelFormat = new char[8];
-  sprintf(this->PolarLabelFormat, "%s", "%-#6.3g");
+  snprintf(this->PolarLabelFormat, 8, "%s", "%-#6.3g");
 
   this->ExponentLocation = VTK_EXPONENT_LABELS;
 
   this->RadialAngleFormat = new char[8];
-  sprintf(this->RadialAngleFormat, "%s", "%-#3.1f");
+  snprintf(this->RadialAngleFormat, 8, "%s", "%-#3.1f");
 
   this->RadialAxisTitleLocation = VTK_TITLE_BOTTOM;
   this->PolarAxisTitleLocation = VTK_TITLE_BOTTOM;
@@ -454,7 +454,7 @@ vtkPolarAxesActor::vtkPolarAxesActor()
 //-----------------------------------------------------------------------------
 vtkPolarAxesActor::~vtkPolarAxesActor()
 {
-  this->SetCamera(NULL);
+  this->SetCamera(nullptr);
 
   if (this->PolarAxisProperty)
   {
@@ -472,42 +472,42 @@ vtkPolarAxesActor::~vtkPolarAxesActor()
   }
 
   delete[] this->PolarLabelFormat;
-  this->PolarLabelFormat = NULL;
+  this->PolarLabelFormat = nullptr;
 
   delete[] this->RadialAngleFormat;
-  this->RadialAngleFormat = NULL;
+  this->RadialAngleFormat = nullptr;
 
   delete[] this->PolarAxisTitle;
-  this->PolarAxisTitle = NULL;
+  this->PolarAxisTitle = nullptr;
 
   if (this->PolarAxisTitleTextProperty)
   {
     this->PolarAxisTitleTextProperty->Delete();
-    this->PolarAxisTitleTextProperty = NULL;
+    this->PolarAxisTitleTextProperty = nullptr;
   }
 
   if (this->PolarAxisLabelTextProperty)
   {
     this->PolarAxisLabelTextProperty->Delete();
-    this->PolarAxisLabelTextProperty = NULL;
+    this->PolarAxisLabelTextProperty = nullptr;
   }
 
   if (this->LastRadialAxisTextProperty)
   {
     this->LastRadialAxisTextProperty->Delete();
-    this->LastRadialAxisTextProperty = NULL;
+    this->LastRadialAxisTextProperty = nullptr;
   }
 
   if (this->SecondaryRadialAxesTextProperty)
   {
     this->SecondaryRadialAxesTextProperty->Delete();
-    this->SecondaryRadialAxesTextProperty = NULL;
+    this->SecondaryRadialAxesTextProperty = nullptr;
   }
 
   if (this->PolarAxis)
   {
     this->PolarAxis->Delete();
-    this->PolarAxis = NULL;
+    this->PolarAxis = nullptr;
   }
 
   if (this->RadialAxes)
@@ -517,85 +517,85 @@ vtkPolarAxesActor::~vtkPolarAxesActor()
       if (this->RadialAxes[i])
       {
         this->RadialAxes[i]->Delete();
-        this->RadialAxes[i] = NULL;
+        this->RadialAxes[i] = nullptr;
       }
     }
     delete[] this->RadialAxes;
-    this->RadialAxes = NULL;
+    this->RadialAxes = nullptr;
   }
 
   if (this->PolarArcs)
   {
     this->PolarArcs->Delete();
-    this->PolarArcs = NULL;
+    this->PolarArcs = nullptr;
   }
   if (this->PolarArcsMapper)
   {
     this->PolarArcsMapper->Delete();
-    this->PolarArcsMapper = NULL;
+    this->PolarArcsMapper = nullptr;
   }
   if (this->PolarArcsActor)
   {
     this->PolarArcsActor->Delete();
-    this->PolarArcsActor = NULL;
+    this->PolarArcsActor = nullptr;
   }
 
   if (this->SecondaryPolarArcs)
   {
     this->SecondaryPolarArcs->Delete();
-    this->SecondaryPolarArcs = NULL;
+    this->SecondaryPolarArcs = nullptr;
   }
   if (this->SecondaryPolarArcsMapper)
   {
     this->SecondaryPolarArcsMapper->Delete();
-    this->SecondaryPolarArcsMapper = NULL;
+    this->SecondaryPolarArcsMapper = nullptr;
   }
   if (this->SecondaryPolarArcsActor)
   {
     this->SecondaryPolarArcsActor->Delete();
-    this->SecondaryPolarArcsActor = NULL;
+    this->SecondaryPolarArcsActor = nullptr;
   }
 
   // ticks related objects
   if (this->ArcMajorTickPts)
   {
     this->ArcMajorTickPts->Delete();
-    this->ArcMajorTickPts = NULL;
+    this->ArcMajorTickPts = nullptr;
   }
   if (this->ArcMinorTickPts)
   {
     this->ArcMinorTickPts->Delete();
-    this->ArcMinorTickPts = NULL;
+    this->ArcMinorTickPts = nullptr;
   }
   if (this->ArcTickPolyData)
   {
     this->ArcTickPolyData->Delete();
-    this->ArcTickPolyData = NULL;
+    this->ArcTickPolyData = nullptr;
   }
   if (this->ArcMinorTickPolyData)
   {
     this->ArcMinorTickPolyData->Delete();
-    this->ArcMinorTickPolyData = NULL;
+    this->ArcMinorTickPolyData = nullptr;
   }
   if (this->ArcTickPolyDataMapper)
   {
     this->ArcTickPolyDataMapper->Delete();
-    this->ArcTickPolyDataMapper = NULL;
+    this->ArcTickPolyDataMapper = nullptr;
   }
   if (this->ArcMinorTickPolyDataMapper)
   {
     this->ArcMinorTickPolyDataMapper->Delete();
-    this->ArcMinorTickPolyDataMapper = NULL;
+    this->ArcMinorTickPolyDataMapper = nullptr;
   }
   if (this->ArcTickActor)
   {
     this->ArcTickActor->Delete();
-    this->ArcTickActor = NULL;
+    this->ArcTickActor = nullptr;
   }
   if (this->ArcMinorTickActor)
   {
     this->ArcMinorTickActor->Delete();
-    this->ArcMinorTickActor = NULL;
+    this->ArcMinorTickActor = nullptr;
   }
 }
 
@@ -1279,11 +1279,11 @@ void vtkPolarAxesActor::CreateRadialAxes(int axisCount)
       if (this->RadialAxes[i])
       {
         this->RadialAxes[i]->Delete();
-        this->RadialAxes[i] = NULL;
+        this->RadialAxes[i] = nullptr;
       }
     }
     delete[] this->RadialAxes;
-    this->RadialAxes = NULL;
+    this->RadialAxes = nullptr;
   }
 
   // Create and set n radial axes of type X
@@ -1451,7 +1451,7 @@ void vtkPolarAxesActor::BuildRadialAxes()
       axis->SetTitleVisibility(this->RadialTitleVisibility);
       std::ostringstream title;
       title.setf(std::ios::fixed, std::ios::floatfield);
-      sprintf(titleValue, this->RadialAngleFormat, actualAngle);
+      snprintf(titleValue, sizeof(titleValue), this->RadialAngleFormat, actualAngle);
       title << titleValue << (this->RadialUnits ? " deg" : "");
       axis->SetTitle(title.str().c_str());
 
@@ -1758,9 +1758,9 @@ void vtkPolarAxesActor::BuildPolarAxisLabelsArcs()
       if (isLastArc)
       {
         // Add polar arc
-        vtkPoints* arcPoints = NULL;
+        vtkPoints* arcPoints = nullptr;
         vtkIdType nPoints = 0;
-        vtkIdType* arcPointIds = NULL;
+        vtkIdType* arcPointIds = nullptr;
         if (arc->GetOutput()->GetNumberOfPoints() > 0)
         {
           arcPoints = arc->GetOutput()->GetPoints();
@@ -1780,9 +1780,9 @@ void vtkPolarAxesActor::BuildPolarAxisLabelsArcs()
       else
       {
         // Append new secondary polar arc to existing ones
-        vtkPoints* arcPoints = NULL;
+        vtkPoints* arcPoints = nullptr;
         vtkIdType nPoints = 0;
-        vtkIdType* arcPointIds = NULL;
+        vtkIdType* arcPointIds = nullptr;
         if (arc->GetOutput()->GetNumberOfPoints() > 0)
         {
           arcPoints = arc->GetOutput()->GetPoints();
@@ -1828,10 +1828,10 @@ void vtkPolarAxesActor::BuildPolarAxisLabelsArcs()
 
     std::list<double>::iterator itList;
     vtkIdType i = 0;
-    for (itList = labelValList.begin(); itList != labelValList.end(); i++, itList++)
+    for (itList = labelValList.begin(); itList != labelValList.end(); ++i, ++itList)
     {
       char label[64];
-      sprintf(label, this->PolarLabelFormat, *itList);
+      snprintf(label, sizeof(label), this->PolarLabelFormat, *itList);
       labels->SetValue(i, label);
     }
   }
@@ -1970,9 +1970,9 @@ void vtkPolarAxesActor::BuildPolarArcsLog()
     if (isLastArc)
     {
       // Add principal polar arc
-      vtkPoints* arcPoints = NULL;
+      vtkPoints* arcPoints = nullptr;
       vtkIdType nPoints;
-      vtkIdType* arcPointIds = NULL;
+      vtkIdType* arcPointIds = nullptr;
       if (arc->GetOutput()->GetNumberOfPoints() > 0)
       {
         arcPoints = arc->GetOutput()->GetPoints();
@@ -1991,9 +1991,9 @@ void vtkPolarAxesActor::BuildPolarArcsLog()
     else
     {
       // Append new polar arc to existing ones
-      vtkPoints* arcPoints = NULL;
+      vtkPoints* arcPoints = nullptr;
       vtkIdType nPoints = 0;
-      vtkIdType* arcPointIds = NULL;
+      vtkIdType* arcPointIds = nullptr;
       if (arc->GetOutput()->GetNumberOfPoints() > 0)
       {
         arcPoints = arc->GetOutput()->GetPoints();
@@ -2072,10 +2072,10 @@ void vtkPolarAxesActor::BuildLabelsLog()
 
     std::list<double>::iterator itList;
     vtkIdType i = 0;
-    for (itList = labelValList.begin(); itList != labelValList.end(); i++, itList++)
+    for (itList = labelValList.begin(); itList != labelValList.end(); ++i, ++itList)
     {
       char label[64];
-      sprintf(label, this->PolarLabelFormat, *itList);
+      snprintf(label, sizeof(label), this->PolarLabelFormat, *itList);
       labels->SetValue(i, label);
     }
   }
@@ -2129,7 +2129,7 @@ std::string vtkPolarAxesActor::FindExponentAndAdjustValues(std::list<double>& va
   int count = 0;
 
   // find common exponent
-  for (itDouble = valuesList.begin(); itDouble != valuesList.end(); itDouble++)
+  for (itDouble = valuesList.begin(); itDouble != valuesList.end(); ++itDouble)
   {
     if (*itDouble != 0.0)
     {
@@ -2167,7 +2167,7 @@ std::string vtkPolarAxesActor::FindExponentAndAdjustValues(std::list<double>& va
   exponentMean = intPart;
 
   // shift every values
-  for (itDouble = valuesList.begin(); itDouble != valuesList.end(); itDouble++)
+  for (itDouble = valuesList.begin(); itDouble != valuesList.end(); ++itDouble)
   {
     if (*itDouble != 0.0)
     {
@@ -2197,7 +2197,7 @@ std::string vtkPolarAxesActor::FindExponentAndAdjustValues(std::list<double>& va
 void vtkPolarAxesActor::GetSignificantPartFromValues(
   vtkStringArray* valuesStr, std::list<double>& valuesList)
 {
-  if (!valuesStr || valuesList.size() == 0)
+  if (!valuesStr || valuesList.empty())
   {
     return;
   }
@@ -2206,12 +2206,12 @@ void vtkPolarAxesActor::GetSignificantPartFromValues(
 
   std::list<double>::iterator itList;
   vtkIdType i = 0;
-  for (itList = valuesList.begin(); itList != valuesList.end(); i++, itList++)
+  for (itList = valuesList.begin(); itList != valuesList.end(); ++i, ++itList)
   {
     char label[64];
     if (this->ExponentLocation == VTK_EXPONENT_LABELS)
     {
-      sprintf(label, this->PolarLabelFormat, *itList);
+      snprintf(label, sizeof(label), this->PolarLabelFormat, *itList);
       valuesStr->SetValue(i, label);
     }
     else

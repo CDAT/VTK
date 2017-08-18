@@ -25,6 +25,9 @@
 #include "vtkRenderingOSPRayModule.h" // For export macro
 #include "vtkVolumeMapperNode.h"
 
+class vtkAbstractArray;
+class vtkDataSet;
+
 namespace osp
 {
   struct TransferFunction;
@@ -37,12 +40,12 @@ class VTKRENDERINGOSPRAY_EXPORT vtkOSPRayVolumeMapperNode :
 public:
   static vtkOSPRayVolumeMapperNode* New();
   vtkTypeMacro(vtkOSPRayVolumeMapperNode, vtkVolumeMapperNode);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Make ospray calls to render me.
    */
-  virtual void Render(bool prepass);
+  virtual void Render(bool prepass) VTK_OVERRIDE;
 
   /**
    * TODO: fix me
@@ -67,6 +70,9 @@ protected:
   osp::TransferFunction* TransferFunction;
   std::vector<float> TFVals;
   std::vector<float> TFOVals;
+
+  vtkAbstractArray *GetArrayToProcess
+    (vtkDataSet* input, int& association);
 
 private:
   vtkOSPRayVolumeMapperNode(const vtkOSPRayVolumeMapperNode&) VTK_DELETE_FUNCTION;

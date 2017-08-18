@@ -44,7 +44,7 @@ vtkDiscretizableColorTransferFunction::vtkDiscretizableColorTransferFunction()
 
   this->UseLogScale = 0;
 
-  this->ScalarOpacityFunction = 0;
+  this->ScalarOpacityFunction = nullptr;
   this->EnableOpacityMapping = false;
 }
 
@@ -53,11 +53,11 @@ vtkDiscretizableColorTransferFunction::~vtkDiscretizableColorTransferFunction()
 {
   // this removes any observer we may have setup for the
   // ScalarOpacityFunction.
-  this->SetScalarOpacityFunction(NULL);
+  this->SetScalarOpacityFunction(nullptr);
   this->LookupTable->Delete();
 
   delete this->Internals;
-  this->Internals = NULL;
+  this->Internals = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ void vtkDiscretizableColorTransferFunction::SetNumberOfIndexedColors(
 {
   if (static_cast<unsigned int>(this->Internals->IndexedColors.size()) != count)
   {
-    this->Internals->IndexedColors.resize(count);
+    this->Internals->IndexedColors.resize(count, vtkTuple<double,3>(0.0));
     this->Modified();
   }
 }
@@ -175,7 +175,7 @@ void vtkDiscretizableColorTransferFunction::Build()
 {
   this->Superclass::Build();
 
-  if (this->BuildTime > this->GetMTime())
+  if (this->LookupTableUpdateTime > this->GetMTime())
   {
     // no need to rebuild anything.
     return;
@@ -199,7 +199,7 @@ void vtkDiscretizableColorTransferFunction::Build()
   // this  is essential since other the LookupTable doesn't update the
   // annotations map. That's a bug in the implementation of
   // vtkScalarsToColors::SetAnnotations(..,..);
-  this->LookupTable->SetAnnotations(NULL, NULL);
+  this->LookupTable->SetAnnotations(nullptr, nullptr);
   this->LookupTable->SetAnnotations(this->AnnotatedValues, this->Annotations);
 
   if (this->IndexedLookup)
@@ -274,7 +274,7 @@ void vtkDiscretizableColorTransferFunction::Build()
 
   this->LookupTable->BuildSpecialColors();
 
-  this->BuildTime.Modified();
+  this->LookupTableUpdateTime.Modified();
 }
 
 //-----------------------------------------------------------------------------
@@ -347,7 +347,7 @@ vtkUnsignedCharArray* vtkDiscretizableColorTransferFunction::MapScalars(
   // color and we won't use it for opacity either.
   bool direct_scalar_mapping =
     ((colorMode == VTK_COLOR_MODE_DEFAULT &&
-      vtkArrayDownCast<vtkUnsignedCharArray>(scalars) != NULL) ||
+      vtkArrayDownCast<vtkUnsignedCharArray>(scalars) != nullptr) ||
      colorMode == VTK_COLOR_MODE_DIRECT_SCALARS);
 
   vtkUnsignedCharArray *colors = (this->Discretize || this->IndexedLookup) ?
@@ -360,8 +360,16 @@ vtkUnsignedCharArray* vtkDiscretizableColorTransferFunction::MapScalars(
      (direct_scalar_mapping == false) &&
      (this->IndexedLookup == false) && //  we don't change alpha for IndexedLookup.
      (this->EnableOpacityMapping == true) &&
-     (this->ScalarOpacityFunction.GetPointer() != NULL))
+     (this->ScalarOpacityFunction.GetPointer() != nullptr))
   {
+    // extract from docs from vtkScalarsToColors.h:
+    // "... When the component argument is -1,
+    //      then the this object uses its own selected technique to change a
+    //      vector into a scalar to map."
+    if (component < 0 && scalars->GetNumberOfComponents() > 1)
+    {
+      component = (this->VectorMode == vtkScalarsToColors::COMPONENT) ? this->VectorComponent : -1;
+    }
     vtkDataArray* da = vtkArrayDownCast<vtkDataArray>(scalars);
     this->MapDataArrayToOpacity(da, component, colors);
   }

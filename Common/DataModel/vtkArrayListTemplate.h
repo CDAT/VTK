@@ -29,7 +29,7 @@
  * performs the initial magic of constructing input and output arrays. Then
  * the input attributes, and output attributes, are passed to initialize the
  * internal structures. Essentially these internal structures are pairs of
- * arrays of the same type, which can be efficently accessed and
+ * arrays of the same type, which can be efficiently accessed and
  * assigned. The operations on these array pairs (e.g., interpolation) occur
  * using a typeless, virtual dispatch base class.
  *
@@ -304,7 +304,7 @@ struct ArrayList
   // Return the number of arrays
   vtkIdType GetNumberOfArrays()
   {
-      return Arrays.size();
+    return static_cast<vtkIdType>(Arrays.size());
   }
 
 };

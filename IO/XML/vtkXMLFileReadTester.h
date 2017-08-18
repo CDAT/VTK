@@ -31,7 +31,7 @@ class VTKIOXML_EXPORT vtkXMLFileReadTester: public vtkXMLParser
 {
 public:
   vtkTypeMacro(vtkXMLFileReadTester,vtkXMLParser);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   static vtkXMLFileReadTester* New();
 
   /**
@@ -42,16 +42,8 @@ public:
 
   //@{
   /**
-   * Get/Set the name of the file tested by TestReadFile().
-   */
-  vtkSetStringMacro(FileName);
-  vtkGetStringMacro(FileName);
-  //@}
-
-  //@{
-  /**
    * Get the data type of the XML file tested.  If the file could not
-   * be read, returns NULL.
+   * be read, returns nullptr.
    */
   vtkGetStringMacro(FileDataType);
   //@}
@@ -59,24 +51,23 @@ public:
   //@{
   /**
    * Get the file version of the XML file tested.  If the file could not
-   * be read, returns NULL.
+   * be read, returns nullptr.
    */
   vtkGetStringMacro(FileVersion);
   //@}
 
 protected:
   vtkXMLFileReadTester();
-  ~vtkXMLFileReadTester();
+  ~vtkXMLFileReadTester() VTK_OVERRIDE;
 
-  void StartElement(const char* name, const char** atts);
-  int ParsingComplete();
-  void ReportStrayAttribute(const char*, const char*, const char*) {}
-  void ReportMissingAttribute(const char*, const char*) {}
-  void ReportBadAttribute(const char*, const char*, const char*) {}
-  void ReportUnknownElement(const char*) {}
-  void ReportXmlParseError() {}
+  void StartElement(const char* name, const char** atts) VTK_OVERRIDE;
+  int ParsingComplete() VTK_OVERRIDE;
+  void ReportStrayAttribute(const char*, const char*, const char*) VTK_OVERRIDE {}
+  void ReportMissingAttribute(const char*, const char*) VTK_OVERRIDE {}
+  void ReportBadAttribute(const char*, const char*, const char*) VTK_OVERRIDE {}
+  void ReportUnknownElement(const char*) VTK_OVERRIDE {}
+  void ReportXmlParseError() VTK_OVERRIDE {}
 
-  char* FileName;
   char* FileDataType;
   char* FileVersion;
   int Done;

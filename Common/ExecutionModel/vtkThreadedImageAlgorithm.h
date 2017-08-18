@@ -14,7 +14,7 @@
 =========================================================================*/
 /**
  * @class   vtkThreadedImageAlgorithm
- * @brief   Generic filter that has one input..
+ * @brief   Generic filter that has one input.
  *
  * vtkThreadedImageAlgorithm is a filter superclass that hides much of the
  * pipeline  complexity. It handles breaking the pipeline execution
@@ -177,8 +177,8 @@ protected:
    */
   virtual void PrepareImageData(vtkInformationVector **inputVector,
                                 vtkInformationVector *outputVector,
-                                vtkImageData ***inDataObjects=0,
-                                vtkImageData **outDataObjects=0);
+                                vtkImageData ***inDataObjects=nullptr,
+                                vtkImageData **outDataObjects=nullptr);
 
 private:
   vtkThreadedImageAlgorithm(const vtkThreadedImageAlgorithm&) VTK_DELETE_FUNCTION;

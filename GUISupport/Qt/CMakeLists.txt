@@ -2,17 +2,17 @@ include(vtkQt)
 
 # set up sources to build
 set(QVTKLibSrcs
-  vtkEventQtSlotConnect.cxx
-  vtkQtConnection.cxx
-  QVTKApplication.cxx
-  QVTKInteractor.cxx
-  QVTKInteractorAdapter.cxx
-  QVTKWidget.cxx
   QFilterTreeProxyModel.cxx
+  QVTKApplication.cxx
+  QVTKInteractorAdapter.cxx
+  QVTKInteractor.cxx
   QVTKPaintEngine.cxx
   QVTKPaintEngine.h
+  QVTKWidget.cxx
+  vtkEventQtSlotConnect.cxx
   vtkQtAbstractModelAdapter.cxx
   vtkQtAnnotationLayersModelAdapter.cxx
+  vtkQtConnection.cxx
   vtkQtDebugLeaksModel.cxx
   vtkQtDebugLeaksView.cxx
   vtkQtTableModelAdapter.cxx
@@ -20,19 +20,25 @@ set(QVTKLibSrcs
   )
 
 set(QVTKMocHeaders
+  QFilterTreeProxyModel.h
   QVTKApplication.h
   QVTKInteractorAdapter.h
   QVTKInteractorInternal.h
   QVTKWidget.h
-  vtkQtConnection.h
-  QFilterTreeProxyModel.h
   vtkQtAbstractModelAdapter.h
   vtkQtAnnotationLayersModelAdapter.h
+  vtkQtConnection.h
   vtkQtDebugLeaksModel.h
   vtkQtDebugLeaksView.h
   vtkQtTableModelAdapter.h
   vtkQtTreeModelAdapter.h
   )
+
+if(VTK_QT_VERSION VERSION_GREATER "4" AND
+    VTK_RENDERING_BACKEND STREQUAL "OpenGL2")
+  list(APPEND QVTKLibSrcs QVTKOpenGLWidget.cxx)
+  list(APPEND QVTKMocHeaders QVTKOpenGLWidget.h)
+endif()
 
 if(VTK_USE_X AND VTK_USE_TDX)
   set(QVTKMocHeaders ${QVTKMocHeaders}
@@ -78,13 +84,18 @@ if(VTK_QT_VERSION VERSION_GREATER "4")
   vtk_module_export_code_find_package(Qt5 COMPONENTS Widgets)
 else()
   # import Qt4 build settings
-  set(QT_USE_QTNETWORK 1)
-  find_package(Qt4 REQUIRED QUIET)
+  find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED QUIET)
   mark_as_advanced(QT_QMAKE_EXECUTABLE)
-  include(${QT_USE_FILE})
+
+  include_directories(${QT_INCLUDES})
+  add_definitions(${QT_DEFINITIONS})
 
   qt4_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
+  set(QT_LIBRARIES Qt4::QtCore Qt4::QtGui)
   set(QT_LIBRARIES_PRIVATE)
+
+  # When this module is loaded by an app, load Qt too.
+  vtk_module_export_code_find_package(Qt4 COMPONENTS QtCore QtGui)
 endif()
 
 foreach(opt
@@ -134,10 +145,11 @@ if(BUILD_SHARED_LIBS AND VTK_BUILD_QT_DESIGNER_PLUGIN)
     qt5_wrap_cpp(PluginMocSrcs ${PluginMocHeaders} TARGET QVTKWidgetPlugin)
     set(QT_LIBRARIES Qt5::${qt_component})
   else()
-    add_definitions(-DQT_PLUGIN)
-    include_directories(${QT_QTDESIGNER_INCLUDE_DIR})
+    find_package(Qt4 COMPONENTS QtCore QtGui QtDesignerComponents REQUIRED QUIET)
+    include_directories(${QT_INCLUDES})
+    add_definitions(${QT_DEFINITIONS})
     qt4_wrap_cpp(PluginMocSrcs ${PluginMocHeaders})
-    set(QT_LIBRARIES ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
+    set(QT_LIBRARIES Qt4::QtCore Qt4::QtGui Qt4::QtDesignerComponents)
   endif()
 
   # add QVTK plugin from sources

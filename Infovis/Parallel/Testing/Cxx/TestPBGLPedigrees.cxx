@@ -116,7 +116,7 @@ void UseCase0()
   }
   else
   {
-    cout << "  after SetPedIds, GetPedigreeIds == NULL\n";
+    cout << "  after SetPedIds, GetPedigreeIds == nullptr\n";
   }
 
 
@@ -202,7 +202,7 @@ void UseCase1()
   }
   else
   {
-    cout << "  after SetPedIds, GetPedigreeIds == NULL\n";
+    cout << "  after SetPedIds, GetPedigreeIds == nullptr\n";
   }
 
   helper->Synchronize();
@@ -299,22 +299,6 @@ void UseCase2()
   VTK_CREATE(vtkVariantArray, pedigreeIds);
 //  pedigreeIds->SetName("myPeds");  // Optional
 
-  bool addPedFirst = false;  // if true, add peds at [0]; if false, add peds at [3]
-  if (addPedFirst)
-  {
-    mdg->GetVertexData()->SetPedigreeIds(pedigreeIds);
-    if (mdg->GetVertexData()->GetPedigreeIds())
-    {
-      cout << "Yes, GetVertexData()->GetPedigreeIds()  is non-NULL\n";
-      if (char *pedIdArrayName = mdg->GetVertexData()->GetPedigreeIds()->GetName())
-        cout << "name of pedigrees array= " << pedIdArrayName << endl;
-      else
-        cout << "unnamed pedigrees array= " << endl;
-    }
-    else
-      cout << "GetVertexData()->GetPedigreeIds()  is NULL at this point\n";
-  }
-
   VTK_CREATE(vtkStringArray, vertexProp0Array);
   vertexProp0Array->SetName("labels");
   mdg->GetVertexData()->AddArray(vertexProp0Array);
@@ -327,10 +311,7 @@ void UseCase2()
   vertexProp2Array->SetName("age");
   mdg->GetVertexData()->AddArray(vertexProp2Array);
 
-  if (!addPedFirst)
-  {
-    mdg->GetVertexData()->SetPedigreeIds(pedigreeIds);
-  }
+  mdg->GetVertexData()->SetPedigreeIds(pedigreeIds);
 
   const char *stringProp;
   float weight;
@@ -361,20 +342,10 @@ void UseCase2()
       ped = vtkVariant("pedC");
     }
 //    cout << myRank <<" vertex "<< v <<","<< stringProp <<","<<weight<< endl;
-    if (addPedFirst)
-    {
-      vertexPropertyArr->SetValue(0,ped);   // add pedId here
-      vertexPropertyArr->SetValue(1,stringProp);
-      vertexPropertyArr->SetValue(2,weight);
-      vertexPropertyArr->SetValue(3,age);
-    }
-    else
-    {
-      vertexPropertyArr->SetValue(0,stringProp);
-      vertexPropertyArr->SetValue(1,weight);
-      vertexPropertyArr->SetValue(2,age);
-      vertexPropertyArr->SetValue(3,ped);  // add pedId here
-    }
+    vertexPropertyArr->SetValue(0,stringProp);
+    vertexPropertyArr->SetValue(1,weight);
+    vertexPropertyArr->SetValue(2,age);
+    vertexPropertyArr->SetValue(3,ped);  // add pedId here
 
     mdg->AddVertex(vertexPropertyArr);
 //    if (i == 0) mdg->AddVertex(vertexPropertyArr);  // what should this do? (adding a vert w/ an existing pedId)
@@ -394,7 +365,7 @@ void UseCase2()
   int numProps = mdg->GetVertexData()->GetNumberOfArrays();   // # of properties = # of arrays
   cout << "numProps = "<<numProps<<endl;
   vtkAbstractArray *peds = mdg->GetVertexData()->GetPedigreeIds();
-  if (peds == NULL)
+  if (peds == nullptr)
   {
     cout << "  No peds here!!\n";
   }
@@ -434,27 +405,17 @@ void UseCase2()
 
   if (myRank == 0)
   {
-  cout << "  ------------------- add pedA again, but different props ---------------\n";
-  // Add an existing vertex (existing pedId), but with different properties
-  stringProp = "labelA-new";
-  weight = 50.0;
-  age = 20;
-  ped = vtkVariant("pedA");
-  if (addPedFirst)
-  {
-    vertexPropertyArr->SetValue(0,ped);
-    vertexPropertyArr->SetValue(1,stringProp);
-    vertexPropertyArr->SetValue(2,weight);
-    vertexPropertyArr->SetValue(3,age);
-  }
-  else
-  {
+    cout << "  ------------------- add pedA again, but different props ---------------\n";
+    // Add an existing vertex (existing pedId), but with different properties
+    stringProp = "labelA-new";
+    weight = 50.0;
+    age = 20;
+    ped = vtkVariant("pedA");
     vertexPropertyArr->SetValue(0,stringProp);
     vertexPropertyArr->SetValue(1,weight);
     vertexPropertyArr->SetValue(2,age);
     vertexPropertyArr->SetValue(3,ped);
-  }
-  mdg->AddVertex(vertexPropertyArr);
+    mdg->AddVertex(vertexPropertyArr);
   }
 
   helper->Synchronize();
@@ -534,13 +495,22 @@ void UseCase3()
   vtkAbstractArray *peds = mdg->GetVertexData()->GetPedigreeIds();
   if (myRank == 0)
   {
-    if (peds == NULL) cout << "  No peds here!!\n";
-    else cout << "  We have peds!\n";
+    if (peds == nullptr)
+    {
+      cout << "  No peds here!!\n";
+    }
+    else
+    {
+      cout << "  We have peds!\n";
+    }
   }
 
 
   if (myRank == 0)
-    cout << "=============== dump vertices\n"; cout.flush();
+  {
+    cout << "=============== dump vertices\n";
+    cout.flush();
+  }
   VTK_CREATE(vtkVertexListIterator, vit);
   mdg->GetVertices(vit);
   while (vit->HasNext())
@@ -611,7 +581,7 @@ void UseCase4()
     mdg->GetVertexData()->SetPedigreeIds(pedigreeIds);
     if (mdg->GetVertexData()->GetPedigreeIds())
     {
-      cout << "  Yes, GetVertexData()->GetPedigreeIds()  is non-NULL\n";
+      cout << "  Yes, GetVertexData()->GetPedigreeIds()  is non-null\n";
       char *pedIdArrayName = mdg->GetVertexData()->GetPedigreeIds()->GetName();
       cout << "  name of pedigrees array= " << pedIdArrayName << endl;
     }
@@ -662,7 +632,10 @@ void UseCase4()
 
   if (myRank == 0)
   {
-    if (peds == NULL) cout << "  No peds here!!\n";
+    if (peds == nullptr)
+    {
+      cout << "  No peds here!!\n";
+    }
     else
     {
       cout << "  We have peds!\n";

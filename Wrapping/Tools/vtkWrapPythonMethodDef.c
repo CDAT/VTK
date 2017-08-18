@@ -433,9 +433,9 @@ static void vtkWrapPython_ClassMethodDef(
             classname, classname);
   }
 
-  /* python expects the method table to end with a "NULL" entry */
+  /* python expects the method table to end with a "nullptr" entry */
   fprintf(fp,
-          "  {NULL, NULL, 0, NULL}\n"
+          "  {nullptr, nullptr, 0, nullptr}\n"
           "};\n"
           "\n");
 }
@@ -529,6 +529,7 @@ static int vtkWrapPython_IsValueWrappable(
   {
     if (vtkWrap_IsCharPointer(val) ||
         vtkWrap_IsVoidPointer(val) ||
+        vtkWrap_IsZeroCopyPointer(val) ||
         vtkWrap_IsPODPointer(val))
     {
       return 1;
@@ -639,12 +640,12 @@ static void vtkWrapPython_CustomMethods(
             "  vtkObjectBase *vp = ap.GetSelfPointer(self, args);\n"
             "  %s *op = static_cast<%s *>(vp);\n"
             "\n"
-            "  char *temp0s = NULL;\n"
+            "  char *temp0s = nullptr;\n"
             "  int temp0i = 0;\n"
-            "  PyObject *temp1 = NULL;\n"
+            "  PyObject *temp1 = nullptr;\n"
             "  float temp2 = 0.0f;\n"
             "  unsigned long tempr;\n"
-            "  PyObject *result = NULL;\n"
+            "  PyObject *result = nullptr;\n"
             "  int argtype = 0;\n"
             "\n",
             classname, data->Name, data->Name);
@@ -740,11 +741,11 @@ static void vtkWrapPython_CustomMethods(
       "z", "", "i", "d", "V *vtkObjectBase" };
 
     static const char *callBackTypeDecl[] = {
-      "  char *calldata = NULL;\n",
+      "  char *calldata = nullptr;\n",
       "",
       "  long calldata;\n",
       "  double calldata;\n",
-      "  vtkObjectBase *calldata = NULL;\n" };
+      "  vtkObjectBase *calldata = nullptr;\n" };
 
     static const char *callBackReadArg[] = {
       " &&\n      ap.GetValue(calldata)",
@@ -764,7 +765,7 @@ static void vtkWrapPython_CustomMethods(
     static const char *eventTypeString[] = { "L", "z" };
     static const char *eventTypeDecl[] = {
       "  unsigned long event;\n",
-      "  char *event = NULL;\n" };
+      "  char *event = nullptr;\n" };
 
     int callBackIdx, eventIdx;
 
@@ -800,7 +801,7 @@ static void vtkWrapPython_CustomMethods(
             "  vtkObject *op = static_cast<vtkObject *>(vp);\n"
             "\n"
             "%s%s"
-            "  PyObject *result = NULL;\n"
+            "  PyObject *result = nullptr;\n"
             "\n"
             "  if (op && ap.CheckArgCount(%d) &&\n"
             "      ap.GetValue(event)%s)\n"
@@ -831,7 +832,7 @@ static void vtkWrapPython_CustomMethods(
       for(eventIdx = 0; eventIdx < 2; eventIdx++)
       {
         fprintf(fp,
-          "  {NULL, PyvtkObject_InvokeEvent_%s%s, METH_VARARGS,\n"
+          "  {nullptr, PyvtkObject_InvokeEvent_%s%s, METH_VARARGS,\n"
           "   \"@%s%s\"},\n",
           eventTypeString[eventIdx],
           callBackTypeString[callBackIdx],
@@ -841,7 +842,7 @@ static void vtkWrapPython_CustomMethods(
     }
 
     fprintf(fp,
-            "  {NULL, NULL, 0, NULL}\n"
+            "  {nullptr, nullptr, 0, nullptr}\n"
             "};\n"
             "\n"
             "static PyObject *\n"
@@ -858,7 +859,7 @@ static void vtkWrapPython_CustomMethods(
             "  }\n"
             "\n"
             "  vtkPythonArgs::ArgCountError(nargs, \"InvokeEvent\");\n"
-            "  return NULL;\n"
+            "  return nullptr;\n"
             "}\n");
   }
 
@@ -890,7 +891,7 @@ static void vtkWrapPython_CustomMethods(
             "\n"
             "  char *temp0;\n"
             "  char tempr[256];\n"
-            "  PyObject *result = NULL;\n"
+            "  PyObject *result = nullptr;\n"
             "\n"
             "  if (op && ap.CheckArgCount(1) &&\n"
             "      ap.GetValue(temp0))\n"
@@ -914,8 +915,8 @@ static void vtkWrapPython_CustomMethods(
             "  vtkObjectBase *vp = ap.GetSelfPointer(self, args);\n"
             "  %s *op = static_cast<%s *>(vp);\n"
             "\n"
-            "  vtkObjectBase *temp0 = NULL;\n"
-            "  PyObject *result = NULL;\n"
+            "  vtkObjectBase *temp0 = nullptr;\n"
+            "  PyObject *result = nullptr;\n"
             "\n"
             "  if (op && ap.CheckArgCount(1) &&\n"
             "      ap.GetVTKObject(temp0, \"vtkObjectBase\"))\n"
@@ -953,8 +954,8 @@ static void vtkWrapPython_CustomMethods(
             "  vtkObjectBase *vp = ap.GetSelfPointer(self, args);\n"
             "  %s *op = static_cast<%s *>(vp);\n"
             "\n"
-            "  vtkObjectBase *temp0 = NULL;\n"
-            "  PyObject *result = NULL;\n"
+            "  vtkObjectBase *temp0 = nullptr;\n"
+            "  PyObject *result = nullptr;\n"
             "\n"
             "  if (op && ap.CheckArgCount(1) &&\n"
             "      ap.GetVTKObject(temp0, \"vtkObjectBase\"))\n"
@@ -994,12 +995,12 @@ static void vtkWrapPython_CustomMethods(
             "  PyVTKObject *vp = (PyVTKObject *)self;\n"
             "  vtkCollection *op = static_cast<vtkCollection *>(vp->vtk_ptr);\n"
             "\n"
-            "  PyObject *result = NULL;\n"
+            "  PyObject *result = nullptr;\n"
             "\n"
             "  if (op)\n"
             "  {\n"
             "    vtkCollectionIterator *tempr = op->NewIterator();\n"
-            "    if (tempr != NULL)\n"
+            "    if (tempr != nullptr)\n"
             "    {\n"
             "      result = vtkPythonArgs::BuildVTKObject(tempr);\n"
             "      PyVTKObject_GetObject(result)->UnRegister(0);\n"
@@ -1020,13 +1021,13 @@ static void vtkWrapPython_CustomMethods(
             "  PyVTKObject *vp = (PyVTKObject *)self;\n"
             "  vtkCollectionIterator *op = static_cast<vtkCollectionIterator*>(vp->vtk_ptr);\n"
             "\n"
-            "  PyObject *result = NULL;\n"
+            "  PyObject *result = nullptr;\n"
             "\n"
             "  if (op)\n"
             "  {\n"
             "    vtkObject *tempr = op->GetCurrentObject();\n"
             "    op->GoToNextItem();\n"
-            "    if (tempr != NULL)\n"
+            "    if (tempr != nullptr)\n"
             "    {\n"
             "      result = vtkPythonArgs::BuildVTKObject(tempr);\n"
             "    }\n"

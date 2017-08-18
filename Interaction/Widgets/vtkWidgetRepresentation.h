@@ -47,7 +47,9 @@
 #include "vtkWeakPointer.h" // needed for vtkWeakPointer iVar.
 
 class vtkAbstractPropPicker;
+class vtkAbstractWidget;
 class vtkPickingManager;
+class vtkRenderWindowInteractor;
 class vtkRenderer;
 
 
@@ -59,7 +61,7 @@ public:
    * Standard methods for instances of this class.
    */
   vtkTypeMacro(vtkWidgetRepresentation,vtkProp);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   //@{
@@ -136,6 +138,34 @@ public:
   virtual void Highlight(int vtkNotUsed(highlightOn)) {}
 
   //@{
+  // Widgets were originally designed to be driven by 2D mouse events
+  // With Virtual Reality and multitouch we get mnore complex events
+  // that may involve multiple pointers as well as 3D pointers and
+  // orientations. As such we provide pointers to the interactor
+  // widget and an event type so that representations can access the
+  // values they need.
+  virtual void StartComplexInteraction(
+    vtkRenderWindowInteractor *,
+    vtkAbstractWidget *,
+    unsigned long /* event */,
+    void * /*callData*/) { }
+  virtual void ComplexInteraction(
+    vtkRenderWindowInteractor *,
+    vtkAbstractWidget *,
+    unsigned long /* event */,
+    void * /* callData */) { }
+  virtual void EndComplexInteraction(
+    vtkRenderWindowInteractor *,
+    vtkAbstractWidget *,
+    unsigned long /* event */,
+    void * /* callData */) { }
+  virtual int ComputeComplexInteractionState(
+    vtkRenderWindowInteractor *iren,
+    vtkAbstractWidget *widget,
+    unsigned long event, void *callData, int modify = 0);
+  //@}
+
+  //@{
   /**
    * Set/Get a factor representing the scaling of the widget upon placement
    * (via the PlaceWidget() method). Normally the widget is placed so that
@@ -178,21 +208,21 @@ public:
    * (i.e., not implementing the Render() methods properly) or leaking graphics resources
    * (i.e., not implementing ReleaseGraphicsResources() properly).
    */
-  virtual double *GetBounds() {return NULL;}
-  virtual void ShallowCopy(vtkProp *prop);
-  virtual void GetActors(vtkPropCollection *) {}
-  virtual void GetActors2D(vtkPropCollection *) {}
-  virtual void GetVolumes(vtkPropCollection *) {}
-  virtual void ReleaseGraphicsResources(vtkWindow *) {}
-  virtual int RenderOverlay(vtkViewport *vtkNotUsed(viewport)) {return 0;}
-  virtual int RenderOpaqueGeometry(vtkViewport *vtkNotUsed(viewport)) {return 0;}
-  virtual int RenderTranslucentPolygonalGeometry(vtkViewport *vtkNotUsed(viewport)) {return 0;}
-  virtual int RenderVolumetricGeometry(vtkViewport *vtkNotUsed(viewport)) {return 0;}
-  virtual int HasTranslucentPolygonalGeometry() { return 0; }
+  double *GetBounds() VTK_OVERRIDE {return nullptr;}
+  void ShallowCopy(vtkProp *prop) VTK_OVERRIDE;
+  void GetActors(vtkPropCollection *) VTK_OVERRIDE {}
+  void GetActors2D(vtkPropCollection *) VTK_OVERRIDE {}
+  void GetVolumes(vtkPropCollection *) VTK_OVERRIDE {}
+  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE {}
+  int RenderOverlay(vtkViewport *vtkNotUsed(viewport)) VTK_OVERRIDE {return 0;}
+  int RenderOpaqueGeometry(vtkViewport *vtkNotUsed(viewport)) VTK_OVERRIDE {return 0;}
+  int RenderTranslucentPolygonalGeometry(vtkViewport *vtkNotUsed(viewport)) VTK_OVERRIDE {return 0;}
+  int RenderVolumetricGeometry(vtkViewport *vtkNotUsed(viewport)) VTK_OVERRIDE {return 0;}
+  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE { return 0; }
 
 protected:
   vtkWidgetRepresentation();
-  ~vtkWidgetRepresentation();
+  ~vtkWidgetRepresentation() VTK_OVERRIDE;
 
   // The renderer in which this widget is placed
   vtkWeakPointer<vtkRenderer> Renderer;
@@ -253,7 +283,8 @@ protected:
    */
   vtkAssemblyPath* GetAssemblyPath(double X, double Y, double Z,
                                    vtkAbstractPropPicker* picker);
-
+  vtkAssemblyPath* GetAssemblyPath3DPoint(double pos[3],
+                                     vtkAbstractPropPicker* picker);
 
   // Members use to control handle size. The two methods return a "radius"
   // in world coordinates. Note that the HandleSize data member is used

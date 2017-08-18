@@ -52,7 +52,7 @@ class VTKRENDERINGFREETYPE_EXPORT vtkMathTextUtilities : public vtkObject
 {
 public:
   vtkTypeMacro(vtkMathTextUtilities, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Returns true if mathtext rendering is available.
@@ -102,7 +102,7 @@ public:
    */
  virtual bool RenderString(const char *str, vtkImageData *data,
                            vtkTextProperty *tprop, int dpi,
-                           int textDims[2] = NULL) = 0;
+                           int textDims[2] = nullptr) = 0;
 
   /**
    * Parse the MathText expression in str and fill path with a contour of the
@@ -134,7 +134,7 @@ public:
 
 protected:
   vtkMathTextUtilities();
-  virtual ~vtkMathTextUtilities();
+  ~vtkMathTextUtilities() VTK_OVERRIDE;
 
 private:
   vtkMathTextUtilities(const vtkMathTextUtilities&) VTK_DELETE_FUNCTION;

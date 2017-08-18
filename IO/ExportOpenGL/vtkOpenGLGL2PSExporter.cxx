@@ -80,7 +80,7 @@ vtkOpenGLGL2PSExporter::~vtkOpenGLGL2PSExporter()
 void vtkOpenGLGL2PSExporter::WriteData()
 {
   // make sure the user specified a file prefix
-  if (this->FilePrefix == NULL)
+  if (this->FilePrefix == nullptr)
   {
     vtkErrorMacro(<< "Please specify a file prefix to use");
     return;
@@ -113,9 +113,10 @@ void vtkOpenGLGL2PSExporter::WriteData()
                        static_cast<GLint>(winsize[1])};
 
   // Create the file.
-  char *fName = new char [strlen(this->FilePrefix) + 8];
-  sprintf(fName, "%s.%s%s", this->FilePrefix, this->GetFileExtension(),
-          (this->Compress && this->FileFormat != PDF_FILE)? ".gz" : "");
+  size_t fNameSize = strlen(this->FilePrefix) + 8;
+  char *fName = new char [fNameSize];
+  snprintf(fName, fNameSize, "%s.%s%s", this->FilePrefix, this->GetFileExtension(),
+           (this->Compress && this->FileFormat != PDF_FILE)? ".gz" : "");
   FILE *fpObj = fopen(fName, "wb");
   if (!fpObj)
   {
@@ -230,7 +231,7 @@ void vtkOpenGLGL2PSExporter::WriteData()
   {
     gl2psBeginPage(this->Title ? this->Title : "VTK GL2PS Export", "VTK",
                    viewport, format, sort, options, GL_RGBA, 0,
-                   NULL, 0, 0, 0, buffsize, fpObj, fName);
+                   nullptr, 0, 0, 0, buffsize, fpObj, fName);
 
     // Render non-specialized geometry by either passing in the raster image or
     // rendering into the feedback buffer.
@@ -279,7 +280,7 @@ void vtkOpenGLGL2PSExporter::WriteData()
   fclose(fpObj);
 
   // Clean up:
-  vtkGL2PSUtilities::SetRenderWindow(NULL);
+  vtkGL2PSUtilities::SetRenderWindow(nullptr);
   vtkGL2PSUtilities::SetTextAsPath(false);
   // Re-enable depth peeling if needed
   for (int i = 0; i < static_cast<int>(origDepthPeeling.size()); ++i)
@@ -672,7 +673,7 @@ void vtkOpenGLGL2PSExporter::DrawTextActor3D(vtkTextActor3D *textAct,
 
   // Get actor info
   vtkMatrix4x4 *actorMatrix = textAct->GetMatrix();
-  double *actorBounds = textAct->GetBounds();
+  const double *actorBounds = textAct->GetBounds();
   double textPos[3] = {(actorBounds[1] + actorBounds[0]) * 0.5,
                        (actorBounds[3] + actorBounds[2]) * 0.5,
                        (actorBounds[5] + actorBounds[4]) * 0.5};
@@ -837,7 +838,7 @@ void vtkOpenGLGL2PSExporter::DrawTexturedActor2D(vtkTexturedActor2D *act,
   vtkPolyData* poly = vtkPolyData::SafeDownCast(mapper->GetInputDataObject(0, 0));
   if (poly)
   {
-    double *bounds = poly->GetBounds();
+    const double *bounds = poly->GetBounds();
     rect[0] += static_cast<int>(bounds[0] + 0.5);
     rect[1] += static_cast<int>(bounds[2] + 0.5);
     rect[2] = static_cast<int>(bounds[1] - bounds[0] + 0.5);

@@ -124,6 +124,7 @@ function(vtk_add_test_mpi exename _tests)
   set(mpi_options
     TESTING_DATA
     CUSTOM_BASELINES
+    NO_VALID
     )
   _vtk_test_parse_args("${mpi_options}" "cxx" ${ARGN})
   _vtk_test_set_options("${mpi_options}" "" ${options})
@@ -160,10 +161,13 @@ function(vtk_add_test_mpi exename _tests)
     if(local_TESTING_DATA)
       set(_D -D ${data_dir})
       set(_T -T ${VTK_TEST_OUTPUT_DIR})
-      if(local_CUSTOM_BASELINES)
-        set(_V -V "${data_dir}/Baseline")
-      else()
-        set(_V -V "DATA{${baseline_dir}/${test_name}.png,:}")
+      set(_V "")
+      if(NOT local_NO_VALID)
+        if(local_CUSTOM_BASELINES)
+          set(_V -V "${data_dir}/Baseline")
+        else()
+          set(_V -V "DATA{${baseline_dir}/${test_name}.png,:}")
+        endif()
       endif()
     endif()
 
@@ -303,6 +307,8 @@ function(vtk_add_test_cxx exename _tests)
       PROPERTIES
         LABELS "${${prefix}_TEST_LABELS}"
         FAIL_REGULAR_EXPRESSION "${_vtk_fail_regex}"
+        # This must match VTK_SKIP_RETURN_CODE in vtkTestingObjectFactory.h"
+        SKIP_RETURN_CODE 125
       )
 
     list(APPEND ${_tests} "${test_file}")
@@ -427,7 +433,7 @@ function(vtk_add_test_python)
     set(_A "")
     if(NOT local_NO_VALID)
       if(local_NO_RT)
-        set(_B -B "DATA{${baseline_dir}/,REGEX:${test_name}(_[0-9]+)?.png}")
+        set(_B -B "DATA{${baseline_dir}/,REGEX:${test_name}(-.*)?(_[0-9]+)?.png}")
       else()
         set(_V -V "DATA{${baseline_dir}/${test_name}.png,:}")
         if(NOT local_JUST_VALID)
@@ -457,6 +463,8 @@ function(vtk_add_test_python)
       PROPERTIES
         LABELS "${${vtk-module}_TEST_LABELS}"
         FAIL_REGULAR_EXPRESSION "${_vtk_fail_regex}"
+        # This must match the skip() function in vtk/test/Testing.py"
+        SKIP_RETURN_CODE 125
       )
   endforeach()
 endfunction()

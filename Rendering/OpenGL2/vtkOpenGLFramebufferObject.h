@@ -184,7 +184,7 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLFramebufferObject : public vtkFrameBuf
 public:
   static vtkOpenGLFramebufferObject* New();
   vtkTypeMacro(vtkOpenGLFramebufferObject, vtkFrameBufferObjectBase);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -371,7 +371,21 @@ public:
   /**
    * Dimensions in pixels of the framebuffer.
    */
-  vtkGetVector2Macro(LastSize,int);
+  int *GetLastSize() VTK_OVERRIDE
+  {
+    vtkDebugMacro(<< this->GetClassName() << " (" << this << "): returning LastSize pointer " << this->LastSize);
+    return this->LastSize;
+  }
+  void GetLastSize(int &_arg1, int &_arg2) VTK_OVERRIDE
+  {
+      _arg1 = this->LastSize[0];
+      _arg2 = this->LastSize[1];
+    vtkDebugMacro(<< this->GetClassName() << " (" << this << "): returning LastSize (" << _arg1 << "," << _arg2 << ")");
+  }
+  void GetLastSize (int _arg[2]) VTK_OVERRIDE
+  {
+    this->GetLastSize (_arg[0], _arg[1]);
+  }
   //@}
 
   /**
@@ -406,21 +420,17 @@ public:
     /**
    * Copy from the currently bound READ FBO to the currently
    * bound DRAW FBO. The method is static so that one doesn't
-   * need to ccreate an instance when transfering between attachments
+   * need to ccreate an instance when transferring between attachments
    * in the default FBO.
    */
-  static
-  int Blit(
-        int srcExt[4],
-        int destExt[4],
-        unsigned int bits,
-        unsigned int mapping);
+  static int Blit(
+    const int srcExt[4], const int destExt[4], unsigned int bits, unsigned int mapping);
 
   /**
    * Download data from the read color attachment of the currently
    * bound FBO into the retruned PBO. The PBO must be free'd when
    * you are finished with it. The number of components in the
-   * PBO is the same as in the name of the specific  download fucntion.
+   * PBO is the same as in the name of the specific download function.
    * When downloading a single color channel, the channel must be
    * identified by index, 1->red, 2->green, 3-> blue.
    */
@@ -567,7 +577,7 @@ protected:
   int GetOpenGLType(int vtkType);
 
   vtkOpenGLFramebufferObject();
-  ~vtkOpenGLFramebufferObject();
+  ~vtkOpenGLFramebufferObject() VTK_OVERRIDE;
 
   vtkWeakPointer<vtkOpenGLRenderWindow> Context;
 

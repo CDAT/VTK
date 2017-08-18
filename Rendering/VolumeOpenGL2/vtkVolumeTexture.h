@@ -81,7 +81,6 @@ class VTKRENDERINGVOLUMEOPENGL2_EXPORT vtkVolumeTexture : public vtkObject
 {
   typedef vtkTuple<int, 6> Size6;
   typedef vtkTuple<int, 3> Size3;
-  struct SortBlocks;
 
 public:
   static vtkVolumeTexture* New();
@@ -104,7 +103,7 @@ public:
   };
 
   vtkTypeMacro(vtkVolumeTexture, vtkObject);
-  void PrintSelf( ostream& os, vtkIndent indent );
+  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
 
   /**
    * Set the parent volume mapper and initialize internals.
@@ -122,7 +121,7 @@ public:
    * (in which case they will be loaded into GPU memory by GetNextBlock()).
    * Requires an active OpenGL context.
    */
-  void LoadVolume(vtkRenderer* ren, vtkImageData* data, vtkDataArray* scalars,
+  bool LoadVolume(vtkRenderer* ren, vtkImageData* data, vtkDataArray* scalars,
     int const interpolation);
 
   void UpdateInterpolationType(int const interpolation);
@@ -156,14 +155,14 @@ public:
 
 protected:
   vtkVolumeTexture();
-  ~vtkVolumeTexture();
+  ~vtkVolumeTexture() VTK_OVERRIDE;
 
 private:
   /**
    * Load an image block as defined in volBlock into GPU memory.
    * Requires an active OpenGL context.
    */
-  void LoadTexture(int const interpolation, VolumeBlock* volBlock);
+  bool LoadTexture(int const interpolation, VolumeBlock* volBlock);
 
   /**
    * Divide the image data in NxMxO user-defined blocks.
@@ -195,6 +194,22 @@ private:
 
   vtkVolumeTexture(const vtkVolumeTexture&) VTK_DELETE_FUNCTION;
   void operator=(const vtkVolumeTexture&) VTK_DELETE_FUNCTION;
+
+  //@{
+  /**
+   * @brief Helper functions to catch potential issues when doing GPU
+   * texture allocations.
+   *
+   * They make use of the available OpenGL mechanisms to try to detect whether
+   * a volume would not fit in the GPU (due to MAX_TEXTURE_SIZE limitations,
+   * memory availability, etc.).
+   */
+  bool AreDimensionsValid(vtkTextureObject* texture, int const width,
+    int const height, int const depth);
+
+  bool SafeLoadTexture(vtkTextureObject* texture, int const width,
+    int const height, int const depth, int numComps, int dataType, void* dataPtr);
+  //@}
 
   //----------------------------------------------------------------------------
   vtkTextureObject* Texture;

@@ -14,10 +14,10 @@
 =========================================================================*/
 /**
  * @class   vtkShader2Collection
- * @brief   a list of Shader2 objects.
+ * @brief   an ordered list of Shader2 objects.
  *
  * vtkShader2Collection represents and provides methods to manipulate a
- * list of Shader2 objects. The list is unsorted and duplicate entries are not
+ * list of Shader2 objects. The list is ordered and duplicate entries are not
  * prevented.
  *
  * @sa
@@ -37,16 +37,16 @@ class VTKRENDERINGOPENGL_EXPORT vtkShader2Collection : public vtkCollection
  public:
   static vtkShader2Collection *New();
   vtkTypeMacro(vtkShader2Collection,vtkCollection);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Modified GetMTime because the collection time depends on the
    * content of the shaders.
    */
-  vtkMTimeType GetMTime();
+  vtkMTimeType GetMTime() VTK_OVERRIDE;
 
   /**
-   * Add a shader to the list.
+   * Add a shader to the bottom of the list.
    */
   void AddItem(vtkShader2 *shader);
 
@@ -120,7 +120,7 @@ class VTKRENDERINGOPENGL_EXPORT vtkShader2Collection : public vtkCollection
 
 protected:
   vtkShader2Collection();
-  ~vtkShader2Collection();
+  ~vtkShader2Collection() VTK_OVERRIDE;
 
   bool HasShadersOfType(int);
 

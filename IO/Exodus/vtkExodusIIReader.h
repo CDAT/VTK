@@ -29,8 +29,8 @@
  * vector, are combined internally for convenience.  To be combined, the array
  * names have to be identical except for a trailing X,Y and Z (or x,y,z).  By
  * default cell and point arrays are not loaded.  However, the user can flag
- * arrays to load with the methods "SetPointArrayStatus" and
- * "SetCellArrayStatus".  The reader DOES NOT respond to piece requests
+ * arrays to load with the methods "SetPointResultArrayStatus" and
+ * "SetElementResultArrayStatus".  The reader DOES NOT respond to piece requests
  *
 */
 
@@ -55,19 +55,19 @@ class VTKIOEXODUS_EXPORT vtkExodusIIReader : public vtkMultiBlockDataSetAlgorith
 public:
   static vtkExodusIIReader *New();
   vtkTypeMacro(vtkExodusIIReader,vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Determine if the file can be readed with this reader.
    */
-  int CanReadFile(const char* fname);
+  virtual int CanReadFile(const char* fname);
 
   //virtual void Modified();
 
   /**
    * Return the object's MTime. This is overridden to include the timestamp of its internal class.
    */
-  virtual vtkMTimeType GetMTime();
+  vtkMTimeType GetMTime() VTK_OVERRIDE;
 
   /**
    * Return the MTime of the internal data structure.
@@ -769,9 +769,17 @@ public:
   vtkGetMacro(SILUpdateStamp, int);
   //@}
 
+  //@{
+  /**
+   * Get the max_name_length in the file. This is the amount of space allocated
+   * int the file for storing names of arrays, blocks, etc.
+   */
+  int GetMaxNameLength();
+  //@}
+
 protected:
   vtkExodusIIReader();
-  ~vtkExodusIIReader();
+  ~vtkExodusIIReader() VTK_OVERRIDE;
 
   // helper for finding IDs
   static int GetIDHelper ( const char *arrayName, vtkDataSet *data, int localID, int searchType );
@@ -800,9 +808,9 @@ protected:
    */
   void AdvertiseTimeSteps( vtkInformation* outputInfo );
 
-  int ProcessRequest( vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestInformation( vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData( vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int ProcessRequest( vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation( vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData( vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
   //int RequestDataOverTime( vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
   // Parameters for controlling what is read in.

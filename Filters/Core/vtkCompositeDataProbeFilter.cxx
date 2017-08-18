@@ -104,6 +104,8 @@ int vtkCompositeDataProbeFilter::RequestData(
 
   if (this->BuildFieldList(sourceComposite))
   {
+    this->InitializeForProbing(input, output);
+
     vtkSmartPointer<vtkCompositeDataIterator> iter;
     iter.TakeReference(sourceComposite->NewIterator());
     // We do reverse traversal, so that for hierarchical datasets, we traverse the
@@ -123,10 +125,6 @@ int vtkCompositeDataProbeFilter::RequestData(
         continue;
       }
 
-      if (idx==0)
-      {
-        this->InitializeForProbing(input, output);
-      }
       this->DoProbing(input, idx, sourceDS, output);
       idx++;
     }
@@ -168,8 +166,8 @@ int vtkCompositeDataProbeFilter::BuildFieldList(vtkCompositeDataSet* source)
 {
   delete this->PointList;
   delete this->CellList;
-  this->PointList = 0;
-  this->CellList = 0;
+  this->PointList = nullptr;
+  this->CellList = nullptr;
 
   vtkSmartPointer<vtkCompositeDataIterator> iter;
   iter.TakeReference(source->NewIterator());

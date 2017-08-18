@@ -51,7 +51,7 @@
 class vtkScatterPlotMatrix::PIMPL
 {
 public:
-  PIMPL() : VisibleColumnsModified(true), BigChart(NULL),
+  PIMPL() : VisibleColumnsModified(true), BigChart(nullptr), BigChartPos(0, 0),
     ResizingBigChart(false), AnimationCallbackInitialized(false), TimerId(0),
     TimerCallbackInitialized(false)
   {
@@ -353,7 +353,7 @@ bool MoveColumn(vtkStringArray* visCols, int fromCol, int toCol)
 }
 } // End of anonymous namespace
 
-vtkStandardNewMacro(vtkScatterPlotMatrix)
+vtkObjectFactoryNewMacro(vtkScatterPlotMatrix)
 
 vtkScatterPlotMatrix::vtkScatterPlotMatrix()
   : NumberOfBins(10), NumberOfFrames(25),
@@ -363,6 +363,9 @@ vtkScatterPlotMatrix::vtkScatterPlotMatrix()
   this->TitleProperties = vtkSmartPointer<vtkTextProperty>::New();
   this->TitleProperties->SetFontSize(12);
   this->SelectionMode = vtkContextScene::SELECTION_NONE;
+  this->ActivePlot = vtkVector2i(0, -2);
+  this->ActivePlotValid = false;
+  this->Animating = false;
 }
 
 vtkScatterPlotMatrix::~vtkScatterPlotMatrix()
@@ -414,6 +417,7 @@ bool vtkScatterPlotMatrix::SetActivePlot(const vtkVector2i &pos)
   {
     // The supplied index is valid (in the lower quadrant).
     this->ActivePlot = pos;
+    this->ActivePlotValid = true;
 
     // Invoke an interaction event, to let observers know something changed.
     this->InvokeEvent(vtkCommand::AnnotationChangedEvent);
@@ -526,6 +530,10 @@ bool vtkScatterPlotMatrix::SetActivePlot(const vtkVector2i &pos)
                                 ->MarkerSize);
       plotPoints->SetMarkerStyle(this->Private->ChartSettings[ACTIVEPLOT]
                                  ->MarkerStyle);
+
+      // Add supplementary plot if any
+      this->AddSupplementaryPlot(this->Private->BigChart, ACTIVEPLOT, row, column, 2);
+
       // Set background color.
       this->Private->BigChart->SetBackgroundBrush(
             this->Private->ChartSettings[ACTIVEPLOT]
@@ -614,6 +622,7 @@ void vtkScatterPlotMatrix::StartAnimation(vtkRenderWindowInteractor* interactor)
   // Start a simple repeating timer to advance along the path until completion.
   if (!this->Private->TimerCallbackInitialized && interactor)
   {
+    this->Animating = true;
     if (!this->Private->AnimationCallbackInitialized)
     {
       this->Private->AnimationCallback->SetClientData(this);
@@ -766,6 +775,7 @@ void vtkScatterPlotMatrix::AdvanceAnimation()
       this->Private->TimerId = 0;
       this->Private->TimerCallbackInitialized = false;
     }
+    this->Animating = false;
   }
 }
 
@@ -814,7 +824,7 @@ void vtkScatterPlotMatrix::SetInput(vtkTable *table)
     this->SetSize(vtkVector2i(0, 0));
     this->Modified();
 
-    if (table == NULL)
+    if (table == nullptr)
     {
       this->SetColumnVisibilityAll(true);
       return;
@@ -1178,11 +1188,11 @@ bool vtkScatterPlotMatrix::MouseButtonReleaseEvent(
     }
     if ((this->Private->AnimationPath.size() == 1 &&
          this->Private->AnimationPath.back() != pos) ||
-        (this->Private->AnimationPath.size() == 0 && this->ActivePlot != pos))
+        (this->Private->AnimationPath.empty() && this->ActivePlot != pos))
     {
       this->Private->AnimationPath.push_back(pos);
     }
-    if (this->Private->AnimationPath.size() > 0)
+    if (!this->Private->AnimationPath.empty())
     {
       this->InvokeEvent(vtkCommand::CreateTimerEvent);
       this->StartAnimation(mouse.GetInteractor());
@@ -1196,7 +1206,7 @@ bool vtkScatterPlotMatrix::MouseButtonReleaseEvent(
       return true;
     }
     this->UpdateAnimationPath(pos);
-    if (this->Private->AnimationPath.size() > 0)
+    if (!this->Private->AnimationPath.empty())
     {
       this->InvokeEvent(vtkCommand::CreateTimerEvent);
       this->StartAnimation(mouse.GetInteractor());
@@ -1238,7 +1248,7 @@ vtkVector2i vtkScatterPlotMatrix::GetAnimationPathElement(vtkIdType i)
 bool vtkScatterPlotMatrix::AddAnimationPath(const vtkVector2i &move)
 {
   vtkVector2i pos = this->ActivePlot;
-  if (this->Private->AnimationPath.size())
+  if (!this->Private->AnimationPath.empty())
   {
     pos = this->Private->AnimationPath.back();
   }
@@ -1256,7 +1266,7 @@ bool vtkScatterPlotMatrix::AddAnimationPath(const vtkVector2i &move)
 
 bool vtkScatterPlotMatrix::BeginAnimationPath(vtkRenderWindowInteractor* interactor)
 {
-  if (interactor && this->Private->AnimationPath.size())
+  if (interactor && !this->Private->AnimationPath.empty())
   {
     this->StartAnimation(interactor);
     return true;
@@ -1411,6 +1421,7 @@ void vtkScatterPlotMatrix::UpdateLayout()
                                   ->MarkerSize);
         plotPoints->SetMarkerStyle(this->Private->ChartSettings[SCATTERPLOT]
                                    ->MarkerStyle);
+        this->AddSupplementaryPlot(chart, SCATTERPLOT, row, column);
         }
       else if (this->GetPlotType(pos) == HISTOGRAM)
         {
@@ -1467,7 +1478,14 @@ void vtkScatterPlotMatrix::UpdateLayout()
           }
 
         this->SetChartSpan(pos, vtkVector2i(n - i, n - j));
-        this->SetActivePlot(vtkVector2i(0, n - 2));
+        if (!this->ActivePlotValid)
+        {
+          if (this->ActivePlot.GetY() < 0)
+          {
+            this->ActivePlot = vtkVector2i(0, n - 2);
+          }
+          this->SetActivePlot(this->ActivePlot);
+        }
         }
       // Only show bottom axis label for bottom plots
       if (j > 0)
@@ -1651,7 +1669,7 @@ vtkTextProperty* vtkScatterPlotMatrix::GetAxisLabelProperties(int plotType)
   {
     return this->Private->ChartSettings[plotType]->LabelFont.GetPointer();
   }
-  return NULL;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -1836,6 +1854,17 @@ void vtkScatterPlotMatrix::SetSelectionMode(int selMode)
   }
 
   this->Modified();
+}
+
+//-----------------------------------------------------------------------------
+void vtkScatterPlotMatrix::SetSize(const vtkVector2i &size)
+{
+  if (this->Size.GetX() != size.GetX() || this->Size.GetY() != size.GetY())
+  {
+    this->ActivePlotValid = false;
+    this->ActivePlot = vtkVector2i(0, this->Size.GetX() - 2);
+  }
+  this->Superclass::SetSize(size);
 }
 
 //----------------------------------------------------------------------------

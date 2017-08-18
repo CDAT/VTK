@@ -31,7 +31,8 @@
 #include "vtkIONetCDFModule.h" // For export macro
 #include "vtkUnstructuredGridAlgorithm.h"
 
-class NcFile;
+#include "vtk_netcdfcpp_fwd.h" // Forward declarations for vtknetcdfcpp
+
 class vtkCallbackCommand;
 class vtkDataArraySelection;
 
@@ -40,7 +41,7 @@ class VTKIONETCDF_EXPORT vtkNetCDFCAMReader : public vtkUnstructuredGridAlgorith
 public:
   static vtkNetCDFCAMReader *New();
   vtkTypeMacro(vtkNetCDFCAMReader,vtkUnstructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Returns 1 if this file can be read and 0 if the file cannot be read.
@@ -148,16 +149,16 @@ public:
 
 protected:
   vtkNetCDFCAMReader();
-  ~vtkNetCDFCAMReader();
+  ~vtkNetCDFCAMReader() VTK_OVERRIDE;
 
   int RequestInformation(vtkInformation*, vtkInformationVector**,
-                         vtkInformationVector*);
+                         vtkInformationVector*) VTK_OVERRIDE;
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                          vtkInformationVector *) VTK_OVERRIDE;
 
-  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *);
+  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
+                                  vtkInformationVector *) VTK_OVERRIDE;
 
   /**
    * Returns true for success.  Based on the piece, number of pieces,
@@ -213,7 +214,7 @@ private:
 
   //@{
   /**
-   * The NetCDF file descriptors.  NULL indicates they haven't
+   * The NetCDF file descriptors.  nullptr indicates they haven't
    * been opened.
    */
   NcFile* PointsFile;

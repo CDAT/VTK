@@ -53,7 +53,7 @@ class VTKVIEWSINFOVIS_EXPORT vtkRenderedTreeAreaRepresentation : public vtkRende
 public:
   static vtkRenderedTreeAreaRepresentation* New();
   vtkTypeMacro(vtkRenderedTreeAreaRepresentation, vtkRenderedRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Set the label render mode.
@@ -61,7 +61,7 @@ public:
    * and unicode support. Requires VTK_USE_QT to be on.
    * FREETYPE - Use standard freetype text rendering.
    */
-  virtual void SetLabelRenderMode(int mode);
+  void SetLabelRenderMode(int mode) VTK_OVERRIDE;
 
   //@{
   /**
@@ -283,7 +283,7 @@ public:
   /**
    * Apply the theme to this view.
    */
-  virtual void ApplyViewTheme(vtkViewTheme* theme);
+  void ApplyViewTheme(vtkViewTheme* theme) VTK_OVERRIDE;
 
   //@{
   /**
@@ -295,35 +295,32 @@ public:
 
 protected:
   vtkRenderedTreeAreaRepresentation();
-  ~vtkRenderedTreeAreaRepresentation();
+  ~vtkRenderedTreeAreaRepresentation() VTK_OVERRIDE;
 
   //@{
   /**
    * Called by the view to add/remove this representation.
    */
-  virtual bool AddToView(vtkView* view);
-  virtual bool RemoveFromView(vtkView* view);
+  bool AddToView(vtkView* view) VTK_OVERRIDE;
+  bool RemoveFromView(vtkView* view) VTK_OVERRIDE;
   //@}
 
-  virtual vtkSelection* ConvertSelection(vtkView* view, vtkSelection* sel);
+  vtkSelection* ConvertSelection(vtkView* view, vtkSelection* sel) VTK_OVERRIDE;
 
-  virtual int FillInputPortInformation(int port, vtkInformation* info);
+  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
 
-  virtual int RequestData(
+  int RequestData(
     vtkInformation*,
     vtkInformationVector**,
-    vtkInformationVector*);
+    vtkInformationVector*) VTK_OVERRIDE;
 
-  virtual void PrepareForRendering(vtkRenderView* view);
+  void PrepareForRendering(vtkRenderView* view) VTK_OVERRIDE;
 
   bool ValidIndex(int idx);
 
   void UpdateHoverHighlight(vtkView* view, int x, int y);
 
-  virtual vtkUnicodeString GetHoverTextInternal(vtkSelection* sel);
-
-  class Internals;
-  Internals* Implementation;
+  vtkUnicodeString GetHoverTextInternal(vtkSelection* sel) VTK_OVERRIDE;
 
   vtkSmartPointer<vtkWorldPointPicker>             Picker;
   vtkSmartPointer<vtkApplyColors>                  ApplyColors;
@@ -368,6 +365,9 @@ protected:
 private:
   vtkRenderedTreeAreaRepresentation(const vtkRenderedTreeAreaRepresentation&) VTK_DELETE_FUNCTION;
   void operator=(const vtkRenderedTreeAreaRepresentation&) VTK_DELETE_FUNCTION;
+
+  class Internals;
+  Internals* Implementation;
 };
 
 #endif

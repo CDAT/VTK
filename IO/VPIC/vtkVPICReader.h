@@ -48,7 +48,7 @@ class VTKIOVPIC_EXPORT vtkVPICReader : public vtkImageAlgorithm
 public:
   static vtkVPICReader *New();
   vtkTypeMacro(vtkVPICReader,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -113,7 +113,7 @@ protected:
   int UsedRank;                         // Number of processors used in display
 
   VPICDataSet* vpicData;                // Data structure controlling access
-  GridExchange* exchanger;		// Exchange ghost cells between procs
+  GridExchange* exchanger;              // Exchange ghost cells between procs
 
   vtkIdType NumberOfNodes;              // Number of points in grid
   vtkIdType NumberOfCells;              // Number of cells in grid
@@ -159,9 +159,9 @@ protected:
   vtkCallbackCommand* SelectionObserver;
 
   int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *);
+                  vtkInformationVector *) VTK_OVERRIDE;
   int RequestInformation(vtkInformation *, vtkInformationVector **inVector,
-                         vtkInformationVector *);
+                         vtkInformationVector *) VTK_OVERRIDE;
 
   void LoadVariableData(int var, int timeStep);
   void LoadComponent(

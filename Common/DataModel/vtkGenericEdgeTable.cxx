@@ -55,7 +55,7 @@ public:
 //-----------------------------------------------------------------------------
 void vtkEdgeTablePoints::Resize(vtkIdType newSize)
 {
-  vtkIdType size = PointVector.size();
+  vtkIdType size = static_cast<vtkIdType>(PointVector.size());
 
   if( size <= newSize )
   {
@@ -77,12 +77,12 @@ void vtkEdgeTablePoints::LoadFactor()
   vtkIdType numEntries = 0;
   vtkIdType numBins = 0;
 
-  vtkIdType size = PointVector.size();
+  vtkIdType size = static_cast<vtkIdType>(PointVector.size());
   cerr << "EdgeTablePoints:\n";
   for(int i=0; i<size; i++)
   {
-    numEntries += PointVector[i].size();
-    if( PointVector[i].size() ) numBins++;
+    numEntries += static_cast<vtkIdType>(PointVector[i].size());
+    if( !PointVector[i].empty() ) numBins++;
     cerr << PointVector[i].size() << ",";
   }
   cerr << "\n";
@@ -93,7 +93,7 @@ void vtkEdgeTablePoints::LoadFactor()
 //-----------------------------------------------------------------------------
 void vtkEdgeTablePoints::DumpPoints()
 {
-  vtkIdType size = PointVector.size();
+  vtkIdType size = static_cast<vtkIdType>(PointVector.size());
   for(int i=0; i<size; i++)
   {
     VectorPointTableType v = PointVector[i];
@@ -125,7 +125,7 @@ public:
 //-----------------------------------------------------------------------------
 void vtkEdgeTableEdge::Resize(vtkIdType newSize)
 {
-  vtkIdType size = Vector.size();
+  vtkIdType size = static_cast<vtkIdType>(Vector.size());
 
   if( size <= newSize )
   {
@@ -145,13 +145,13 @@ void vtkEdgeTableEdge::LoadFactor()
   vtkIdType numEntry = 0;
   vtkIdType numBins = 0;
 
-  vtkIdType size = Vector.size();
+  vtkIdType size = static_cast<vtkIdType>(Vector.size());
   cerr << "EdgeTableEdge:\n";
   for(int i=0; i<size; i++)
   {
     VectorEdgeTableType v = Vector[i];
-    numEntry += v.size();
-    if(v.size()) numBins++;
+    numEntry += static_cast<vtkIdType>(v.size());
+    if(!v.empty()) numBins++;
   }
   cerr << "\n";
   cerr << size << "," << numEntry << "," << numBins << "," << Modulo
@@ -161,7 +161,7 @@ void vtkEdgeTableEdge::LoadFactor()
 //-----------------------------------------------------------------------------
 void vtkEdgeTableEdge::DumpEdges()
 {
-  vtkIdType size = Vector.size();
+  vtkIdType size = static_cast<vtkIdType>(Vector.size());
   for(int i=0; i<size; i++)
   {
     VectorEdgeTableType v = Vector[i];

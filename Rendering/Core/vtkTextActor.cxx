@@ -46,7 +46,7 @@ vtkTextActor::vtkTextActor()
   // so...compute equivalent coords for initial position
   this->PositionCoordinate->SetCoordinateSystemToViewport();
 
-  // This intializes the rectangle structure.
+  // This initializes the rectangle structure.
   // It will be used to display the text image as a texture map.
   this->Rectangle = vtkPolyData::New();
   this->RectanglePoints = vtkPoints::New();
@@ -101,7 +101,7 @@ vtkTextActor::vtkTextActor()
 
   this->FontScaleExponent = 1;
 
-  this->Input = 0;
+  this->Input = nullptr;
   this->InputRendered = false;
 
   this->FormerOrientation = 0.0;
@@ -119,15 +119,15 @@ vtkTextActor::~vtkTextActor()
 {
   this->ImageData->Delete();
   this->Transform->Delete();
-  this->SetTextProperty(NULL);
+  this->SetTextProperty(nullptr);
   this->ScaledTextProperty->Delete();
-  this->ScaledTextProperty = NULL;
+  this->ScaledTextProperty = nullptr;
   delete [] this->Input;
   this->Rectangle->Delete();
-  this->Rectangle = 0;
+  this->Rectangle = nullptr;
   this->RectanglePoints->Delete();
-  this->RectanglePoints = 0;
-  this->SetTexture(0);
+  this->RectanglePoints = nullptr;
+  this->SetTexture(nullptr);
 }
 
 // ----------------------------------------------------------------------------
@@ -155,6 +155,9 @@ void vtkTextActor::GetBoundingBox(
       else if ( bbox[3] < x[1] )
         bbox[3] = x[1];
     }
+    // Use pixel centers rather than pixel corners for the coordinates.
+    --bbox[1];
+    --bbox[3];
   }
   else
   {
@@ -352,7 +355,7 @@ bool vtkTextActor::RenderImage(vtkTextProperty *tprop, vtkViewport *vp)
   }
 
   return this->TextRenderer->RenderString(tprop, text, this->ImageData,
-                                          NULL, win->GetDPI());
+                                          nullptr, win->GetDPI());
 }
 
 // ----------------------------------------------------------------------------
@@ -411,7 +414,7 @@ void vtkTextActor::SetTextProperty(vtkTextProperty *p)
   if ( this->TextProperty )
   {
     this->TextProperty->UnRegister( this );
-    this->TextProperty = NULL;
+    this->TextProperty = nullptr;
   }
   this->TextProperty = p;
   if (this->TextProperty)
@@ -426,7 +429,7 @@ void vtkTextActor::SetTextProperty(vtkTextProperty *p)
 void vtkTextActor::ShallowCopy(vtkProp *prop)
 {
   vtkTextActor *a = vtkTextActor::SafeDownCast(prop);
-  if ( a != NULL )
+  if ( a != nullptr )
   {
     this->SetPosition2(a->GetPosition2());
     this->SetMinimumSize(a->GetMinimumSize());
@@ -878,9 +881,9 @@ void vtkTextActor::ComputeRectangle(vtkViewport *viewport)
 
   this->RectanglePoints->SetNumberOfPoints(4);
   this->RectanglePoints->SetPoint(0, xo,           yo,           0.0);
-  this->RectanglePoints->SetPoint(1, xo,           yo + dims[1] - 1, 0.0);
-  this->RectanglePoints->SetPoint(2, xo + dims[0] - 1, yo + dims[1] - 1, 0.0);
-  this->RectanglePoints->SetPoint(3, xo + dims[0] - 1, yo,           0.0);
+  this->RectanglePoints->SetPoint(1, xo,           yo + dims[1], 0.0);
+  this->RectanglePoints->SetPoint(2, xo + dims[0], yo + dims[1], 0.0);
+  this->RectanglePoints->SetPoint(3, xo + dims[0], yo,           0.0);
 }
 
 // ----------------------------------------------------------------------------

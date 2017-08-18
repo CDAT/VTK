@@ -60,7 +60,7 @@ class VTKRENDERINGCORE_EXPORT vtkInteractorObserver : public vtkObject
 {
 public:
   vtkTypeMacro(vtkInteractorObserver,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Methods for turning the interactor observer on and off, and determining
@@ -195,13 +195,13 @@ public:
    * as well as listening for DeleteEvents, without actually having to process
    * mouse events.)
    */
-  void GrabFocus(vtkCommand *mouseEvents, vtkCommand *keypressEvents=NULL);
+  void GrabFocus(vtkCommand *mouseEvents, vtkCommand *keypressEvents=nullptr);
   void ReleaseFocus();
   //@}
 
 protected:
   vtkInteractorObserver();
-  ~vtkInteractorObserver();
+  ~vtkInteractorObserver() VTK_OVERRIDE;
 
   //@{
   /**

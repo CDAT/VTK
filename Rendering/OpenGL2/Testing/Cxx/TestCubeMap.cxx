@@ -14,14 +14,12 @@
 
 #include "vtkActor.h"
 #include "vtkCamera.h"
-#include "vtkImageData.h"
 #include "vtkImageFlip.h"
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkJPEGReader.h"
 #include "vtkNew.h"
 #include "vtkOpenGLPolyDataMapper.h"
 #include "vtkOpenGLRenderWindow.h"
-#include "vtkOpenGLTexture.h"
 #include "vtkPLYReader.h"
 #include "vtkPolyDataNormals.h"
 #include "vtkProperty.h"
@@ -32,7 +30,7 @@
 #include "vtkShaderProgram.h"
 #include "vtkSmartPointer.h"
 #include "vtkTestUtilities.h"
-#include "vtkTextureObject.h"
+#include "vtkTexture.h"
 
 //----------------------------------------------------------------------------
 int TestCubeMap(int argc, char *argv[])
@@ -44,10 +42,8 @@ int TestCubeMap(int argc, char *argv[])
   renderWindow->AddRenderer(renderer.Get());
   vtkNew<vtkRenderWindowInteractor> iren;
   iren->SetRenderWindow(renderWindow.Get());
-
-  // We call Render to create the OpenGL context as it will
-  // be needed by the texture object
-  renderWindow->Render();
+  vtkNew<vtkTexture> texture;
+  texture->CubeMapOn();
 
   const char* fileName =
     vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/bunny.ply");
@@ -57,7 +53,6 @@ int TestCubeMap(int argc, char *argv[])
   vtkNew<vtkPolyDataNormals> norms;
   norms->SetInputConnection(reader->GetOutputPort());
 
-  vtkSmartPointer<vtkImageData> imgs[6];
   const char* fpath[] =
     {
     "Data/skybox-px.jpg",
@@ -68,8 +63,6 @@ int TestCubeMap(int argc, char *argv[])
     "Data/skybox-nz.jpg"
     };
 
-  void* images[6];
-
   for (int i = 0; i < 6; i++)
   {
     vtkNew<vtkJPEGReader> imgReader;
@@ -78,24 +71,8 @@ int TestCubeMap(int argc, char *argv[])
     vtkNew<vtkImageFlip> flip;
     flip->SetInputConnection(imgReader->GetOutputPort());
     flip->SetFilteredAxis(1); // flip y axis
-    flip->Update();
-    imgs[i] = flip->GetOutput();
-    images[i] = imgs[i]->GetScalarPointer();
+    texture->SetInputConnection(i, flip->GetOutputPort(0));
   }
-
-  int dims[3];
-  imgs[0]->GetDimensions(dims);
-
-  // Create a texture object from our set of cube map images
-  vtkNew<vtkTextureObject> texObject;
-  texObject->SetContext(
-    vtkOpenGLRenderWindow::SafeDownCast(renderWindow.Get()));
-  texObject->CreateCubeFromRaw(
-    dims[0], dims[1], 3, imgs[0]->GetScalarType(), images);
-
-  // Setup a texture with our home made texture object
-  vtkNew<vtkOpenGLTexture> texture;
-  texture->SetTextureObject(texObject.Get());
 
   vtkNew<vtkOpenGLPolyDataMapper> mapper;
   mapper->SetInputConnection(norms->GetOutputPort());
@@ -129,9 +106,9 @@ int TestCubeMap(int argc, char *argv[])
     "//VTK::System::Dec\n"  // always start with this line
     "//VTK::Output::Dec\n"  // always have this line in your FS
     "varying vec3 TexCoords;\n"
-    "uniform samplerCube CubeMap;\n"
+    "uniform samplerCube texture_0;\n"
     "void main () {\n"
-    "  gl_FragData[0] = texture(CubeMap, TexCoords);\n"
+    "  gl_FragData[0] = texture(texture_0, TexCoords);\n"
     "}\n"
     );
 

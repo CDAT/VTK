@@ -35,10 +35,10 @@ vtkCxxSetObjectMacro(vtkTextActor3D, TextProperty, vtkTextProperty);
 // ----------------------------------------------------------------------------
 vtkTextActor3D::vtkTextActor3D()
 {
-  this->Input        = NULL;
+  this->Input        = nullptr;
   this->ImageActor   = vtkImageActor::New();
-  this->ImageData    = NULL;
-  this->TextProperty = NULL;
+  this->ImageData    = nullptr;
+  this->TextProperty = nullptr;
 
   this->BuildTime.Modified();
 
@@ -51,16 +51,16 @@ vtkTextActor3D::vtkTextActor3D()
 // --------------------------------------------------------------------------
 vtkTextActor3D::~vtkTextActor3D()
 {
-  this->SetTextProperty(NULL);
-  this->SetInput(NULL);
+  this->SetTextProperty(nullptr);
+  this->SetInput(nullptr);
 
   this->ImageActor->Delete();
-  this->ImageActor = NULL;
+  this->ImageActor = nullptr;
 
   if (this->ImageData)
   {
     this->ImageData->Delete();
-    this->ImageData = NULL;
+    this->ImageData = nullptr;
   }
 }
 
@@ -68,7 +68,7 @@ vtkTextActor3D::~vtkTextActor3D()
 void vtkTextActor3D::ShallowCopy(vtkProp *prop)
 {
   vtkTextActor3D *a = vtkTextActor3D::SafeDownCast(prop);
-  if (a != NULL)
+  if (a != nullptr)
   {
     this->SetInput(a->GetInput());
     this->SetTextProperty(a->GetTextProperty());
@@ -84,14 +84,14 @@ double* vtkTextActor3D::GetBounds()
   // that we haven't rendered yet, so we have to make sure our bounds
   // are up to date so that we don't get culled.
   this->UpdateImageActor();
-  double* bounds = this->ImageActor->GetBounds();
+  const double* bounds = this->ImageActor->GetBounds();
   this->Bounds[0] = bounds[0];
   this->Bounds[1] = bounds[1];
   this->Bounds[2] = bounds[2];
   this->Bounds[3] = bounds[3];
   this->Bounds[4] = bounds[4];
   this->Bounds[5] = bounds[5];
-  return bounds;
+  return this->Bounds;
 }
 
 // --------------------------------------------------------------------------
@@ -254,14 +254,14 @@ int vtkTextActor3D::UpdateImageActor()
   if (!this->TextProperty)
   {
     vtkErrorMacro(<<"Need a text property to render text actor");
-    this->ImageActor->SetInputData(0);
+    this->ImageActor->SetInputData(nullptr);
     return 0;
   }
 
   // No input, the assign the image actor a zilch input
   if (!this->Input || !*this->Input)
   {
-    this->ImageActor->SetInputData(0);
+    this->ImageActor->SetInputData(nullptr);
     return 1;
   }
 
@@ -292,15 +292,15 @@ int vtkTextActor3D::UpdateImageActor()
     if (!tRend)
     {
       vtkErrorMacro(<<"Failed getting the TextRenderer instance.");
-      this->ImageActor->SetInputData(0);
+      this->ImageActor->SetInputData(nullptr);
       return 0;
     }
 
     if (!tRend->RenderString(this->TextProperty, this->Input, this->ImageData,
-                             NULL, vtkTextActor3D::GetRenderedDPI()))
+                             nullptr, vtkTextActor3D::GetRenderedDPI()))
     {
       vtkErrorMacro(<<"Failed rendering text to buffer");
-      this->ImageActor->SetInputData(0);
+      this->ImageActor->SetInputData(nullptr);
       return 0;
     }
 

@@ -42,7 +42,7 @@ class VTKIOXML_EXPORT vtkXMLGenericDataObjectReader : public vtkXMLDataReader
 {
 public:
   vtkTypeMacro(vtkXMLGenericDataObjectReader,vtkXMLDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   static vtkXMLGenericDataObjectReader *New();
 
   //@{
@@ -57,7 +57,7 @@ public:
   /**
    * Get the output as various concrete types. This method is typically used
    * when you know exactly what type of data is being read.  Otherwise, use
-   * the general GetOutput() method. If the wrong type is used NULL is
+   * the general GetOutput() method. If the wrong type is used nullptr is
    * returned.  (You must also set the filename of the object prior to
    * getting the output.)
    */
@@ -74,17 +74,17 @@ public:
   /**
    * Overridden method.
    */
-  vtkIdType GetNumberOfPoints();
+  vtkIdType GetNumberOfPoints() VTK_OVERRIDE;
 
   /**
    * Overridden method.
    */
-  vtkIdType GetNumberOfCells();
+  vtkIdType GetNumberOfCells() VTK_OVERRIDE;
 
   /**
    * Overridden method. Not Used. Delegated.
    */
-  void SetupEmptyOutput();
+  void SetupEmptyOutput() VTK_OVERRIDE;
 
   /**
    * This method can be used to find out the type of output expected without
@@ -94,25 +94,25 @@ public:
 
 protected:
   vtkXMLGenericDataObjectReader();
-  ~vtkXMLGenericDataObjectReader();
+  ~vtkXMLGenericDataObjectReader() VTK_OVERRIDE;
 
   /**
    * Overridden method. Not used. Return "vtkDataObject".
    */
-  const char* GetDataSetName();
+  const char* GetDataSetName() VTK_OVERRIDE;
 
 
-  virtual int RequestDataObject(vtkInformation *, vtkInformationVector **,
-                                vtkInformationVector *);
-  virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *);
+  int RequestDataObject(vtkInformation *, vtkInformationVector **,
+                                vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                                 vtkInformationVector *) VTK_OVERRIDE;
   virtual int RequestUpdateExtent(vtkInformation *request,
                                   vtkInformationVector **inputVector,
                                   vtkInformationVector *outputVector);
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *);
-  virtual int FillOutputPortInformation(int, vtkInformation *);
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
 
   vtkXMLReader *Reader; // actual reader
 

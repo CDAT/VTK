@@ -134,6 +134,7 @@ public:
   void Reset();
   void CopyStructure(vtkDataSet *ds) VTK_OVERRIDE;
   vtkIdType GetNumberOfCells() VTK_OVERRIDE;
+  using vtkDataSet::GetCell;
   vtkCell *GetCell(vtkIdType cellId) VTK_OVERRIDE;
   void GetCell(vtkIdType cellId, vtkGenericCell *cell) VTK_OVERRIDE;
   void GetCellBounds(vtkIdType cellId, double bounds[6]) VTK_OVERRIDE;
@@ -268,7 +269,7 @@ public:
   //@}
 
   /**
-   * Special support for polyhedron. Return NULL for all other cell types.
+   * Special support for polyhedron. Return nullptr for all other cell types.
    */
   vtkIdType      *GetFaces(vtkIdType cellId);
 
@@ -284,10 +285,19 @@ public:
    * Special function used by vtkUnstructuredGridReader.
    * By default vtkUnstructuredGrid does not contain face information, which is
    * only used by polyhedron cells. If so far no polyhedron cells have been
-   * added, Faces and FaceLocations pointers will be NULL. In this case, need to
+   * added, Faces and FaceLocations pointers will be nullptr. In this case, need to
    * initialize the arrays and assign values to the previous non-polyhedron cells.
    */
   int InitializeFacesRepresentation(vtkIdType numPrevCells);
+
+  /**
+   * Return the mesh (geometry/topology) modification time.
+   * This time is different from the usual MTime which also takes into
+   * account the modification of data arrays. This function can be used to
+   * track the changes on the mesh separately from the data arrays
+   * (eg. static mesh over time with transient data).
+   */
+  virtual vtkMTimeType GetMeshMTime();
 
   /**
    * A static method for converting a polyhedron vtkCellArray of format

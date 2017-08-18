@@ -30,12 +30,14 @@
 class vtkActor;
 class vtkCompositeDataDisplayAttributes;
 class vtkDataArray;
+class vtkInformationDoubleKey;
 class vtkInformationIntegerKey;
 class vtkInformationObjectBaseKey;
 class vtkInformationStringKey;
 class vtkMapper;
 class vtkPiecewiseFunction;
 class vtkPolyData;
+class vtkProperty;
 class vtkTimeStamp;
 
 
@@ -45,13 +47,13 @@ class VTKRENDERINGOSPRAY_EXPORT vtkOSPRayActorNode :
 public:
   static vtkOSPRayActorNode* New();
   vtkTypeMacro(vtkOSPRayActorNode, vtkActorNode);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Overridden to take into account my renderables time, including
    * mapper and data into mapper inclusive of composite input
    */
-  virtual vtkMTimeType GetMTime();
+  virtual vtkMTimeType GetMTime() VTK_OVERRIDE;
 
   /**
    * When added to the mapper, enables scale array and scale function.
@@ -90,6 +92,19 @@ public:
    * Convenience method to set a scale function on my renderable.
    */
   static void SetScaleFunction(vtkPiecewiseFunction *scaleFunction, vtkActor *);
+
+  /**
+   * Indicates that the actor acts as a light emitting object.
+   */
+  static vtkInformationDoubleKey* LUMINOSITY();
+
+  //@{
+  /**
+   * Convenience method to set luminosity on my renderable.
+   */
+  static void SetLuminosity(double value, vtkProperty *);
+  static double GetLuminosity(vtkProperty *);
+  //@}
 
 protected:
   vtkOSPRayActorNode();

@@ -269,7 +269,7 @@ public:
 
    * IMPORTANT: The stream _must_ be finalized with the "CloseStream" call.
    */
-  int StreamTriangle(	vtkIdType vertex0Id, double scalar0,
+  int StreamTriangle( vtkIdType vertex0Id, double scalar0,
                       vtkIdType vertex1Id, double scalar1,
                       vtkIdType vertex2Id, double scalar2);
 
@@ -325,7 +325,7 @@ public:
 
    * 'simplificationMetric' is an object in charge of evaluating the importance
    * of a Reeb graph arc at each step of the simplification process.
-   * if 'simplificationMetric' is NULL, the default strategy (persitence of the
+   * if 'simplificationMetric' is nullptr, the default strategy (persitence of the
    * scalar field) is used.
    * Customized simplification metric evaluation algorithm can be designed (see
    * vtkReebGraphSimplificationMetric), enabling the user to control the

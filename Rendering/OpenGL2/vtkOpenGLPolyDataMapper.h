@@ -32,27 +32,30 @@
 #include <map> //for methods
 
 class vtkCellArray;
+class vtkGenericOpenGLResourceFreeCallback;
 class vtkMatrix4x4;
 class vtkMatrix3x3;
+class vtkOpenGLRenderTimer;
 class vtkOpenGLTexture;
 class vtkOpenGLBufferObject;
 class vtkOpenGLVertexBufferObject;
+class vtkOpenGLVertexBufferObjectGroup;
+class vtkPoints;
 class vtkTextureObject;
 class vtkTransform;
-class vtkGenericOpenGLResourceFreeCallback;
-class vtkValuePassHelper;
+
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLPolyDataMapper : public vtkPolyDataMapper
 {
 public:
   static vtkOpenGLPolyDataMapper* New();
   vtkTypeMacro(vtkOpenGLPolyDataMapper, vtkPolyDataMapper)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Implemented by sub classes. Actual rendering is done here.
    */
-  virtual void RenderPiece(vtkRenderer *ren, vtkActor *act);
+  void RenderPiece(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
 
   //@{
   /**
@@ -68,7 +71,7 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *);
+  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
 
   vtkGetMacro(PopulateSelectionSettings,int);
   void SetPopulateSelectionSettings(int v) { this->PopulateSelectionSettings = v; };
@@ -79,7 +82,7 @@ public:
    * Used by vtkHardwareSelector to determine if the prop supports hardware
    * selection.
    */
-  virtual bool GetSupportsSelection() { return true; }
+  bool GetSupportsSelection() VTK_OVERRIDE { return true; }
 
   /**
    * Returns if the mapper does not expect to have translucent geometry. This
@@ -91,7 +94,7 @@ public:
    * Overridden to use the actual data and ScalarMode to determine if we have
    * opaque geometry.
    */
-  virtual bool GetIsOpaque();
+  bool GetIsOpaque() VTK_OVERRIDE;
 
   // used by RenderPiece and functions it calls to reduce
   // calls to get the input and allow for rendering of
@@ -146,13 +149,13 @@ public:
    */
   void AddShaderReplacement(
     vtkShader::Type shaderType, // vertex, fragment, etc
-    std::string originalValue,
+    const std::string& originalValue,
     bool replaceFirst,  // do this replacement before the default
-    std::string replacementValue,
+    const std::string& replacementValue,
     bool replaceAll);
   void ClearShaderReplacement(
     vtkShader::Type shaderType, // vertex, fragment, etc
-    std::string originalValue,
+    const std::string& originalValue,
     bool replaceFirst);
   //@}
 
@@ -205,8 +208,8 @@ public:
    */
   bool GetHaveAppleBug() { return this->HaveAppleBug; }
 
-  /// Return the mapper's vertex buffer object.
-  vtkGetObjectMacro(VBO,vtkOpenGLVertexBufferObject);
+  /// Return the mapper's vertex buffer objects.
+  vtkGetObjectMacro(VBOs, vtkOpenGLVertexBufferObjectGroup);
 
   /**\brief A convenience method for enabling/disabling
     *   the VBO's shift+scale transform.
@@ -225,9 +228,18 @@ public:
     PrimitiveEnd
   };
 
+  /**
+   * Get access to the map of glprim to vtkcell ids
+   */
+  static void MakeCellCellMap(std::vector<vtkIdType> &CellCellMap,
+                              bool HaveAppleBug,
+                              vtkPolyData *poly,
+                              vtkCellArray **prims, int representation,
+                              vtkPoints *points);
+
 protected:
   vtkOpenGLPolyDataMapper();
-  ~vtkOpenGLPolyDataMapper();
+  ~vtkOpenGLPolyDataMapper() VTK_OVERRIDE;
 
   vtkGenericOpenGLResourceFreeCallback *ResourceCallback;
 
@@ -251,7 +263,7 @@ protected:
    * to be updated depending on whether this->Static is set or not. This method
    * simply obtains the bounds from the data-object and returns it.
    */
-  virtual void ComputeBounds();
+  void ComputeBounds() VTK_OVERRIDE;
 
   /**
    * Make sure appropriate shaders are defined, compiled and bound.  This method
@@ -368,7 +380,7 @@ protected:
   virtual void BuildIBO(vtkRenderer *ren, vtkActor *act, vtkPolyData *poly);
 
   // The VBO and its layout.
-  vtkOpenGLVertexBufferObject *VBO;
+  vtkOpenGLVertexBufferObjectGroup *VBOs;
 
   // Structures for the various cell types we render.
   vtkOpenGLHelper Primitives[PrimitiveEnd];
@@ -396,6 +408,7 @@ protected:
 
   // values we use to determine if we need to rebuild shaders
   std::map<const vtkOpenGLHelper *, int> LastLightComplexity;
+  std::map<const vtkOpenGLHelper *, int> LastLightCount;
   std::map<const vtkOpenGLHelper *, vtkTimeStamp> LightComplexityChanged;
 
   int LastSelectionState;
@@ -424,6 +437,7 @@ protected:
   vtkMatrix3x3* TempMatrix3;
   vtkNew<vtkTransform> VBOInverseTransform;
   vtkNew<vtkMatrix4x4> VBOShiftScale;
+  int ShiftScaleMethod; // for points
 
   // if set to true, tcoords will be passed to the
   // VBO even if the mapper knows of no texture maps
@@ -491,11 +505,7 @@ protected:
   char *VertexShaderCode;
   char *FragmentShaderCode;
   char *GeometryShaderCode;
-  unsigned int TimerQuery;
-
-#if GL_ES_VERSION_3_0 != 1
-  vtkSmartPointer<vtkValuePassHelper> ValuePassHelper;
-#endif
+  vtkOpenGLRenderTimer *TimerQuery;
 
   // are we currently drawing spheres/tubes
   bool DrawingSpheres(vtkOpenGLHelper &cellBO, vtkActor *actor);
@@ -508,6 +518,9 @@ protected:
   // get how big to make the points when doing point picking
   // typically 2 for points, 4 for lines, 6 for surface
   int GetPointPickingPrimitiveSize(int primType);
+
+  // a map from drawn triangles back to containing cell id
+  std::vector<unsigned int> CellCellMap;
 
 private:
   vtkOpenGLPolyDataMapper(const vtkOpenGLPolyDataMapper&) VTK_DELETE_FUNCTION;

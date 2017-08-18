@@ -315,6 +315,7 @@ public:
    * Get cell with cellId such that: 0 <= cellId < NumberOfCells.
    * THIS METHOD IS NOT THREAD SAFE.
    */
+  using vtkDataSet::GetCell;
   vtkCell *GetCell(vtkIdType cellId) VTK_OVERRIDE;
 
   /**
@@ -367,7 +368,7 @@ public:
 
   /**
    * Locate cell based on global coordinate x and tolerance
-   * squared. If cell and cellId is non-NULL, then search starts from
+   * squared. If cell and cellId is non-nullptr, then search starts from
    * this cell and looks at immediate neighbors.  Returns cellId >= 0
    * if inside, < 0 otherwise.  The parametric coordinates are
    * provided in pcoords[3]. The interpolation weights are returned in

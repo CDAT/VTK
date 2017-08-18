@@ -102,7 +102,6 @@ vtkOSOpenGLRenderWindow::vtkOSOpenGLRenderWindow()
   this->OwnWindow = 0;
 
   this->Internal = new vtkOSOpenGLRenderWindowInternal(this);
-
 }
 
 // free up memory & close the window

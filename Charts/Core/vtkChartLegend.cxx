@@ -82,8 +82,8 @@ vtkChartLegend::vtkChartLegend()
 vtkChartLegend::~vtkChartLegend()
 {
   delete this->Storage;
-  this->Storage = NULL;
-  this->Point = NULL;
+  this->Storage = nullptr;
+  this->Point = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ bool vtkChartLegend::Paint(vtkContext2D *painter)
   // This is where everything should be drawn, or dispatched to other methods.
   vtkDebugMacro(<< "Paint event called in vtkChartLegend.");
 
-  if (!this->Visible || this->Storage->ActivePlots.size() == 0)
+  if (!this->Visible || this->Storage->ActivePlots.empty())
   {
     return true;
   }

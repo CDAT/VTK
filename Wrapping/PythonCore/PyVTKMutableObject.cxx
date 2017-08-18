@@ -65,7 +65,7 @@ static PyObject *PyVTKMutableObject_CompatibleObject(PyObject *opn)
   else if (nb && nb->nb_index)
   {
     opn = nb->nb_index(opn);
-    if (opn == 0 || (!PyLong_Check(opn)
+    if (opn == nullptr || (!PyLong_Check(opn)
 #ifndef VTK_PY3K
         && !PyInt_Check(opn)
 #endif
@@ -73,24 +73,24 @@ static PyObject *PyVTKMutableObject_CompatibleObject(PyObject *opn)
     {
       PyErr_SetString(PyExc_TypeError,
                       "nb_index should return integer object");
-      return NULL;
+      return nullptr;
     }
   }
   else if (nb && nb->nb_float)
   {
     opn = nb->nb_float(opn);
-    if (opn == 0 || !PyFloat_Check(opn))
+    if (opn == nullptr || !PyFloat_Check(opn))
     {
       PyErr_SetString(PyExc_TypeError,
                       "nb_float should return float object");
-      return NULL;
+      return nullptr;
     }
   }
   else
   {
     PyErr_SetString(PyExc_TypeError,
                     "a numeric or string object is required");
-    return NULL;
+    return nullptr;
   }
 
   return opn;
@@ -110,7 +110,7 @@ PyObject *PyVTKMutableObject_GetValue(PyObject *self)
     PyErr_SetString(PyExc_TypeError, "a vtk.mutable() object is required");
   }
 
-  return NULL;
+  return nullptr;
 }
 
 int PyVTKMutableObject_SetValue(PyObject *self, PyObject *val)
@@ -183,7 +183,7 @@ static PyObject *PyVTKMutableObject_Get(PyObject *self, PyObject *args)
     return ob;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 static PyObject *PyVTKMutableObject_Set(PyObject *self, PyObject *args)
@@ -204,7 +204,7 @@ static PyObject *PyVTKMutableObject_Set(PyObject *self, PyObject *args)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 #ifdef VTK_PY3K
@@ -217,17 +217,21 @@ static PyObject *PyVTKMutableObject_Trunc(PyObject *self, PyObject *args)
     PyObject *attr = PyUnicode_InternFromString("__trunc__");
     PyObject *ob = PyVTKMutableObject_GetValue(self);
     PyObject *meth = _PyType_Lookup(Py_TYPE(ob), attr);
-    if (meth == NULL)
+    if (meth == nullptr)
     {
       PyErr_Format(PyExc_TypeError,
                    "type %.100s doesn't define __trunc__ method",
                    Py_TYPE(ob)->tp_name);
-      return NULL;
+      return nullptr;
     }
-    return PyObject_CallFunction(meth, (char *)"O", ob);
+#if PY_VERSION_HEX >= 0x03040000
+    return PyObject_CallFunction(meth, "O", ob);
+#else
+    return PyObject_CallFunction(meth, const_cast<char *>("O"), ob);
+#endif
   }
 
-  return NULL;
+  return nullptr;
 }
 
 static PyObject *PyVTKMutableObject_Round(PyObject *self, PyObject *args)
@@ -239,21 +243,29 @@ static PyObject *PyVTKMutableObject_Round(PyObject *self, PyObject *args)
     PyObject *attr = PyUnicode_InternFromString("__round__");
     PyObject *ob = PyVTKMutableObject_GetValue(self);
     PyObject *meth = _PyType_Lookup(Py_TYPE(ob), attr);
-    if (meth == NULL)
+    if (meth == nullptr)
     {
       PyErr_Format(PyExc_TypeError,
                    "type %.100s doesn't define __round__ method",
                    Py_TYPE(ob)->tp_name);
-      return NULL;
+      return nullptr;
     }
+#if PY_VERSION_HEX >= 0x03040000
     if (opn)
     {
-      return PyObject_CallFunction(meth, (char *)"OO", ob, opn);
+      return PyObject_CallFunction(meth, "OO", ob, opn);
     }
-    return PyObject_CallFunction(meth, (char *)"O", ob);
+    return PyObject_CallFunction(meth, "O", ob);
+#else
+    if (opn)
+    {
+      return PyObject_CallFunction(meth, const_cast<char *>("OO"), ob, opn);
+    }
+    return PyObject_CallFunction(meth, const_cast<char *>("O"), ob);
+#endif
   }
 
-  return NULL;
+  return nullptr;
 }
 #endif
 
@@ -266,7 +278,7 @@ static PyMethodDef PyVTKMutableObject_Methods[] = {
   {"__round__", PyVTKMutableObject_Round, METH_VARARGS,
    "Returns the Integral closest to x, rounding half toward even.\n"},
 #endif
-  { NULL, NULL, 0, NULL }
+  { nullptr, nullptr, 0, nullptr }
 };
 
 
@@ -452,7 +464,7 @@ static PyObject *PyVTKMutableObject_Hex(PyObject *ob)
 
   PyErr_SetString(PyExc_TypeError,
                   "hex() argument can't be converted to hex");
-  return NULL;
+  return nullptr;
 #endif
 }
 
@@ -470,7 +482,7 @@ static PyObject *PyVTKMutableObject_Oct(PyObject *ob)
 
   PyErr_SetString(PyExc_TypeError,
                   "oct() argument can't be converted to oct");
-  return NULL;
+  return nullptr;
 #endif
 }
 #endif
@@ -550,7 +562,7 @@ static PyNumberMethods PyVTKMutableObject_AsNumber = {
   PyVTKMutableObject_Long,                   // nb_long
 #else
   PyVTKMutableObject_Long,                   // nb_int
-  NULL,                                      // nb_reserved
+  nullptr,                                   // nb_reserved
 #endif
   PyVTKMutableObject_Float,                  // nb_float
 #ifndef VTK_PY3K
@@ -576,8 +588,8 @@ static PyNumberMethods PyVTKMutableObject_AsNumber = {
   PyVTKMutableObject_InPlaceTrueDivide,      // nb_inplace_true_divide
   PyVTKMutableObject_Index,                  // nb_index
 #if PY_VERSION_HEX >= 0x03050000
-  0,                                         // nb_matrix_multiply
-  0,                                         // nb_inplace_matrix_multiply
+  nullptr,                                   // nb_matrix_multiply
+  nullptr,                                   // nb_inplace_matrix_multiply
 #endif
 };
 
@@ -656,8 +668,8 @@ static Py_ssize_t PyVTKMutableObject_GetReadBuf(
       op, segment, ptrptr);
   }
 
-  sprintf(text, "type \'%.20s\' does not support readable buffer access",
-          Py_TYPE(op)->tp_name);
+  snprintf(text, sizeof(text), "type \'%.20s\' does not support readable buffer access",
+           Py_TYPE(op)->tp_name);
   PyErr_SetString(PyExc_TypeError, text);
 
   return -1;
@@ -677,8 +689,8 @@ static Py_ssize_t PyVTKMutableObject_GetWriteBuf(
       op, segment, ptrptr);
   }
 
-  sprintf(text, "type \'%.20s\' does not support writeable buffer access",
-          Py_TYPE(op)->tp_name);
+  snprintf(text, sizeof(text), "type \'%.20s\' does not support writeable buffer access",
+           Py_TYPE(op)->tp_name);
   PyErr_SetString(PyExc_TypeError, text);
 
   return -1;
@@ -697,8 +709,8 @@ PyVTKMutableObject_GetSegCount(PyObject *op, Py_ssize_t *lenp)
     return Py_TYPE(op)->tp_as_buffer->bf_getsegcount(op, lenp);
   }
 
-  sprintf(text, "type \'%.20s\' does not support buffer access",
-          Py_TYPE(op)->tp_name);
+  snprintf(text, sizeof(text), "type \'%.20s\' does not support buffer access",
+           Py_TYPE(op)->tp_name);
   PyErr_SetString(PyExc_TypeError, text);
 
   return -1;
@@ -718,8 +730,8 @@ static Py_ssize_t PyVTKMutableObject_GetCharBuf(
       op, segment, ptrptr);
   }
 
-  sprintf(text, "type \'%.20s\' does not support character buffer access",
-          Py_TYPE(op)->tp_name);
+  snprintf(text, sizeof(text), "type \'%.20s\' does not support character buffer access",
+           Py_TYPE(op)->tp_name);
   PyErr_SetString(PyExc_TypeError, text);
 
   return -1;
@@ -766,7 +778,7 @@ static void PyVTKMutableObject_Delete(PyObject *ob)
 
 static PyObject *PyVTKMutableObject_Repr(PyObject *ob)
 {
-  PyObject *r = 0;
+  PyObject *r = nullptr;
   const char *name = Py_TYPE(ob)->tp_name;
   PyObject *s = PyObject_Repr(((PyVTKMutableObject *)ob)->value);
   if (s)
@@ -774,14 +786,21 @@ static PyObject *PyVTKMutableObject_Repr(PyObject *ob)
 #ifdef VTK_PY3K
     r = PyUnicode_FromFormat("%s(%U)", name, s);
 #else
-    char textspace[128];
     const char *text = PyString_AsString(s);
-    size_t n = strlen(name) + strlen(text) + 3;
-    char *cp = textspace;
-    if (n > 128) { cp = (char *)malloc(n); }
-    sprintf(cp, "%s(%s)", name, text);
-    r = PyString_FromString(cp);
-    if (n > 128) { free(cp); }
+    size_t n = strlen(name) + strlen(text) + 3; // for '(', ')', null
+    if (n > 128)
+    {
+      char *cp = (char *)malloc(n);
+      snprintf(cp, n, "%s(%s)", name, text);
+      r = PyString_FromString(cp);
+      free(cp);
+    }
+    else
+    {
+      char textspace[128];
+      snprintf(textspace, sizeof(textspace), "%s(%s)", name, text);
+      r = PyString_FromString(textspace);
+    }
 #endif
     Py_DECREF(s);
   }
@@ -852,7 +871,7 @@ static PyObject *PyVTKMutableObject_GetAttr(PyObject *self, PyObject *attr)
                "'%.50s' object has no attribute '%.80s'",
                Py_TYPE(self)->tp_name, name);
 #endif
-  return NULL;
+  return nullptr;
 }
 
 static PyObject *PyVTKMutableObject_New(
@@ -864,7 +883,7 @@ static PyObject *PyVTKMutableObject_New(
   {
     PyErr_SetString(PyExc_TypeError,
                     "mutable() does not take keyword arguments");
-    return NULL;
+    return nullptr;
   }
 
   if (PyArg_ParseTuple(args, "O:mutable", &o))
@@ -879,7 +898,7 @@ static PyObject *PyVTKMutableObject_New(
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 //--------------------------------------------------------------------
@@ -889,52 +908,52 @@ PyTypeObject PyVTKMutableObject_Type = {
   sizeof(PyVTKMutableObject),            // tp_basicsize
   0,                                     // tp_itemsize
   PyVTKMutableObject_Delete,             // tp_dealloc
-  0,                                     // tp_print
-  0,                                     // tp_getattr
-  0,                                     // tp_setattr
-  0,                                     // tp_compare
+  nullptr,                               // tp_print
+  nullptr,                               // tp_getattr
+  nullptr,                               // tp_setattr
+  nullptr,                               // tp_compare
   PyVTKMutableObject_Repr,               // tp_repr
   &PyVTKMutableObject_AsNumber,          // tp_as_number
-  0,                                     // tp_as_sequence
-  0,                                     // tp_as_mapping
+  nullptr,                               // tp_as_sequence
+  nullptr,                               // tp_as_mapping
 #if PY_VERSION_HEX >= 0x02060000
   PyObject_HashNotImplemented,           // tp_hash
 #else
-  0,                                     // tp_hash
+  nullptr,                               // tp_hash
 #endif
-  0,                                     // tp_call
+  nullptr,                               // tp_call
   PyVTKMutableObject_Str,                // tp_string
   PyVTKMutableObject_GetAttr,            // tp_getattro
-  0,                                     // tp_setattro
+  nullptr,                               // tp_setattro
   &PyVTKMutableObject_AsBuffer,          // tp_as_buffer
 #ifndef VTK_PY3K
   Py_TPFLAGS_CHECKTYPES |
 #endif
   Py_TPFLAGS_DEFAULT,                    // tp_flags
   PyVTKMutableObject_Doc,                // tp_doc
-  0,                                     // tp_traverse
-  0,                                     // tp_clear
+  nullptr,                               // tp_traverse
+  nullptr,                               // tp_clear
   PyVTKMutableObject_RichCompare,        // tp_richcompare
   0,                                     // tp_weaklistoffset
-  0,                                     // tp_iter
-  0,                                     // tp_iternext
+  nullptr,                               // tp_iter
+  nullptr,                               // tp_iternext
   PyVTKMutableObject_Methods,            // tp_methods
-  0,                                     // tp_members
-  0,                                     // tp_getset
-  0,                                     // tp_base
-  0,                                     // tp_dict
-  0,                                     // tp_descr_get
-  0,                                     // tp_descr_set
+  nullptr,                               // tp_members
+  nullptr,                               // tp_getset
+  nullptr,                               // tp_base
+  nullptr,                               // tp_dict
+  nullptr,                               // tp_descr_get
+  nullptr,                               // tp_descr_set
   0,                                     // tp_dictoffset
-  0,                                     // tp_init
-  0,                                     // tp_alloc
+  nullptr,                               // tp_init
+  nullptr,                               // tp_alloc
   PyVTKMutableObject_New,                // tp_new
   PyObject_Del,                          // tp_free
-  0,                                     // tp_is_gc
-  0,                                     // tp_bases
-  0,                                     // tp_mro
-  0,                                     // tp_cache
-  0,                                     // tp_subclasses
-  0,                                     // tp_weaklist
+  nullptr,                               // tp_is_gc
+  nullptr,                               // tp_bases
+  nullptr,                               // tp_mro
+  nullptr,                               // tp_cache
+  nullptr,                               // tp_subclasses
+  nullptr,                               // tp_weaklist
   VTK_WRAP_PYTHON_SUPPRESS_UNINITIALIZED
 };

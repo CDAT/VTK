@@ -38,6 +38,7 @@ vtkObjectFactoryNewMacro(vtkResampleWithDataSet);
 
 //-----------------------------------------------------------------------------
 vtkResampleWithDataSet::vtkResampleWithDataSet()
+  : MarkBlankPointsAndCells(true)
 {
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
@@ -69,6 +70,18 @@ void vtkResampleWithDataSet::SetSourceData(vtkDataObject *input)
 }
 
 //----------------------------------------------------------------------------
+void vtkResampleWithDataSet::SetCategoricalData(bool arg)
+{
+  this->Prober->SetCategoricalData(arg);
+}
+
+bool vtkResampleWithDataSet::GetCategoricalData()
+{
+  // work around for Visual Studio warning C4800:
+  // 'int' : forcing value to bool 'true' or 'false' (performance warning)
+  return this->Prober->GetCategoricalData() ? true : false;
+}
+
 void vtkResampleWithDataSet::SetPassCellArrays(bool arg)
 {
   this->Prober->SetPassCellArrays(arg);
@@ -76,7 +89,7 @@ void vtkResampleWithDataSet::SetPassCellArrays(bool arg)
 
 bool vtkResampleWithDataSet::GetPassCellArrays()
 {
-  // work arround for Visual Studio warning C4800:
+  // work around for Visual Studio warning C4800:
   // 'int' : forcing value to bool 'true' or 'false' (performance warning)
   return this->Prober->GetPassCellArrays() ? true : false;
 }
@@ -99,6 +112,27 @@ void vtkResampleWithDataSet::SetPassFieldArrays(bool arg)
 bool vtkResampleWithDataSet::GetPassFieldArrays()
 {
   return this->Prober->GetPassFieldArrays() ? true : false;
+}
+
+//----------------------------------------------------------------------------
+void vtkResampleWithDataSet::SetTolerance(double arg)
+{
+  this->Prober->SetTolerance(arg);
+}
+
+double vtkResampleWithDataSet::GetTolerance()
+{
+  return this->Prober->GetTolerance();
+}
+
+void vtkResampleWithDataSet::SetComputeTolerance(bool arg)
+{
+  this->Prober->SetComputeTolerance(arg);
+}
+
+bool vtkResampleWithDataSet::GetComputeTolerance()
+{
+  return this->Prober->GetComputeTolerance();
 }
 
 //----------------------------------------------------------------------------
@@ -295,7 +329,10 @@ int vtkResampleWithDataSet::RequestData(vtkInformation *vtkNotUsed(request),
     this->Prober->SetSourceData(source);
     this->Prober->Update();
     output->ShallowCopy(this->Prober->GetOutput());
-    this->SetBlankPointsAndCells(output);
+    if (this->MarkBlankPointsAndCells)
+    {
+      this->SetBlankPointsAndCells(output);
+    }
   }
   else if (inDataObject->IsA("vtkCompositeDataSet"))
   {
@@ -307,7 +344,7 @@ int vtkResampleWithDataSet::RequestData(vtkInformation *vtkNotUsed(request),
 
     vtkSmartPointer<vtkCompositeDataIterator> iter;
     iter.TakeReference(input->NewIterator());
-    for (iter->InitReverseTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
+    for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
     {
       vtkDataSet *ds = static_cast<vtkDataSet*>(iter->GetCurrentDataObject());
       if (ds)
@@ -317,8 +354,11 @@ int vtkResampleWithDataSet::RequestData(vtkInformation *vtkNotUsed(request),
         vtkDataSet *result = this->Prober->GetOutput();
 
         vtkDataSet *block = result->NewInstance();
-        block->DeepCopy(result);
-        this->SetBlankPointsAndCells(block);
+        block->ShallowCopy(result);
+        if (this->MarkBlankPointsAndCells)
+        {
+          this->SetBlankPointsAndCells(block);
+        }
         output->SetDataSet(iter.GetPointer(), block);
         block->Delete();
       }

@@ -49,9 +49,8 @@ public:
   /**
    * Evaluate box defined by the two points (pMin,pMax).
    */
+  using vtkImplicitFunction::EvaluateFunction;
   double EvaluateFunction(double x[3]) VTK_OVERRIDE;
-  double EvaluateFunction(double x, double y, double z)
-    {return this->vtkImplicitFunction::EvaluateFunction(x, y, z); }
 
   /**
    * Evaluate the gradient of the box.
@@ -92,12 +91,13 @@ public:
   void AddBounds(const double bounds[6]);
 
   /**
-   * Bounding box intersection modified from Graphics Gems Vol I. The method
-   * returns a non-zero value if the bounding box is hit. Origin[3] starts
-   * the ray, dir[3] is the vector components of the ray in the x-y-z
-   * directions, coord[3] is the location of hit, and t is the parametric
-   * coordinate along line. (Notes: the intersection ray dir[3] is NOT
-   * normalized.  Valid intersections will only occur between 0<=t<=1.)
+   * Bounding box intersection with line modified from Graphics Gems Vol
+   * I. The method returns a non-zero value if the bounding box is
+   * hit. Origin[3] starts the ray, dir[3] is the vector components of the
+   * ray in the x-y-z directions, coord[3] is the location of hit, and t is
+   * the parametric coordinate along line. (Notes: the intersection ray
+   * dir[3] is NOT normalized.  Valid intersections will only occur between
+   * 0<=t<=1.)
    */
   static char IntersectBox(double bounds[6], double origin[3], double dir[3],
                            double coord[3], double& t);
@@ -110,7 +110,7 @@ public:
    * plane2 where integers (0, 1, 2, 3, 4, 5) stand for the
    * (xmin, xmax, ymin, ymax, zmin, zmax) planes respectively, and a value
    * of -1 means that no intersection occurred.  The actual intersection
-   * coordinates are stored in x1 and x2, which can be set to NULL of you
+   * coordinates are stored in x1 and x2, which can be set to nullptr of you
    * do not need them to be returned.  The function return value will be
    * zero if the line is wholly outside of the box.
    */
@@ -119,6 +119,16 @@ public:
                                double &t1, double &t2,
                                double x1[3], double x2[3],
                                int &plane1, int &plane2);
+
+  /**
+   * Plane intersection with the box. The plane is infinite in extent and
+   * defined by an origin and normal. The function indicates whether the
+   * plane intersects, not the particulars of intersection points and such.
+   * The function returns non-zero if the plane and box intersect; zero
+   * otherwise.
+   */
+  static int IntersectWithPlane(double bounds[6], double origin[3],
+                                double normal[3]);
 
 protected:
   vtkBox();
@@ -146,5 +156,3 @@ inline void vtkBox::SetXMax(double p[3])
 
 
 #endif
-
-

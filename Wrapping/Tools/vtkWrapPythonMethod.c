@@ -77,7 +77,7 @@ void vtkWrapPython_DeclareVariables(
     if (vtkWrap_IsFunction(arg))
     {
       fprintf(fp,
-              "  PyObject *temp%d = NULL;\n",
+              "  PyObject *temp%d = nullptr;\n",
               i);
       /* ignore further arguments */
       break;
@@ -115,24 +115,24 @@ void vtkWrapPython_DeclareVariables(
         if (!vtkWrap_IsConst(arg))
         {
           fprintf(fp,
-              "  %s *save%d = (size%d == 0 ? NULL : temp%d + size%d);\n",
+              "  %s *save%d = (size%d == 0 ? nullptr : temp%d + size%d);\n",
               vtkWrap_GetTypeName(arg), i, i, i, i);
         }
       }
       else if (vtkWrap_IsArray(arg) && arg->Value)
       {
-        /* prepare for "T a[n] = NULL" arg (array whose default is NULL) */
+        /* prepare for "T a[n] = nullptr" arg (array with default of NULL) */
         fprintf(fp,
               "  int size%d = 0;\n"
               "  %s store%d[%s%d];\n"
-              "  %s *temp%d = NULL;\n",
+              "  %s *temp%d = nullptr;\n",
               i,
               vtkWrap_GetTypeName(arg), i, mtwo, arg->Count,
               vtkWrap_GetTypeName(arg), i);
         if (!vtkWrap_IsConst(arg))
         {
           fprintf(fp,
-              "  %s *save%d = NULL;\n",
+              "  %s *save%d = nullptr;\n",
               vtkWrap_GetTypeName(arg), i);
         }
         fprintf(fp,
@@ -173,7 +173,8 @@ void vtkWrapPython_DeclareVariables(
     }
 
     /* temps for buffer objects */
-    if (vtkWrap_IsVoidPointer(arg))
+    if (vtkWrap_IsVoidPointer(arg) ||
+        vtkWrap_IsZeroCopyPointer(arg))
     {
       fprintf(fp,
               "  Py_buffer pbuf%d = VTK_PYBUFFER_INITIALIZER;\n",
@@ -186,7 +187,7 @@ void vtkWrapPython_DeclareVariables(
         !vtkWrap_IsNonConstRef(arg))
     {
       fprintf(fp,
-              "  PyObject *pobj%d = NULL;\n",
+              "  PyObject *pobj%d = nullptr;\n",
               i);
     }
   }
@@ -205,7 +206,7 @@ void vtkWrapPython_DeclareVariables(
 
   /* temp variable for the Python return value */
   fprintf(fp,
-          "  PyObject *result = NULL;\n"
+          "  PyObject *result = nullptr;\n"
           "\n");
 }
 
@@ -299,7 +300,8 @@ void vtkWrapPython_GetSingleArgument(
     fprintf(fp, "%sGetFunction(%stemp%d)",
             prefix, argname, i);
   }
-  else if (vtkWrap_IsVoidPointer(arg))
+  else if (vtkWrap_IsVoidPointer(arg) ||
+           vtkWrap_IsZeroCopyPointer(arg))
   {
     fprintf(fp, "%sGetBuffer(%stemp%d, &pbuf%d)",
             prefix, argname, i, i);
@@ -418,7 +420,7 @@ void vtkWrapPython_ReturnValue(
     prefix = "vtkPythonArgs::";
 
     fprintf(fp,
-            "    if (PyErr_Occurred() == NULL)\n"
+            "    if (PyErr_Occurred() == nullptr)\n"
             "    {\n");
   }
   else
@@ -441,9 +443,10 @@ void vtkWrapPython_ReturnValue(
   }
   else if (vtkWrap_IsEnumMember(data, val))
   {
+    vtkWrapText_PythonName(data->Name, pythonname);
     fprintf(fp,
             "      result = Py%s_%s_FromEnum(tempr);\n",
-            data->Name, val->Class);
+            pythonname, val->Class);
   }
   else if (vtkWrap_IsPythonObject(val))
   {
@@ -756,8 +759,8 @@ static void vtkWrapPython_GenerateMethodCall(
       if (vtkWrap_IsFunction(arg))
       {
         fprintf(fp,"\n"
-                "        (temp%d == Py_None ? NULL : vtkPythonVoidFunc),\n"
-                "        (temp%d == Py_None ? NULL : temp%d));\n",
+                "        (temp%d == Py_None ? nullptr : vtkPythonVoidFunc),\n"
+                "        (temp%d == Py_None ? nullptr : temp%d));\n",
                 i, i, i);
         fprintf(fp,
                 "      if (temp%d != Py_None)\n"
@@ -765,7 +768,7 @@ static void vtkWrapPython_GenerateMethodCall(
                 "        Py_INCREF(temp%d);\n"
                 "      }\n"
                 "      %sArgDelete(\n"
-                "        (temp%d == Py_None ? NULL : vtkPythonVoidFuncArgDelete)",
+                "        (temp%d == Py_None ? nullptr : vtkPythonVoidFuncArgDelete)",
                 i, i, methodname, i);
         break;
       }
@@ -936,7 +939,8 @@ static void vtkWrapPython_FreeTemporaries(
   {
     arg = currentFunction->Parameters[i];
 
-    if (vtkWrap_IsVoidPointer(arg))
+    if (vtkWrap_IsVoidPointer(arg) ||
+        vtkWrap_IsZeroCopyPointer(arg))
     {
       /* release Py_buffer objects */
       fprintf(fp,

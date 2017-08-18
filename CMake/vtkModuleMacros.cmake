@@ -5,6 +5,7 @@ set(_VTKModuleMacros_DEFAULT_LABEL "VTKModular")
 include(${_VTKModuleMacros_DIR}/vtkModuleAPI.cmake)
 include(VTKGenerateExportHeader)
 include(vtkWrapping)
+include(vtkTargetLinkLibrariesWithDynamicLookup)
 if(VTK_MAKE_INSTANTIATORS)
   include(vtkMakeInstantiator)
 endif()
@@ -22,6 +23,7 @@ endif()
 #  DEPENDS = Modules that will be publicly linked to this module
 #  PRIVATE_DEPENDS = Modules that will be privately linked to this module
 #  COMPILE_DEPENDS = Modules that are needed at compile time by this module
+#  OPTIONAL_PYTHON_LINK = Optionally link the python library to this module
 #  TEST_DEPENDS = Modules that are needed by this modules testing executables
 #  DESCRIPTION = Free text description of the module
 #  TCL_NAME = Alternative name for the TCL wrapping (cannot contain numbers)
@@ -47,6 +49,7 @@ macro(vtk_module _name)
   set(${vtk-module-test}_DECLARED 1)
   set(${vtk-module}_DEPENDS "")
   set(${vtk-module}_COMPILE_DEPENDS "")
+  set(${vtk-module}_OPTIONAL_PYTHON_LINK 0)
   set(${vtk-module}_PRIVATE_DEPENDS "")
   set(${vtk-module-test}_DEPENDS "${vtk-module}")
   set(${vtk-module}_IMPLEMENTS "")
@@ -79,6 +82,9 @@ macro(vtk_module _name)
     elseif("${arg}" STREQUAL "IMPLEMENTATION_REQUIRED_BY_BACKEND")
       set(_doing "")
       set(${vtk-module}_IMPLEMENTATION_REQUIRED_BY_BACKEND 1)
+    elseif("${arg}" STREQUAL "OPTIONAL_PYTHON_LINK")
+      set(_doing "")
+      set(${vtk-module}_OPTIONAL_PYTHON_LINK 1)
     elseif("${arg}" MATCHES "^[A-Z][A-Z][A-Z]$" AND
            NOT "${arg}" MATCHES "^(ON|OFF|MPI)$")
       set(_doing "")
@@ -510,12 +516,16 @@ endfunction()
 # added to VTK_COMPILETOOLS_TARGETS global property. This also adds install
 # rules for the target unless NO_INSTALL argument is specified or
 # VTK_INSTALL_NO_DEVELOPMENT variable is set.
+if(NOT DEFINED VTK_COMPILE_TOOLS_IMPORTED)
+  set(VTK_COMPILE_TOOLS_IMPORTED FALSE)
+endif()
 function(vtk_compile_tools_target _name)
-  if (CMAKE_CROSSCOMPILING)
+  if(VTK_COMPILE_TOOLS_IMPORTED)
     message(AUTHOR_WARNING
-      "vtk_compile_tools_target is being called when CMAKE_CROSSCOMPILING is true. "
+      "vtk_compile_tools_target is being called when VTK_COMPILE_TOOLS_IMPORTED is true. "
       "This generally signifies a script issue. compile-tools are not expected "
-      "to built, but rather imported when CMAKE_CROSSCOMPILING is ON")
+      "to be built, but rather imported when CMAKE_CROSSCOMPILING is ON and "
+      "CMAKE_CROSSCOMPILER_EMULATOR is undefined.")
   endif ()
   set(_install 1)
   foreach(arg IN LISTS ARGN)
@@ -536,6 +546,21 @@ endfunction()
 
 function(vtk_add_library name)
   add_library(${name} ${ARGN} ${headers})
+  # We use compile features to specify that VTK requires C++11.
+  # We request a series of C++11 features that will conform to VTK's
+  # desired minimum requirements.
+  # - cxx_override enforces Intel 14+, and GCC 4.7+
+  # - cxx_nullptr as this a hard requirement for all compiler
+  # CMake 3.8+ introduces the concept of meta language compiler features, and
+  # also introduces the first compilers that are only meta language feature
+  # aware. So if we have CMake 3.8+ we will also set the meta feature as
+  # a private flag ( private so we don't force consumers to also use 3.8+ )
+  if(NOT VTK_IGNORE_CMAKE_CXX11_CHECKS)
+    target_compile_features(${name} PUBLIC cxx_nullptr cxx_override)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.8)
+      target_compile_features(${name} PRIVATE cxx_std_11)
+    endif()
+  endif()
   if(NOT ARGV1 STREQUAL OBJECT)
     vtk_target(${name})
   endif()
@@ -661,6 +686,11 @@ function(vtk_module_library name)
     endif()
   endforeach()
 
+  # Optionally link the module to the python library
+  if(NOT _vtk_build_as_kit AND ${${vtk-module}_OPTIONAL_PYTHON_LINK})
+    vtk_target_link_libraries_with_dynamic_lookup(${vtk-module} LINK_PUBLIC ${vtkPython_LIBRARIES})
+  endif()
+
   # Handle the private dependencies, setting up link/include directories.
   foreach(dep IN LISTS ${vtk-module}_PRIVATE_DEPENDS)
     if(${dep}_INCLUDE_DIRS)
@@ -721,16 +751,8 @@ VTK_AUTOINIT(${vtk-module})
     # mismatched visibility warnings when building statically since not all
     # libraries that VTK builds don't set visibility flags. Until we get a
     # time to do that, we skip visibility flags for static libraries.
-    if(CMAKE_VERSION VERSION_LESS 3.3)
-      #CMake 3.3 deprecates add_compiler_export_flags and also has policy
-      #CMP0063 which properly propagates visibility flags to OBJECT libs
-      vtk_add_compiler_export_flags(my_abi_flags)
-      set_property(TARGET ${vtk-module}${target_suffix} APPEND
-        PROPERTY COMPILE_FLAGS "${my_abi_flags}")
-    else()
-      set_property(TARGET ${vtk-module}${target_suffix}
-        PROPERTY CXX_VISIBILITY_PRESET "hidden")
-    endif()
+    set_property(TARGET ${vtk-module}${target_suffix}
+                 PROPERTY CXX_VISIBILITY_PRESET "hidden")
   endif()
 
   if(BUILD_TESTING AND PYTHON_EXECUTABLE AND NOT ${vtk-module}_NO_HeaderTest AND VTK_SOURCE_DIR)
@@ -802,6 +824,7 @@ macro(vtk_module_third_party _pkg)
   string(TOUPPER "${_pkg}" _upper)
 
   set(_includes "")
+  set(_pkg_name "")
   set(_libs "")
   set(_nolibs 0)
   set(_subdir 1)
@@ -810,7 +833,7 @@ macro(vtk_module_third_party _pkg)
   set(_optional_components "")
   set(_doing "")
   foreach(arg ${ARGN})
-    if("${arg}" MATCHES "^(LIBRARIES|INCLUDE_DIRS|COMPONENTS|OPTIONAL_COMPONENTS)$")
+    if("${arg}" MATCHES "^(LIBRARIES|INCLUDE_DIRS|COMPONENTS|OPTIONAL_COMPONENTS|PACKAGE)$")
       set(_doing "${arg}")
     elseif("${arg}" STREQUAL "NO_ADD_SUBDIRECTORY")
       set(_doing "")
@@ -825,6 +848,11 @@ macro(vtk_module_third_party _pkg)
         message(AUTHOR_WARNING "Duplicate 'VERSION' keyword")
       endif ()
       set(_version "${arg}")
+    elseif("${_doing}" STREQUAL "PACKAGE")
+      if (_pkg_name)
+        message(AUTHOR_WARNING "Duplicate 'PACKAGE' keyword")
+      endif ()
+      set(_pkg_name "${arg}")
     elseif("${_doing}" STREQUAL "LIBRARIES")
       list(APPEND _libs "${arg}")
     elseif("${_doing}" STREQUAL "INCLUDE_DIRS")
@@ -841,6 +869,10 @@ macro(vtk_module_third_party _pkg)
   if(_libs AND _nolibs)
     message(FATAL_ERROR "Cannot specify both LIBRARIES and NO_LIBRARIES")
   endif()
+  if (NOT _pkg_name)
+    set(_pkg_name "${_pkg}")
+  endif ()
+  string(TOUPPER "${_pkg_name}" _upper_pkg_name)
 
   option(VTK_USE_SYSTEM_${_upper} "Use system-installed ${_pkg}" ${VTK_USE_SYSTEM_LIBRARIES})
   mark_as_advanced(VTK_USE_SYSTEM_${_upper})
@@ -851,33 +883,27 @@ macro(vtk_module_third_party _pkg)
       list(APPEND __extra_args ${_components})
     endif()
     if (_optional_components)
-      if ("${CMAKE_VERSION}" VERSION_GREATER "2.8.7")
-        list(APPEND __extra_args "OPTIONAL_COMPONENTS" ${_optional_components})
-      else ()
-        # for cmake version <= 2.8.7, since OPTIONAL_COMPONENTS is not
-        # available, we just treat them as required components.
-        list(APPEND __extra_args ${_optional_components})
-      endif()
+      list(APPEND __extra_args "OPTIONAL_COMPONENTS" ${_optional_components})
     endif()
-    find_package(${_pkg} ${_version} REQUIRED ${__extra_args})
-    if(NOT ${_upper}_FOUND AND NOT ${_pkg}_FOUND)
-      message(FATAL_ERROR "VTK_USE_SYSTEM_${_upper} is ON but ${_pkg} is not found!")
+    find_package(${_pkg_name} ${_version} REQUIRED ${__extra_args})
+    if(NOT ${_upper_pkg_name}_FOUND AND NOT ${_pkg_name}_FOUND)
+      message(FATAL_ERROR "VTK_USE_SYSTEM_${_upper} is ON but ${_pkg_name} is not found!")
     endif()
-    if(${_pkg}_INCLUDE_DIRS)
-      set(vtk${_lower}_SYSTEM_INCLUDE_DIRS ${${_pkg}_INCLUDE_DIRS})
-    elseif(${_upper}_INCLUDE_DIRS)
-      set(vtk${_lower}_SYSTEM_INCLUDE_DIRS ${${_upper}_INCLUDE_DIRS})
+    if(${_pkg_name}_INCLUDE_DIRS)
+      set(vtk${_lower}_SYSTEM_INCLUDE_DIRS ${${_pkg_name}_INCLUDE_DIRS})
+    elseif(${_upper_pkg_name}_INCLUDE_DIRS)
+      set(vtk${_lower}_SYSTEM_INCLUDE_DIRS ${${_upper_pkg_name}_INCLUDE_DIRS})
     else()
-      set(vtk${_lower}_SYSTEM_INCLUDE_DIRS ${${_upper}_INCLUDE_DIR})
+      set(vtk${_lower}_SYSTEM_INCLUDE_DIRS ${${_upper_pkg_name}_INCLUDE_DIR})
     endif()
-    if(${_pkg}_LIBRARIES)
-      set(vtk${_lower}_LIBRARIES "${${_pkg}_LIBRARIES}")
+    if(${_pkg_name}_LIBRARIES)
+      set(vtk${_lower}_LIBRARIES "${${_pkg_name}_LIBRARIES}")
     else()
-      set(vtk${_lower}_LIBRARIES "${${_upper}_LIBRARIES}")
+      set(vtk${_lower}_LIBRARIES "${${_upper_pkg_name}_LIBRARIES}")
     endif()
 
     #a workaround for bad FindHDF5 behavior in which deb or opt can
-    #end up empty. cmake >= 2.8.12.2 makes this uneccessary
+    #end up empty. cmake >= 2.8.12.2 makes this unnecessary
     string(REGEX MATCH "debug;.*optimized;.*"
            _remove_deb_opt "${vtk${_lower}_LIBRARIES}")
     if (_remove_deb_opt)

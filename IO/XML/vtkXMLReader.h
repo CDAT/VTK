@@ -44,7 +44,15 @@ class VTKIOXML_EXPORT vtkXMLReader : public vtkAlgorithm
 {
 public:
   vtkTypeMacro(vtkXMLReader, vtkAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+
+  enum FieldType
+  {
+    POINT_DATA,
+    CELL_DATA,
+    OTHER
+  };
+
 
   //@{
   /**
@@ -61,7 +69,7 @@ public:
   vtkSetMacro(ReadFromInputString, int);
   vtkGetMacro(ReadFromInputString, int);
   vtkBooleanMacro(ReadFromInputString, int);
-  void SetInputString(std::string s) { this->InputString = s; }
+  void SetInputString(const std::string& s) { this->InputString = s; }
   //@}
 
   /**
@@ -149,9 +157,9 @@ public:
     return this->XMLParser;
   }
 
-  virtual int ProcessRequest(vtkInformation *request,
+  int ProcessRequest(vtkInformation *request,
                              vtkInformationVector **inputVector,
-                             vtkInformationVector *outputVector);
+                             vtkInformationVector *outputVector) VTK_OVERRIDE;
 
   //@{
   /**
@@ -173,7 +181,7 @@ public:
 
 protected:
   vtkXMLReader();
-  ~vtkXMLReader();
+  ~vtkXMLReader() VTK_OVERRIDE;
 
   // Pipeline execution methods to be defined by subclass.  Called by
   // corresponding RequestData methods after appropriate setup has been
@@ -255,6 +263,14 @@ protected:
                             vtkDataSetAttributes* dsa);
   char** CreateStringArray(int numStrings);
   void DestroyStringArray(int numStrings, char** strings);
+
+  // Read an Array values starting at the given index and up to numValues.
+  // This method assumes that the array is of correct size to
+  // accommodate all numValues values. arrayIndex is the value index at which the read
+  // values will be put in the array.
+  virtual int ReadArrayValues(
+    vtkXMLDataElement* da, vtkIdType arrayIndex, vtkAbstractArray* array,
+    vtkIdType startIndex, vtkIdType numValues, FieldType type = OTHER);
 
   // Setup the data array selections for the input's set of arrays.
   void SetDataArraySelections(vtkXMLDataElement* eDSA,
@@ -356,6 +372,15 @@ protected:
 
   vtkDataObject* GetCurrentOutput();
   vtkInformation* GetCurrentOutputInformation();
+
+  // Flag for whether DataProgressCallback should actually update
+  // progress.
+  int InReadData;
+
+  virtual void ConvertGhostLevelsToGhostType(
+    FieldType, vtkAbstractArray*, vtkIdType, vtkIdType) {}
+
+  void ReadFieldData();
 
 private:
   // The stream used to read the input if it is in a file.

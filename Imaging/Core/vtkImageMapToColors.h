@@ -19,7 +19,7 @@
  * The vtkImageMapToColors filter will take an input image of any valid
  * scalar type, and map the first component of the image through a
  * lookup table.  The result is an image of type VTK_UNSIGNED_CHAR.
- * If the lookup table is not set, or is set to NULL, then the input
+ * If the lookup table is not set, or is set to nullptr, then the input
  * data will be passed through if it is already of type VTK_UNSIGNED_CHAR.
  *
  * @sa
@@ -83,7 +83,7 @@ public:
   /**
    * We need to check the modified time of the lookup table too.
    */
-  virtual vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() VTK_OVERRIDE;
 
   //@{
   /**
@@ -96,9 +96,9 @@ public:
 
 protected:
   vtkImageMapToColors();
-  ~vtkImageMapToColors();
+  ~vtkImageMapToColors() VTK_OVERRIDE;
 
-  virtual int RequestInformation(vtkInformation *,
+  int RequestInformation(vtkInformation *,
                                  vtkInformationVector **,
                                  vtkInformationVector *) VTK_OVERRIDE;
 
@@ -108,7 +108,7 @@ protected:
                            vtkImageData ***inData, vtkImageData **outData,
                            int extent[6], int id) VTK_OVERRIDE;
 
-  virtual int RequestData(vtkInformation *request,
+  int RequestData(vtkInformation *request,
                           vtkInformationVector **inputVector,
                           vtkInformationVector *outputVector) VTK_OVERRIDE;
 

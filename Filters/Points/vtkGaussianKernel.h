@@ -53,15 +53,15 @@ public:
    */
   static vtkGaussianKernel *New();
   vtkTypeMacro(vtkGaussianKernel,vtkGeneralizedKernel);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   /**
    * Initialize the kernel. Overload the superclass to set up internal
    * computational values.
    */
-  virtual void Initialize(vtkAbstractPointLocator *loc, vtkDataSet *ds,
-                          vtkPointData *pd);
+  void Initialize(vtkAbstractPointLocator *loc, vtkDataSet *ds,
+                          vtkPointData *pd) VTK_OVERRIDE;
 
   // Re-use any superclass signatures that we don't override.
   using vtkGeneralizedKernel::ComputeWeights;
@@ -77,11 +77,11 @@ public:
    * invoke ComputeWeights() and provide the interpolation basis points pIds
    * directly. The probably weighting prob are numbers 0<=prob<=1 which are
    * multiplied against the interpolation weights before normalization. They
-   * are estimates of local confidence of weights. The prob may be NULL in
+   * are estimates of local confidence of weights. The prob may be nullptr in
    * which all probabilities are considered =1.
    */
-  virtual vtkIdType ComputeWeights(double x[3], vtkIdList *pIds,
-                                   vtkDoubleArray *prob, vtkDoubleArray *weights);
+  vtkIdType ComputeWeights(double x[3], vtkIdList *pIds,
+                                   vtkDoubleArray *prob, vtkDoubleArray *weights) VTK_OVERRIDE;
 
   //@{
   /**
@@ -95,7 +95,7 @@ public:
 
 protected:
   vtkGaussianKernel();
-  ~vtkGaussianKernel();
+  ~vtkGaussianKernel() VTK_OVERRIDE;
 
   double Sharpness;
 

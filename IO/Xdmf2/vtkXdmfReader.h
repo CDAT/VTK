@@ -47,7 +47,7 @@ class VTKIOXDMF2_EXPORT vtkXdmfReader : public vtkDataReader
 public:
   static vtkXdmfReader* New();
   vtkTypeMacro(vtkXdmfReader, vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   // Until needed, multiple domains are not supported.
   //// Description:
@@ -70,7 +70,7 @@ public:
 
   //// Description:
   //// Returns the name for the active domain. Note that this may be different
-  //// from what GetDomainName() returns if DomainName is NULL or invalid.
+  //// from what GetDomainName() returns if DomainName is nullptr or invalid.
   // vtkGetStringMacro(ActiveDomainName);
 
   /**
@@ -81,7 +81,7 @@ public:
   int GetNumberOfPointArrays();
 
   /**
-   * Returns the name of point array at the give index. Returns NULL if index is
+   * Returns the name of point array at the give index. Returns nullptr if index is
    * invalid.
    */
   const char* GetPointArrayName(int index);
@@ -189,13 +189,13 @@ protected:
 
   virtual int ProcessRequest(vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
+    vtkInformationVector *outputVector) VTK_OVERRIDE;
   virtual int RequestDataObject(vtkInformationVector *outputVector);
   virtual int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *);
+    vtkInformationVector *) VTK_OVERRIDE;
   virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *);
-  virtual int FillOutputPortInformation(int port, vtkInformation *info);
+    vtkInformationVector *) VTK_OVERRIDE;
+  virtual int FillOutputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
 
   vtkXdmfArraySelection* GetPointArraySelection();
   vtkXdmfArraySelection* GetCellArraySelection();

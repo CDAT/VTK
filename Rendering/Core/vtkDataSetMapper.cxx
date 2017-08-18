@@ -29,8 +29,8 @@ vtkStandardNewMacro(vtkDataSetMapper);
 //----------------------------------------------------------------------------
 vtkDataSetMapper::vtkDataSetMapper()
 {
-  this->GeometryExtractor = NULL;
-  this->PolyDataMapper = NULL;
+  this->GeometryExtractor = nullptr;
+  this->PolyDataMapper = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ void vtkDataSetMapper::Render(vtkRenderer *ren, vtkActor *act)
 
   // Need a lookup table
   //
-  if ( this->LookupTable == NULL )
+  if ( this->LookupTable == nullptr )
   {
     this->CreateDefaultLookupTable();
   }
@@ -91,7 +91,7 @@ void vtkDataSetMapper::Render(vtkRenderer *ren, vtkActor *act)
 
   // Now can create appropriate mapper
   //
-  if ( this->PolyDataMapper == NULL )
+  if ( this->PolyDataMapper == nullptr )
   {
     vtkDataSetSurfaceFilter *gf = vtkDataSetSurfaceFilter::New();
     vtkPolyDataMapper *pm = vtkPolyDataMapper::New();
@@ -109,7 +109,7 @@ void vtkDataSetMapper::Render(vtkRenderer *ren, vtkActor *act)
   }
 
   // For efficiency: if input type is vtkPolyData, there's no need to
-  // pass it thru the geometry filter.
+  // pass it through the geometry filter.
   //
   if ( this->GetInput()->GetDataObjectType() == VTK_POLY_DATA )
   {
@@ -183,7 +183,7 @@ vtkMTimeType vtkDataSetMapper::GetMTime()
   vtkMTimeType mTime=this->vtkMapper::GetMTime();
   vtkMTimeType time;
 
-  if ( this->LookupTable != NULL )
+  if ( this->LookupTable != nullptr )
   {
     time = this->LookupTable->GetMTime();
     mTime = ( time > mTime ? time : mTime );

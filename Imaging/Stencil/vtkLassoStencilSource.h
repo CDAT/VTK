@@ -42,7 +42,7 @@ class VTKIMAGINGSTENCIL_EXPORT vtkLassoStencilSource : public vtkImageStencilSou
 public:
   static vtkLassoStencilSource *New();
   vtkTypeMacro(vtkLassoStencilSource, vtkImageStencilSource);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   enum {
     POLYGON = 0,
@@ -84,7 +84,7 @@ public:
   /**
    * The points for a particular slice.  This will override the
    * points that were set by calling SetPoints() for the slice.
-   * To clear the setting, call SetSlicePoints(slice, NULL).
+   * To clear the setting, call SetSlicePoints(slice, nullptr).
    */
   virtual void SetSlicePoints(int i, vtkPoints *points);
   virtual vtkPoints *GetSlicePoints(int i);
@@ -98,14 +98,14 @@ public:
   /**
    * Overload GetMTime() to include the timestamp on the points.
    */
-  vtkMTimeType GetMTime();
+  vtkMTimeType GetMTime() VTK_OVERRIDE;
 
 protected:
   vtkLassoStencilSource();
-  ~vtkLassoStencilSource();
+  ~vtkLassoStencilSource() VTK_OVERRIDE;
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                          vtkInformationVector *) VTK_OVERRIDE;
 
   int Shape;
   int SliceOrientation;

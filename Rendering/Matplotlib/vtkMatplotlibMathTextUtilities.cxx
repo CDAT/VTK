@@ -1098,8 +1098,23 @@ bool vtkMatplotlibMathTextUtilities::StringToPath(const char *str,
     points->SetPoint(i, newPoint);
   }
 
-
   return true;
+}
+
+//----------------------------------------------------------------------------
+void vtkMatplotlibMathTextUtilities::SetScaleToPowerOfTwo(bool val)
+{
+  if (this->ScaleToPowerOfTwo != val)
+  {
+    this->ScaleToPowerOfTwo = val;
+    this->Modified();
+  }
+}
+
+//----------------------------------------------------------------------------
+bool vtkMatplotlibMathTextUtilities::GetScaleToPowerOfTwo()
+{
+  return this->ScaleToPowerOfTwo;
 }
 
 //----------------------------------------------------------------------------

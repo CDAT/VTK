@@ -14,10 +14,10 @@
 =========================================================================*/
 /**
  * @class   vtkPropCollection
- * @brief   a list of Props
+ * @brief   an ordered list of Props
  *
  * vtkPropCollection represents and provides methods to manipulate a list of
- * Props (i.e., vtkProp and subclasses). The list is unsorted and duplicate
+ * Props (i.e., vtkProp and subclasses). The list is ordered and duplicate
  * entries are not prevented.
  *
  * @sa
@@ -39,7 +39,7 @@ class VTKRENDERINGCORE_EXPORT vtkPropCollection : public vtkCollection
   vtkTypeMacro(vtkPropCollection,vtkCollection);
 
   /**
-   * Add an Prop to the list.
+   * Add a Prop to the bottom of the list.
    */
   void AddItem(vtkProp *a);
 
@@ -70,7 +70,7 @@ class VTKRENDERINGCORE_EXPORT vtkPropCollection : public vtkCollection
 
 protected:
   vtkPropCollection() {}
-  ~vtkPropCollection() {}
+  ~vtkPropCollection() VTK_OVERRIDE {}
 
 
 private:
@@ -94,9 +94,9 @@ inline vtkProp *vtkPropCollection::GetNextProp()
 
 inline vtkProp *vtkPropCollection::GetLastProp()
 {
-  if ( this->Bottom == NULL )
+  if ( this->Bottom == nullptr )
   {
-    return NULL;
+    return nullptr;
   }
   else
   {

@@ -330,7 +330,8 @@ public:
   enum DeleteMethod
   {
     VTK_DATA_ARRAY_FREE,
-    VTK_DATA_ARRAY_DELETE
+    VTK_DATA_ARRAY_DELETE,
+    VTK_DATA_ARRAY_ALIGNED_FREE
   };
 
   //@{
@@ -342,8 +343,11 @@ public:
    * actual array provided; it does not copy the data from the supplied
    * array. If specified, the delete method determines how the data array
    * will be deallocated. If the delete method is VTK_DATA_ARRAY_FREE, free()
-   * will be used. If the delete method is DELETE, delete[] will be used. The
-   * default is FREE. (Note not all subclasses can support deleteMethod.)
+   * will be used. If the delete method is VTK_DATA_ARRAY_DELETE, delete[]
+   * will be used. If the delete method is VTK_DATA_ARRAY_ALIGNED_FREE
+   * _aligned_free() will be used on windows, while free() will be used
+   * everywhere else.The default is FREE.
+   * (Note not all subclasses can support deleteMethod.)
    */
   virtual void SetVoidArray(void *vtkNotUsed(array),
                             vtkIdType vtkNotUsed(size),
@@ -533,7 +537,7 @@ public:
    * Inquire if this array has an instance of vtkInformation
    * already associated with it.
    */
-  bool HasInformation(){ return this->Information!=0; }
+  bool HasInformation(){ return this->Information!=nullptr; }
 
   /**
    * Copy information instance. Arrays use information objects
@@ -564,11 +568,28 @@ public:
    * {VTK_DOUBLE_MAX, VTK_DOUBLE_MIN} or (2) call ComputeUniqueValues(component)
    * and ComputeRange(component) <b>before</b> modifying the information object.
    * Otherwise it is possible for modifications to the array to take place
-   * without the bounds on the component being updated since the modification
-   * time of the vtkInformation object is used to determine when the
-   * COMPONENT_RANGE values are out of date.
+   * without the bounds on the component being updated.
    */
   static vtkInformationInformationVectorKey* PER_COMPONENT();
+
+  /**
+   * This key is used to hold a vector of COMPONENT_VALUES (and, for
+   * vtkDataArray subclasses, COMPONENT_RANGE) keys -- one
+   * for each component of the array.  You may add additional per-component
+   * key-value pairs to information objects in this vector. However if you
+   * do so, you must be sure to either (1) set COMPONENT_VALUES to
+   * an invalid variant and set COMPONENT_RANGE to
+   * {VTK_DOUBLE_MAX, VTK_DOUBLE_MIN} or (2) call ComputeUniqueValues(component)
+   * and ComputeFiniteRange(component) <b>before</b> modifying the information object.
+   * Otherwise it is possible for modifications to the array to take place
+   * without the bounds on the component being updated.
+   */
+  static vtkInformationInformationVectorKey* PER_FINITE_COMPONENT();
+
+  /**
+   * Removes out-of-date PER_COMPONENT() and PER_FINITE_COMPONENT() values.
+   */
+  void Modified() VTK_OVERRIDE;
 
   /**
    * A key used to hold discrete values taken on either by the tuples of the

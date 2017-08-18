@@ -34,8 +34,8 @@ vtkPhyloXMLTreeWriter::vtkPhyloXMLTreeWriter()
   this->EdgeWeightArrayName = "weight";
   this->NodeNameArrayName = "node name";
 
-  this->EdgeWeightArray = NULL;
-  this->NodeNameArray = NULL;
+  this->EdgeWeightArray = nullptr;
+  this->NodeNameArray = nullptr;
   this->Blacklist = vtkSmartPointer<vtkStringArray>::New();
 }
 
@@ -346,9 +346,9 @@ void vtkPhyloXMLTreeWriter::WritePropertyElement(vtkAbstractArray *array,
                                                  vtkXMLDataElement *element)
 {
   // Search for attribute on this array.
-  std::string authority = "";
-  std::string appliesTo = "";
-  std::string unit = "";
+  std::string authority;
+  std::string appliesTo;
+  std::string unit;
 
   vtkInformation *info = array->GetInformation();
   vtkNew<vtkInformationIterator> infoItr;
@@ -512,7 +512,7 @@ const char* vtkPhyloXMLTreeWriter::GetDataSetName()
     this->InputInformation->Get(vtkDataObject::DATA_OBJECT()));
   if (!hdInput)
   {
-    return 0;
+    return nullptr;
   }
   return hdInput->GetClassName();
 }

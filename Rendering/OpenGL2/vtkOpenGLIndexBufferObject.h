@@ -31,18 +31,18 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLIndexBufferObject :
 public:
   static vtkOpenGLIndexBufferObject *New();
   vtkTypeMacro(vtkOpenGLIndexBufferObject, vtkOpenGLBufferObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   // Sizes/offsets are all in bytes as OpenGL API expects them.
   size_t IndexCount; // Number of indices in the VBO
 
   // Description:
-  // used to create an IBO for triangle primatives
+  // used to create an IBO for triangle primitives
   size_t CreateTriangleIndexBuffer(vtkCellArray *cells,
      vtkPoints *points);
 
   // Description:
-  // used to create an IBO for triangle primatives
+  // used to create an IBO for triangle primitives
   static void AppendTriangleIndexBuffer(
     std::vector<unsigned int> &indexArray,
     vtkCellArray *cells,
@@ -54,7 +54,7 @@ public:
   size_t CreateTriangleLineIndexBuffer(vtkCellArray *cells);
 
   // Description:
-  // used to create an IBO for line primatives
+  // used to create an IBO for line primitives
   static void AppendLineIndexBuffer(
     std::vector<unsigned int> &indexArray,
     vtkCellArray *cells,
@@ -72,11 +72,11 @@ public:
     vtkIdType vertexOffset);
 
   // Description:
-  // used to create an IBO for primatives as points
+  // used to create an IBO for primitives as points
   size_t CreatePointIndexBuffer(vtkCellArray *cells);
 
   // Description:
-  // used to create an IBO for primatives as points
+  // used to create an IBO for primitives as points
   static void AppendPointIndexBuffer(
     std::vector<unsigned int> &indexArray,
     vtkCellArray *cells,
@@ -112,7 +112,7 @@ public:
   //
   static void CreateCellSupportArrays(
     vtkCellArray *[4],
-    std::vector<unsigned int> &cellCellMap,
+    std::vector<vtkIdType> &cellCellMap,
     int representation,
     vtkPoints *points);
 
@@ -121,7 +121,7 @@ public:
   size_t CreateVertexIndexBuffer(vtkCellArray **cells);
 
   // Description:
-  // used to create an IBO for primatives as points
+  // used to create an IBO for primitives as points
   static void AppendVertexIndexBuffer(
     std::vector<unsigned int> &indexArray,
     vtkCellArray **cells,
@@ -129,7 +129,7 @@ public:
 
 protected:
   vtkOpenGLIndexBufferObject();
-  ~vtkOpenGLIndexBufferObject();
+  ~vtkOpenGLIndexBufferObject() VTK_OVERRIDE;
 
 private:
   vtkOpenGLIndexBufferObject(const vtkOpenGLIndexBufferObject&) VTK_DELETE_FUNCTION;

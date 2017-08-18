@@ -1,20 +1,21 @@
 vtk_add_test_cxx(${vtk-module}CxxTests tests
   # Surface rendering tests
-  TestOSPRayCompositePolyDataMapper2.cxx,
-  TestOSPRayDynamicObject.cxx,
-  TestOSPRayDynamicScene.cxx,
-  TestOSPRayImplicits.cxx,
-  TestOSPRayLayers.cxx,
-  TestOSPRayLights.cxx,
+  TestOSPRayAmbient.cxx
+  TestOSPRayCompositePolyDataMapper2.cxx
+  TestOSPRayDynamicObject.cxx
+  TestOSPRayDynamicScene.cxx
+  TestOSPRayImplicits.cxx
+  TestOSPRayLayers.cxx
+  TestOSPRayLights.cxx
   TestOSPRayMultiBlock.cxx
-  TestOSPRayMultiBlockPartialArrayFieldData.cxx,
-  TestOSPRayOrthographic.cxx,
-  TestOSPRayPass.cxx,
-  TestOSPRayRenderMesh.cxx,
-  TestOSPRayRendererType.cxx,
+  TestOSPRayMultiBlockPartialArrayFieldData.cxx
+  TestOSPRayOrthographic.cxx
+  TestOSPRayPass.cxx
+  TestOSPRayRenderMesh.cxx
   TestOSPRayScalarBar.cxx
-  TestOSPRayTime.cxx,
+  TestOSPRayTime.cxx
   TestOSPRayWindow.cxx
+  TestOSPRayStereo.cxx
   # Volume rendering tests
   TestGPURayCastCameraInside.cxx
   TestGPURayCastCellData.cxx
@@ -30,6 +31,11 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestGPUVolumeRayCastMapper.cxx
   TestOSPRayVolumeRenderer.cxx
   TestSmartVolumeMapper.cxx
+  # Path tracer tests
+  TestOSPRayRendererType.cxx
+  TestPathTracerBackground.cxx
+  TestPathTracerLuminous.cxx
+  TestPathTracerShadows.cxx
   )
 vtk_test_cxx_executable(${vtk-module}CxxTests tests RENDERING_FACTORY
   vtkOSPRayTestInteractor.cxx

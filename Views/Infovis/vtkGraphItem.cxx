@@ -63,10 +63,10 @@ struct vtkGraphItem::Internals {
 
 vtkGraphItem::vtkGraphItem()
 {
-  this->Graph = 0;
+  this->Graph = nullptr;
   this->GraphBuildTime = 0;
   this->Internal = new Internals();
-  this->Internal->Interactor = NULL;
+  this->Internal->Interactor = nullptr;
   this->Internal->Animating = false;
   this->Internal->AnimationCallbackInitialized = false;
   this->Internal->TimerId = 0;
@@ -199,7 +199,8 @@ void vtkGraphItem::PaintBuffers(vtkContext2D *painter)
   {
     return;
   }
-  vtkIdType numEdges = this->Internal->EdgePositions.size();
+  vtkIdType numEdges = static_cast<vtkIdType>(
+    this->Internal->EdgePositions.size());
   for (vtkIdType edgeIdx = 0; edgeIdx < numEdges; ++edgeIdx)
   {
     if (this->Internal->EdgePositions[edgeIdx].empty())
@@ -384,7 +385,7 @@ bool vtkGraphItem::MouseMoveEvent(const vtkContextMouseEvent &event)
       return true;
     }
     vtkStdString text = this->VertexTooltip(v);
-    if (text == "")
+    if (text.empty())
     {
       this->Tooltip->SetVisible(false);
       return true;

@@ -56,9 +56,8 @@ public:
   /**
    * Evaluate plane equations. Return smallest absolute value.
    */
+  using vtkImplicitFunction::EvaluateFunction;
   double EvaluateFunction(double x[3]) VTK_OVERRIDE;
-  double EvaluateFunction(double x, double y, double z)
-    {return this->vtkImplicitFunction::EvaluateFunction(x, y, z); } ;
   //@}
 
   /**
@@ -107,7 +106,7 @@ public:
 
   /**
    * Create and return a pointer to a vtkPlane object at the ith
-   * position. Asking for a plane outside the allowable range returns NULL.
+   * position. Asking for a plane outside the allowable range returns nullptr.
    * This method always returns the same object.
    * Use GetPlane(int i, vtkPlane *plane) instead.
    */

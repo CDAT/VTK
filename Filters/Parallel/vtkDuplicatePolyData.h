@@ -35,7 +35,7 @@ class VTKFILTERSPARALLEL_EXPORT vtkDuplicatePolyData : public vtkPolyDataAlgorit
 public:
   static vtkDuplicatePolyData *New();
   vtkTypeMacro(vtkDuplicatePolyData, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -63,7 +63,7 @@ public:
   //@{
   /**
    * This duplicate filter works in client server mode when this
-   * controller is set.  We have a client flag to diferentiate the
+   * controller is set.  We have a client flag to differentiate the
    * client and server because the socket controller is odd:
    * Proth processes think their id is 0.
    */
@@ -84,11 +84,11 @@ public:
 
 protected:
   vtkDuplicatePolyData();
-  ~vtkDuplicatePolyData();
+  ~vtkDuplicatePolyData() VTK_OVERRIDE;
 
   // Data generation method
-  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
   void ClientExecute(vtkPolyData *output);
 
   vtkMultiProcessController *Controller;

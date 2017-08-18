@@ -40,7 +40,7 @@ class VTKIOXMLPARSER_EXPORT vtkXMLParser : public vtkObject
 {
 public:
   vtkTypeMacro(vtkXMLParser,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   static vtkXMLParser* New();
 
@@ -112,7 +112,7 @@ public:
 
   //@{
   /**
-   * Set and get the encoding the parser should expect (NULL defaults to
+   * Set and get the encoding the parser should expect (nullptr defaults to
    * Expat's own default encoder, i.e UTF-8).
    * This should be set before parsing (i.e. a call to Parse()) or
    * even initializing the parser (i.e. a call to InitializeParser())
@@ -123,7 +123,7 @@ public:
 
 protected:
   vtkXMLParser();
-  ~vtkXMLParser();
+  ~vtkXMLParser() VTK_OVERRIDE;
 
   // Input stream.  Set by user.
   istream* Stream;
@@ -145,7 +145,7 @@ protected:
   // Expat parser structure.  Exists only during call to Parse().
   void* Parser;
 
-  // Create/Allocate the internal parser (can be overriden by subclasses).
+  // Create/Allocate the internal parser (can be overridden by subclasses).
   virtual int CreateParser();
 
   // Called by Parse() to read the stream and call ParseBuffer.  Can

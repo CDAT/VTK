@@ -31,6 +31,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkUniformGrid.h"
 #include "vtkXMLDataElement.h"
+#include "vtkXMLDataParser.h"
 #include "vtkXMLImageDataReader.h"
 #include "vtkXMLPolyDataReader.h"
 #include "vtkXMLRectilinearGridReader.h"
@@ -133,6 +134,17 @@ int vtkXMLCompositeDataReader::ReadPrimaryElement(vtkXMLDataElement* ePrimary)
     return 0;
   }
 
+  vtkXMLDataElement* root = this->XMLParser->GetRootElement();
+  int numNested = root->GetNumberOfNestedElements();
+  for (int i = 0; i < numNested; ++i)
+  {
+    vtkXMLDataElement* eNested = root->GetNestedElement(i);
+    if (strcmp(eNested->GetName(), "FieldData") == 0)
+    {
+      this->FieldDataElement = eNested;
+    }
+  }
+
   // Simply save the XML tree. We'll iterate over it later.
   this->Internal->Root = ePrimary;
   return 1;
@@ -149,7 +161,7 @@ vtkXMLReader* vtkXMLCompositeDataReader::GetReaderOfType(const char* type)
 {
   if (!type)
   {
-    return 0;
+    return nullptr;
   }
 
   vtkXMLCompositeDataReaderInternals::ReadersType::iterator iter =
@@ -159,7 +171,7 @@ vtkXMLReader* vtkXMLCompositeDataReader::GetReaderOfType(const char* type)
     return iter->second.GetPointer();
   }
 
-  vtkXMLReader* reader = 0;
+  vtkXMLReader* reader = nullptr;
   if (strcmp(type, "vtkXMLImageDataReader") == 0)
   {
     reader = vtkXMLImageDataReader::New();
@@ -247,6 +259,8 @@ void vtkXMLCompositeDataReader::ReadXMLData()
   {
     return;
   }
+
+  this->ReadFieldData();
 
   // Find the path to this file in case the internal files are
   // specified as relative paths.
@@ -337,7 +351,7 @@ vtkDataSet* vtkXMLCompositeDataReader::ReadDataset(vtkXMLDataElement* xmlElem,
   const char* file = xmlElem->GetAttribute("file");
   if (!file)
   {
-    return 0;
+    return nullptr;
   }
 
   std::string fileName;
@@ -353,14 +367,14 @@ vtkDataSet* vtkXMLCompositeDataReader::ReadDataset(vtkXMLDataElement* xmlElem,
 
   // Get the file extension.
   std::string ext = vtksys::SystemTools::GetFilenameLastExtension(fileName);
-  if (ext.size() > 0)
+  if (!ext.empty())
   {
     // remote "." from the extension.
     ext = &(ext.c_str()[1]);
   }
 
   // Search for the reader matching this extension.
-  const char* rname = 0;
+  const char* rname = nullptr;
   for(const vtkXMLCompositeDataReaderEntry* readerEntry =
     this->Internal->ReaderList;
     !rname && readerEntry->extension; ++readerEntry)
@@ -374,7 +388,7 @@ vtkDataSet* vtkXMLCompositeDataReader::ReadDataset(vtkXMLDataElement* xmlElem,
   if (!reader)
   {
     vtkErrorMacro("Could not create reader for " << rname);
-    return 0;
+    return nullptr;
   }
   reader->SetFileName(fileName.c_str());
   // initialize array selection so we don't have any residual array selections
@@ -385,7 +399,7 @@ vtkDataSet* vtkXMLCompositeDataReader::ReadDataset(vtkXMLDataElement* xmlElem,
   vtkDataSet* output = reader->GetOutputAsDataSet();
   if (!output)
   {
-    return 0;
+    return nullptr;
   }
 
   vtkDataSet* outputCopy = output->NewInstance();
@@ -417,5 +431,5 @@ const vtkXMLCompositeDataReaderEntry
   {"vti", "vtkXMLImageDataReader"},
   {"vtr", "vtkXMLRectilinearGridReader"},
   {"vts", "vtkXMLStructuredGridReader"},
-  {0, 0}
+  {nullptr, nullptr}
 };

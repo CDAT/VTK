@@ -33,18 +33,18 @@ void vtkPointSetCellIterator::PrintSelf(ostream &os, vtkIndent indent)
 void vtkPointSetCellIterator::SetPointSet(vtkPointSet *ds)
 {
   this->PointSet = ds;
-  this->PointSetPoints = ds ? ds->GetPoints() : NULL;
+  this->PointSetPoints = ds ? ds->GetPoints() : nullptr;
   this->CellId = 0;
-  if(ds)
+  if (this->PointSetPoints)
   {
-    this->Points->SetDataType(ds->GetPoints()->GetDataType());
+    this->Points->SetDataType(this->PointSetPoints->GetDataType());
   }
 }
 
 //------------------------------------------------------------------------------
 bool vtkPointSetCellIterator::IsDoneWithTraversal()
 {
-  return this->PointSet.GetPointer() == NULL
+  return this->PointSet.GetPointer() == nullptr
       || this->CellId >= this->PointSet->GetNumberOfCells();
 }
 
@@ -63,8 +63,8 @@ void vtkPointSetCellIterator::IncrementToNextCell()
 //------------------------------------------------------------------------------
 vtkPointSetCellIterator::vtkPointSetCellIterator()
   : vtkCellIterator(),
-    PointSet(NULL),
-    PointSetPoints(NULL),
+    PointSet(nullptr),
+    PointSetPoints(nullptr),
     CellId(0)
 {
 }

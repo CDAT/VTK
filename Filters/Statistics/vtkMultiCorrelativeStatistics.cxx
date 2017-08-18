@@ -236,7 +236,7 @@ void vtkMultiCorrelativeStatistics::Aggregate( vtkDataObjectCollection* inMetaCo
         muFactor = static_cast<double>( inN ) / totN;
         covFactor = static_cast<double>( inN ) * outN / totN;
       }
-      else if ( inCov->GetValueByName( r, VTK_MULTICORRELATIVE_KEYCOLUMN2 ).ToString() == "" )
+      else if ( inCov->GetValueByName( r, VTK_MULTICORRELATIVE_KEYCOLUMN2 ).ToString().empty() )
       {
         // Mean
         inMu.push_back( inCov->GetValueByName( r, VTK_MULTICORRELATIVE_ENTRIESCOL ).ToDouble() );
@@ -392,7 +392,7 @@ void vtkMultiCorrelativeStatistics::Learn( vtkTable* inData,
   //  Row 0: cardinality of sample
   //  Rows 1 to m - 1: means of each variable
   //  Rows m to m + colPairs.size(): variances/covariances for each pair of variables
-  col3->SetNumberOfTuples( 1 + m + colPairs.size() );
+  col3->SetNumberOfTuples( static_cast<vtkIdType>(1 + m + colPairs.size()));
   col3->FillComponent( 0, 0. );
 
   // Retrieve pointer to values and skip Cardinality entry
@@ -680,7 +680,7 @@ void vtkMultiCorrelativeStatistics::Assess( vtkTable* inData,
   // where "A", "B", and "C" are the column names specified in the per-request metadata tables.
   vtkIdType nRow = inData->GetNumberOfRows();
   int nb = static_cast<int>( inMeta->GetNumberOfBlocks() );
-  AssessFunctor* dfunc = 0;
+  AssessFunctor* dfunc = nullptr;
   for ( int req = 1; req < nb; ++ req )
   {
     vtkTable* reqModel = vtkTable::SafeDownCast( inMeta->GetBlock( req ) );
@@ -693,7 +693,7 @@ void vtkMultiCorrelativeStatistics::Assess( vtkTable* inData,
 
     this->SelectAssessFunctor( inData,
                                reqModel,
-                               0,
+                               nullptr,
                                dfunc );
     vtkMultiCorrelativeAssessFunctor* mcfunc = static_cast<vtkMultiCorrelativeAssessFunctor*>( dfunc );
     if ( ! mcfunc )
@@ -876,7 +876,7 @@ void vtkMultiCorrelativeStatistics::SelectAssessFunctor( vtkTable* inData,
                                                          vtkStringArray* vtkNotUsed(rowNames),
                                                          AssessFunctor*& dfunc )
 {
-  dfunc = 0;
+  dfunc = nullptr;
   vtkTable* reqModel = vtkTable::SafeDownCast( inMetaDO );
   if ( ! reqModel )
   {

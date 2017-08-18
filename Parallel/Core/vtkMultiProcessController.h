@@ -77,7 +77,7 @@ class VTKPARALLELCORE_EXPORT vtkMultiProcessController : public vtkObject
 {
 public:
   vtkTypeMacro(vtkMultiProcessController,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * This method is for setting up the processes.
@@ -276,7 +276,7 @@ public:
    * Convenience method when there is no argument.
    */
   void TriggerRMI(int remoteProcessId, int tag)
-    { this->TriggerRMI(remoteProcessId, NULL, 0, tag); }
+    { this->TriggerRMI(remoteProcessId, nullptr, 0, tag); }
 
   //@{
   /**
@@ -295,7 +295,7 @@ public:
   }
   void TriggerRMIOnAllChildren(int tag)
   {
-    this->TriggerRMIOnAllChildren(NULL, 0, tag);
+    this->TriggerRMIOnAllChildren(nullptr, 0, tag);
   }
   void BroadcastTriggerRMIOnAllChildren(void* arg, int argLength, int tag);
   //@}
@@ -331,7 +331,7 @@ public:
   /**
    * Setting this flag to 1 will cause the TriggerRMIOnAllChildren to use
    * a collective broadcast operation to communicate the RMI tag to the
-   * sattelites.
+   * satellites.
    */
   vtkSetMacro(BroadcastTriggerRMI,bool);
   vtkGetMacro(BroadcastTriggerRMI,bool);
@@ -1423,7 +1423,7 @@ public:
 
 protected:
   vtkMultiProcessController();
-  ~vtkMultiProcessController();
+  ~vtkMultiProcessController() VTK_OVERRIDE;
 
   /**
    * Implementation for TriggerRMI() provides subclasses an opportunity to
@@ -1454,7 +1454,7 @@ protected:
 
   // This flag can be used to indicate that an MPI Broadcast will be used
   // when calling TriggerRMIOnAllChildren(), instead of the binary tree
-  // propagation of the data to the sattelite ranks from rank 0.
+  // propagation of the data to the satellite ranks from rank 0.
   bool BroadcastTriggerRMI;
 
   vtkOutputWindow* OutputWindow;
@@ -1719,7 +1719,7 @@ inline vtkDataObject* vtkMultiProcessController::ReceiveDataObject(
   }
   else
   {
-    return 0;
+    return nullptr;
   }
 }
 

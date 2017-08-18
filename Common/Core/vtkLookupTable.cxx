@@ -87,7 +87,7 @@ vtkLookupTable::vtkLookupTable(int sze, int ext)
 vtkLookupTable::~vtkLookupTable()
 {
   this->Table->UnRegister( this );
-  this->Table = NULL;
+  this->Table = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -279,11 +279,17 @@ void vtkLookupTable::ForceBuild()
 // Table is built from linear ramp of each value.
 void vtkLookupTable::Build()
 {
-  if (this->Table->GetNumberOfTuples() < 1 ||
-      (this->GetMTime() > this->BuildTime &&
-       this->InsertTime <= this->BuildTime))
+  vtkMTimeType mtime = this->GetMTime();
+
+  if ((mtime > this->BuildTime &&
+       this->InsertTime <= this->BuildTime) ||
+      this->Table->GetNumberOfTuples() < 1)
   {
     this->ForceBuild();
+  }
+  else if (mtime > this->SpecialColorsBuildTime)
+  {
+    this->BuildSpecialColors();
   }
 }
 
@@ -343,6 +349,8 @@ void vtkLookupTable::BuildSpecialColors()
   tptr[1] = color[1];
   tptr[2] = color[2];
   tptr[3] = color[3];
+
+  this->SpecialColorsBuildTime.Modified();
 }
 
 //----------------------------------------------------------------------------
@@ -647,7 +655,7 @@ vtkIdType vtkLookupTable::GetIndex(double v)
 // Given a table, set the internal table and set the number of colors.
 void vtkLookupTable::SetTable(vtkUnsignedCharArray *table)
 {
-  if (table != this->Table && table != NULL)
+  if (table != this->Table && table != nullptr)
   {
     // Check for incorrect arrays.
     if (table->GetNumberOfComponents() != this->Table->GetNumberOfComponents())
@@ -663,7 +671,7 @@ void vtkLookupTable::SetTable(vtkUnsignedCharArray *table)
     this->Table = table;
     this->Table->Register(this);
     this->NumberOfColors = this->Table->GetNumberOfTuples();
-    this->ResizeTableForSpecialColors();
+    this->BuildSpecialColors();
 
     // If InsertTime is not modified the array will be rebuilt.  So we
     // use the same approach that the SetTableValue function does.
@@ -689,8 +697,6 @@ void vtkLookupTable::GetColorAsUnsignedChars(const double colorIn[4],
     else if (v > 1.0) { v = 1.0; }
     colorOut[c] = static_cast<unsigned char>( v * 255.0 + 0.5 );
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------

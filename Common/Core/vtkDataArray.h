@@ -55,7 +55,7 @@ public:
    * Perform a fast, safe cast from a vtkAbstractArray to a vtkDataArray.
    * This method checks if source->GetArrayType() returns DataArray
    * or a more derived type, and performs a static_cast to return
-   * source as a vtkDataArray pointer. Otherwise, NULL is returned.
+   * source as a vtkDataArray pointer. Otherwise, nullptr is returned.
    */
   static vtkDataArray* FastDownCast(vtkAbstractArray *source);
 
@@ -380,6 +380,61 @@ public:
     this->GetRange(range,0);
   }
 
+  /**
+   * The range of the data array values for the given component will be
+   * returned in the provided range array argument. If comp is -1, the range
+   * of the magnitude (L2 norm) over all components will be provided. The
+   * range is computed and then cached, and will not be re-computed on
+   * subsequent calls to GetRange() unless the array is modified or the
+   * requested component changes.
+   * THIS METHOD IS NOT THREAD SAFE.
+   */
+  void GetFiniteRange(double range[2], int comp)
+  {
+    this->ComputeFiniteRange(range, comp);
+  }
+
+  //@{
+  /**
+   * Return the range of the data array values for the given component. If
+   * comp is -1, return the range of the magnitude (L2 norm) over all
+   * components.The range is computed and then cached, and will not be
+   * re-computed on subsequent calls to GetRange() unless the array is
+   * modified or the requested component changes.
+   * THIS METHOD IS NOT THREAD SAFE.
+   */
+  double *GetFiniteRange(int comp)
+  {
+    this->GetFiniteRange(this->FiniteRange, comp);
+    return this->FiniteRange;
+  }
+  //@}
+
+  /**
+   * Return the range of the data array. If the array has multiple components,
+   * then this will return the range of only the first component (component
+   * zero). The range is computed and then cached, and will not be re-computed
+   * on subsequent calls to GetRange() unless the array is modified.
+   * THIS METHOD IS NOT THREAD SAFE.
+   */
+  double *GetFiniteRange()
+  {
+    return this->GetFiniteRange(0);
+  }
+
+  /**
+   * The the range of the data array values will be returned in the provided
+   * range array argument. If the data array has multiple components, then
+   * this will return the range of only the first component (component zero).
+   * The range is computend and then cached, and will not be re-computed on
+   * subsequent calls to GetRange() unless the array is modified.
+   * THIS METHOD IS NOT THREAD SAFE.
+   */
+  void GetFiniteRange(double range[2])
+  {
+    this->GetFiniteRange(range, 0);
+  }
+
   //@{
   /**
    * These methods return the Min and Max possible range of the native
@@ -419,6 +474,7 @@ public:
    * this value is set to { VTK_DOUBLE_MAX, VTK_DOUBLE_MIN }.
    */
   static vtkInformationDoubleVectorKey* COMPONENT_RANGE();
+
   /**
    * This key is used to hold tight bounds on the $L_2$ norm
    * of tuples in the array.
@@ -429,6 +485,20 @@ public:
   static vtkInformationDoubleVectorKey* L2_NORM_RANGE();
 
   /**
+   * This key is used to hold tight bounds on the $L_2$ norm
+   * of tuples in the array.
+   * Two values (a minimum and maximum) are stored for each component.
+   * When GetFiniteRange() is called when no tuples are present in the array
+   * this value is set to { VTK_DOUBLE_MAX, VTK_DOUBLE_MIN }.
+   */
+  static vtkInformationDoubleVectorKey* L2_NORM_FINITE_RANGE();
+
+  /**
+   * Removes out-of-date L2_NORM_RANGE() and L2_NORM_FINITE_RANGE() values.
+   */
+  void Modified() VTK_OVERRIDE;
+
+  /**
    * A human-readable string indicating the units for the array data.
    */
   static vtkInformationStringKey *UNITS_LABEL();
@@ -436,8 +506,8 @@ public:
   /**
    * Copy information instance. Arrays use information objects
    * in a variety of ways. It is important to have flexibility in
-   * this regard because certain keys should not be coppied, while
-   * others must be. NOTE: Up to the implmeneter to make sure that
+   * this regard because certain keys should not be copied, while
+   * others must be. NOTE: Up to the implmenter to make sure that
    * keys not inteneded to be coppied are excluded here.
    */
   int CopyInformation(vtkInformation *infoFrom, int deep=1) VTK_OVERRIDE;
@@ -461,6 +531,15 @@ protected:
   virtual void ComputeRange(double range[2], int comp);
 
   /**
+   * Compute the range for a specific component. If comp is set -1
+   * then L2 norm is computed on all components. Call ClearRange
+   * to force a recomputation if it is needed. The range is copied
+   * to the range argument.
+   * THIS METHOD IS NOT THREAD SAFE.
+   */
+  virtual void ComputeFiniteRange(double range[2], int comp);
+
+  /**
    * Computes the range for each component of an array, the length
    * of \a ranges must be two times the number of components.
    * Returns true if the range was computed. Will return false
@@ -472,12 +551,25 @@ protected:
   // if you try to compute the range of an array of length zero.
   virtual bool ComputeVectorRange(double range[2]);
 
+  /**
+   * Computes the range for each component of an array, the length
+   * of \a ranges must be two times the number of components.
+   * Returns true if the range was computed. Will return false
+   * if you try to compute the range of an array of length zero.
+   */
+  virtual bool ComputeFiniteScalarRange(double* ranges);
+
+  // Returns true if the range was computed. Will return false
+  // if you try to compute the range of an array of length zero.
+  virtual bool ComputeFiniteVectorRange(double range[2]);
+
   // Construct object with default tuple dimension (number of components) of 1.
   vtkDataArray();
   ~vtkDataArray() VTK_OVERRIDE;
 
   vtkLookupTable *LookupTable;
   double Range[2];
+  double FiniteRange[2];
 
 private:
   double* GetTupleN(vtkIdType i, int n);
@@ -504,7 +596,7 @@ inline vtkDataArray* vtkDataArray::FastDownCast(vtkAbstractArray *source)
         break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 vtkArrayDownCast_FastCastMacro(vtkDataArray)

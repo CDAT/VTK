@@ -459,7 +459,7 @@ void vtkDescriptiveStatistics::Derive( vtkMultiBlockDataSet* inMeta )
 
   // Finally set second block of output meta port to derived statistics table
   inMeta->SetNumberOfBlocks( 2 );
-  inMeta->GetMetaData( static_cast<unsigned>( 0 ) )->Set( vtkCompositeDataSet::NAME(), "Derived Statistics" );
+  inMeta->GetMetaData( static_cast<unsigned>( 1 ) )->Set( vtkCompositeDataSet::NAME(), "Derived Statistics" );
   inMeta->SetBlock( 1, derivedTab );
 
   // Clean up
@@ -562,8 +562,8 @@ void vtkDescriptiveStatistics::Test( vtkTable* inData,
     if ( r >= nRowPrim )
     {
       vtkWarningMacro( "Incomplete input: model does not have a row "
-		       << varName.c_str()
-		       <<". Cannot test." );
+           << varName.c_str()
+           <<". Cannot test." );
       continue;
     }
 
@@ -677,7 +677,7 @@ void vtkDescriptiveStatistics::SelectAssessFunctor( vtkTable* outData,
                                                     vtkStringArray* rowNames,
                                                     AssessFunctor*& dfunc )
 {
-  dfunc = 0;
+  dfunc = nullptr;
   vtkMultiBlockDataSet* inMeta = vtkMultiBlockDataSet::SafeDownCast( inMetaDO );
   if ( ! inMeta )
   {

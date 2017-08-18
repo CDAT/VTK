@@ -69,8 +69,8 @@ public:
 
   double Corner[3]; //center point of this node
   double Axes[3][3]; //the axes defining the OBB - ordered from long->short
-  vtkOBBNode *Parent; //parent node; NULL if root
-  vtkOBBNode **Kids; //two children of this node; NULL if leaf
+  vtkOBBNode *Parent; //parent node; nullptr if root
+  vtkOBBNode **Kids; //two children of this node; nullptr if leaf
   vtkIdList *Cells; //list of cells in node
   void DebugPrintTree( int level, double *leaf_vol, int *minCells,
                        int *maxCells );
@@ -105,7 +105,7 @@ public:
    * The return value of the function is 0 if no intersections were found,
    * -1 if point 'a0' lies inside the closed surface, or +1 if point 'a0'
    * lies outside the closed surface.
-   * Either 'points' or 'cellIds' can be set to NULL if you don't want
+   * Either 'points' or 'cellIds' can be set to nullptr if you don't want
    * to receive that information.
    */
   int IntersectWithLine(const double a0[3], const double a1[3],
@@ -154,7 +154,7 @@ public:
   /**
    * Returns true if line intersects node.
    */
-  int LineIntersectsNode( vtkOBBNode *pA, double b0[3], double b1[3] );
+  int LineIntersectsNode( vtkOBBNode *pA, const double b0[3], const double b1[3] );
 
   /**
    * Returns true if triangle (optionally transformed) intersects node.

@@ -20,7 +20,7 @@
  * vtkLagrangianBasicIntegrationModel implementation using
  * article :
  * "Matida, E. A., et al. "Improved numerical simulation of aerosol deposition in
- * an idealized mouth–throat." Journal of Aerosol Science 35.1 (2004): 1-19."
+ * an idealized mouth-throat." Journal of Aerosol Science 35.1 (2004): 1-19."
  * Input Array to process are expected as follow :
  * Index 1 is the "FlowVelocity" from flow input in the tracker
  * Index 2 is the "FlowDensity" from flow input in the tracker
@@ -44,7 +44,7 @@ class VTKFILTERSFLOWPATHS_EXPORT vtkLagrangianMatidaIntegrationModel :
 {
 public:
   vtkTypeMacro(vtkLagrangianMatidaIntegrationModel, vtkLagrangianBasicIntegrationModel);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   static vtkLagrangianMatidaIntegrationModel* New();
 
   // Needed for multiple signatures polymorphism
@@ -54,12 +54,12 @@ public:
    * Evaluate the integration model velocity field
    * f at position x, using data from cell in dataSet with index cellId
    */
-  virtual int FunctionValues(vtkDataSet* dataSet, vtkIdType cellId,
-    double* weights, double* x, double* f);
+  int FunctionValues(vtkDataSet* dataSet, vtkIdType cellId,
+    double* weights, double* x, double* f) VTK_OVERRIDE;
 
 protected:
   vtkLagrangianMatidaIntegrationModel();
-  virtual ~vtkLagrangianMatidaIntegrationModel();
+  ~vtkLagrangianMatidaIntegrationModel() VTK_OVERRIDE;
 
   static double GetRelaxationTime(double dynVisc, double diameter, double density);
 

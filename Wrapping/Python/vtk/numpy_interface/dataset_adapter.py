@@ -72,6 +72,7 @@ import sys
 from vtk import buffer_shared
 from vtk.util import numpy_support
 from vtk.vtkCommonDataModel import vtkDataObject
+from vtk.vtkCommonCore import vtkWeakReference
 import weakref
 
 if sys.hexversion < 0x03000000:
@@ -275,10 +276,9 @@ class VTKArray(numpy.ndarray):
         obj.Association = ArrayAssociation.FIELD
         # add the new attributes to the created instance
         obj.VTKObject = array
-        # if dataset:
-        #     import weakref
-        #     obj.DataSet = weakref.ref(dataset)
-        obj.DataSet = dataset
+        if dataset:
+            obj._dataset = vtkWeakReference()
+            obj._dataset.Set(dataset.VTKObject)
         # Finally, we must return the newly created object:
         return obj
 
@@ -316,6 +316,34 @@ class VTKArray(numpy.ndarray):
             return out_arr[()]
         else:
             return numpy.ndarray.__array_wrap__(self, out_arr, context)
+
+    @property
+    def DataSet(self):
+        """
+        Get the dataset this array is associated with. The reference to the
+        dataset is held through a vtkWeakReference to ensure it doesn't prevent
+        the dataset from being collected if necessary.
+        """
+        if hasattr(self, '_dataset') and self._dataset and self._dataset.Get():
+            return WrapDataObject(self._dataset.Get())
+
+        return  None
+
+    @DataSet.setter
+    def DataSet(self, dataset):
+        """
+        Set the dataset this array is associated with. The reference is held
+        through a vtkWeakReference.
+        """
+        # Do we have dataset to store
+        if dataset and dataset.VTKObject:
+            # Do we need to create a vtkWeakReference
+            if not hasattr(self, '_dataset') or self._dataset is None:
+                self._dataset = vtkWeakReference()
+
+            self._dataset.Set(dataset.VTKObject)
+        else:
+            self._dataset = None
 
 class VTKNoneArrayMetaClass(type):
     def __new__(mcs, name, parent, attr):
@@ -465,7 +493,7 @@ class VTKCompositeDataArray(object):
     """
 
     def __init__(self, arrays = [], dataset = None, name = None,
-                 association = ArrayAssociation.FIELD):
+                 association = None):
         """Construct a composite array given a container of
         arrays, a dataset, name and association. It is sufficient
         to define a container of arrays to define a composite array.
@@ -477,7 +505,19 @@ class VTKCompositeDataArray(object):
         self._Arrays = arrays
         self.DataSet = dataset
         self.Name = name
-        self.Association = association
+        validAssociation = True
+        if association == None:
+            for array in self._Arrays:
+                if hasattr(array, "Association"):
+                    if association == None:
+                        association = array.Association
+                    elif array.Association and association != array.Association:
+                        validAssociation = False
+                        break
+        if validAssociation:
+            self.Association = association
+        else:
+            self.Association = ArrayAssociation.FIELD
         self.Initialized = False
 
     def __init_from_composite(self):
@@ -556,7 +596,8 @@ class VTKCompositeDataArray(object):
                     res.append(op(l[0], l[1]))
                 else:
                     res.append(NoneArray)
-        return VTKCompositeDataArray(res, dataset=self.DataSet)
+        return VTKCompositeDataArray(
+            res, dataset=self.DataSet, association=self.Association)
 
     def _reverse_numeric_op(self, other, op):
         """Used to implement numpy-style numerical operations such as __add__,
@@ -577,7 +618,8 @@ class VTKCompositeDataArray(object):
                     res.append(op(l[0], l[1]))
                 else:
                     res.append(NoneArray)
-        return VTKCompositeDataArray(res, dataset=self.DataSet)
+        return VTKCompositeDataArray(
+            res, dataset=self.DataSet, association = self.Association)
 
     def __str__(self):
         return self.Arrays.__str__()
@@ -591,7 +633,8 @@ class VTKCompositeDataArray(object):
                     res.append(NoneArray)
                 else:
                     res.append(a.astype(dtype))
-        return VTKCompositeDataArray(res, dataset = self.DataSet)
+        return VTKCompositeDataArray(
+            res, dataset = self.DataSet, association = self.Association)
 
 
 class DataSetAttributes(VTKObjectWrapper):
@@ -994,8 +1037,10 @@ class PointSet(DataSet):
         dataset has implicit points."""
         if not self.VTKObject.GetPoints():
             return None
-        return vtkDataArrayToVTKArray(
+        array = vtkDataArrayToVTKArray(
             self.VTKObject.GetPoints().GetData(), self)
+        array.Association = ArrayAssociation.POINT
+        return array
 
     def SetPoints(self, pts):
         """Given a VTKArray instance, sets the points of the dataset."""

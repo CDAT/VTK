@@ -96,7 +96,7 @@ class VTKIOGEOMETRY_EXPORT vtkTecplotReader : public vtkMultiBlockDataSetAlgorit
 public:
   static vtkTecplotReader * New();
   vtkTypeMacro( vtkTecplotReader, vtkMultiBlockDataSetAlgorithm );
-  void  PrintSelf( ostream & os, vtkIndent indent );
+  void  PrintSelf( ostream & os, vtkIndent indent ) VTK_OVERRIDE;
 
   //@{
   /**
@@ -121,7 +121,7 @@ public:
   int   GetNumberOfBlocks();
 
   /**
-   * Get the name of a block specified by a zero-based index. NULL is returned
+   * Get the name of a block specified by a zero-based index. nullptr is returned
    * for an invalid block index.
    */
   const char * GetBlockName( int blockIdx );
@@ -133,7 +133,7 @@ public:
   int   GetNumberOfDataAttributes();
 
   /**
-   * Get the name of a zero-based data attribute (not 3D coordinates). NULL is
+   * Get the name of a zero-based data attribute (not 3D coordinates). nullptr is
    * returned for an invalid attribute index.
    */
   const char * GetDataAttributeName( int attrIndx );
@@ -175,14 +175,14 @@ public:
 
 protected:
   vtkTecplotReader();
-  ~vtkTecplotReader();
+  ~vtkTecplotReader() VTK_OVERRIDE;
 
-  virtual int FillOutputPortInformation( int port, vtkInformation * info );
-  virtual int RequestInformation( vtkInformation * request,
+  int FillOutputPortInformation( int port, vtkInformation * info ) VTK_OVERRIDE;
+  int RequestInformation( vtkInformation * request,
                                   vtkInformationVector ** inputVector,
-                                  vtkInformationVector  * outputVector );
-  virtual int RequestData
-          ( vtkInformation *, vtkInformationVector **, vtkInformationVector * );
+                                  vtkInformationVector  * outputVector ) VTK_OVERRIDE;
+  int RequestData
+          ( vtkInformation *, vtkInformationVector **, vtkInformationVector * ) VTK_OVERRIDE;
 
   /**
    * A callback function registered with the selection observer.

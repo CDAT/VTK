@@ -18,6 +18,8 @@
 #include "vtkBitArray.h"
 #include "vtkCompositeDataIterator.h"
 #include "vtkCompositeDataSet.h"
+#include "vtkDataObjectTree.h"
+#include "vtkDataObjectTreeIterator.h"
 #include "vtkHardwareSelector.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
@@ -30,6 +32,44 @@
 #include "vtkSmartPointer.h"
 
 #include <map>
+
+namespace {
+int getNumberOfChildren(vtkDataObjectTree *tree)
+{
+  int result = 0;
+  if (tree)
+  {
+    vtkDataObjectTreeIterator *it = tree->NewTreeIterator();
+    it->SetTraverseSubTree(false);
+    it->SetVisitOnlyLeaves(false);
+    for (it->InitTraversal(); !it->IsDoneWithTraversal(); it->GoToNextItem())
+    {
+      ++result;
+    }
+    it->Delete();
+  }
+  return result;
+}
+
+vtkDataObject* getChildDataObject(vtkDataObjectTree *tree, int child)
+{
+  vtkDataObject *result = nullptr;
+  if (tree)
+  {
+    vtkDataObjectTreeIterator *it = tree->NewTreeIterator();
+    it->SetTraverseSubTree(false);
+    it->SetVisitOnlyLeaves(false);
+    it->InitTraversal();
+    for (int i = 0; i < child; ++i)
+    {
+      it->GoToNextItem();
+    }
+    result = it->GetCurrentDataObject();
+    it->Delete();
+  }
+  return result;
+}
+}
 
 class vtkOpenGLGlyph3DMappervtkColorMapper : public vtkMapper
 {
@@ -50,22 +90,36 @@ public:
   std::vector<float> Matrices;  // transposed
   std::vector<float> NormalMatrices; // transposed
   vtkTimeStamp BuildTime;
-  vtkOpenGLGlyph3DHelper *Mapper;
+  // May be polydata or composite dataset:
+  vtkDataObject *DataObject;
+  // maps composite dataset flat index to polydatamapper. Key = -1 for polydata
+  // DataObject.
+  typedef std::map<int, vtkOpenGLGlyph3DHelper*> MapperMap;
+  MapperMap Mappers;
   int NumberOfPoints;
 
   vtkOpenGLGlyph3DMapperEntry()
   {
-    this->Mapper = vtkOpenGLGlyph3DHelper::New();
-    vtkPolyData *ss = vtkPolyData::New();
-    this->Mapper->SetInputData(ss);
-    ss->Delete();
-    this->Mapper->SetPopulateSelectionSettings(0);
     this->NumberOfPoints = 0;
+    this->DataObject = nullptr;
   };
   ~vtkOpenGLGlyph3DMapperEntry()
   {
-    this->Mapper->Delete();
+    this->ClearMappers();
+    if (this->DataObject)
+    {
+      this->DataObject->Delete();
+    }
   };
+  void ClearMappers()
+  {
+    for (MapperMap::iterator it = this->Mappers.begin();
+         it != this->Mappers.end(); ++it)
+    {
+      it->second->Delete();
+    }
+    this->Mappers.clear();
+  }
 };
 
 class vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperSubArray
@@ -73,19 +127,22 @@ class vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperSubArray
 public:
   std::map<size_t, vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperEntry *>  Entries;
   vtkTimeStamp BuildTime;
-  bool LastSelectingState;
   vtkOpenGLGlyph3DMapperSubArray()
   {
-    this->LastSelectingState = false;
   };
   ~vtkOpenGLGlyph3DMapperSubArray()
   {
+    this->ClearEntries();
+  };
+  void ClearEntries()
+  {
     std::map<size_t, vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperEntry *>::iterator miter = this->Entries.begin();
-    for (;miter != this->Entries.end(); miter++)
+    for (;miter != this->Entries.end(); ++miter)
     {
       delete miter->second;
     }
-  };
+    this->Entries.clear();
+  }
 };
 
 class vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperArray
@@ -95,7 +152,7 @@ public:
   ~vtkOpenGLGlyph3DMapperArray()
   {
     std::map<const vtkDataSet *, vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperSubArray *>::iterator miter = this->Entries.begin();
-    for (;miter != this->Entries.end(); miter++)
+    for (;miter != this->Entries.end(); ++miter)
     {
       delete miter->second;
     }
@@ -113,7 +170,6 @@ vtkStandardNewMacro(vtkOpenGLGlyph3DMapper)
 vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapper()
 {
   this->GlyphValues = new vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperArray();
-  this->LastWindow = 0;
   this->ColorMapper = vtkOpenGLGlyph3DMappervtkColorMapper::New();
 }
 
@@ -122,14 +178,8 @@ vtkOpenGLGlyph3DMapper::~vtkOpenGLGlyph3DMapper()
 {
   this->ColorMapper->Delete();
 
-  if (this->LastWindow)
-  {
-    this->ReleaseGraphicsResources(this->LastWindow);
-    this->LastWindow = 0;
-  }
-
   delete this->GlyphValues;
-  this->GlyphValues = 0;
+  this->GlyphValues = nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -139,7 +189,7 @@ vtkOpenGLGlyph3DMapper::~vtkOpenGLGlyph3DMapper()
 void vtkOpenGLGlyph3DMapper::CopyInformationToSubMapper(
     vtkOpenGLGlyph3DHelper *mapper)
 {
-  assert("pre: mapper_exists" && mapper!=0);
+  assert("pre: mapper_exists" && mapper!=nullptr);
   mapper->SetStatic(this->Static);
   mapper->ScalarVisibilityOff();
   // not used
@@ -171,18 +221,10 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer *ren, vtkActor *actor)
   this->SetupColorMapper();
 
   vtkHardwareSelector* selector = ren->GetSelector();
-  bool selecting_points = selector && (selector->GetFieldAssociation() ==
-    vtkDataObject::FIELD_ASSOCIATION_POINTS);
 
   if (selector)
   {
     selector->BeginRenderProp();
-  }
-
-  if (selector && !selecting_points)
-  {
-    // Selecting some other attribute. Not supported.
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
   }
 
   vtkDataObject* inputDO = this->GetInputDataObject(0, 0);
@@ -190,7 +232,7 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer *ren, vtkActor *actor)
   // Check input for consistency
   //
   // Create a default source, if no source is specified.
-  if (this->GetSource(0) == 0)
+  if (!this->UseSourceTableTree && this->GetSource(0) == nullptr)
   {
     vtkPolyData *defaultSource = vtkPolyData::New();
     defaultSource->Allocate();
@@ -205,9 +247,56 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer *ren, vtkActor *actor)
     defaultSource->InsertNextCell(VTK_LINE, 2, defaultPointIds);
     this->SetSourceData(defaultSource);
     defaultSource->Delete();
-    defaultSource = NULL;
+    defaultSource = nullptr;
     defaultPoints->Delete();
-    defaultPoints = NULL;
+    defaultPoints = nullptr;
+  }
+
+  // Check that source configuration is sane:
+  vtkDataObjectTree *sourceTableTree = this->GetSourceTableTree();
+  int numSourceDataSets = this->GetNumberOfInputConnections(1);
+  if (this->UseSourceTableTree)
+  {
+    if (numSourceDataSets > 1)
+    {
+      vtkErrorMacro("UseSourceTableTree is true, but multiple source datasets "
+                    "are set.");
+      return;
+    }
+    if (!sourceTableTree)
+    {
+      vtkErrorMacro("UseSourceTableTree is true, but the source dataset is "
+                    "not a vtkDataObjectTree.");
+      return;
+    }
+    vtkDataObjectTreeIterator *it = sourceTableTree->NewTreeIterator();
+    it->SetTraverseSubTree(false);
+    it->SetVisitOnlyLeaves(false);
+    for (it->InitTraversal(); !it->IsDoneWithTraversal(); it->GoToNextItem())
+    {
+      vtkDataObject *node = it->GetCurrentDataObject();
+      if (!node->IsA("vtkPolyData") && !node->IsA("vtkCompositeDataSet"))
+      {
+        vtkErrorMacro("The source table tree must only contain vtkPolyData "
+                      "or vtkCompositeDataSet children, but found a "
+                      << node->GetClassName() << ".");
+        it->Delete();
+        return;
+      }
+    }
+    it->Delete();
+  }
+  else
+  {
+    for (int i = 0; i < numSourceDataSets; ++i)
+    {
+      if (!this->GetSource(i))
+      {
+        vtkErrorMacro("Source input at index " << i << " not set, or not "
+                      "vtkPolyData.");
+        return;
+      }
+    }
   }
 
   // Render the input dataset or every dataset in the input composite dataset.
@@ -236,11 +325,6 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer *ren, vtkActor *actor)
     iter->Delete();
   }
 
-  if (selector && !selecting_points)
-  {
-    // Selecting some other attribute. Not supported.
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  }
   if (selector)
   {
     selector->EndRenderProp();
@@ -279,11 +363,15 @@ void vtkOpenGLGlyph3DMapper::Render(
   }
 
   // make sure we have a subentry for each source
-  unsigned int numberOfSources = this->GetNumberOfInputConnections(1);
+  vtkDataObjectTree *sourceTableTree = this->GetSourceTableTree();
+  int sTTSize = getNumberOfChildren(sourceTableTree);
+  int numSourceDataSets = this->GetNumberOfInputConnections(1);
+  size_t numberOfSources = this->UseSourceTableTree ? sTTSize
+                                                    : numSourceDataSets;
   bool numberOfSourcesChanged = false;
   if (numberOfSources != subarray->Entries.size())
   {
-    subarray->Entries.clear();
+    subarray->ClearEntries();
     for (size_t cc = 0; cc < numberOfSources; cc++)
     {
       subarray->Entries.insert(std::make_pair(cc,
@@ -293,38 +381,106 @@ void vtkOpenGLGlyph3DMapper::Render(
   }
 
   // make sure sources are up to date
+  vtkDataObjectTreeIterator *sTTIter = nullptr;
+  if (sourceTableTree)
+  {
+    sTTIter = sourceTableTree->NewTreeIterator();
+    sTTIter->SetTraverseSubTree(false);
+    sTTIter->SetVisitOnlyLeaves(false);
+    sTTIter->InitTraversal();
+  }
   for (size_t cc = 0; cc < subarray->Entries.size(); cc++)
   {
-    vtkPolyData *s = this->GetSource(static_cast<int>(cc));
-    vtkOpenGLGlyph3DHelper *gh = subarray->Entries[cc]->Mapper;
-    vtkPolyData *ss = gh->GetInput();
-    if (s->GetMTime() > ss->GetMTime() || numberOfSourcesChanged)
+    vtkDataObject *s = this->UseSourceTableTree
+        ? sTTIter->GetCurrentDataObject()
+        : this->GetSource(static_cast<int>(cc));
+
+    vtkOpenGLGlyph3DMapperEntry *entry = subarray->Entries[cc];
+    vtkDataObject *ss = entry->DataObject;
+    if (ss && !ss->IsA(s->GetClassName()))
+    {
+      ss->Delete();
+      ss = nullptr;
+    }
+    if (!ss)
+    {
+      ss = s->NewInstance();
+      entry->DataObject = ss;
+    }
+    if (numberOfSourcesChanged || s->GetMTime() > ss->GetMTime())
     {
       ss->ShallowCopy(s);
-      // Copy mapper ivar to sub-mapper
-      this->CopyInformationToSubMapper(gh);
+      entry->ClearMappers();
+    }
+
+    // Create/update the helper mappers:
+    vtkCompositeDataIterator *cdsIter = nullptr;
+    if (vtkCompositeDataSet *cds = vtkCompositeDataSet::SafeDownCast(ss))
+    {
+      cdsIter = cds->NewIterator();
+      cdsIter->InitTraversal();
+    }
+
+    for (;;)
+    {
+      vtkOpenGLGlyph3DHelper *mapper = nullptr;
+
+      int mapperIdx = cdsIter ? cdsIter->GetCurrentFlatIndex() : -1;
+      vtkOpenGLGlyph3DMapperEntry::MapperMap::iterator mapIter =
+          entry->Mappers.find(mapperIdx);
+      if (mapIter == entry->Mappers.end())
+      {
+        mapper = vtkOpenGLGlyph3DHelper::New();
+        entry->Mappers.insert(std::make_pair(mapperIdx, mapper));
+      }
+      else
+      {
+        mapper = mapIter->second;
+      }
+      this->CopyInformationToSubMapper(mapper);
+
+      if (cdsIter)
+      {
+        cdsIter->GoToNextItem();
+      }
+
+      if (!cdsIter || cdsIter->IsDoneWithTraversal())
+      {
+        break;
+      }
+    }
+
+    if (cdsIter)
+    {
+      cdsIter->Delete();
+      cdsIter = nullptr;
+    }
+
+    if (sTTIter)
+    {
+      sTTIter->GoToNextItem();
     }
   }
-
-  vtkHardwareSelector* selector = ren->GetSelector();
-  bool selecting_points = selector && (selector->GetFieldAssociation() ==
-    vtkDataObject::FIELD_ASSOCIATION_POINTS);
+  if (sTTIter)
+  {
+    sTTIter->Delete();
+    sTTIter = nullptr;
+  }
 
   // rebuild all entries for this DataSet if it
   // has been modified
   if (subarray->BuildTime < dataset->GetMTime() ||
-      subarray->BuildTime < this->GetMTime() ||
-      subarray->LastSelectingState != selecting_points )
+      subarray->BuildTime < this->GetMTime())
   {
     rebuild = true;
   }
 
   // get the mask array
-  vtkBitArray *maskArray = 0;
+  vtkBitArray *maskArray = nullptr;
   if (this->Masking)
   {
     maskArray = vtkArrayDownCast<vtkBitArray>(this->GetMaskArray(dataset));
-    if (maskArray == 0)
+    if (maskArray == nullptr)
     {
       vtkDebugMacro(<<"masking is enabled but there is no mask array. Ignore masking.");
     }
@@ -342,8 +498,7 @@ void vtkOpenGLGlyph3DMapper::Render(
   // rebuild all sources for this dataset
   if (rebuild)
   {
-    this->RebuildStructures(subarray, numPts, actor, dataset, maskArray,
-            selecting_points);
+    this->RebuildStructures(subarray, numPts, actor, dataset, maskArray);
   }
 
   // for each subarray
@@ -355,51 +510,52 @@ void vtkOpenGLGlyph3DMapper::Render(
     {
       continue;
     }
-    vtkOpenGLGlyph3DHelper *gh = entry->Mapper;
 
-    // now draw, there is a fast path for a special case of
-    // only triangles
-    bool fastPath = false;
-    vtkPolyData* pd = gh->GetInput();
-    gh->CurrentInput = pd;
-    if (pd && pd->GetNumberOfVerts() == 0 && pd->GetNumberOfLines() == 0 && pd->GetNumberOfStrips() == 0)
+    vtkDataObject *dObj = entry->DataObject;
+    vtkPolyData *pd = vtkPolyData::SafeDownCast(dObj);
+    vtkCompositeDataSet *cds = pd ? nullptr
+                                  : vtkCompositeDataSet::SafeDownCast(dObj);
+
+    vtkCompositeDataIterator *cdsIter = nullptr;
+    if (cds)
     {
-      fastPath = true;
+      cdsIter = cds->NewIterator();
+      cdsIter->InitTraversal();
     }
 
-    // use fast path
-    gh->SetUseFastPath(fastPath);
-    if (fastPath)
+    // Either render the polydata, or loop through the composite dataset and
+    // render each polydata leaf:
+    for (;;)
     {
-      gh->GlyphRender(ren, actor, entry->NumberOfPoints,
-        entry->Colors, entry->Matrices, entry->NormalMatrices,
-        entry->PickIds, subarray->BuildTime);
-    }
-    else
+      int mapperIdx = -1;
+      if (cdsIter)
+      {
+        pd = vtkPolyData::SafeDownCast(cdsIter->GetCurrentDataObject());
+        mapperIdx = cdsIter->GetCurrentFlatIndex();
+        cdsIter->GoToNextItem();
+      }
+
+      if (pd && pd->GetNumberOfPoints() > 0)
+      {
+        vtkOpenGLGlyph3DHelper *gh = entry->Mappers[mapperIdx];
+        gh->CurrentInput = pd;
+        gh->GlyphRender(ren, actor, entry->NumberOfPoints,
+                        entry->Colors, entry->Matrices, entry->NormalMatrices,
+                        entry->PickIds, subarray->BuildTime);
+      }
+
+      if (!cdsIter || cdsIter->IsDoneWithTraversal())
+      {
+        break;
+      }
+    } // end composite glyph iteration
+
+    if (cdsIter)
     {
-      bool primed = false;
-      for (vtkIdType inPtId = 0; inPtId < entry->NumberOfPoints; inPtId++)
-      {
-        if (selecting_points)
-        {
-          selector->RenderAttributeId(entry->PickIds[inPtId]);
-        }
-        if (!primed)
-        {
-          gh->RenderPieceStart(ren, actor);
-          primed = true;
-        }
-        gh->SetModelColor(&(entry->Colors[inPtId*4]));
-        gh->SetModelTransform(&(entry->Matrices[inPtId*16]));
-        gh->SetModelNormalTransform(&(entry->NormalMatrices[inPtId*9]));
-        gh->RenderPieceDraw(ren, actor);
-      }
-      if (primed)
-      {
-        gh->RenderPieceFinish(ren, actor);
-      }
+      cdsIter->Delete();
+      cdsIter = nullptr;
     }
-  }
+  } // end entries
 
   vtkOpenGLCheckErrorMacro("failed after Render");
 }
@@ -412,8 +568,7 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
   vtkIdType numPts,
   vtkActor* actor,
   vtkDataSet* dataset,
-  vtkBitArray *maskArray,
-  bool selecting_points)
+  vtkBitArray *maskArray)
 {
   double den = this->Range[1] - this->Range[0];
   if (den == 0.0)
@@ -433,7 +588,7 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
   }
 
   vtkDataArray* orientArray = this->GetOrientationArray(dataset);
-  if (orientArray !=0 && orientArray->GetNumberOfComponents() != 3)
+  if (orientArray !=nullptr && orientArray->GetNumberOfComponents() != 3)
   {
     vtkErrorMacro(" expecting an orientation array with 3 component, getting "
       << orientArray->GetNumberOfComponents() << " components.");
@@ -448,10 +603,9 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
   vtkDataArray* selectionArray = this->GetSelectionIdArray(dataset);
 
   /// FIXME: Didn't handle the premultiplycolorswithalpha aspect...
-  vtkUnsignedCharArray* colors = NULL;
   this->ColorMapper->SetInputDataObject(dataset);
   this->ColorMapper->MapScalars(actor->GetProperty()->GetOpacity());
-  colors = ((vtkOpenGLGlyph3DMappervtkColorMapper *)this->ColorMapper)->GetColors();
+  vtkUnsignedCharArray* colors = ((vtkOpenGLGlyph3DMappervtkColorMapper *)this->ColorMapper)->GetColors();
   //  bool multiplyWithAlpha =
   //    (this->ScalarsToColorsPainter->GetPremultiplyColorsWithAlpha(actor) == 1);
   // Traverse all Input points, transforming Source points
@@ -507,6 +661,7 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
 
   // loop over every point and fill structures
   int index = 0;
+  vtkDataObjectTree *sourceTableTree = this->GetSourceTableTree();
   for (vtkIdType inPtId = 0; inPtId < numPts; inPtId++)
   {
     if (!(inPtId % 10000))
@@ -534,7 +689,9 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
     }
 
     // source can be null.
-    vtkPolyData *source = this->GetSource(index);
+    vtkDataObject *source = this->UseSourceTableTree
+        ? getChildDataObject(sourceTableTree, index)
+        : this->GetSource(index);
 
     // Make sure we're not indexing into empty glyph
     if (source)
@@ -648,7 +805,7 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
       vtkIdType selectionId = inPtId;
       if (this->UseSelectionIds)
       {
-        if (selectionArray == NULL ||
+        if (selectionArray == nullptr ||
             selectionArray->GetNumberOfTuples() == 0)
         {
           vtkWarningMacro(<<"UseSelectionIds is true, but selection array"
@@ -707,7 +864,6 @@ void vtkOpenGLGlyph3DMapper::RebuildStructures(
     }
   }
 
-  subarray->LastSelectingState = selecting_points;
   subarray->BuildTime.Modified();
   trans->Delete();
   normalTrans->Delete();
@@ -722,12 +878,16 @@ void vtkOpenGLGlyph3DMapper::ReleaseGraphicsResources(vtkWindow *window)
   if (this->GlyphValues)
   {
     std::map<const vtkDataSet *, vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperSubArray *>::iterator miter = this->GlyphValues->Entries.begin();
-    for (;miter != this->GlyphValues->Entries.end(); miter++)
+    for (;miter != this->GlyphValues->Entries.end(); ++miter)
     {
       std::map<size_t, vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperEntry *>::iterator miter2 = miter->second->Entries.begin();
-      for (;miter2 != miter->second->Entries.end(); miter2++)
+      for (;miter2 != miter->second->Entries.end(); ++miter2)
       {
-        miter2->second->Mapper->ReleaseGraphicsResources(window);
+        vtkOpenGLGlyph3DMapperEntry::MapperMap::iterator miter3 = miter2->second->Mappers.begin();
+        for (; miter3 != miter2->second->Mappers.end(); ++miter3)
+        {
+          miter3->second->ReleaseGraphicsResources(window);
+        }
       }
     }
   }

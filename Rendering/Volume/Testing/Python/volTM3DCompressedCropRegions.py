@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import vtk
-from vtk.test import Testing
 from vtk.util.misc import vtkGetDataRoot
 VTK_DATA_ROOT = vtkGetDataRoot()
 
@@ -93,7 +92,8 @@ culler.SetSortingStyleToBackToFront()
 valid = volumeMapper_0_0.IsRenderSupported(volumeProperty, ren1)
 if (valid == 0):
     print("Required Extensions Not Supported")
-    sys.exit(0)
+    from vtk.test import Testing
+    Testing.skip()
 
 ren1.ResetCamera()
 ren1.GetActiveCamera().Zoom(3.0)

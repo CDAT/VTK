@@ -77,7 +77,7 @@ int vtkHyperOctreeLimiter::RequestData(vtkInformation *vtkNotUsed(request),
 
   //TODO: this is incorrect, so I use Insert and Squeeze instead of Set.
   int aMaximumLevel = inInfo->Get(vtkHyperOctree::LEVELS());
-  vtkIdType fact=(1<<(aMaximumLevel-1));
+  vtkIdType fact=static_cast<vtkIdType>(1)<<(aMaximumLevel-1);
   vtkIdType maxNumberOfCells=fact*fact;
 
   //give the output the same number and type of attribute data arrays
@@ -90,7 +90,7 @@ int vtkHyperOctreeLimiter::RequestData(vtkInformation *vtkNotUsed(request),
   {
     vtkDataArray *ida = ipd->GetArray(a);
     vtkDataArray *oda = opd->GetArray(ida->GetName());
-    if (oda == NULL)
+    if (oda == nullptr)
     {
       oda = ida->NewInstance();
       oda->SetName(ida->GetName());
@@ -119,7 +119,7 @@ int vtkHyperOctreeLimiter::RequestData(vtkInformation *vtkNotUsed(request),
   {
     vtkDataArray *ida = icd->GetArray(a);
     vtkDataArray *oda = ocd->GetArray(ida->GetName());
-    if (oda == NULL)
+    if (oda == nullptr)
     {
       oda = ida->NewInstance();
       oda->SetName(ida->GetName());

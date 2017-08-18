@@ -48,6 +48,9 @@ class vtkTexture;
 class vtkTextActor;
 class vtkImageAlgorithm;
 
+// Private.
+#define VTK_RESLICE_CURSOR_REPRESENTATION_MAX_TEXTBUFF 128
+
 class VTKINTERACTIONWIDGETS_EXPORT vtkResliceCursorRepresentation : public vtkWidgetRepresentation
 {
 public:
@@ -56,7 +59,7 @@ public:
    * Standard VTK methods.
    */
   vtkTypeMacro(vtkResliceCursorRepresentation,vtkWidgetRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   //@{
@@ -121,7 +124,7 @@ public:
   /**
    * These are methods that satisfy vtkWidgetRepresentation's API.
    */
-  virtual void BuildRepresentation();
+  void BuildRepresentation() VTK_OVERRIDE;
 
   //@{
   /**
@@ -247,7 +250,7 @@ public:
 
 protected:
   vtkResliceCursorRepresentation();
-  ~vtkResliceCursorRepresentation();
+  ~vtkResliceCursorRepresentation() VTK_OVERRIDE;
 
   //@{
   /**
@@ -325,7 +328,7 @@ protected:
   double                    InitialLevel;
   double                    LastEventPosition[2];
   int                       UseImageActor;
-  char                      TextBuff[128];
+  char                      TextBuff[VTK_RESLICE_CURSOR_REPRESENTATION_MAX_TEXTBUFF];
   int                       DisplayText;
 
   vtkScalarsToColors      * CreateDefaultLookupTable();

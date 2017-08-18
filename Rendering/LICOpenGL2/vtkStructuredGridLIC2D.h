@@ -25,8 +25,8 @@
  * texture are supported, giving a power-of-two image may result in faster
  * execution on the GPU.
  *
- * Please refer to Forssell, L. K., “Visualizing flow over curvilinear grid
- * surfaces using line integral convolution”, Visualization 94 Conference
+ * Please refer to Forssell, L. K., "Visualizing flow over curvilinear grid
+ * surfaces using line integral convolution", Visualization 94 Conference
  * Proceedings, pages 240-247, IEEE Computer Society, 1994 for details of the
  * algorithm.
  *
@@ -56,7 +56,7 @@ class VTKRENDERINGLICOPENGL2_EXPORT vtkStructuredGridLIC2D
 public:
   static vtkStructuredGridLIC2D* New();
   vtkTypeMacro(vtkStructuredGridLIC2D, vtkStructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -126,7 +126,7 @@ protected:
    * Redefined from the superclass.
    */
   virtual int FillInputPortInformation(int port,
-                                       vtkInformation *info);
+                                       vtkInformation *info) VTK_OVERRIDE;
 
   /**
    * Fill the output port information objects for this algorithm.
@@ -135,15 +135,15 @@ protected:
    * Redefined from the superclass.
    */
   virtual int FillOutputPortInformation(int port,
-                                        vtkInformation *info);
+                                        vtkInformation *info) VTK_OVERRIDE;
 
   virtual int RequestInformation(vtkInformation *request,
          vtkInformationVector **inputVector,
-         vtkInformationVector *outputVector);
+         vtkInformationVector *outputVector) VTK_OVERRIDE;
 
   int RequestUpdateExtent (vtkInformation *request,
                            vtkInformationVector **inputVector,
-                           vtkInformationVector *outputVector);
+                           vtkInformationVector *outputVector) VTK_OVERRIDE;
 
   /**
    * Stolen from vtkImageAlgorithm. Should be in vtkStructuredGridAlgorithm.
@@ -162,7 +162,7 @@ protected:
    */
   virtual int RequestData(vtkInformation *request,
                           vtkInformationVector **inputVector,
-                          vtkInformationVector *outputVector);
+                          vtkInformationVector *outputVector) VTK_OVERRIDE;
 
   int    Steps;
   double StepSize;

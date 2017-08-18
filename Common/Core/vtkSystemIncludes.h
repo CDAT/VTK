@@ -67,7 +67,7 @@
 // include blockers are put in place that prevent including the
 // C-style versions from ever including the sub-headers.  Therefore we
 // have to include the sub-headers here to get the using declarations.
-#if defined(__BORLANDC__)
+#if defined(__BORLANDC__) && (__BORLANDC__ < 0x660)
 # include <mem.h>    /* mem... functions from string.h */
 # include <search.h> /* search functions from stdlib.h */
 #endif
@@ -118,11 +118,11 @@
 #define VTK_MAX_VRCOMP                  4
 
 // If VTK_USE_PTHREADS is defined, then the multithreaded
-// function is of type void *, and returns NULL
+// function is of type void *, and returns nullptr
 // Otherwise the type is void which is correct for WIN32
 // and SPROC
 #ifdef VTK_USE_PTHREADS
-#define VTK_THREAD_RETURN_VALUE  NULL
+#define VTK_THREAD_RETURN_VALUE  nullptr
 #define VTK_THREAD_RETURN_TYPE   void *
 #endif
 

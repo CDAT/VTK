@@ -53,9 +53,10 @@ endif()
 
 # These tests are only built for the OpenGL2 backend
 set (VolumeOpenGL2CxxTests
-  TestGPURayCastBlendModes.cxx
   TestGPURayCastAverageIP.cxx
+  TestGPURayCastBlendModes.cxx
   TestGPURayCastCameraInside.cxx
+  TestGPURayCastCameraInsideClipping.cxx
   TestGPURayCastCameraInsideSmallSpacing.cxx
   TestGPURayCastCameraInsideTransformation.cxx
   TestGPURayCastCellData.cxx
@@ -63,11 +64,16 @@ set (VolumeOpenGL2CxxTests
   TestGPURayCastClippingPolyData.cxx
   TestGPURayCastClippingUserTransform.cxx
   TestGPURayCastDependentComponentsLightParameters.cxx
+  TestGPURayCastDepthPeeling.cxx
+  TestGPURayCastDepthPeelingBlendModes.cxx
+  TestGPURayCastDepthPeelingOpaque.cxx
+  TestGPURayCastDepthPeelingTransVol.cxx
   TestGPURayCastFourComponentsAdditive.cxx
   TestGPURayCastFourComponentsAverage.cxx
   TestGPURayCastFourComponentsDependentGradient.cxx
   TestGPURayCastGradientOpacity.cxx
   TestGPURayCastGradientOpacityLight.cxx
+  TestGPURayCastImageSampleXY.cxx
   TestGPURayCastIndependentComponentsLightParameters.cxx
   TestGPURayCastIndependentVectorMode.cxx
   TestGPURayCastJittering.cxx
@@ -82,6 +88,7 @@ set (VolumeOpenGL2CxxTests
   TestGPURayCastTextureStreaming.cxx
   TestGPURayCastThreeComponentsAdditive.cxx
   TestGPURayCastThreeComponentsIndependent.cxx
+  TestGPURayCastTransfer2D.cxx
   TestGPURayCastTwoComponentsDependent.cxx
   TestGPURayCastTwoComponentsDependentGradient.cxx
   TestGPURayCastTwoComponentsGradient.cxx
@@ -92,6 +99,7 @@ set (VolumeOpenGL2CxxTests
   TestGPURayCastVolumePolyData.cxx
   TestGPURayCastVolumeRotation.cxx
   TestGPURayCastVolumeScale.cxx
+  TestMultiBlockMapper.cxx
   TestProjectedTetrahedraOffscreen.cxx
   TestProjectedTetrahedraTransform.cxx
   TestRemoveVolumeNonCurrentContext.cxx

@@ -44,7 +44,7 @@ class VTKRENDERINGCORE_EXPORT vtkImageActor : public vtkImageSlice
 {
 public:
   vtkTypeMacro(vtkImageActor,vtkImageSlice);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Instantiate the image actor.
@@ -74,7 +74,7 @@ public:
   //@{
   /**
    * Set/Get the object's opacity. 1.0 is totally opaque and 0.0 is completely
-   * transparent.
+   * transparent. The default is 1.0.
    */
   virtual void SetOpacity(double);
   virtual double GetOpacity();
@@ -98,10 +98,10 @@ public:
   /**
    * Get the bounds of this image actor. Either copy the bounds
    * into a user provided array or return a pointer to an array.
-   * In either case the boudns is expressed as a 6-vector
+   * In either case the bounds is expressed as a 6-vector
    * (xmin,xmax, ymin,ymax, zmin,zmax).
    */
-  double *GetBounds();
+  double *GetBounds() VTK_OVERRIDE;
   void GetBounds(double bounds[6]) { this->Superclass::GetBounds(bounds); };
   //@}
 
@@ -152,11 +152,12 @@ public:
    * ForceOpaqueOn(), which forces this method to return false, or
    * ForceTranslucentOn(), which forces this method to return true.
    */
-  virtual int HasTranslucentPolygonalGeometry();
+  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
 
   //@{
   /**
    * Force the actor to be rendered during the opaque rendering pass.
+   * Default is false.
    * See also: ForceTranslucentOn() to use translucent rendering pass.
    */
   vtkGetMacro(ForceOpaque, bool);
@@ -166,7 +167,7 @@ public:
 
 protected:
   vtkImageActor();
-  ~vtkImageActor();
+  ~vtkImageActor() VTK_OVERRIDE;
 
   /**
    * Guess the orientation from the extent.  The orientation will be Z

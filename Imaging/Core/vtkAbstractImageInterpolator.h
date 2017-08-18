@@ -179,7 +179,7 @@ public:
    * Get the support size for use in computing update extents.  If the data
    * will be sampled on a regular grid, then pass a matrix describing the
    * structured coordinate transformation between the output and the input.
-   * Otherwise, pass NULL as the matrix to retrieve the full kernel size.
+   * Otherwise, pass nullptr as the matrix to retrieve the full kernel size.
    */
   virtual void ComputeSupportSize(const double matrix[16], int support[3]) = 0;
 
@@ -262,7 +262,7 @@ public:
 
 protected:
   vtkAbstractImageInterpolator();
-  ~vtkAbstractImageInterpolator();
+  ~vtkAbstractImageInterpolator() VTK_OVERRIDE;
 
   /**
    * Subclass-specific updates.
@@ -345,18 +345,18 @@ inline void vtkAbstractImageInterpolator::InterpolateIJK(
 
 inline bool vtkAbstractImageInterpolator::CheckBoundsIJK(const double x[3])
 {
-  double *bounds = this->StructuredBoundsDouble;
-  return !((x[0] < bounds[0]) | (x[0] > bounds[1]) |
-           (x[1] < bounds[2]) | (x[1] > bounds[3]) |
-           (x[2] < bounds[4]) | (x[2] > bounds[5]));
+  const double *bounds = this->StructuredBoundsDouble;
+  return !((x[0] < bounds[0]) || (x[0] > bounds[1]) ||
+           (x[1] < bounds[2]) || (x[1] > bounds[3]) ||
+           (x[2] < bounds[4]) || (x[2] > bounds[5]));
 }
 
 inline bool vtkAbstractImageInterpolator::CheckBoundsIJK(const float x[3])
 {
-  float *bounds = this->StructuredBoundsFloat;
-  return !((x[0] < bounds[0]) | (x[0] > bounds[1]) |
-           (x[1] < bounds[2]) | (x[1] > bounds[3]) |
-           (x[2] < bounds[4]) | (x[2] > bounds[5]));
+  const float *bounds = this->StructuredBoundsFloat;
+  return !((x[0] < bounds[0]) || (x[0] > bounds[1]) ||
+           (x[1] < bounds[2]) || (x[1] > bounds[3]) ||
+           (x[2] < bounds[4]) || (x[2] > bounds[5]));
 }
 
 inline void vtkAbstractImageInterpolator::InterpolateRow(

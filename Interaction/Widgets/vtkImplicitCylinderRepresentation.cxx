@@ -283,13 +283,13 @@ int vtkImplicitCylinderRepresentation::ComputeInteractionState(int X, int Y,
   // The second picker may need to be called. This is done because the cylinder
   // wraps around things that can be picked; thus the cylinder is the selection
   // of last resort.
-  if ( path == NULL )
+  if ( path == nullptr )
   {
     this->CylPicker->Pick(X, Y, 0., this->Renderer);
     path = this->CylPicker->GetPath();
   }
 
-  if ( path == NULL ) // Nothing picked
+  if ( path == nullptr ) // Nothing picked
   {
     this->SetRepresentationState(vtkImplicitCylinderRepresentation::Outside);
     this->InteractionState = vtkImplicitCylinderRepresentation::Outside;
@@ -955,7 +955,7 @@ AdjustRadius(double vtkNotUsed(X), double Y, double *p1, double *p2)
   v[2] = p2[2] - p1[2];
   double l = sqrt( vtkMath::Dot(v,v) );
 
-  dr = l / this->Outline->GetOutput()->GetLength();
+  dr = l / 4;
   if ( Y < this->LastEventPosition[1] )
   {
     dr *= -1.0;
@@ -1235,7 +1235,7 @@ void vtkImplicitCylinderRepresentation::GetPolyData(vtkPolyData *pd)
 //----------------------------------------------------------------------------
 void vtkImplicitCylinderRepresentation::GetCylinder(vtkCylinder *cyl)
 {
-  if ( cyl == NULL )
+  if ( cyl == nullptr )
   {
     return;
   }
@@ -1512,7 +1512,7 @@ void vtkImplicitCylinderRepresentation::BuildCylinder()
   // intersect the bounding box.
   bool edgeInside[VTK_MAX_CYL_RESOLUTION];
   double x1[3], x2[3], p1[3], p2[3], t1, t2;
-  double *bounds = this->Outline->GetOutput()->GetBounds();
+  const double *bounds = this->Outline->GetOutput()->GetBounds();
   int plane1, plane2;
   for (pid=0; pid < res; ++pid)
   {

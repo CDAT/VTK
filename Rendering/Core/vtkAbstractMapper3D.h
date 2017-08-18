@@ -43,7 +43,7 @@ class VTKRENDERINGCORE_EXPORT vtkAbstractMapper3D : public vtkAbstractMapper
 {
 public:
   vtkTypeMacro(vtkAbstractMapper3D, vtkAbstractMapper);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Return bounding box (array of six doubles) of data expressed as
@@ -95,14 +95,9 @@ public:
   void GetClippingPlaneInDataCoords(
     vtkMatrix4x4 *propMatrix, int i, double planeEquation[4]);
 
-  /**
-   * Get the number of clipping planes.
-   */
-  int GetNumberOfClippingPlanes();
-
 protected:
    vtkAbstractMapper3D();
-   ~vtkAbstractMapper3D() {}
+   ~vtkAbstractMapper3D() VTK_OVERRIDE {}
 
   double Bounds[6];
   double Center[3];

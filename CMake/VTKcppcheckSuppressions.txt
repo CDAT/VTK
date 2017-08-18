@@ -13,11 +13,11 @@
 //=========================================================================
 
 // This file contains enough suppressions to result in no cppcheck warnings,
-// at least on Mac OS X with cppcheck 1.76.1.
+// at least on macOS with cppcheck 1.79.
 
 // To run:
 // cd /path/to/VTK/
-// cppcheck --platform=unix64 --enable=style -q --suppressions-list=CMake/VTKcppcheckSuppressions.txt --template='{id},{file}:{line},{severity},{message}' -j8 .
+// cppcheck --platform=unspecified --enable=style -q --suppressions-list=CMake/VTKcppcheckSuppressions.txt --template='{id},{file}:{line},{severity},{message}' -j8 .
 
 // Suppress everything from ThirdParty.
 *:ThirdParty/*
@@ -64,67 +64,43 @@ argumentSize
 
 // False positives.
 AssignmentAddressToInteger:Common/Math/vtkPolynomialSolversUnivariate.cxx
+AssignmentAddressToInteger:IO/Exodus/vtkExodusIIReader.cxx
 CastIntegerToAddressAtReturn:Geovis/Core/vtkGeoTreeNode.h
 copyCtorPointerCopying:IO/NetCDF/vtkSLACReader.cxx
-duplicateExpression:Common/Math/Testing/Cxx/TestPolynomialSolversUnivariate.cxx
 duplicateExpression:Rendering/Annotation/vtkScalarBarActor.cxx
-memleak:Common/Core/Testing/Cxx/TestGarbageCollector.cxx
 memleak:Examples/Infovis/Cxx/MultiView.cxx
 memleak:IO/Image/vtkJPEGReader.cxx
 memleak:Imaging/Hybrid/vtkSurfaceReconstructionFilter.cxx
-multiCondition:Filters/Matlab/vtkMatlabMexAdapter.cxx
-nullPointer:Interaction/Style/vtkInteractorStyleJoystickActor.cxx
-nullPointer:Interaction/Style/vtkInteractorStyleTrackballActor.cxx
+memleak:Rendering/OpenGL2/vtkOpenGLRenderTimerLog.cxx
 operatorEqVarError:Filters/General/vtkHyperStreamline.cxx
-redundantAssignInSwitch:Wrapping/Tools/vtkWrapPythonOverload.c
-redundantAssignment:Filters/General/vtkInterpolatingSubdivisionFilter.cxx
 redundantAssignment:Wrapping/Tcl/vtkTclUtil.cxx
 redundantAssignment:Wrapping/Tools/vtkParsePreprocess.c
 stlIfStrFind:Infovis/Core/vtkPipelineGraphSource.cxx
 stlIfStrFind:Rendering/OpenGL2/vtkOpenGLRenderer.cxx
-unassignedVariable:Common/Transforms/vtkHomogeneousTransform.cxx
-unassignedVariable:Filters/Core/vtkFlyingEdges3D.cxx
-unassignedVariable:Rendering/Core/vtkCamera.cxx
 unsafeClassCanLeak:Filters/General/vtkDensifyPolyData.cxx
 unsafeClassCanLeak:GUISupport/Qt/QVTKInteractorInternal.h
 unsafeClassCanLeak:Interaction/Widgets/vtkBiDimensionalRepresentation.h
+unusedLabelSwitch:IO/Exodus/vtkCPExodusIINodalCoordinatesTemplate.txx
 uselessAssignmentArg:Common/DataModel/vtkReebGraph.cxx
-uselessAssignmentPtrArg:IO/Parallel/vtkPImageWriter.cxx
 uselessAssignmentPtrArg:Wrapping/Tools/vtkParse.tab.c
 
+// false positive: <http://trac.cppcheck.net/ticket/7889>
+knownConditionTrueFalse:IO/Parallel/vtkMultiBlockPLOT3DReader.cxx
+knownConditionTrueFalse:Parallel/MPI/Testing/Cxx/ExerciseMultiProcessController.cxx
+
+// false positive: <http://trac.cppcheck.net/ticket/7896>
+unassignedVariable:Common/Transforms/vtkHomogeneousTransform.cxx
+unassignedVariable:Rendering/Core/vtkCamera.cxx
+
 // Not worth fixing, but not actually false positives.
+duplicateExpression:Common/Math/Testing/Cxx/TestPolynomialSolversUnivariate.cxx
 knownConditionTrueFalse:GUISupport/Qt/QVTKWidget.cxx
 knownConditionTrueFalse:Rendering/OpenGL/vtkXGPUInfoList.cxx
 passedByValue:Filters/General/vtkYoungsMaterialInterface.cxx
+knownConditionTrueFalse:IO/XML/Testing/Cxx/TestHyperOctreeIO.cxx
+knownConditionTrueFalse:Rendering/OSPRay/vtkOSPRayRendererNode.cxx
 
 // There are a fair number of these, but they are probably worth working through.
-// 217 warnings
-postfixOperator:Common/*
-postfixOperator:Examples/HyperTree/Cxx/*
-postfixOperator:Filters/*
-postfixOperator:IO/*
-postfixOperator:Parallel/Core/*
-postfixOperator:Rendering/*
-postfixOperator:Utilities/*
-// 30 warnings
-duplInheritedMember:Charts/Core/vtkChartMatrix.h
-duplInheritedMember:Charts/Core/vtkPlot3D.h
-duplInheritedMember:Common/DataModel/vtkGenericCellTessellator.h
-duplInheritedMember:Common/DataModel/vtkPlanes.h
-duplInheritedMember:Common/ExecutionModel/vtkStreamingDemandDrivenPipeline.h
-duplInheritedMember:Filters/FlowPaths/vtkAbstractInterpolatedVelocityField.h
-duplInheritedMember:Filters/Sources/vtkOutlineSource.h
-duplInheritedMember:IO/EnSight/vtkGenericEnSightReader.h
-duplInheritedMember:IO/Geometry/vtkMoleculeReaderBase.h
-duplInheritedMember:IO/SQL/vtkTableToDatabaseWriter.h
-duplInheritedMember:Imaging/Core/vtkImageReslice.h
-duplInheritedMember:Interaction/Widgets/vtkBiDimensionalRepresentation.h
-duplInheritedMember:Rendering/Core/vtkColorTransferFunction.h
-duplInheritedMember:Rendering/OpenGL/vtkStandardPolyDataPainter.h
-duplInheritedMember:Rendering/OpenGL/vtkXRenderWindowInteractor.h
-duplInheritedMember:Rendering/OpenGL2/vtkImageProcessingPass.h
-duplInheritedMember:Views/Infovis/vtkRenderView.h
-duplInheritedMember:Views/Infovis/vtkRenderedRepresentation.h
 // 16 warnings
 invalidPointerCast:Rendering/GL2PSOpenGL2/vtkOpenGLGL2PSHelperImpl.cxx
 invalidPointerCast:Rendering/OSPRay/vtkOSPRayPolyDataMapperNode.cxx
@@ -132,14 +108,23 @@ invalidPointerCast:Rendering/OpenGL2/vtkOpenGLSphereMapper.cxx
 invalidPointerCast:Rendering/OpenGL2/vtkOpenGLStickMapper.cxx
 invalidPointerCast:Rendering/OpenGL2/vtkOpenGLVertexBufferObject.cxx
 invalidPointerCast:Rendering/ParallelLIC/vtkParallelTimer.cxx
+// 14 warnings
+copyCtorAndEqOperator
+
 // 6 warnings
 noConstructor:Common/Core/Testing/Cxx/TestCxxFeatures.cxx
 noConstructor:Common/Core/Testing/Cxx/TestDataArrayIterators.cxx
 noConstructor:Common/Core/vtkTypeList.txx
 noConstructor:Filters/ParallelDIY2/vtkPResampleWithDataSet.cxx
 noConstructor:Rendering/Core/Testing/Cxx/TestInteractorTimers.cxx
+noConstructor:Examples/GUI/Win32/vtkMFC/vtkSDI/vtkSDIView.h
 
-// To investigate further...
+// Need someone that knows this code...
 memleak:Wrapping/Tools/vtkParsePreprocess.c
 nullPointerRedundantCheck:IO/Exodus/vtkExodusIIReaderParser.cxx
 redundantAssignment:IO/Image/vtkJPEGReader.cxx
+knownConditionTrueFalse:IO/Exodus/vtkExodusIIWriter.cxx
+knownConditionTrueFalse:Rendering/Label/vtkLabeledTreeMapDataMapper.cxx
+knownConditionTrueFalse:Filters/ParallelFlowPaths/Testing/Cxx/TestPStreamGeometry.cxx
+knownConditionTrueFalse:Rendering/Label/vtkLabelSizeCalculator.cxx
+redundantAssignment:Rendering/OSPRay/vtkOSPRayRendererNode.cxx

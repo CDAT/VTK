@@ -14,10 +14,10 @@
 =========================================================================*/
 /**
  * @class   vtkProp3DCollection
- * @brief   a list of 3D props
+ * @brief   an ordered list of 3D props
  *
  * vtkProp3DCollection represents and provides methods to manipulate a list of
- * 3D props (i.e., vtkProp3D and subclasses). The list is unsorted and
+ * 3D props (i.e., vtkProp3D and subclasses). The list is ordered and
  * duplicate entries are not prevented.
  *
  * @sa
@@ -39,7 +39,7 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
-   * Add an actor to the list.
+   * Add an actor to the bottom of the list.
    */
   void AddItem(vtkProp3D *p);
 
@@ -64,7 +64,7 @@ public:
 
 protected:
   vtkProp3DCollection() {}
-  ~vtkProp3DCollection() {}
+  ~vtkProp3DCollection() VTK_OVERRIDE {}
 
 
 private:
@@ -95,9 +95,9 @@ inline vtkProp3D *vtkProp3DCollection::GetNextProp3D()
 
 inline vtkProp3D *vtkProp3DCollection::GetLastProp3D()
 {
-  if ( this->Bottom == NULL )
+  if ( this->Bottom == nullptr )
   {
-    return NULL;
+    return nullptr;
   }
   else
   {

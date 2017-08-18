@@ -66,7 +66,7 @@ class VTKRENDERINGCORE_EXPORT vtkTexture : public vtkImageAlgorithm
 public:
   static vtkTexture* New();
   vtkTypeMacro(vtkTexture, vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Renders a texture map. It first checks the object's modified time
@@ -124,6 +124,15 @@ public:
   vtkGetMacro(Interpolate, int);
   vtkSetMacro(Interpolate, int);
   vtkBooleanMacro(Interpolate, int);
+  //@}
+
+  //@{
+  /**
+   * Turn on/off use of mipmaps when rendering.
+   */
+  vtkGetMacro(Mipmap, bool);
+  vtkSetMacro(Mipmap, bool);
+  vtkBooleanMacro(Mipmap, bool);
   //@}
 
   //@{
@@ -250,16 +259,41 @@ public:
    */
   virtual int GetTextureUnit() { return 0; }
 
+  //@{
+  /**
+   * Is this texture a cube map, if so it needs 6 inputs
+   * one for each side of the cube. You must set this before
+   * connecting the inputs. The inputs must all have the same
+   * size, data type, and depth
+   */
+  vtkGetMacro(CubeMap, bool);
+  vtkBooleanMacro(CubeMap, bool);
+  void SetCubeMap(bool val);
+  //@}
+
+  //@{
+  /**
+   * Is this texture using the sRGB color space. If you are using a
+   * sRGB framebuffer or window then you probably also want to be
+   * using sRGB color textures for proper handling of gamma and
+   * associated color mixing.
+   */
+  vtkGetMacro(UseSRGBColorSpace, bool);
+  vtkSetMacro(UseSRGBColorSpace, bool);
+  vtkBooleanMacro(UseSRGBColorSpace, bool);
+  //@}
+
 protected:
   vtkTexture();
-  ~vtkTexture();
+  ~vtkTexture() VTK_OVERRIDE;
 
   // A texture is a sink, so there is no need to do anything.
   // This definition avoids a warning when doing Update() on a vtkTexture object.
-  virtual void ExecuteData(vtkDataObject *)
+  void ExecuteData(vtkDataObject *) VTK_OVERRIDE
   {
   }
 
+  bool Mipmap;
   int Repeat;
   int EdgeClamp;
   int Interpolate;
@@ -274,6 +308,8 @@ protected:
   // this is to duplicated the previous behavior of SelfCreatedLookUpTable
   int SelfAdjustingTableRange;
   bool PremultipliedAlpha;
+  bool CubeMap;
+  bool UseSRGBColorSpace;
 
   // the result of HasTranslucentPolygonalGeometry is cached
   vtkTimeStamp TranslucentComputationTime;

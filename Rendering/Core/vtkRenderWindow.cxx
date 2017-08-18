@@ -22,6 +22,7 @@
 #include "vtkPropCollection.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRendererCollection.h"
+#include "vtkRenderTimerLog.h"
 #include "vtkTimerLog.h"
 #include "vtkTransform.h"
 #include "vtkGraphicsFactory.h"
@@ -57,22 +58,21 @@ vtkRenderWindow::vtkRenderWindow()
   this->PolygonSmoothing = 0;
   this->StereoRender = 0;
   this->StereoType = VTK_STEREO_RED_BLUE;
-  this->StereoStatus = 0;
   this->StereoCapableWindow = 0;
   this->AlphaBitPlanes = 0;
   this->StencilCapable = 0;
-  this->Interactor = NULL;
+  this->Interactor = nullptr;
   this->AAFrames = 0;
   this->FDFrames = 0;
   this->UseConstantFDOffsets = 0;
-  this->ConstantFDOffsets[0] = NULL;
-  this->ConstantFDOffsets[1] = NULL;
+  this->ConstantFDOffsets[0] = nullptr;
+  this->ConstantFDOffsets[1] = nullptr;
   this->SubFrames = 0;
-  this->AccumulationBuffer = NULL;
+  this->AccumulationBuffer = nullptr;
   this->AccumulationBufferSize = 0;
   this->CurrentSubFrame = 0;
   this->DesiredUpdateRate = 0.0001;
-  this->ResultFrame = NULL;
+  this->ResultFrame = nullptr;
   this->SwapBuffers = 1;
   this->AbortRender = 0;
   this->InAbortCheck = 0;
@@ -84,12 +84,13 @@ vtkRenderWindow::vtkRenderWindow()
   this->AnaglyphColorSaturation = 0.65f;
   this->AnaglyphColorMask[0] = 4;  // red
   this->AnaglyphColorMask[1] = 3;  // cyan
-  this->PainterDeviceAdapter = NULL;
+  this->PainterDeviceAdapter = nullptr;
   this->AbortCheckTime = 0.0;
   this->CapturingGL2PSSpecialProps = 0;
   this->MultiSamples = 0;
+  this->UseSRGBColorSpace = false;
 
-#ifdef VTK_USE_OFFSCREEN
+#ifdef VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN
   this->OffScreenRendering = 1;
 #endif
   this->DeviceIndex = 0;
@@ -98,19 +99,19 @@ vtkRenderWindow::vtkRenderWindow()
 //----------------------------------------------------------------------------
 vtkRenderWindow::~vtkRenderWindow()
 {
-  this->SetInteractor(NULL);
+  this->SetInteractor(nullptr);
 
   delete [] this->AccumulationBuffer;
-  this->AccumulationBuffer = NULL;
+  this->AccumulationBuffer = nullptr;
   this->AccumulationBufferSize = 0;
 
   delete [] this->ResultFrame;
-  this->ResultFrame = NULL;
+  this->ResultFrame = nullptr;
 
   for (int i = 0; i < 2; ++i)
   {
     delete [] this->ConstantFDOffsets[i];
-    this->ConstantFDOffsets[i] = NULL;
+    this->ConstantFDOffsets[i] = nullptr;
   }
 
   if (this->Renderers)
@@ -153,8 +154,8 @@ void vtkRenderWindow::SetInteractor(vtkRenderWindowInteractor *rwi)
     // to avoid destructor recursion
     vtkRenderWindowInteractor *temp = this->Interactor;
     this->Interactor = rwi;
-    if (temp != NULL) {temp->UnRegister(this);}
-    if (this->Interactor != NULL)
+    if (temp != nullptr) {temp->UnRegister(this);}
+    if (this->Interactor != nullptr)
     {
       this->Interactor->Register(this);
 
@@ -174,8 +175,10 @@ void vtkRenderWindow::SetInteractor(vtkRenderWindowInteractor *rwi)
 }
 
 //----------------------------------------------------------------------------
+#if !defined(VTK_LEGACY_REMOVE)
 void vtkRenderWindow::SetFDFrames(int fdFrames)
 {
+  VTK_LEGACY_BODY(SetFDFrames, "VTK 8.1");
   if (this->FDFrames != fdFrames)
   {
     this->FDFrames = fdFrames;
@@ -183,7 +186,7 @@ void vtkRenderWindow::SetFDFrames(int fdFrames)
     for (int i = 0; i < 2; i++)
     {
       delete [] this->ConstantFDOffsets[i];
-      this->ConstantFDOffsets[i] = NULL;
+      this->ConstantFDOffsets[i] = nullptr;
 
       if (this->FDFrames > 0)
       {
@@ -204,6 +207,7 @@ void vtkRenderWindow::SetFDFrames(int fdFrames)
 //----------------------------------------------------------------------------
 void vtkRenderWindow::SetSubFrames(int subFrames)
 {
+  VTK_LEGACY_BODY(SetSubFrames, "VTK 8.1");
   if (this->SubFrames != subFrames)
   {
     this->SubFrames = subFrames;
@@ -216,6 +220,7 @@ void vtkRenderWindow::SetSubFrames(int subFrames)
     this->Modified();
   }
 }
+#endif
 
 //----------------------------------------------------------------------------
 void vtkRenderWindow::SetDesiredUpdateRate(double rate)
@@ -308,13 +313,21 @@ void vtkRenderWindow::Render()
   this->InRender = 1;
 
   vtkDebugMacro(<< "Starting Render Method.\n");
-  this->InvokeEvent(vtkCommand::StartEvent,NULL);
+  this->InvokeEvent(vtkCommand::StartEvent,nullptr);
 
   this->NeverRendered = 0;
 
   if ( this->Interactor && ! this->Interactor->GetInitialized() )
   {
     this->Interactor->Initialize();
+  }
+
+  vtkRenderTimerLog::ScopedEventLogger event;
+  if (this->RenderTimer->GetLoggingEnabled())
+  {
+    this->Start(); // Ensure context exists
+    this->RenderTimer->MarkFrame();
+    event = this->RenderTimer->StartScopedEvent("vtkRenderWindow::Render");
   }
 
   // CAUTION:
@@ -356,7 +369,7 @@ void vtkRenderWindow::Render()
     {
       p1 = this->AccumulationBuffer;
       unsigned char *p2;
-      unsigned char *p3 = NULL;
+      unsigned char *p3 = nullptr;
       if (this->ResultFrame)
       {
         p2 = this->ResultFrame;
@@ -375,10 +388,7 @@ void vtkRenderWindow::Render()
           *p1 += *p2; p1++; p2++;
         }
       }
-      if (p3)
-      {
-        delete [] p3;
-      }
+      delete [] p3;
     }
 
     // if this is the last sub frame then convert back into unsigned char
@@ -421,7 +431,7 @@ void vtkRenderWindow::Render()
 
       // free any memory
       delete [] this->AccumulationBuffer;
-      this->AccumulationBuffer = NULL;
+      this->AccumulationBuffer = nullptr;
     }
   }
   else // no subframes
@@ -468,17 +478,20 @@ void vtkRenderWindow::Render()
       }
 
       delete [] this->AccumulationBuffer;
-      this->AccumulationBuffer = NULL;
+      this->AccumulationBuffer = nullptr;
     }
 
     this->CopyResultFrame();
   }
 
   delete [] this->ResultFrame;
-  this->ResultFrame = NULL;
+  this->ResultFrame = nullptr;
+
+  // Stop the render timer before invoking the EndEvent.
+  event.Stop();
 
   this->InRender = 0;
-  this->InvokeEvent(vtkCommand::EndEvent,NULL);
+  this->InvokeEvent(vtkCommand::EndEvent,nullptr);
 }
 
 //----------------------------------------------------------------------------
@@ -829,7 +842,7 @@ void vtkRenderWindow::RemoveRenderer(vtkRenderer *ren)
   if (ren->GetRenderWindow() == this)
   {
     ren->ReleaseGraphicsResources(this);
-    ren->SetRenderWindow(NULL);
+    ren->SetRenderWindow(nullptr);
   }
   this->Renderers->RemoveItem(ren);
 }
@@ -848,7 +861,7 @@ int vtkRenderWindow::CheckAbortStatus()
     if (vtkTimerLog::GetUniversalTime() - this->AbortCheckTime > 0.2)
     {
       this->InAbortCheck = 1;
-      this->InvokeEvent(vtkCommand::AbortCheckEvent,NULL);
+      this->InvokeEvent(vtkCommand::AbortCheckEvent,nullptr);
       this->InAbortCheck = 0;
       this->AbortCheckTime = vtkTimerLog::GetUniversalTime();
     }
@@ -893,6 +906,8 @@ void vtkRenderWindow::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "AccumulationBuffer Size " << this->AccumulationBufferSize << "\n";
   os << indent << "AlphaBitPlanes: " << (this->AlphaBitPlanes ? "On" : "Off")
      << endl;
+  os << indent << "UseSRGBColorSpace: " << (this->UseSRGBColorSpace ? "On" : "Off")
+     << endl;
 
   os << indent << "AnaglyphColorSaturation: "
      << this->AnaglyphColorSaturation << "\n";
@@ -921,55 +936,6 @@ void vtkRenderWindow::PrintSelf(ostream& os, vtkIndent indent)
 // methods, subclasses might need to switch some hardware settings here.
 void vtkRenderWindow::StereoUpdate(void)
 {
-  // if stereo is on and it wasn't before
-  if (this->StereoRender && (!this->StereoStatus))
-  {
-    switch (this->StereoType)
-    {
-      case VTK_STEREO_RED_BLUE:
-        this->StereoStatus = 1;
-        break;
-      case VTK_STEREO_ANAGLYPH:
-        this->StereoStatus = 1;
-        break;
-      case VTK_STEREO_DRESDEN:
-        this->StereoStatus = 1;
-        break;
-      case VTK_STEREO_INTERLACED:
-        this->StereoStatus = 1;
-        break;
-      case VTK_STEREO_CHECKERBOARD:
-        this->StereoStatus = 1;
-        break;
-      case VTK_STEREO_SPLITVIEWPORT_HORIZONTAL:
-        this->StereoStatus = 1;
-        break;
-    }
-  }
-  else if ((!this->StereoRender) && this->StereoStatus)
-  {
-    switch (this->StereoType)
-    {
-      case VTK_STEREO_RED_BLUE:
-        this->StereoStatus = 0;
-        break;
-      case VTK_STEREO_ANAGLYPH:
-        this->StereoStatus = 0;
-        break;
-      case VTK_STEREO_DRESDEN:
-        this->StereoStatus = 0;
-        break;
-      case VTK_STEREO_INTERLACED:
-        this->StereoStatus = 0;
-        break;
-      case VTK_STEREO_CHECKERBOARD:
-        this->StereoStatus = 0;
-        break;
-      case VTK_STEREO_SPLITVIEWPORT_HORIZONTAL:
-        this->StereoStatus = 0;
-        break;
-    }
-  }
 }
 
 //----------------------------------------------------------------------------
@@ -1048,7 +1014,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
       }
       this->ResultFrame = result;
       delete [] this->StereoBuffer;
-      this->StereoBuffer = NULL;
+      this->StereoBuffer = nullptr;
       delete [] buff;
     }
       break;
@@ -1131,7 +1097,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
       }
       this->ResultFrame = result;
       delete [] this->StereoBuffer;
-      this->StereoBuffer = NULL;
+      this->StereoBuffer = nullptr;
       delete [] buff;
     }
       break;
@@ -1191,7 +1157,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
 
       this->ResultFrame = result;
       delete [] this->StereoBuffer;
-      this->StereoBuffer = NULL;
+      this->StereoBuffer = nullptr;
       delete [] buff;
     }
       break;
@@ -1265,7 +1231,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
 
       this->ResultFrame = result;
       delete [] this->StereoBuffer;
-      this->StereoBuffer = NULL;
+      this->StereoBuffer = nullptr;
       delete [] buff;
     }
       break;
@@ -1311,7 +1277,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
       // cleanup
       this->ResultFrame = sleft;
 
-      this->StereoBuffer = NULL;
+      this->StereoBuffer = nullptr;
       delete [] sright;
     }
     break;
@@ -1369,7 +1335,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
       // cleanup
       this->ResultFrame = sleft;
 
-      this->StereoBuffer = NULL;
+      this->StereoBuffer = nullptr;
       delete [] sright;
     }
     break;
@@ -1410,9 +1376,9 @@ void vtkRenderWindow::UnRegister(vtkObjectBase *o)
     {
       this->vtkObject::UnRegister(o);
       vtkRenderWindowInteractor *tmp = this->Interactor;
-      tmp->Register(0);
-      this->Interactor->SetRenderWindow(NULL);
-      tmp->UnRegister(0);
+      tmp->Register(nullptr);
+      this->Interactor->SetRenderWindow(nullptr);
+      tmp->UnRegister(nullptr);
       return;
     }
   }
@@ -1435,7 +1401,7 @@ const char *vtkRenderWindow::GetRenderingBackend()
 //----------------------------------------------------------------------------
 void vtkRenderWindow::CaptureGL2PSSpecialProps(vtkCollection *result)
 {
-  if (result == NULL)
+  if (result == nullptr)
   {
     vtkErrorMacro(<<"CaptureGL2PSSpecialProps was passed a NULL pointer.");
     return;
@@ -1462,7 +1428,7 @@ void vtkRenderWindow::CaptureGL2PSSpecialProps(vtkCollection *result)
 
   for (Renderers->InitTraversal(); (ren = Renderers->GetNextItem());)
   {
-    ren->SetGL2PSSpecialPropCollection(NULL);
+    ren->SetGL2PSSpecialPropCollection(nullptr);
   }
   this->CapturingGL2PSSpecialProps = 0;
 }

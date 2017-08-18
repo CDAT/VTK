@@ -44,7 +44,7 @@ class VTKFILTERSEXTRACTION_EXPORT vtkExtractVectorComponents : public vtkDataSet
 public:
   static vtkExtractVectorComponents *New();
   vtkTypeMacro(vtkExtractVectorComponents,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Specify the input data or filter.
@@ -53,7 +53,7 @@ public:
 
   /**
    * Get the output dataset representing velocity x-component. If output is
-   * NULL then input hasn't been set, which is necessary for abstract
+   * nullptr then input hasn't been set, which is necessary for abstract
    * objects. (Note: this method returns the same information as the
    * GetOutput() method with an index of 0.)
    */
@@ -61,7 +61,7 @@ public:
 
   /**
    * Get the output dataset representing velocity y-component. If output is
-   * NULL then input hasn't been set, which is necessary for abstract
+   * nullptr then input hasn't been set, which is necessary for abstract
    * objects. (Note: this method returns the same information as the
    * GetOutput() method with an index of 1.)
    * Note that if ExtractToFieldData is true, this output will be empty.
@@ -70,7 +70,7 @@ public:
 
   /**
    * Get the output dataset representing velocity z-component. If output is
-   * NULL then input hasn't been set, which is necessary for abstract
+   * nullptr then input hasn't been set, which is necessary for abstract
    * objects. (Note: this method returns the same information as the
    * GetOutput() method with an index of 2.)
    * Note that if ExtractToFieldData is true, this output will be empty.
@@ -89,9 +89,9 @@ public:
 
 protected:
   vtkExtractVectorComponents();
-  ~vtkExtractVectorComponents();
+  ~vtkExtractVectorComponents() VTK_OVERRIDE;
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
   int ExtractToFieldData;
   int OutputsInitialized;
 private:

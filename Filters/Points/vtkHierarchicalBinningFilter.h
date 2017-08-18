@@ -38,7 +38,7 @@
  * space is uniformally subdivided into bins of (M x N x O) dimensions; in
  * turn each subsequent level in the tree is further divided into (M x N x O)
  * bins (note that level 0 is a single, root bin). Thus the number of bins at
- * level L of the hierachical tree is: Nbins=(M^L x N^L x O^L). Once the
+ * level L of the hierarchical tree is: Nbins=(M^L x N^L x O^L). Once the
  * binning is created to a specified depth, then points are placed in the
  * bins using a pseudo-random sampling proportional to the number of bins in each
  * level. All input points are sorted in the order described above, with no
@@ -87,12 +87,12 @@ public:
    */
   static vtkHierarchicalBinningFilter *New();
   vtkTypeMacro(vtkHierarchicalBinningFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   //@{
   /**
-   * Specify the number of levels in the spatial hierachy. By default, the
+   * Specify the number of levels in the spatial hierarchy. By default, the
    * number of levels is three.
    */
   vtkSetClampMacro(NumberOfLevels,int,1,VTK_MAX_LEVEL);
@@ -189,7 +189,7 @@ public:
 
 protected:
   vtkHierarchicalBinningFilter();
-  ~vtkHierarchicalBinningFilter();
+  ~vtkHierarchicalBinningFilter() VTK_OVERRIDE;
 
   // IVars
   int NumberOfLevels;
@@ -201,9 +201,9 @@ protected:
   // that the convenience functions can be invoked on the bin tree.
   vtkBinTree *Tree;
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *);
-  virtual int FillInputPortInformation(int port, vtkInformation *info);
+  int RequestData(vtkInformation *, vtkInformationVector **,
+    vtkInformationVector *) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
 
 private:
   vtkHierarchicalBinningFilter(const vtkHierarchicalBinningFilter&) VTK_DELETE_FUNCTION;

@@ -93,9 +93,9 @@ vtkHyperTreeGridSource::vtkHyperTreeGridSource()
   this->MaterialMask[1] = 0;
 
   // Grid description & material mask as bit arrays
-  this->DescriptorBits = 0;
-  this->MaterialMaskBits = 0;
-  this->LevelZeroMaterialIndex = 0;
+  this->DescriptorBits = nullptr;
+  this->MaterialMaskBits = nullptr;
+  this->LevelZeroMaterialIndex = nullptr;
   this->LevelZeroMaterialMap.clear();
 
   // Default quadric is a sphere with radius 1
@@ -106,7 +106,7 @@ vtkHyperTreeGridSource::vtkHyperTreeGridSource()
                                   -1. );
 
   // Keep reference to hyper tree grid output
-  this->Output = 0;
+  this->Output = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -115,51 +115,51 @@ vtkHyperTreeGridSource::~vtkHyperTreeGridSource()
   if ( this->XCoordinates )
   {
     this->XCoordinates->UnRegister( this );
-    this->XCoordinates = 0;
+    this->XCoordinates = nullptr;
   }
 
   if ( this->YCoordinates )
   {
     this->YCoordinates->UnRegister( this );
-    this->YCoordinates = 0;
+    this->YCoordinates = nullptr;
   }
 
   if ( this->ZCoordinates )
   {
     this->ZCoordinates->UnRegister( this );
-    this->ZCoordinates = 0;
+    this->ZCoordinates = nullptr;
   }
 
   if ( this->DescriptorBits )
   {
     this->DescriptorBits->UnRegister( this );
-    this->DescriptorBits = 0;
+    this->DescriptorBits = nullptr;
   }
 
   if ( this->MaterialMaskBits )
   {
     this->MaterialMaskBits->UnRegister( this );
-    this->MaterialMaskBits = 0;
+    this->MaterialMaskBits = nullptr;
   }
 
   if ( this->LevelZeroMaterialIndex )
   {
     this->LevelZeroMaterialIndex->UnRegister( this );
-    this->LevelZeroMaterialIndex = 0;
+    this->LevelZeroMaterialIndex = nullptr;
   }
 
   this->LevelZeroMaterialMap.clear();
 
   delete [] this->Descriptor;
-  this->Descriptor = 0;
+  this->Descriptor = nullptr;
 
   delete [] this->MaterialMask;
-  this->MaterialMask = 0;
+  this->MaterialMask = nullptr;
 
   if ( this->Quadric )
   {
     this->Quadric->UnRegister( this );
-    this->Quadric = NULL;
+    this->Quadric = nullptr;
   }
 }
 
@@ -563,8 +563,8 @@ int vtkHyperTreeGridSource::InitializeFromStringDescriptor()
         }
 
         // Store descriptor and material mask for current level
-        this->LevelDescriptors.push_back( descriptor.str().c_str() );
-        this->LevelMaterialMasks.push_back( mask.str().c_str() );
+        this->LevelDescriptors.push_back( descriptor.str() );
+        this->LevelMaterialMasks.push_back( mask.str() );
 
         // Check whether cursor is still at rool level
         if ( rootLevel )
@@ -665,10 +665,10 @@ int vtkHyperTreeGridSource::InitializeFromStringDescriptor()
   }
 
   // Push per-level descriptor and material mask if used
-  this->LevelDescriptors.push_back( descriptor.str().c_str() );
+  this->LevelDescriptors.push_back( descriptor.str() );
   if ( this->UseMaterialMask )
   {
-    this->LevelMaterialMasks.push_back( mask.str().c_str() );
+    this->LevelMaterialMasks.push_back( mask.str() );
   }
 
   // Reset maximum depth if fewer levels are described
@@ -690,7 +690,7 @@ int vtkHyperTreeGridSource::InitializeFromStringDescriptor()
   for ( unsigned int i = 1; i < nLevels; ++ i )
   {
     this->LevelBitsIndex.push_back(
-      LevelBitsIndex[i-1] + this->LevelDescriptors[i-1].length());
+      static_cast<vtkIdType>(LevelBitsIndex[i-1] + this->LevelDescriptors[i-1].length()));
   }
   this->LevelBitsIndexCnt = this->LevelBitsIndex;
 
@@ -784,7 +784,7 @@ int vtkHyperTreeGridSource::InitializeFromBitsDescriptor()
 
   // Calculate total level 0 grid size
   vtkIdType nTotal = this->LevelZeroMaterialIndex ?
-    this->LevelZeroMaterialMap.size() :
+    static_cast<vtkIdType>(this->LevelZeroMaterialMap.size()) :
     this->GridSize[0] * this->GridSize[1] * this->GridSize[2];
 
   // Parse descriptor and material mask if used
@@ -1139,7 +1139,7 @@ vtkBitArray* vtkHyperTreeGridSource::ConvertDescriptorStringToBitArray(
   const std::string& str )
 {
   vtkBitArray* desc = vtkBitArray::New();
-  desc->Allocate( str.length() );
+  desc->Allocate( static_cast<vtkIdType>(str.length()) );
   for ( std::string::const_iterator dit = str.begin();
     dit != str.end();  ++ dit )
   {
@@ -1169,7 +1169,7 @@ vtkBitArray* vtkHyperTreeGridSource::ConvertDescriptorStringToBitArray(
                       << " in string "
                       << str);
         desc->Delete();
-        return 0;
+        return nullptr;
     } // switch( *dit )
   }
   desc->Squeeze();

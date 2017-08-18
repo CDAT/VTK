@@ -108,11 +108,8 @@ int TestShadowMapBakerPass(int argc, char *argv[])
   mapper2->SetInputConnection(plane->GetOutputPort());
   renderer->RemoveActor(actor.Get());
   renderer->AddActor(actor2.Get());
-  glrenderer->SetPass(NULL);
+  glrenderer->SetPass(nullptr);
 
-  renderer->GetActiveCamera()->SetPosition(0,0,1);
-  renderer->GetActiveCamera()->SetFocalPoint(0,0,0);
-  renderer->GetActiveCamera()->SetViewUp(0,1,0);
   renderer->ResetCamera();
   renderer->GetActiveCamera()->Zoom(2.0);
   renderWindow->Render();

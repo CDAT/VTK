@@ -38,7 +38,7 @@ class VTKRENDERINGCORE_EXPORT vtkCompositeDataDisplayAttributes : public vtkObje
 public:
   static vtkCompositeDataDisplayAttributes* New();
   vtkTypeMacro(vtkCompositeDataDisplayAttributes, vtkObject)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Returns true if any block has any block visibility is set.
@@ -128,7 +128,7 @@ public:
   void RemoveBlockOpacities();
 
   // If the input \a dobj is a vtkCompositeDataSet, we will loop over the
-  // hierarchy recursively starting from intial index 0 and use only visible
+  // hierarchy recursively starting from initial index 0 and use only visible
   // blocks, which is specified in the vtkCompositeDataDisplayAttributes \a cda,
   // to compute the \a bounds.
   static void ComputeVisibleBounds(
@@ -138,7 +138,7 @@ public:
 
 protected:
   vtkCompositeDataDisplayAttributes();
-  ~vtkCompositeDataDisplayAttributes();
+  ~vtkCompositeDataDisplayAttributes() VTK_OVERRIDE;
 
 private:
   vtkCompositeDataDisplayAttributes(const vtkCompositeDataDisplayAttributes&) VTK_DELETE_FUNCTION;
@@ -146,7 +146,7 @@ private:
 
   /**
    * If the input data \a dobj is a vtkCompositeDataSet, we will
-   * loop over the hierarchy recursively starting from intial index
+   * loop over the hierarchy recursively starting from initial index
    * \a flat_index and use only visible blocks, which is
    * specified in the vtkCompositeDataDisplayAttributes \a cda,
    * to compute bounds and the result bounds will be set to

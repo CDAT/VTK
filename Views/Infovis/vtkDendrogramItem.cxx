@@ -104,7 +104,7 @@ vtkVector2f vtkDendrogramItem::GetPositionVector()
 //-----------------------------------------------------------------------------
 void vtkDendrogramItem::SetTree(vtkTree *tree)
 {
-  if (tree == NULL || tree->GetNumberOfVertices() == 0)
+  if (tree == nullptr || tree->GetNumberOfVertices() == 0)
   {
     this->Tree = vtkSmartPointer<vtkTree>::New();
     this->PrunedTree = vtkSmartPointer<vtkTree>::New();
@@ -247,7 +247,7 @@ void vtkDendrogramItem::RebuildBuffers()
   vtkNew<vtkTreeLayoutStrategy> strategy;
 
   if (this->PrunedTree->GetVertexData()->GetAbstractArray(
-    this->DistanceArrayName) != NULL)
+    this->DistanceArrayName) != nullptr)
   {
     strategy->SetDistanceArrayName(this->DistanceArrayName);
   }
@@ -494,7 +494,7 @@ void vtkDendrogramItem::PaintBuffers(vtkContext2D *painter)
           trianglePoints[5] = this->MinY;
           triangleLabelX = trianglePoints[0];
           triangleLabelY = trianglePoints[3] + 1;
-          painter->GetTextProp()->SetJustificationToLeft();
+          painter->GetTextProp()->SetJustificationToRight();
           break;
         case vtkDendrogramItem::LEFT_TO_RIGHT:
         default:
@@ -1135,7 +1135,7 @@ void vtkDendrogramItem::CollapseToNumberOfLeafNodes(unsigned int n)
     vtkIdType childVertex = this->Tree->GetChild(root, child);
 
     double weight = 0.0;
-    if (nodeWeights != NULL)
+    if (nodeWeights != nullptr)
     {
       weight = nodeWeights->GetValue(childVertex);
     }
@@ -1167,7 +1167,7 @@ void vtkDendrogramItem::CollapseToNumberOfLeafNodes(unsigned int n)
       vtkIdType childVertex = this->Tree->GetChild(v.ID, child);
 
       double weight = 0.0;
-      if (nodeWeights != NULL)
+      if (nodeWeights != nullptr)
       {
         weight = nodeWeights->GetValue(childVertex);
       }
@@ -1492,7 +1492,7 @@ void vtkDendrogramItem::ComputeLabelWidth(vtkContext2D *painter)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkDendrogramItem::GetPositionOfVertex(std::string vertexName,
+bool vtkDendrogramItem::GetPositionOfVertex(const std::string& vertexName,
                                             double position[2])
 {
   vtkStringArray *vertexNames = vtkArrayDownCast<vtkStringArray>(

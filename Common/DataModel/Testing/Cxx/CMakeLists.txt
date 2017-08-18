@@ -46,8 +46,10 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   otherColorTransferFunction.cxx
   otherEmptyCell.cxx
   otherFieldData.cxx
+  otherImageData.cxx
   otherRectilinearGrid.cxx
   otherStructuredGrid.cxx
+  otherUniformGrid.cxx
   quadCellConsistency.cxx
   quadraticEvaluation.cxx
   TestBoundingBox.cxx
@@ -61,6 +63,7 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   UnitTestImplicitVolume.cxx
   UnitTestLine.cxx
   UnitTestPlanesIntersection.cxx
+  UnitTestTriangleIntersection.cxx
   )
 vtk_add_test_cxx(${vtk-module}CxxTests data_tests
   quadraticIntersection.cxx

@@ -43,7 +43,7 @@ public:
   static vtkRenderWindowInteractor3D *New();
 
   vtkTypeMacro(vtkRenderWindowInteractor3D,vtkRenderWindowInteractor);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -55,8 +55,8 @@ public:
    * and all other interactors associated with the widget are disabled
    * when their data is not displayed.
    */
-  virtual void Enable();
-  virtual void Disable();
+  void Enable() VTK_OVERRIDE;
+  void Disable() VTK_OVERRIDE;
   //@}
 
   /**
@@ -64,13 +64,7 @@ public:
    * calls PostQuitMessage(0) to terminate the application. An application can Specify
    * ExitMethod for alternative behavior (i.e. suppression of keyboard exit)
    */
-  void TerminateApp(void);
-
-  /**
-   * Create default picker. Used to create one when none is specified.
-   * Default is an instance of vtkPropPicker.
-   */
-  virtual vtkAbstractPropPicker *CreateDefaultPicker();
+  void TerminateApp(void) VTK_OVERRIDE;
 
   //@{
   /**
@@ -84,7 +78,7 @@ public:
   {
     if (pointerIndex >= VTKI_MAX_POINTERS)
     {
-      return NULL;
+      return nullptr;
     }
     return this->WorldEventPositions[pointerIndex];
   }
@@ -92,7 +86,7 @@ public:
   {
     if (pointerIndex >= VTKI_MAX_POINTERS)
     {
-      return NULL;
+      return nullptr;
     }
     return this->LastWorldEventPositions[pointerIndex];
   }
@@ -100,7 +94,7 @@ public:
   {
     if (pointerIndex >= VTKI_MAX_POINTERS)
     {
-      return NULL;
+      return nullptr;
     }
     return this->WorldEventOrientations[pointerIndex];
   }
@@ -108,7 +102,7 @@ public:
   {
     if (pointerIndex >= VTKI_MAX_POINTERS)
     {
-      return NULL;
+      return nullptr;
     }
     return this->LastWorldEventOrientations[pointerIndex];
   }
@@ -219,8 +213,16 @@ public:
   /**
    * Override to set pointers down
    */
-  virtual void RightButtonPressEvent();
-  virtual void RightButtonReleaseEvent();
+  void RightButtonPressEvent() VTK_OVERRIDE;
+  void RightButtonReleaseEvent() VTK_OVERRIDE;
+  //@}
+
+  //@{
+  /**
+   * Override to set pointers down
+   */
+  void MiddleButtonPressEvent() VTK_OVERRIDE;
+  void MiddleButtonReleaseEvent() VTK_OVERRIDE;
   //@}
 
   //@{
@@ -233,11 +235,13 @@ public:
 
   //@{
   /**
-   * Set/Get the optional translation to map world coordinates into the
+   * Set/Get the optional scale translation to map world coordinates into the
    * 3D physical space (meters, 0,0,0).
    */
   virtual void SetPhysicalTranslation(vtkCamera *, double, double, double) {};
-  virtual double *GetPhysicalTranslation(vtkCamera *) { return NULL; };
+  virtual double *GetPhysicalTranslation(vtkCamera *) { return nullptr; };
+  virtual void SetPhysicalScale(double) {};
+  virtual double GetPhysicalScale() { return 1.0; };
   //@}
 
   //@{
@@ -249,9 +253,14 @@ public:
   vtkGetVector3Macro(LastTranslation3D, double);
   //@}
 
+  /**
+   * Is the interactor loop done
+   */
+  vtkGetMacro(Done, bool);
+
 protected:
   vtkRenderWindowInteractor3D();
-  ~vtkRenderWindowInteractor3D();
+  ~vtkRenderWindowInteractor3D() VTK_OVERRIDE;
 
   int     MouseInWindow;
   int     StartedMessageLoop;
@@ -268,7 +277,7 @@ protected:
   double   StartingPhysicalEventPositions[VTKI_MAX_POINTERS][3];
   double   WorldEventOrientations[VTKI_MAX_POINTERS][4];
   double   LastWorldEventOrientations[VTKI_MAX_POINTERS][4];
-  virtual void RecognizeGesture(vtkCommand::EventIds);
+  void RecognizeGesture(vtkCommand::EventIds) VTK_OVERRIDE;
 
 private:
   vtkRenderWindowInteractor3D(const vtkRenderWindowInteractor3D&) VTK_DELETE_FUNCTION;  // Not implemented.

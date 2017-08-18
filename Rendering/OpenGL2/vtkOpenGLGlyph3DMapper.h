@@ -41,25 +41,24 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLGlyph3DMapper
 public:
   static vtkOpenGLGlyph3DMapper* New();
   vtkTypeMacro(vtkOpenGLGlyph3DMapper, vtkGlyph3DMapper);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Method initiates the mapping process. Generally sent by the actor
    * as each frame is rendered.
-   * Its behavior depends on the value of SelectMode.
    */
-  virtual void Render(vtkRenderer *ren, vtkActor *a);
+  void Render(vtkRenderer *ren, vtkActor *a) VTK_OVERRIDE;
 
   /**
    * Release any graphics resources that are being consumed by this mapper.
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow *window);
+  void ReleaseGraphicsResources(vtkWindow *window) VTK_OVERRIDE;
 
 protected:
   vtkOpenGLGlyph3DMapper();
-  ~vtkOpenGLGlyph3DMapper();
+  ~vtkOpenGLGlyph3DMapper() VTK_OVERRIDE;
 
   /**
    * Render setup
@@ -86,9 +85,7 @@ protected:
    */
   virtual void RebuildStructures(vtkOpenGLGlyph3DMapperSubArray *entry,
     vtkIdType numPts, vtkActor* actor, vtkDataSet* dataset,
-    vtkBitArray *maskArray, bool selecting_points);
-
-  vtkWeakPointer<vtkWindow> LastWindow; // Window used for previous render.
+    vtkBitArray *maskArray);
 
 private:
   vtkOpenGLGlyph3DMapper(const vtkOpenGLGlyph3DMapper&) VTK_DELETE_FUNCTION;

@@ -23,7 +23,7 @@
 //----------------------------------------------------------------------
 vtkWidgetRepresentation::vtkWidgetRepresentation()
 {
-  this->Renderer = NULL;
+  this->Renderer = nullptr;
 
   this->InteractionState = 0;
   this->StartEventPosition[0] = 0.0;
@@ -110,7 +110,7 @@ vtkPickingManager* vtkWidgetRepresentation::GetPickingManager()
       !this->Renderer->GetRenderWindow()->GetInteractor() ||
       !this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager())
   {
-    return 0;
+    return nullptr;
   }
 
   return
@@ -129,6 +129,13 @@ GetAssemblyPath(double X, double Y, double Z, vtkAbstractPropPicker* picker)
   }
 
   return pm->GetAssemblyPath(X, Y, 0., picker, this->Renderer, this);
+}
+
+vtkAssemblyPath* vtkWidgetRepresentation::
+GetAssemblyPath3DPoint(double pos[3], vtkAbstractPropPicker* picker)
+{
+  picker->Pick3DPoint(pos, this->Renderer);
+  return picker->GetPath();
 }
 
 //----------------------------------------------------------------------
@@ -161,6 +168,14 @@ void vtkWidgetRepresentation::ShallowCopy(vtkProp *prop)
 
 //----------------------------------------------------------------------
 int vtkWidgetRepresentation::ComputeInteractionState(int, int, int)
+{
+  return 0;
+}
+
+int vtkWidgetRepresentation::ComputeComplexInteractionState(
+  vtkRenderWindowInteractor *,
+  vtkAbstractWidget *,
+  unsigned long, void *, int)
 {
   return 0;
 }

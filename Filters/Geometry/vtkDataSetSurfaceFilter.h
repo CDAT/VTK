@@ -31,10 +31,10 @@
 #include "vtkFiltersGeometryModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
 
-
 class vtkPointData;
 class vtkPoints;
 class vtkIdTypeArray;
+class vtkStructuredGrid;
 
 // Helper structure for hashing faces.
 struct vtkFastGeomQuadStruct
@@ -95,7 +95,7 @@ public:
   /**
    * If PassThroughCellIds or PassThroughPointIds is on, then these ivars
    * control the name given to the field in which the ids are written into.  If
-   * set to NULL, then vtkOriginalCellIds or vtkOriginalPointIds (the default)
+   * set to nullptr, then vtkOriginalCellIds or vtkOriginalPointIds (the default)
    * is used, respectively.
    */
   vtkSetStringMacro(OriginalCellIdsName);
@@ -151,6 +151,7 @@ public:
   virtual int UnstructuredGridExecute(vtkDataSet *input,
                                       vtkPolyData *output);
   virtual int DataSetExecute(vtkDataSet *input, vtkPolyData *output);
+  virtual int StructuredWithBlankingExecute(vtkStructuredGrid *input, vtkPolyData *output);
   virtual int UniformGridExecute(
       vtkDataSet *input, vtkPolyData *output,
       vtkIdType *ext, vtkIdType *wholeExt, bool extractface[6] );

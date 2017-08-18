@@ -5,8 +5,10 @@ vtk_add_test_python(
   TestPointInterpolator2.py
   TestPointInterpolator2D.py
   TestPointInterpolator2D2.py
+  TestPointOccupancyFilter.py
   TestSPHInterpolator.py
   TestSPHInterpolator2D.py
+  TestSPHInterpolatorWithCutoff.py
   )
 
 if ("${VTK_RENDERING_BACKEND}" STREQUAL "OpenGL2")
@@ -26,6 +28,7 @@ if ("${VTK_RENDERING_BACKEND}" STREQUAL "OpenGL2")
     TestRadiusOutlierRemoval.py
     TestSignedDistanceFilter.py
     TestStatisticalOutlierRemoval.py
+    TestUnsignedDistanceFilter.py
     TestVoxelGridFilter.py
     )
 endif ()

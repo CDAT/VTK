@@ -23,8 +23,6 @@
 #include "vtkEvent.h"
 #include "vtkWidgetEvent.h"
 
-
-
 //----------------------------------------------------------------------
 vtkAbstractWidget::vtkAbstractWidget()
 {
@@ -33,10 +31,10 @@ vtkAbstractWidget::vtkAbstractWidget()
     vtkAbstractWidget::ProcessEventsHandler);
 
   // There is no parent to this widget currently
-  this->Parent = NULL;
+  this->Parent = nullptr;
 
   // Set up the geometry
-  this->WidgetRep = NULL;
+  this->WidgetRep = nullptr;
 
   // Set priority higher than interactor styles
   this->Priority = 0.5;
@@ -126,7 +124,7 @@ void vtkAbstractWidget::SetEnabled(int enabling)
     {
       this->SetCurrentRenderer(this->Interactor->FindPokedRenderer(X,Y));
 
-      if (this->CurrentRenderer == NULL)
+      if (this->CurrentRenderer == nullptr)
       {
         return;
       }
@@ -158,7 +156,7 @@ void vtkAbstractWidget::SetEnabled(int enabling)
     this->WidgetRep->BuildRepresentation();
     this->CurrentRenderer->AddViewProp(this->WidgetRep);
 
-    this->InvokeEvent(vtkCommand::EnableEvent,NULL);
+    this->InvokeEvent(vtkCommand::EnableEvent,nullptr);
   }
 
   else //disabling------------------
@@ -187,8 +185,8 @@ void vtkAbstractWidget::SetEnabled(int enabling)
       this->CurrentRenderer->RemoveViewProp(this->WidgetRep);
     }
 
-    this->InvokeEvent(vtkCommand::DisableEvent,NULL);
-    this->SetCurrentRenderer(NULL);
+    this->InvokeEvent(vtkCommand::DisableEvent,nullptr);
+    this->SetCurrentRenderer(nullptr);
   }
 
   // We no longer call render when enabled state changes. It's the applications
@@ -215,27 +213,37 @@ void vtkAbstractWidget::ProcessEventsHandler(vtkObject* vtkNotUsed(object),
     return;
   }
 
-  int modifier = vtkEvent::GetModifier(self->Interactor);
+  // if the event has data then get the translation using the
+  // event data
   unsigned long widgetEvent = vtkWidgetEvent::NoEvent;
-
-  // If neither the ctrl nor the shift keys are pressed, give
-  // NoModifier a preference over AnyModifer.
-  if (modifier == vtkEvent::AnyModifier)
+  if (calldata && vtkCommand::EventHasData(vtkEvent))
   {
     widgetEvent = self->EventTranslator->GetTranslation(vtkEvent,
-                                          vtkEvent::NoModifier,
+      static_cast<vtkEventData *>(calldata));
+  }
+  else
+  {
+    int modifier = vtkEvent::GetModifier(self->Interactor);
+
+    // If neither the ctrl nor the shift keys are pressed, give
+    // NoModifier a preference over AnyModifer.
+    if (modifier == vtkEvent::AnyModifier)
+    {
+      widgetEvent = self->EventTranslator->GetTranslation(vtkEvent,
+                                            vtkEvent::NoModifier,
+                                            self->Interactor->GetKeyCode(),
+                                            self->Interactor->GetRepeatCount(),
+                                            self->Interactor->GetKeySym());
+    }
+
+    if ( widgetEvent == vtkWidgetEvent::NoEvent)
+    {
+      widgetEvent = self->EventTranslator->GetTranslation(vtkEvent,
+                                          modifier,
                                           self->Interactor->GetKeyCode(),
                                           self->Interactor->GetRepeatCount(),
                                           self->Interactor->GetKeySym());
-  }
-
-  if ( widgetEvent == vtkWidgetEvent::NoEvent)
-  {
-    widgetEvent = self->EventTranslator->GetTranslation(vtkEvent,
-                                        modifier,
-                                        self->Interactor->GetKeyCode(),
-                                        self->Interactor->GetRepeatCount(),
-                                        self->Interactor->GetKeySym());
+    }
   }
 
   // Save the call data for widgets if needed

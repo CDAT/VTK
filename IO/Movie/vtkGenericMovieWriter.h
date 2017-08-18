@@ -22,7 +22,7 @@
  * the file (i.e. the contents of the vtkImageData), End() will finalize
  * and close the file.
  * @sa
- * vtkAVIWriter vtkMPEG2Writer
+ * vtkAVIWriter
 */
 
 #ifndef vtkGenericMovieWriter_h
@@ -37,7 +37,7 @@ class VTKIOMOVIE_EXPORT vtkGenericMovieWriter : public vtkImageAlgorithm
 {
 public:
   vtkTypeMacro(vtkGenericMovieWriter,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -80,7 +80,7 @@ public:
 
 protected:
   vtkGenericMovieWriter();
-  ~vtkGenericMovieWriter();
+  ~vtkGenericMovieWriter() VTK_OVERRIDE;
 
   char *FileName;
   int Error;

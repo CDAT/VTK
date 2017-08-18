@@ -31,10 +31,10 @@ class vtkColorQuantizeNode
 public:
   vtkColorQuantizeNode()
     { this->Axis = -1; this->SplitPoint = -1; this->Index = -1;
-      this->Child1 = NULL; this->Child2 = NULL;
+      this->Child1 = nullptr; this->Child2 = nullptr;
       this->StdDev[0] = this->StdDev[1] = this->StdDev[2] = 0.0;
-      this->Histogram[0] = this->Histogram[1] = this->Histogram[2] = NULL;
-      this->Image = NULL;
+      this->Histogram[0] = this->Histogram[1] = this->Histogram[2] = nullptr;
+      this->Image = nullptr;
       this->Bounds[0] = 0; this->Bounds[1] = 256;
       this->Bounds[2] = 0; this->Bounds[3] = 256;
       this->Bounds[4] = 0; this->Bounds[5] = 256; };
@@ -535,9 +535,9 @@ void vtkColorQuantizeNode::Divide( int axis, int nextIndex )
   delete [] this->Histogram[1];
   delete [] this->Histogram[2];
 
-  this->Histogram[0] = NULL;
-  this->Histogram[1] = NULL;
-  this->Histogram[2] = NULL;
+  this->Histogram[0] = nullptr;
+  this->Histogram[1] = nullptr;
+  this->Histogram[2] = nullptr;
 
   this->Child1->SetImageExtent( this->ImageExtent );
   this->Child1->SetImageIncrement( this->ImageIncrement );
@@ -676,7 +676,7 @@ void vtkImageQuantizeRGBToIndex::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
-  // Input Type is internal so we dont prit it
+  // Input Type is internal so we don't print it
   //os << indent << "InputType: " << this->InputType << endl;
 
   os << indent << "Number Of Colors: " << this->NumberOfColors << endl;

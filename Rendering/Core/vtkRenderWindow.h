@@ -43,11 +43,13 @@
 
 #include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkWindow.h"
+#include "vtkNew.h" // For vtkNew
 
 class vtkFloatArray;
 class vtkPainterDeviceAdapter;
 class vtkProp;
 class vtkCollection;
+class vtkRenderTimerLog;
 class vtkRenderWindowInteractor;
 class vtkRenderer;
 class vtkRendererCollection;
@@ -81,7 +83,7 @@ class VTKRENDERINGCORE_EXPORT vtkRenderWindow : public vtkWindow
 {
 public:
   vtkTypeMacro(vtkRenderWindow,vtkWindow);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Construct an instance of  vtkRenderWindow with its screen size
@@ -116,6 +118,11 @@ public:
   virtual const char *GetRenderingBackend();
 
   /**
+   * Get the render timer log for this window.
+   */
+  vtkGetNewMacro(RenderTimer, vtkRenderTimerLog)
+
+  /**
    * Return the collection of renderers in the render window.
    */
   vtkRendererCollection *GetRenderers() {return this->Renderers;};
@@ -140,7 +147,7 @@ public:
    * Ask each renderer owned by this RenderWindow to render its image and
    * synchronize this process.
    */
-  virtual void Render();
+  void Render() VTK_OVERRIDE;
 
   /**
    * Initialize the rendering process.
@@ -399,9 +406,9 @@ public:
    * the diagonal.
    */
   virtual int SetPixelData(int x, int y, int x2, int y2, unsigned char *data,
-                           int front) = 0;
+                           int front, int right=0) = 0;
   virtual int SetPixelData(int x, int y, int x2, int y2,
-                           vtkUnsignedCharArray *data, int front) = 0;
+                           vtkUnsignedCharArray *data, int front, int right=0) = 0;
   //@}
 
   //@{
@@ -412,24 +419,24 @@ public:
    * method blends the data with the previous contents of the frame buffer
    * or completely replaces the frame buffer data.
    */
-  virtual float *GetRGBAPixelData(int x, int y, int x2, int y2, int front) = 0;
+  virtual float *GetRGBAPixelData(int x, int y, int x2, int y2, int front, int right=0) = 0;
   virtual int GetRGBAPixelData(int x, int y, int x2, int y2, int front,
-                               vtkFloatArray *data) = 0;
+                               vtkFloatArray *data, int right=0) = 0;
   virtual int SetRGBAPixelData(int x, int y, int x2, int y2, float *,
-                               int front, int blend=0) = 0;
+                               int front, int blend=0, int right=0) = 0;
   virtual int SetRGBAPixelData(int, int, int, int, vtkFloatArray*,
-                               int, int blend=0) = 0;
-  virtual void ReleaseRGBAPixelData(float *data)=0;
+                               int, int blend=0, int right=0) = 0;
+  virtual void ReleaseRGBAPixelData(float *data) = 0;
   virtual unsigned char *GetRGBACharPixelData(int x, int y, int x2, int y2,
-                                              int front) = 0;
+                                              int front, int right=0) = 0;
   virtual int GetRGBACharPixelData(int x, int y, int x2, int y2, int front,
-                                   vtkUnsignedCharArray *data) = 0;
+                                   vtkUnsignedCharArray *data, int right=0) = 0;
   virtual int SetRGBACharPixelData(int x,int y, int x2, int y2,
                                    unsigned char *data, int front,
-                                   int blend=0) = 0;
+                                   int blend=0, int right=0) = 0;
   virtual int SetRGBACharPixelData(int x, int y, int x2, int y2,
                                    vtkUnsignedCharArray *data, int front,
-                                   int blend=0) = 0;
+                                   int blend=0, int right=0) = 0;
   //@}
 
   //@{
@@ -453,6 +460,7 @@ public:
   }
   //@}
 
+#if !defined(VTK_LEGACY_REMOVE)
   //@{
   /**
    * Set the number of frames for doing antialiasing. The default is
@@ -499,6 +507,7 @@ public:
   vtkGetMacro(SubFrames,int);
   virtual void SetSubFrames(int subFrames);
   //@}
+#endif
 
   //@{
   /**
@@ -581,24 +590,24 @@ public:
    * This Method detects loops of RenderWindow<->Interactor,
    * so objects are freed properly.
    */
-  virtual void UnRegister(vtkObjectBase *o);
+  void UnRegister(vtkObjectBase *o) VTK_OVERRIDE;
 
   //@{
   /**
    * Dummy stubs for vtkWindow API.
    */
-  virtual void SetDisplayId(void *) = 0;
-  virtual void SetWindowId(void *)  = 0;
+  void SetDisplayId(void *) VTK_OVERRIDE = 0;
+  void SetWindowId(void *)  VTK_OVERRIDE = 0;
   virtual void SetNextWindowId(void *) = 0;
-  virtual void SetParentId(void *)  = 0;
-  virtual void *GetGenericDisplayId() = 0;
-  virtual void *GetGenericWindowId() = 0;
-  virtual void *GetGenericParentId() = 0;
-  virtual void *GetGenericContext() = 0;
-  virtual void *GetGenericDrawable() = 0;
-  virtual void SetWindowInfo(char *) = 0;
+  void SetParentId(void *)  VTK_OVERRIDE = 0;
+  void *GetGenericDisplayId() VTK_OVERRIDE = 0;
+  void *GetGenericWindowId() VTK_OVERRIDE = 0;
+  void *GetGenericParentId() VTK_OVERRIDE = 0;
+  void *GetGenericContext() VTK_OVERRIDE = 0;
+  void *GetGenericDrawable() VTK_OVERRIDE = 0;
+  void SetWindowInfo(char *) VTK_OVERRIDE = 0;
   virtual void SetNextWindowInfo(char *) = 0;
-  virtual void SetParentInfo(char *) = 0;
+  void SetParentInfo(char *) VTK_OVERRIDE = 0;
   //@}
 
   /**
@@ -611,7 +620,7 @@ public:
    * Attempt to make this window the current graphics context for the calling
    * thread.
    */
-  virtual void MakeCurrent() = 0;
+  void MakeCurrent() VTK_OVERRIDE = 0;
 
   /**
    * Tells if this window is the current graphics context for the calling
@@ -717,9 +726,19 @@ public:
   virtual int SetUseOffScreenBuffers(bool) { return 0; }
   virtual bool GetUseOffScreenBuffers() { return false; }
 
+  //@{
+  /**
+   * Set/Get if we want this window to use the sRGB color space.
+   * Some hardware/drivers do not fully support this.
+   */
+  vtkGetMacro(UseSRGBColorSpace, bool);
+  vtkSetMacro(UseSRGBColorSpace, bool);
+  vtkBooleanMacro(UseSRGBColorSpace, bool);
+  //@}
+
 protected:
   vtkRenderWindow();
-  ~vtkRenderWindow();
+  ~vtkRenderWindow() VTK_OVERRIDE;
 
   virtual void DoStereoRender();
   virtual void DoFDRender();
@@ -727,6 +746,7 @@ protected:
 
   vtkPainterDeviceAdapter* PainterDeviceAdapter;
   vtkRendererCollection *Renderers;
+  vtkNew<vtkRenderTimerLog> RenderTimer;
   int Borders;
   int FullScreen;
   int OldScreen[5];
@@ -735,7 +755,6 @@ protected:
   int PolygonSmoothing;
   int StereoRender;
   int StereoType;
-  int StereoStatus; // used for keeping track of what's going on
   int StereoCapableWindow;
   int AlphaBitPlanes;
   vtkRenderWindowInteractor *Interactor;
@@ -764,6 +783,8 @@ protected:
   int StencilCapable;
   int CapturingGL2PSSpecialProps;
   int DeviceIndex;
+
+  bool UseSRGBColorSpace;
 
   /**
    * The universal time since the last abort check occurred.

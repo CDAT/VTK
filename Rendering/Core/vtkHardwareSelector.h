@@ -90,7 +90,7 @@ public:
     PixelInformation():
       Valid(false),
       ProcessID(-1),
-      Prop(NULL),
+      Prop(nullptr),
       CompositeID(0),
       AttributeID(-1) {}
   };
@@ -99,7 +99,7 @@ public:
 public:
   static vtkHardwareSelector* New();
   vtkTypeMacro(vtkHardwareSelector, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -286,9 +286,9 @@ public:
 
 protected:
   vtkHardwareSelector();
-  ~vtkHardwareSelector();
+  ~vtkHardwareSelector() VTK_OVERRIDE;
 
-  // Used to notify subclasses when a capture pass is occuring.
+  // Used to notify subclasses when a capture pass is occurring.
   virtual void PreCapturePass(int pass) { (void)pass; }
   virtual void PostCapturePass(int pass) { (void)pass; }
 

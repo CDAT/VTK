@@ -109,7 +109,7 @@ class VTKFILTERSPARALLELMPI_EXPORT vtkDistributedDataFilter: public vtkDataObjec
     vtkDataObjectAlgorithm);
 
 public:
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   static vtkDistributedDataFilter *New();
 
@@ -204,7 +204,7 @@ public:
   /**
    * Ensure previous filters don't send up ghost cells
    */
-  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
 
   /**
    * This class does a great deal of all-to-all communication
@@ -250,7 +250,7 @@ public:
    * that may not always work, sometimes the processes have be pre-assigned and
    * we want to preserve that partitioning. In that case, one sets the region
    * assignments explicitly. Look at vtkPKdTree::AssignRegions for details about
-   * the arguments. Calling SetUserRegionAssignments(NULL, 0) will revert to
+   * the arguments. Calling SetUserRegionAssignments(nullptr, 0) will revert to
    * default behavior i.e. letting the KdTree come up with the assignments.
    */
   void SetUserRegionAssignments(const int *map, int numRegions);
@@ -302,11 +302,11 @@ protected:
    */
 
   virtual int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *);
+    vtkInformationVector *) VTK_OVERRIDE;
   void SingleProcessExecute(vtkDataSet *input, vtkUnstructuredGrid *output);
   virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *);
-  virtual int FillInputPortInformation(int port, vtkInformation *info);
+    vtkInformationVector *) VTK_OVERRIDE;
+  virtual int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
 
   /**
    * Overridden to create the correct type of data output. If input is dataset,
@@ -315,7 +315,7 @@ protected:
    */
   virtual int RequestDataObject(vtkInformation*,
                                 vtkInformationVector**,
-                                vtkInformationVector*);
+                                vtkInformationVector*) VTK_OVERRIDE;
 
   /**
    * Implementation for request data.

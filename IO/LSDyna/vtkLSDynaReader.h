@@ -165,7 +165,7 @@ class VTKIOLSDYNA_EXPORT vtkLSDynaReader : public vtkMultiBlockDataSetAlgorithm
 {
 public:
   vtkTypeMacro(vtkLSDynaReader,vtkMultiBlockDataSetAlgorithm);
-  virtual void PrintSelf(ostream &os, vtkIndent indent);
+  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
   static vtkLSDynaReader *New();
 
   /**
@@ -459,7 +459,7 @@ public:
   /**
    * Should deflected coordinates be used, or should the mesh remain
    * undeflected?  By default, this is true but its value is ignored if the
-   * nodal "Deflection" array is not set to be loaded.
+   * nodal "Deflected Coordinates" array is not set to be loaded.
    */
   void SetDeformedMesh(int);
   vtkGetMacro(DeformedMesh,int);
@@ -558,7 +558,7 @@ protected:
   char* InputDeck;
 
   vtkLSDynaReader();
-  virtual ~vtkLSDynaReader();
+  ~vtkLSDynaReader() VTK_OVERRIDE;
 
   /**
    * This function populates the reader's private dictionary with
@@ -581,8 +581,8 @@ protected:
    */
   int ScanDatabaseTimeSteps();
 
-  virtual int RequestInformation( vtkInformation*, vtkInformationVector**, vtkInformationVector* );
-  virtual int RequestData( vtkInformation*, vtkInformationVector**, vtkInformationVector* );
+  int RequestInformation( vtkInformation*, vtkInformationVector**, vtkInformationVector* ) VTK_OVERRIDE;
+  int RequestData( vtkInformation*, vtkInformationVector**, vtkInformationVector* ) VTK_OVERRIDE;
 
   //@{
   /**
@@ -604,6 +604,7 @@ protected:
   virtual int ReadCellStateInfo( vtkIdType );
   virtual int ReadDeletion();
   virtual int ReadSPHState( vtkIdType );
+  virtual int ComputeDeflectionAndUpdateGeometry(vtkUnstructuredGrid* grid);
   //@}
 
   /**

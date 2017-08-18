@@ -122,7 +122,7 @@ public:
 
   static vtkTextureObject* New();
   vtkTypeMacro(vtkTextureObject, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -178,12 +178,11 @@ public:
 
   //@{
   /**
-   * Bind UnBind The texture must have been created using Create().
-   * A side affect is that tex paramteres are sent.
+   * Bind the texture, must have been created using Create().
+   * A side affect is that tex parameters are sent.
    * RenderWindow must be set before calling this.
    */
   void Bind();
-  void UnBind();
   //@}
 
   /**
@@ -308,6 +307,15 @@ public:
   bool Create3DFromRaw(unsigned int width, unsigned int height,
                        unsigned int depth, int numComps,
                        int dataType, void *data);
+
+  /**
+   * Create a 3D texture using the GL_PROXY_TEXTURE_3D target.  This serves
+   * as a pre-allocation step which assists in verifying that the size
+   * of the texture to be created is supported by the implementation and that
+   * there is sufficient texture memory available for it.
+   */
+  bool AllocateProxyTexture3D(unsigned int const width, unsigned int const height,
+    unsigned int const depth, int const numComps, int const dataType);
 
   /**
    * This is used to download raw data from the texture into a pixel bufer. The
@@ -641,16 +649,26 @@ public:
   vtkSetMacro(GenerateMipmap, bool);
   //@}
 
+  //@{
   /**
    * Query and return maximum texture size (dimension) supported by the
    * OpenGL driver for a particular context. It should be noted that this
    * size does not consider the internal format of the texture and therefore
-   * there is no guarentee that a texture of this size will be allocated by
+   * there is no guarantee that a texture of this size will be allocated by
    * the driver. Also, the method does not make the context current so
    * if the passed context is not valid or current, a value of -1 will
    * be returned.
    */
   static int GetMaximumTextureSize(vtkOpenGLRenderWindow* context);
+  static int GetMaximumTextureSize3D(vtkOpenGLRenderWindow* context);
+
+  /**
+   * Overload which uses the internal context to query the maximum 3D
+   * texture size. Will make the internal context current, returns -1 if
+   * anything fails.
+   */
+  int GetMaximumTextureSize3D();
+  //@}
 
   /**
    * Returns if the context supports the required extensions. If flags
@@ -723,7 +741,7 @@ public:
   /**
    * Get the shift and scale required in the shader to
    * return the texture values to their original range.
-   * Thsi is useful when for example you have unsigned char
+   * This is useful when for example you have unsigned char
    * data and it is being accessed using the floating point
    * texture calls. In that case OpenGL maps the uchar
    * range to a different floating point range under the hood.
@@ -738,9 +756,22 @@ public:
   // data values are lost
   void Resize(unsigned int width, unsigned int height);
 
+  //@{
+  /**
+   * Is this texture using the sRGB color space. If you are using a
+   * sRGB framebuffer or window then you probably also want to be
+   * using sRGB color textures for proper handling of gamma and
+   * associated color mixing.
+   */
+  vtkGetMacro(UseSRGBColorSpace, bool);
+  vtkSetMacro(UseSRGBColorSpace, bool);
+  vtkBooleanMacro(UseSRGBColorSpace, bool);
+  //@}
+
+
 protected:
   vtkTextureObject();
-  ~vtkTextureObject();
+  ~vtkTextureObject() VTK_OVERRIDE;
 
   vtkGenericOpenGLResourceFreeCallback *ResourceCallback;
 
@@ -764,6 +795,7 @@ protected:
   unsigned int Height;
   unsigned int Depth;
   unsigned int Samples;
+  bool UseSRGBColorSpace;
 
   unsigned int Target; // GLenum
   unsigned int Format; // GLenum

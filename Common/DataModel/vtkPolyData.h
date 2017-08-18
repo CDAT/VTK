@@ -99,6 +99,7 @@ public:
    * Standard vtkDataSet interface.
    */
   vtkIdType GetNumberOfCells() VTK_OVERRIDE;
+  using vtkDataSet::GetCell;
   vtkCell *GetCell(vtkIdType cellId) VTK_OVERRIDE;
   void GetCell(vtkIdType cellId, vtkGenericCell *cell) VTK_OVERRIDE;
   int GetCellType(vtkIdType cellId) VTK_OVERRIDE;
@@ -114,7 +115,7 @@ public:
    * won't be duplicated in the output.
    */
   void CopyCells(vtkPolyData *pd, vtkIdList *idList,
-                 vtkPointLocator *locator = NULL);
+                 vtkPointLocator *locator = nullptr);
 
   /**
    * Copy a cells point ids into list provided. (Less efficient.)
@@ -192,7 +193,7 @@ public:
 
   //@{
   /**
-   * Return the number of primitives of a particular type held..
+   * Return the number of primitives of a particular type held.
    */
   vtkIdType GetNumberOfVerts();
   vtkIdType GetNumberOfLines();
@@ -258,7 +259,7 @@ public:
   /**
    * Check if BuildCells is needed.
    */
-  bool NeedToBuildCells() { return this->Cells == 0; }
+  bool NeedToBuildCells() { return this->Cells == nullptr; }
 
   /**
    * Create upward links from points to cells that use each point. Enables
@@ -520,6 +521,15 @@ public:
   int GetScalarFieldCriticalIndex (vtkIdType pointId, int fieldId);
   int GetScalarFieldCriticalIndex (vtkIdType pointId, const char* fieldName);
 
+  /**
+   * Return the mesh (geometry/topology) modification time.
+   * This time is different from the usual MTime which also takes into
+   * account the modification of data arrays. This function can be used to
+   * track the changes on the mesh separately from the data arrays
+   * (eg. static mesh over time with transient data).
+   */
+  virtual vtkMTimeType GetMeshMTime();
+
 protected:
   vtkPolyData();
   ~vtkPolyData() VTK_OVERRIDE;
@@ -697,9 +707,9 @@ inline unsigned char vtkPolyData::GetCellPoints(
       break;
 
     default:
-      cells = NULL;
+      cells = nullptr;
       npts = 0;
-      pts = NULL;
+      pts = nullptr;
       return 0;
   }
   int loc = this->Cells->GetCellLocation(cellId);
@@ -731,8 +741,8 @@ inline unsigned char vtkPolyData::GetCell(
       break;
 
     default:
-      cells = NULL;
-      cell = NULL;
+      cells = nullptr;
+      cell = nullptr;
       return 0;
   }
   int loc = this->Cells->GetCellLocation(cellId);

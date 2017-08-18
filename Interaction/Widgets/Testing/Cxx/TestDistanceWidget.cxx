@@ -815,7 +815,7 @@ public:
   static vtkDistanceCallback *New()
     { return new vtkDistanceCallback; }
   void Execute(vtkObject *caller, unsigned long, void*) VTK_OVERRIDE;
-  vtkDistanceCallback():Renderer(0),RenderWindow(0),DistanceWidget(0),Distance(0) {}
+  vtkDistanceCallback():Renderer(nullptr),RenderWindow(nullptr),DistanceWidget(nullptr),Distance(nullptr) {}
   vtkRenderer *Renderer;
   vtkRenderWindow *RenderWindow;
   vtkDistanceWidget *DistanceWidget;
@@ -837,7 +837,7 @@ void vtkDistanceCallback::Execute(vtkObject*, unsigned long eid, void* callData)
 
     char title[256];
     this->Distance->GetAxis()->SetRange(0.0,dist);
-    sprintf(title,"%-#6.3g",dist);
+    snprintf(title,sizeof(title),"%-#6.3g",dist);
     this->Distance->GetAxis()->SetTitle(title);
   }
   else

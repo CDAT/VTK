@@ -36,7 +36,7 @@ class vtkWidgetEvent;
 class vtkAbstractWidget;
 class vtkWidgetEventTranslator;
 class vtkCallbackMap; // PIMPL encapsulation of STL map
-
+class vtkEventData;
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkWidgetCallbackMapper : public vtkObject
 {
@@ -51,7 +51,7 @@ public:
    * Standard macros.
    */
   vtkTypeMacro(vtkWidgetCallbackMapper,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
   //@}
 
   //@{
@@ -84,6 +84,9 @@ public:
                          int repeatCount, const char* keySym,
                          unsigned long widgetEvent,
                          vtkAbstractWidget *w, CallbackType f);
+  void SetCallbackMethod(unsigned long VTKEvent, vtkEventData *ed,
+                         unsigned long widgetEvent,
+                         vtkAbstractWidget *w, CallbackType f);
   //void SetCallbackMethod(vtkWidgetEvent *vtkEvent, unsigned long widgetEvent,
   //                       vtkAbstractWidget *w, CallbackType f);
   //@}
@@ -96,7 +99,7 @@ public:
 
 protected:
   vtkWidgetCallbackMapper();
-  ~vtkWidgetCallbackMapper();
+  ~vtkWidgetCallbackMapper() VTK_OVERRIDE;
 
   // Translates VTK events into widget events
   vtkWidgetEventTranslator *EventTranslator;

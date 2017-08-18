@@ -86,7 +86,7 @@ class VTKIOEXODUS_EXPORT vtkExodusIIWriter : public vtkWriter
 public:
   static vtkExodusIIWriter *New ();
   vtkTypeMacro(vtkExodusIIWriter,vtkWriter);
-  void PrintSelf (ostream& os, vtkIndent indent);
+  void PrintSelf (ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Specify the vtkModelMetadata object which contains the Exodus file
@@ -171,9 +171,18 @@ public:
   vtkSetStringMacro(BlockIdArrayName);
   vtkGetStringMacro(BlockIdArrayName);
 
+  /**
+   * In certain cases we know that metadata doesn't exist and
+   * we want to ignore that warning.
+   */
+
+  vtkSetMacro(IgnoreMetaDataWarning, bool);
+  vtkGetMacro(IgnoreMetaDataWarning, bool);
+  vtkBooleanMacro(IgnoreMetaDataWarning, bool);
+
 protected:
   vtkExodusIIWriter ();
-  ~vtkExodusIIWriter ();
+  ~vtkExodusIIWriter () VTK_OVERRIDE;
 
   vtkModelMetadata* ModelMetadata;
 
@@ -195,10 +204,10 @@ protected:
   int WriteAllTimeSteps;
   int NumberOfTimeSteps;
 
-  vtkDoubleArray* TimeValues;
   int CurrentTimeIndex;
   int FileTimeOffset;
   bool TopologyChanged;
+  bool IgnoreMetaDataWarning;
 
   vtkDataObject *OriginalInput;
   std::vector< vtkSmartPointer<vtkUnstructuredGrid> > FlattenedInput;
@@ -213,7 +222,7 @@ protected:
   {
     Block ()
     {
-      this->Name = 0;
+      this->Name = nullptr;
       this->Type = 0;
       this->NumElements = 0;
       this->ElementStartIndex = -1;
@@ -223,7 +232,7 @@ protected:
       this->GridIndex = 0;
       this->OutputIndex = -1;
       this->NumAttributes = 0;
-      this->BlockAttributes = 0;
+      this->BlockAttributes = nullptr;
     };
     const char *Name;
     int Type;
@@ -276,7 +285,7 @@ protected:
 
   int ProcessRequest (vtkInformation* request,
                       vtkInformationVector** inputVector,
-                      vtkInformationVector* outputVector);
+                      vtkInformationVector* outputVector) VTK_OVERRIDE;
 
   int RequestInformation (vtkInformation* request,
                           vtkInformationVector** inputVector,
@@ -286,13 +295,13 @@ protected:
                                    vtkInformationVector** inputVector,
                                    vtkInformationVector* outputVector);
 
-  int FillInputPortInformation (int port, vtkInformation* info);
+  int FillInputPortInformation (int port, vtkInformation* info) VTK_OVERRIDE;
 
   int RequestData (vtkInformation* request,
                    vtkInformationVector** inputVector,
-                   vtkInformationVector* outputVector);
+                   vtkInformationVector* outputVector) VTK_OVERRIDE;
 
-  void WriteData ();
+  void WriteData () VTK_OVERRIDE;
 
   int FlattenHierarchy (vtkDataObject* input, const char *name, bool& changed);
 
@@ -357,6 +366,12 @@ protected:
   int WriteCellData (int timestep, vtkDataArray *buffer);
   void ExtractPointData (const char *name, int comp, vtkDataArray *buffer);
   int WritePointData (int timestep, vtkDataArray *buffer);
+
+  /**
+   * Get the maximum length name in the input data set. If it is smaller
+   * than 32 characters long we just return the ExodusII default of 32.
+   */
+  virtual unsigned int GetMaxNameLength();
 
 private:
   vtkExodusIIWriter (const vtkExodusIIWriter&) VTK_DELETE_FUNCTION;

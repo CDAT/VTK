@@ -64,7 +64,7 @@ class VTKFILTERSMODELING_EXPORT vtkLinearExtrusionFilter : public vtkPolyDataAlg
 {
 public:
   vtkTypeMacro(vtkLinearExtrusionFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   /**
    * Create object with normal extrusion type, capping on, scale factor=1.0,
@@ -123,9 +123,9 @@ public:
 
 protected:
   vtkLinearExtrusionFilter();
-  ~vtkLinearExtrusionFilter() {}
+  ~vtkLinearExtrusionFilter() VTK_OVERRIDE {}
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
   int ExtrusionType;
   int Capping;
   double ScaleFactor;
@@ -135,8 +135,8 @@ protected:
   void (vtkLinearExtrusionFilter::*ExtrudePoint)(double x[3], vtkIdType id,
                                                    vtkDataArray *normals);
   void ViaNormal(double x[3], vtkIdType id, vtkDataArray *normals);
-  void ViaVector(double x[3], vtkIdType id, vtkDataArray *normals=0);
-  void ViaPoint(double x[3], vtkIdType id, vtkDataArray *normals=0);
+  void ViaVector(double x[3], vtkIdType id, vtkDataArray *normals=nullptr);
+  void ViaPoint(double x[3], vtkIdType id, vtkDataArray *normals=nullptr);
 
 private:
   vtkLinearExtrusionFilter(const vtkLinearExtrusionFilter&) VTK_DELETE_FUNCTION;

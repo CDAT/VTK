@@ -47,7 +47,7 @@ class VTKRENDERINGPARALLEL_EXPORT vtkSynchronizedRenderers : public vtkObject
 public:
   static vtkSynchronizedRenderers* New();
   vtkTypeMacro(vtkSynchronizedRenderers, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -202,7 +202,7 @@ public:
     // This is a raw version of PushToViewport() that assumes that the
     // glViewport() has already been setup externally.
     // the argument is optional for backwards compat with old OpenGL
-    bool PushToFrameBuffer(vtkRenderer *ren = NULL);
+    bool PushToFrameBuffer(vtkRenderer *ren = nullptr);
 
     // Captures the image from the viewport.
     // This doesn't trigger a render, just captures what's currently there in

@@ -26,10 +26,10 @@
 vtkStandardNewMacro(vtkOBJReader);
 
 // Description:
-// Instantiate object with NULL filename.
+// Instantiate object with nullptr filename.
 vtkOBJReader::vtkOBJReader()
 {
-  this->FileName = NULL;
+  this->FileName = nullptr;
 
   this->SetNumberOfInputPorts(0);
 }
@@ -37,7 +37,7 @@ vtkOBJReader::vtkOBJReader()
 vtkOBJReader::~vtkOBJReader()
 {
   delete [] this->FileName;
-  this->FileName = NULL;
+  this->FileName = nullptr;
 }
 
 /*---------------------------------------------------------------------------*\
@@ -118,7 +118,7 @@ int vtkOBJReader::RequestData(
 
   FILE *in = fopen(this->FileName,"r");
 
-  if (in == NULL)
+  if (in == nullptr)
   {
     vtkErrorMacro(<< "File " << this->FileName << " not found");
     return 0;
@@ -126,7 +126,7 @@ int vtkOBJReader::RequestData(
 
   vtkDebugMacro(<<"Reading file");
 
-  // intialise some structures to store the file contents in
+  // initialize some structures to store the file contents in
   vtkPoints *points = vtkPoints::New();
   std::vector<vtkFloatArray*> tcoords_vector;
   vtkFloatArray *normals = vtkFloatArray::New();
@@ -154,10 +154,12 @@ int vtkOBJReader::RequestData(
   char tcoordsName[100];
   float xyz[3];
   int numPoints = 0;
+  int numTCoords = 0;
+  int numNormals = 0;
 
   // First loop to initialize the data arrays for the different set of texture coordinates
   int lineNr = 0;
-  while (everything_ok && fgets(rawLine, MAX_LINE, in) != NULL)
+  while (everything_ok && fgets(rawLine, MAX_LINE, in) != nullptr)
   {
     lineNr++;
     char *pLine = rawLine;
@@ -186,7 +188,7 @@ int vtkOBJReader::RequestData(
       if (sscanf(pLine, "%s", tcoordsName) == 1)
       {
         // Go to next line to see if any texture coordinates exist
-        if (fgets(rawLine, MAX_LINE, in) != NULL)
+        if (fgets(rawLine, MAX_LINE, in) != nullptr)
         {
           lineNr++;
           pLine = rawLine;
@@ -223,7 +225,7 @@ int vtkOBJReader::RequestData(
   } // (end of first while loop)
 
   // If no material texture coordinates are found, add default TCoords
-  if(tcoords_vector.size() == 0)
+  if(tcoords_vector.empty())
   {
     vtkFloatArray *tcoords = vtkFloatArray::New();
     tcoords->SetNumberOfComponents(2);
@@ -235,7 +237,7 @@ int vtkOBJReader::RequestData(
   // Second loop to parse points, faces, texture coordinates, normals...
   lineNr = 0;
   fseek(in, 0, SEEK_SET);
-  while (everything_ok && fgets(rawLine, MAX_LINE, in) != NULL)
+  while (everything_ok && fgets(rawLine, MAX_LINE, in) != nullptr)
   {
     lineNr++;
     char *pLine = rawLine;
@@ -300,6 +302,7 @@ int vtkOBJReader::RequestData(
             tcoords->InsertNextTuple2(-1.0, -1.0);
           }
         }
+        numTCoords++;
       }
       else
       {
@@ -314,6 +317,7 @@ int vtkOBJReader::RequestData(
       {
         normals->InsertNextTuple(xyz);
         hasNormals = true;
+        numNormals++;
       }
       else
       {
@@ -351,7 +355,7 @@ int vtkOBJReader::RequestData(
           else if (strcmp(pLine, "\\\n") == 0)
           {
             // handle backslash-newline continuation
-            if (fgets(rawLine, MAX_LINE, in) != NULL)
+            if (fgets(rawLine, MAX_LINE, in) != nullptr)
             {
               lineNr++;
               pLine = rawLine;
@@ -431,7 +435,7 @@ int vtkOBJReader::RequestData(
           else if (strcmp(pLine, "\\\n") == 0)
           {
             // handle backslash-newline continuation
-            if (fgets(rawLine, MAX_LINE, in) != NULL)
+            if (fgets(rawLine, MAX_LINE, in) != nullptr)
             {
               lineNr++;
               pLine = rawLine;
@@ -497,9 +501,27 @@ int vtkOBJReader::RequestData(
               polys->InsertCellPoint(iVert-1);
             }
             nVerts++;
-            tcoord_polys->InsertCellPoint(iTCoord-1);
+
+            // Current index is relative to last texture index
+            if (iTCoord < 0)
+            {
+              tcoord_polys->InsertCellPoint(numTCoords + iTCoord);
+            }
+            else
+            {
+              tcoord_polys->InsertCellPoint(iTCoord - 1);
+            }
             nTCoords++;
-            normal_polys->InsertCellPoint(iNormal-1);
+
+            // Current index is relative to last normal index
+            if (iNormal < 0)
+            {
+              normal_polys->InsertCellPoint(numNormals + iNormal);
+            }
+            else
+            {
+              normal_polys->InsertCellPoint(iNormal - 1);
+            }
             nNormals++;
             if (iTCoord != iVert)
               tcoords_same_as_verts = false;
@@ -517,7 +539,16 @@ int vtkOBJReader::RequestData(
               polys->InsertCellPoint(iVert-1);
             }
             nVerts++;
-            normal_polys->InsertCellPoint(iNormal-1);
+
+            // Current index is relative to last normal index
+            if (iNormal < 0)
+            {
+              normal_polys->InsertCellPoint(numNormals + iNormal);
+            }
+            else
+            {
+              normal_polys->InsertCellPoint(iNormal - 1);
+            }
             nNormals++;
             if (iNormal != iVert)
               normals_same_as_verts = false;
@@ -533,7 +564,16 @@ int vtkOBJReader::RequestData(
               polys->InsertCellPoint(iVert-1);
             }
             nVerts++;
-            tcoord_polys->InsertCellPoint(iTCoord-1);
+
+            // Current index is relative to last texture index
+            if (iTCoord < 0)
+            {
+              tcoord_polys->InsertCellPoint(numTCoords + iTCoord);
+            }
+            else
+            {
+              tcoord_polys->InsertCellPoint(iTCoord - 1);
+            }
             nTCoords++;
             if (iTCoord != iVert)
               tcoords_same_as_verts = false;
@@ -553,7 +593,7 @@ int vtkOBJReader::RequestData(
           else if (strcmp(pLine, "\\\n") == 0)
           {
             // handle backslash-newline continuation
-            if (fgets(rawLine, MAX_LINE, in) != NULL)
+            if (fgets(rawLine, MAX_LINE, in) != nullptr)
             {
               lineNr++;
               pLine = rawLine;

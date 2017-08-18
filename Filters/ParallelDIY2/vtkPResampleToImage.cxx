@@ -435,7 +435,7 @@ void Redistribute(void* blockp, const diy::ReduceProxy& srp,
   int length = (maxIdx - minIdx + 1 + groupSize - 1) / groupSize;
 
   PointList myPoints;
-  myPoints.DataSize = b->Points.DataSize; // initilize myPoints
+  myPoints.DataSize = b->Points.DataSize; // initialize myPoints
   std::size_t numPoints = b->Points.Indices.size();
   for (size_t i = 0; i < numPoints; ++i)
   {
@@ -487,7 +487,7 @@ inline diy::mpi::communicator GetDiyCommunicator(vtkMPIController *controller)
 
 //---------------------------------------------------------------------------
 vtkPResampleToImage::vtkPResampleToImage()
-  : Controller(NULL)
+  : Controller(nullptr)
 {
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
@@ -495,7 +495,7 @@ vtkPResampleToImage::vtkPResampleToImage()
 //----------------------------------------------------------------------------
 vtkPResampleToImage::~vtkPResampleToImage()
 {
-  this->SetController(NULL);
+  this->SetController(nullptr);
 }
 
 //----------------------------------------------------------------------------

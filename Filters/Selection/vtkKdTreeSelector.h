@@ -41,7 +41,7 @@ class VTKFILTERSSELECTION_EXPORT vtkKdTreeSelector : public vtkSelectionAlgorith
 public:
   static vtkKdTreeSelector* New();
   vtkTypeMacro(vtkKdTreeSelector, vtkSelectionAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   //@{
   /**
@@ -67,7 +67,7 @@ public:
   /**
    * The field name to use when generating the selection.
    * If set, creates a VALUES selection.
-   * If not set (or is set to NULL), creates a INDICES selection.
+   * If not set (or is set to nullptr), creates a INDICES selection.
    * By default this is not set.
    */
   vtkSetStringMacro(SelectionFieldName);
@@ -110,11 +110,11 @@ public:
   vtkGetMacro(SingleSelectionThreshold, double);
   //@}
 
-  vtkMTimeType GetMTime();
+  vtkMTimeType GetMTime() VTK_OVERRIDE;
 
 protected:
   vtkKdTreeSelector();
-  ~vtkKdTreeSelector();
+  ~vtkKdTreeSelector() VTK_OVERRIDE;
 
   vtkKdTree* KdTree;
   double SelectionBounds[6];
@@ -124,13 +124,13 @@ protected:
   double SingleSelectionThreshold;
   int SelectionAttribute;
 
-  virtual int FillInputPortInformation(
-    int port, vtkInformation* info);
+  int FillInputPortInformation(
+    int port, vtkInformation* info) VTK_OVERRIDE;
 
   int RequestData(
     vtkInformation*,
     vtkInformationVector**,
-    vtkInformationVector*);
+    vtkInformationVector*) VTK_OVERRIDE;
 
 private:
   vtkKdTreeSelector(const vtkKdTreeSelector&) VTK_DELETE_FUNCTION;

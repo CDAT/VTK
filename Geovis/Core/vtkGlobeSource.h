@@ -48,7 +48,7 @@ class VTKGEOVISCORE_EXPORT vtkGlobeSource : public vtkPolyDataAlgorithm
 {
 public:
   vtkTypeMacro(vtkGlobeSource,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
 
   //@{
@@ -135,7 +135,7 @@ public:
    * at the spherical coordinates theta and phi.
    */
   static void ComputeGlobePoint(
-    double theta, double phi, double radius, double* point, double* normal = 0);
+    double theta, double phi, double radius, double* point, double* normal = nullptr);
 
   /**
    * Calculates the spherical coordinates theta and phi based on the
@@ -146,12 +146,12 @@ public:
 
 protected:
   vtkGlobeSource();
-  ~vtkGlobeSource() {}
+  ~vtkGlobeSource() VTK_OVERRIDE {}
 
   int RequestData(
     vtkInformation *,
     vtkInformationVector **,
-    vtkInformationVector *);
+    vtkInformationVector *) VTK_OVERRIDE;
 
   void AddPoint(
     double theta, double phi, double radius,

@@ -176,7 +176,7 @@ public:
   //@}
 
   /**
-   * Return the bounding box coordinates of the text in viewport coordinates.
+   * Return the bounding box coordinates of the text in pixels.
    * The bbox array is populated with [ xmin, xmax, ymin, ymax ]
    * values in that order.
    */
@@ -262,7 +262,7 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
 
   //@{
   /**
@@ -270,15 +270,15 @@ public:
    * DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS.
    * Draw the text actor to the screen.
    */
-  virtual int RenderOpaqueGeometry(vtkViewport* viewport) VTK_OVERRIDE;
-  virtual int RenderTranslucentPolygonalGeometry(vtkViewport* ) VTK_OVERRIDE {return 0;};
-  virtual int RenderOverlay(vtkViewport* viewport) VTK_OVERRIDE;
+  int RenderOpaqueGeometry(vtkViewport* viewport) VTK_OVERRIDE;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* ) VTK_OVERRIDE {return 0;};
+  int RenderOverlay(vtkViewport* viewport) VTK_OVERRIDE;
   //@}
 
   /**
    * Does this prop have some translucent polygonal geometry?
    */
-  virtual int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
 
 protected:
   /**
@@ -293,7 +293,7 @@ protected:
     vtkTextProperty *tprop, vtkViewport *viewport, int bbox[4]);
 
    vtkTextActor();
-  ~vtkTextActor();
+  ~vtkTextActor() VTK_OVERRIDE;
 
   int     MinimumSize[2];
   float   MaximumLineHeight;

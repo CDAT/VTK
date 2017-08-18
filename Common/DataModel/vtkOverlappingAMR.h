@@ -143,14 +143,14 @@ public:
   /**
    * Return a pointer to Parents of a block.  The first entry is the number
    * of parents the block has followed by its parent ids in level-1.
-   * If none exits it returns NULL.
+   * If none exits it returns nullptr.
    */
   unsigned int *GetParents(unsigned int level, unsigned int index,  unsigned int& numParents);
 
   /**
    * Return a pointer to Children of a block.  The first entry is the number
    * of children the block has followed by its childern ids in level+1.
-   * If none exits it returns NULL.
+   * If none exits it returns nullptr.
    */
   unsigned int *GetChildren(unsigned int level, unsigned int index, unsigned int& numChildren);
 
@@ -168,7 +168,7 @@ public:
   bool FindGrid(double q[3], unsigned int& level, unsigned int& gridId);
 
   /**
-   * Get/Set the interal representation of amr meta meta data
+   * Get/Set the internal representation of amr meta meta data
    */
   vtkAMRInformation* GetAMRInfo() VTK_OVERRIDE
     { return Superclass::GetAMRInfo();}
@@ -178,7 +178,7 @@ public:
   //@{
   /**
    * Check whether the data set is internally consistent, e.g.
-   * whether the meta data and acutal data blocks match.
+   * whether the meta data and actual data blocks match.
    * Incorrectness will be reported as error messages
    */
   void Audit();
