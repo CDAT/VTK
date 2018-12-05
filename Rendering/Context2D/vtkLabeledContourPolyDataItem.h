@@ -127,7 +127,6 @@ protected:
   bool PlaceLabels();
   bool ResolveLabels();
   virtual bool CreateLabels();
-  bool RenderBackgrounds(vtkContext2D* painter);
   bool RenderLabels(vtkContext2D* painter);
 
   bool AllocateTextActors(vtkIdType num);

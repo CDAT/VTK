@@ -82,35 +82,21 @@ struct LabelInfo
   // Position in actor space:
   vtkVector3d Position;
 
-  // Orientation (normalized, world space)
-  vtkVector3d RightW; // Left --> Right
-  vtkVector3d UpW; // Bottom --> Top
-
-  // Orientation (normalized in world space, represented in actor space)
-  vtkVector3d RightA; // Left --> Right
-  vtkVector3d UpA; // Bottom --> Top
-
-  // Corner locations (actor space):
-  vtkVector3d TLa;
-  vtkVector3d TRa;
-  vtkVector3d BRa;
-  vtkVector3d BLa;
+  // Which directions are label right and up in display space
+  vtkVector2d RightD;
+  vtkVector2d UpD;
 
   // Corner location (display space):
   vtkVector2i TLd;
   vtkVector2i TRd;
   vtkVector2i BRd;
   vtkVector2i BLd;
-
-  // Factor to scale the text actor by:
-  double ScaleDisplayToActor;
 };
 
 //------------------------------------------------------------------------------
 struct LabelHelper
 {
   double orientation;
-  float boxPoints[10];
 };
 
 namespace {
@@ -304,11 +290,6 @@ bool vtkLabeledContourPolyDataItem::Paint(vtkContext2D* painter)
   double startRender = vtkTimerLog::GetUniversalTime();
 
   this->Superclass::Paint(painter);
-
-  if (!this->RenderBackgrounds(painter))
-  {
-    return false;
-  }
 
   if (!this->RenderLabels(painter))
   {
@@ -763,45 +744,6 @@ bool vtkLabeledContourPolyDataItem::CreateLabels()
 }
 
 //------------------------------------------------------------------------------
-bool vtkLabeledContourPolyDataItem::RenderBackgrounds(vtkContext2D* painter)
-{
-  vtkPen* pen = painter->GetPen();
-  vtkBrush* brush = painter->GetBrush();
-
-  double prevPenColor[4];
-  unsigned char prevPenOpacity;
-  double prevBrushColor[4];
-  double prevBrushOpacity;
-
-  pen->GetColorF(prevPenColor);
-  prevPenOpacity = pen->GetOpacity();
-  brush->GetColorF(prevBrushColor);
-  prevBrushOpacity = brush->GetOpacityF();
-
-  double bgcolor[3];
-  double bgopacity;
-
-  for (vtkIdType i = 0; i < this->NumberOfUsedTextActors; ++i)
-  {
-    vtkTextProperty* tprop = this->TextActors[i]->GetTextProperty();
-    tprop->GetBackgroundColor(bgcolor);
-    bgopacity = tprop->GetBackgroundOpacity();
-    pen->SetColorF(bgcolor);
-    pen->SetOpacityF(bgopacity);
-    brush->SetColorF(bgcolor);
-    brush->SetOpacityF(bgopacity);
-    painter->DrawQuad(this->LabelHelpers[i]->boxPoints);
-  }
-
-  pen->SetColorF(prevPenColor);
-  pen->SetOpacity(prevPenOpacity);
-  brush->SetColorF(prevBrushColor);
-  brush->SetOpacityF(prevBrushOpacity);
-
-  return true;
-}
-
-//------------------------------------------------------------------------------
 bool vtkLabeledContourPolyDataItem::RenderLabels(vtkContext2D* painter)
 {
   double pos[3];
@@ -1218,25 +1160,24 @@ bool vtkLabeledContourPolyDataItem::Private::NextLabel(
     vtkIdType endIdx = curIdx - 1;
 
     // The direction of the text.
-    vtkVector3d prevPointWorld;
-    vtkVector3d startPointWorld;
-    this->ActorToWorld(prevPoint, prevPointWorld);
-    this->ActorToWorld(startPoint, startPointWorld);
-    info.RightW = (prevPointWorld - startPointWorld).Normalized();
+    vtkVector2d prevDisplay;
+    vtkVector2d startDisplay;
+    this->ActorToDisplay(prevPoint, prevDisplay);
+    this->ActorToDisplay(startPoint, startDisplay);
+    info.RightD = (prevDisplay - startDisplay).Normalized();
+
     // Ensure the text reads left->right:
-    if (info.RightW.Dot(this->CameraRight) < 0.)
+    if (((info.RightD[0] * this->CameraRight[0]) + (info.RightD[1] * this->CameraRight[1])) < 0.)
     {
-      info.RightW = -info.RightW;
+      info.RightD = -info.RightD;
     }
 
-    // The up vector. Cross the forward direction with the orientation and
-    // ensure that the result vector is in the same hemisphere as CameraUp
-    info.UpW = info.RightW.Compare(this->CameraForward, 10e-10)
-        ? this->CameraUp
-        : info.RightW.Cross(this->CameraForward).Normalized();
-    if (info.UpW.Dot(this->CameraUp) < 0.)
+    info.UpD[0] = info.RightD[1];
+    info.UpD[1] = -info.RightD[0];
+
+    if (((info.UpD[0] * this->CameraUp[0]) + (info.UpD[1] * this->CameraUp[1])) < 0.)
     {
-      info.UpW = -info.UpW;
+      info.UpD = -info.UpD;
     }
 
     // Walk through the segment lengths to find where the center is for label
@@ -1285,48 +1226,10 @@ bool vtkLabeledContourPolyDataItem::Private::BuildLabel(vtkTextActor3D *actor,
   actor->SetInput(metric.Text.c_str());
 
   helper->orientation =
-    vtkMath::DegreesFromRadians(atan2(info.RightW[1], info.RightW[0]));
-
-  helper->boxPoints[0] = info.TLa[0];  helper->boxPoints[1] = info.TLa[1];
-  helper->boxPoints[2] = info.TRa[0];  helper->boxPoints[3] = info.TRa[1];
-  helper->boxPoints[4] = info.BRa[0];  helper->boxPoints[5] = info.BRa[1];
-  helper->boxPoints[6] = info.BLa[0];  helper->boxPoints[7] = info.BLa[1];
-  helper->boxPoints[8] = info.TLa[0];  helper->boxPoints[9] = info.TLa[1];
+    vtkMath::DegreesFromRadians(atan2(info.RightD[1], info.RightD[0]));
 
   actor->SetTextProperty(metric.TProp);
   actor->SetPosition(const_cast<double*>(info.Position.GetData()));
-
-  vtkNew<vtkTransform> xform;
-  xform->PostMultiply();
-
-  xform->Translate((-info.Position).GetData());
-
-  xform->Scale(info.ScaleDisplayToActor,
-               info.ScaleDisplayToActor,
-               info.ScaleDisplayToActor);
-
-  vtkVector3d forward = info.UpA.Cross(info.RightA);
-  double rot[16];
-  rot[4 * 0 + 0] = info.RightA[0];
-  rot[4 * 1 + 0] = info.RightA[1];
-  rot[4 * 2 + 0] = info.RightA[2];
-  rot[4 * 3 + 0] = 0;
-  rot[4 * 0 + 1] = info.UpA[0];
-  rot[4 * 1 + 1] = info.UpA[1];
-  rot[4 * 2 + 1] = info.UpA[2];
-  rot[4 * 3 + 1] = 0;
-  rot[4 * 0 + 2] = forward[0];
-  rot[4 * 1 + 2] = forward[1];
-  rot[4 * 2 + 2] = forward[2];
-  rot[4 * 3 + 2] = 0;
-  rot[4 * 0 + 3] = 0;
-  rot[4 * 1 + 3] = 0;
-  rot[4 * 2 + 3] = 0;
-  rot[4 * 3 + 3] = 1;
-  xform->Concatenate(rot);
-
-  xform->Translate(info.Position.GetData());
-  actor->SetUserTransform(xform);
 
   return true;
 }
@@ -1335,49 +1238,19 @@ bool vtkLabeledContourPolyDataItem::Private::BuildLabel(vtkTextActor3D *actor,
 void vtkLabeledContourPolyDataItem::Private::ComputeLabelInfo(
     LabelInfo &info, const LabelMetric &metrics)
 {
-  // Convert the right and up vectors into actor space:
-  vtkVector3d worldPosition;
-  this->ActorToWorld(info.Position, worldPosition);
+  vtkVector2d displayPosition;
+  this->ActorToDisplay(info.Position, displayPosition);
 
-  vtkVector3d endW = worldPosition + info.RightW;
-  vtkVector3d endA;
-  this->WorldToActor(endW, endA);
-  info.RightA = endA - info.Position;
+  // Compute the corners of the quad.  Display coordinates are used to detect
+  // collisions.  Note that we make this a little bigger (4px) than a tight
+  // bbox to give a little breathing room around the text.
+  vtkVector2d displayHalfWidth = (0.5 * metrics.Dimensions[0] + 2) * info.RightD;
+  vtkVector2d displayHalfHeight = (0.5 * metrics.Dimensions[1] + 2) * info.UpD;
 
-  endW = worldPosition + info.UpW;
-  this->WorldToActor(endW, endA);
-  info.UpA = endA - info.Position;
-
-  // Compute scaling factor. Use the Up vector for deltas as we know it is
-  // perpendicular to the view axis:
-  vtkVector3d delta = info.UpA * (0.5 * metrics.Dimensions[0]);
-  vtkVector3d leftActor = info.Position - delta;
-  vtkVector3d rightActor = info.Position + delta;
-  vtkVector2d leftDisplay;
-  vtkVector2d rightDisplay;
-  this->ActorToDisplay(leftActor, leftDisplay);
-  this->ActorToDisplay(rightActor, rightDisplay);
-  info.ScaleDisplayToActor = static_cast<double>(metrics.Dimensions[0]) /
-      (rightDisplay - leftDisplay).Norm();
-
-  // Compute the corners of the quad. Actor coordinates are used to create the
-  // background rectangle, display coordinates are used to detect collisions.
-  // Note that we make this a little bigger (4px) than a tight bbox to give a
-  // little breathing room around the text.
-  vtkVector3d halfWidth =
-      ((0.5 * metrics.Dimensions[0] + 2) * info.ScaleDisplayToActor)
-      * info.RightA;
-  vtkVector3d halfHeight =
-      ((0.5 * metrics.Dimensions[1] + 2) * info.ScaleDisplayToActor)
-      * info.UpA;
-  info.TLa = info.Position + halfHeight - halfWidth;
-  info.TRa = info.Position + halfHeight + halfWidth;
-  info.BRa = info.Position - halfHeight + halfWidth;
-  info.BLa = info.Position - halfHeight - halfWidth;
-  this->ActorToDisplay(info.TLa, info.TLd);
-  this->ActorToDisplay(info.TRa, info.TRd);
-  this->ActorToDisplay(info.BRa, info.BRd);
-  this->ActorToDisplay(info.BLa, info.BLd);
+  info.TLd = (displayPosition + displayHalfHeight - displayHalfWidth).Cast<int>();
+  info.TRd = (displayPosition + displayHalfHeight + displayHalfWidth).Cast<int>();
+  info.BRd = (displayPosition - displayHalfHeight + displayHalfWidth).Cast<int>();
+  info.BLd = (displayPosition - displayHalfHeight - displayHalfWidth).Cast<int>();
 }
 
 // Anonymous namespace for some TestOverlap helpers:
