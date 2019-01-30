@@ -29,4 +29,5 @@ vtk_module(vtkRenderingMatplotlib
     vtkPython
     vtkRenderingCore
     vtkWrappingPythonCore
+  OPTIONAL_PYTHON_LINK
   )
