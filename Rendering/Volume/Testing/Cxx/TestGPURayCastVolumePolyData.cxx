@@ -39,7 +39,7 @@
 #include <vtkVolumeProperty.h>
 #include <vtkXMLImageDataReader.h>
 
-int TestGPURayCastVolumePolyData(int argc, char *argv[])
+int TestGPURayCastVolumePolyData(int argc, char* argv[])
 {
   double scalarRange[2];
 
@@ -48,16 +48,17 @@ int TestGPURayCastVolumePolyData(int argc, char *argv[])
   vtkNew<vtkGPUVolumeRayCastMapper> volumeMapper;
 
   vtkNew<vtkXMLImageDataReader> reader;
-  const char* volumeFile = vtkTestUtilities::ExpandDataFileName(
-                            argc, argv, "Data/vase_1comp.vti");
+  const char* volumeFile = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/vase_1comp.vti");
   reader->SetFileName(volumeFile);
   volumeMapper->SetInputConnection(reader->GetOutputPort());
+
+  delete[] volumeFile;
 
   // Add outline filter
   vtkNew<vtkOutlineFilter> outlineFilter;
   outlineFilter->SetInputConnection(reader->GetOutputPort());
   outlineMapper->SetInputConnection(outlineFilter->GetOutputPort());
-  outlineActor->SetMapper(outlineMapper.GetPointer());
+  outlineActor->SetMapper(outlineMapper);
 
   volumeMapper->GetInput()->GetScalarRange(scalarRange);
   volumeMapper->SetSampleDistance(0.1);
@@ -67,12 +68,12 @@ int TestGPURayCastVolumePolyData(int argc, char *argv[])
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetMultiSamples(0);
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
   renWin->SetSize(400, 400);
   ren->SetBackground(0.2, 0.2, 0.5);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkPiecewiseFunction> scalarOpacity;
   scalarOpacity->AddPoint(50, 0.0);
@@ -81,7 +82,7 @@ int TestGPURayCastVolumePolyData(int argc, char *argv[])
   vtkNew<vtkVolumeProperty> volumeProperty;
   volumeProperty->ShadeOn();
   volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
-  volumeProperty->SetScalarOpacity(scalarOpacity.GetPointer());
+  volumeProperty->SetScalarOpacity(scalarOpacity);
 
   vtkSmartPointer<vtkColorTransferFunction> colorTransferFunction =
     volumeProperty->GetRGBTransferFunction(0);
@@ -89,8 +90,8 @@ int TestGPURayCastVolumePolyData(int argc, char *argv[])
   colorTransferFunction->AddRGBPoint(scalarRange[0], 0.6, 0.4, 0.1);
 
   vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
-  volume->SetMapper(volumeMapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
+  volume->SetMapper(volumeMapper);
+  volume->SetProperty(volumeProperty);
 
   /// Add sphere in the center of volume
   int dims[3];
@@ -101,29 +102,29 @@ int TestGPURayCastVolumePolyData(int argc, char *argv[])
   im->GetOrigin(origin);
   im->GetSpacing(spacing);
 
-  center[0] = origin[0] + spacing[0]*dims[0]/2.0;
-  center[1] = origin[1] + spacing[1]*dims[1]/2.0;
-  center[2] = origin[2] + spacing[2]*dims[2]/2.0;
+  center[0] = origin[0] + spacing[0] * dims[0] / 2.0;
+  center[1] = origin[1] + spacing[1] * dims[1] / 2.0;
+  center[2] = origin[2] + spacing[2] * dims[2] / 2.0;
 
   vtkNew<vtkSphereSource> sphereSource;
   sphereSource->SetCenter(center);
-  sphereSource->SetRadius(dims[1]/3.0);
+  sphereSource->SetRadius(dims[1] / 3.0);
   vtkNew<vtkPolyDataMapper> sphereMapper;
   vtkNew<vtkActor> sphereActor;
   sphereMapper->SetInputConnection(sphereSource->GetOutputPort());
-  sphereActor->SetMapper(sphereMapper.GetPointer());
+  sphereActor->SetMapper(sphereMapper);
 
-  ren->AddViewProp(volume.GetPointer());
-  ren->AddActor(outlineActor.GetPointer());
-  ren->AddActor(sphereActor.GetPointer());
+  ren->AddViewProp(volume);
+  ren->AddActor(outlineActor);
+  ren->AddActor(sphereActor);
 
   renWin->Render();
   ren->ResetCamera();
 
   iren->Initialize();
 
-  int retVal = vtkRegressionTestImage( renWin.GetPointer() );
-  if( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

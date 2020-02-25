@@ -34,39 +34,37 @@
  * @sa
  * vtkImageFFT
  *
-*/
+ */
 
 #ifndef vtkTableFFT_h
 #define vtkTableFFT_h
 
-#include "vtkTableAlgorithm.h"
 #include "vtkImagingFourierModule.h" // For export macro
-#include "vtkSmartPointer.h"    // For internal method.
+#include "vtkSmartPointer.h"         // For internal method.
+#include "vtkTableAlgorithm.h"
 
 class VTKIMAGINGFOURIER_EXPORT vtkTableFFT : public vtkTableAlgorithm
 {
 public:
   vtkTypeMacro(vtkTableFFT, vtkTableAlgorithm);
-  static vtkTableFFT *New();
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTableFFT* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkTableFFT();
-  ~vtkTableFFT() VTK_OVERRIDE;
+  ~vtkTableFFT() override;
 
-  int RequestData(vtkInformation *request,
-                          vtkInformationVector **inputVector,
-                          vtkInformationVector *outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   /**
    * Perform the FFT on the given data array.
    */
-  virtual vtkSmartPointer<vtkDataArray> DoFFT(vtkDataArray *input);
+  virtual vtkSmartPointer<vtkDataArray> DoFFT(vtkDataArray* input);
 
 private:
-  vtkTableFFT(const vtkTableFFT &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTableFFT &) VTK_DELETE_FUNCTION;
+  vtkTableFFT(const vtkTableFFT&) = delete;
+  void operator=(const vtkTableFFT&) = delete;
 };
 
-
-#endif //vtkTableFFT_h
+#endif // vtkTableFFT_h

@@ -34,6 +34,10 @@
  * contours are being extracted. If you want to use a scalar tree,
  * invoke the method UseScalarTreeOn().
  *
+ * @warning
+ * If the input vtkUnstructuredGrid contains 3D linear cells, the class
+ * vtkContour3DLinearGrid is much faster and may be preferred in certain
+ * applications.
  *
  * @warning
  * For unstructured data or structured grids, normals and gradients
@@ -41,10 +45,10 @@
  * normals of the resulting isosurface.
  *
  * @sa
- * vtkMarchingContourFilter
- * vtkMarchingCubes vtkSliceCubes vtkDividingCubes vtkMarchingSquares
- * vtkImageMarchingCubes
-*/
+ * vtkContour3DLinearGrid vtkContourFilter vtkMarchingContourFilter
+ * vtkFlyingEdges3D vtkMarchingCubes vtkSliceCubes vtkDividingCubes
+ * vtkMarchingSquares vtkImageMarchingCubes
+ */
 
 #ifndef vtkContourGrid_h
 #define vtkContourGrid_h
@@ -61,14 +65,14 @@ class vtkIncrementalPointLocator;
 class VTKFILTERSCORE_EXPORT vtkContourGrid : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkContourGrid,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkContourGrid, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object with initial range (0,1) and single contour value
    * of 0.0.
    */
-  static vtkContourGrid *New();
+  static vtkContourGrid* New();
 
   //@{
   /**
@@ -76,10 +80,10 @@ public:
    */
   void SetValue(int i, double value);
   double GetValue(int i);
-  double *GetValues();
-  void GetValues(double *contourValues);
+  double* GetValues();
+  void GetValues(double* contourValues);
   void SetNumberOfContours(int number);
-  int GetNumberOfContours();
+  vtkIdType GetNumberOfContours();
   void GenerateValues(int numContours, double range[2]);
   void GenerateValues(int numContours, double rangeStart, double rangeEnd);
   //@}
@@ -87,7 +91,7 @@ public:
   /**
    * Modified GetMTime Because we delegate to vtkContourValues
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -96,9 +100,9 @@ public:
    * processed by filters that modify topology or geometry, it may be
    * wise to turn Normals and Gradients off.
    */
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, vtkTypeBool);
+  vtkGetMacro(ComputeNormals, vtkTypeBool);
+  vtkBooleanMacro(ComputeNormals, vtkTypeBool);
   //@}
 
   //@{
@@ -112,27 +116,29 @@ public:
    * ComputeGradients is not used so these methods don't affect
    * anything (VTK 6.0).
    */
-  vtkSetMacro(ComputeGradients,int);
-  vtkGetMacro(ComputeGradients,int);
-  vtkBooleanMacro(ComputeGradients,int);
+#ifndef VTK_LEGACY_REMOVE
+  vtkSetMacro(ComputeGradients, vtkTypeBool);
+  vtkGetMacro(ComputeGradients, vtkTypeBool);
+  vtkBooleanMacro(ComputeGradients, vtkTypeBool);
+#endif
   //@}
 
   //@{
   /**
    * Set/Get the computation of scalars.
    */
-  vtkSetMacro(ComputeScalars,int);
-  vtkGetMacro(ComputeScalars,int);
-  vtkBooleanMacro(ComputeScalars,int);
+  vtkSetMacro(ComputeScalars, vtkTypeBool);
+  vtkGetMacro(ComputeScalars, vtkTypeBool);
+  vtkBooleanMacro(ComputeScalars, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Enable the use of a scalar tree to accelerate contour extraction.
    */
-  vtkSetMacro(UseScalarTree,int);
-  vtkGetMacro(UseScalarTree,int);
-  vtkBooleanMacro(UseScalarTree,int);
+  vtkSetMacro(UseScalarTree, vtkTypeBool);
+  vtkGetMacro(UseScalarTree, vtkTypeBool);
+  vtkBooleanMacro(UseScalarTree, vtkTypeBool);
   //@}
 
   //@{
@@ -140,8 +146,8 @@ public:
    * Specify the instance of vtkScalarTree to use. If not specified
    * and UseScalarTree is enabled, then a vtkSimpleScalarTree will be used.
    */
-  void SetScalarTree(vtkScalarTree *sTree);
-  vtkGetObjectMacro(ScalarTree,vtkScalarTree);
+  void SetScalarTree(vtkScalarTree* sTree);
+  vtkGetObjectMacro(ScalarTree, vtkScalarTree);
   //@}
 
   //@{
@@ -149,21 +155,21 @@ public:
    * Set / get a spatial locator for merging points. By default,
    * an instance of vtkMergePoints is used.
    */
-  void SetLocator(vtkIncrementalPointLocator *locator);
-  vtkGetObjectMacro(Locator,vtkIncrementalPointLocator);
+  void SetLocator(vtkIncrementalPointLocator* locator);
+  vtkGetObjectMacro(Locator, vtkIncrementalPointLocator);
   //@}
 
   //@{
   /**
-   * If this is enabled (by default), the output will be triangles
-   * otherwise, the output will be the intersection polygons
-   * WARNING: if the cutting function is not a plane, the output
-   * will be 3D poygons, which might be nice to look at but hard
-   * to compute with downstream.
+   * If this is enabled (by default), the output will be triangles otherwise,
+   * the output may be represented by one or more polygons. WARNING: if the
+   * resulting isocontour is not planar, and GenerateTriangles is false, the
+   * output may consist of some 3D polygons (i.e., which may be non-planar) -
+   * which might be nice to look at but hard to compute with downstream.
    */
-  vtkSetMacro(GenerateTriangles,int);
-  vtkGetMacro(GenerateTriangles,int);
-  vtkBooleanMacro(GenerateTriangles,int);
+  vtkSetMacro(GenerateTriangles, vtkTypeBool);
+  vtkGetMacro(GenerateTriangles, vtkTypeBool);
+  vtkBooleanMacro(GenerateTriangles, vtkTypeBool);
   //@}
 
   /**
@@ -184,28 +190,30 @@ public:
 
 protected:
   vtkContourGrid();
-  ~vtkContourGrid() VTK_OVERRIDE;
+  ~vtkContourGrid() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  vtkContourValues *ContourValues;
-  int ComputeNormals;
-  int ComputeGradients;
-  int ComputeScalars;
-  int GenerateTriangles;
+  vtkContourValues* ContourValues;
+  vtkTypeBool ComputeNormals;
+#ifndef VTK_LEGACY_REMOVE
+  vtkTypeBool ComputeGradients;
+#endif
+  vtkTypeBool ComputeScalars;
+  vtkTypeBool GenerateTriangles;
 
-  vtkIncrementalPointLocator *Locator;
+  vtkIncrementalPointLocator* Locator;
 
-  int UseScalarTree;
-  vtkScalarTree *ScalarTree;
+  vtkTypeBool UseScalarTree;
+  vtkScalarTree* ScalarTree;
 
   int OutputPointsPrecision;
-  vtkEdgeTable *EdgeTable;
+  vtkEdgeTable* EdgeTable;
 
 private:
-  vtkContourGrid(const vtkContourGrid&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContourGrid&) VTK_DELETE_FUNCTION;
+  vtkContourGrid(const vtkContourGrid&) = delete;
+  void operator=(const vtkContourGrid&) = delete;
 };
 
 /**
@@ -213,28 +221,36 @@ private:
  * between 0<=i<NumberOfContours.
  */
 inline void vtkContourGrid::SetValue(int i, double value)
-{this->ContourValues->SetValue(i,value);}
+{
+  this->ContourValues->SetValue(i, value);
+}
 
 /**
  * Get the ith contour value.
  */
 inline double vtkContourGrid::GetValue(int i)
-{return this->ContourValues->GetValue(i);}
+{
+  return this->ContourValues->GetValue(i);
+}
 
 /**
  * Get a pointer to an array of contour values. There will be
  * GetNumberOfContours() values in the list.
  */
-inline double *vtkContourGrid::GetValues()
-{return this->ContourValues->GetValues();}
+inline double* vtkContourGrid::GetValues()
+{
+  return this->ContourValues->GetValues();
+}
 
 /**
  * Fill a supplied list with contour values. There will be
  * GetNumberOfContours() values in the list. Make sure you allocate
  * enough memory to hold the list.
  */
-inline void vtkContourGrid::GetValues(double *contourValues)
-{this->ContourValues->GetValues(contourValues);}
+inline void vtkContourGrid::GetValues(double* contourValues)
+{
+  this->ContourValues->GetValues(contourValues);
+}
 
 /**
  * Set the number of contours to place into the list. You only really
@@ -242,30 +258,34 @@ inline void vtkContourGrid::GetValues(double *contourValues)
  * will automatically increase list size as needed.
  */
 inline void vtkContourGrid::SetNumberOfContours(int number)
-{this->ContourValues->SetNumberOfContours(number);}
+{
+  this->ContourValues->SetNumberOfContours(number);
+}
 
 /**
  * Get the number of contours in the list of contour values.
  */
-inline int vtkContourGrid::GetNumberOfContours()
-{return this->ContourValues->GetNumberOfContours();}
+inline vtkIdType vtkContourGrid::GetNumberOfContours()
+{
+  return this->ContourValues->GetNumberOfContours();
+}
 
 /**
  * Generate numContours equally spaced contour values between specified
  * range. Contour values will include min/max range values.
  */
 inline void vtkContourGrid::GenerateValues(int numContours, double range[2])
-{this->ContourValues->GenerateValues(numContours, range);}
+{
+  this->ContourValues->GenerateValues(numContours, range);
+}
 
 /**
  * Generate numContours equally spaced contour values between specified
  * range. Contour values will include min/max range values.
  */
-inline void vtkContourGrid::GenerateValues(int numContours, double
-                                             rangeStart, double rangeEnd)
-{this->ContourValues->GenerateValues(numContours, rangeStart, rangeEnd);}
-
+inline void vtkContourGrid::GenerateValues(int numContours, double rangeStart, double rangeEnd)
+{
+  this->ContourValues->GenerateValues(numContours, rangeStart, rangeEnd);
+}
 
 #endif
-
-

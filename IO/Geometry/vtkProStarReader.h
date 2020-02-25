@@ -22,7 +22,7 @@
  * @par Thanks:
  * Reader written by Mark Olesen
  *
-*/
+ */
 
 #ifndef vtkProStarReader_h
 #define vtkProStarReader_h
@@ -33,9 +33,9 @@
 class VTKIOGEOMETRY_EXPORT vtkProStarReader : public vtkUnstructuredGridAlgorithm
 {
 public:
-  static vtkProStarReader *New();
-  vtkTypeMacro(vtkProStarReader,vtkUnstructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkProStarReader* New();
+  vtkTypeMacro(vtkProStarReader, vtkUnstructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -85,12 +85,10 @@ public:
 
 protected:
   vtkProStarReader();
-  ~vtkProStarReader() VTK_OVERRIDE;
+  ~vtkProStarReader() override;
 
-  int RequestInformation
-    (vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData
-    (vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * The name of the file to be read.  If it has a .cel, .vrt, or .inp
@@ -98,7 +96,7 @@ protected:
    * the appropriate files.  Otherwise those extensions will be appended
    * to FileName when opening the files.
    */
-  char *FileName;
+  char* FileName;
 
   /**
    * The coordinates are multiplied by ScaleFactor when setting them.
@@ -112,12 +110,12 @@ private:
   //
   struct idMapping;
 
-  FILE* OpenFile(const char *ext);
+  FILE* OpenFile(const char* ext);
 
-  bool ReadVrtFile(vtkUnstructuredGrid *output, idMapping& pointMapping);
-  bool ReadCelFile(vtkUnstructuredGrid *output, const idMapping& pointMapping);
+  bool ReadVrtFile(vtkUnstructuredGrid* output, idMapping& pointMapping);
+  bool ReadCelFile(vtkUnstructuredGrid* output, const idMapping& pointMapping);
 
-  vtkProStarReader(const vtkProStarReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProStarReader&) VTK_DELETE_FUNCTION;
+  vtkProStarReader(const vtkProStarReader&) = delete;
+  void operator=(const vtkProStarReader&) = delete;
 };
 #endif

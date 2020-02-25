@@ -29,7 +29,7 @@
  *
  * @sa
  * vtkMarchingCubes vtkSliceCubes vtkMCubesReader
-*/
+ */
 
 #ifndef vtkMCubesWriter_h
 #define vtkMCubesWriter_h
@@ -45,9 +45,9 @@ class vtkPolyData;
 class VTKIOGEOMETRY_EXPORT vtkMCubesWriter : public vtkWriter
 {
 public:
-  static vtkMCubesWriter *New();
-  vtkTypeMacro(vtkMCubesWriter,vtkWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkMCubesWriter* New();
+  vtkTypeMacro(vtkMCubesWriter, vtkWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -75,25 +75,22 @@ public:
 
 protected:
   vtkMCubesWriter();
-  ~vtkMCubesWriter() VTK_OVERRIDE;
+  ~vtkMCubesWriter() override;
 
-  void WriteData() VTK_OVERRIDE;
+  void WriteData() override;
 
-  void WriteMCubes(FILE *fp, vtkPoints *pts, vtkDataArray *normals,
-                   vtkCellArray *polys);
-  void WriteLimits(FILE *fp, double *bounds);
+  void WriteMCubes(FILE* fp, vtkPoints* pts, vtkDataArray* normals, vtkCellArray* polys);
+  void WriteLimits(FILE* fp, double* bounds);
 
-  char *LimitsFileName;
+  char* LimitsFileName;
 
-  char *FileName;
+  char* FileName;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkMCubesWriter(const vtkMCubesWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMCubesWriter&) VTK_DELETE_FUNCTION;
+  vtkMCubesWriter(const vtkMCubesWriter&) = delete;
+  void operator=(const vtkMCubesWriter&) = delete;
 };
 
 #endif
-
-

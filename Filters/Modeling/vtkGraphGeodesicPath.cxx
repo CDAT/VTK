@@ -14,30 +14,26 @@
 =========================================================================*/
 #include "vtkGraphGeodesicPath.h"
 
+#include "vtkExecutive.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
-#include "vtkExecutive.h"
-
 
 //-----------------------------------------------------------------------------
 vtkGraphGeodesicPath::vtkGraphGeodesicPath()
 {
   this->StartVertex = 0;
-  this->EndVertex   = 0;
+  this->EndVertex = 0;
 }
 
 //-----------------------------------------------------------------------------
-vtkGraphGeodesicPath::~vtkGraphGeodesicPath()
-{
-}
+vtkGraphGeodesicPath::~vtkGraphGeodesicPath() = default;
 
 //-----------------------------------------------------------------------------
 void vtkGraphGeodesicPath::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "StartVertex: " << this->StartVertex << endl;
-  os << indent << "EndVertex: "   << this->EndVertex   << endl;
+  os << indent << "EndVertex: " << this->EndVertex << endl;
 }
-

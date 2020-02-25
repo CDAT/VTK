@@ -22,34 +22,34 @@
 class vtkPiecewiseFunction;
 class vtkImageData;
 
-/// vtkPiecewiseFunctionItem internall uses vtkPlot::Color, white by default
-class VTKCHARTSCORE_EXPORT vtkPiecewiseFunctionItem: public vtkScalarsToColorsItem
+/// vtkPiecewiseFunctionItem internal uses vtkPlot::Color, white by default
+class VTKCHARTSCORE_EXPORT vtkPiecewiseFunctionItem : public vtkScalarsToColorsItem
 {
 public:
   static vtkPiecewiseFunctionItem* New();
   vtkTypeMacro(vtkPiecewiseFunctionItem, vtkScalarsToColorsItem);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void SetPiecewiseFunction(vtkPiecewiseFunction* t);
   vtkGetObjectMacro(PiecewiseFunction, vtkPiecewiseFunction);
 
 protected:
   vtkPiecewiseFunctionItem();
-  ~vtkPiecewiseFunctionItem() VTK_OVERRIDE;
+  ~vtkPiecewiseFunctionItem() override;
 
   // Description:
   // Reimplemented to return the range of the piecewise function
-  void ComputeBounds(double bounds[4]) VTK_OVERRIDE;
+  void ComputeBounds(double bounds[4]) override;
 
   // Description
   // Compute the texture from the PiecewiseFunction
-  void ComputeTexture() VTK_OVERRIDE;
+  void ComputeTexture() override;
 
   vtkPiecewiseFunction* PiecewiseFunction;
 
 private:
-  vtkPiecewiseFunctionItem(const vtkPiecewiseFunctionItem &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPiecewiseFunctionItem &) VTK_DELETE_FUNCTION;
+  vtkPiecewiseFunctionItem(const vtkPiecewiseFunctionItem&) = delete;
+  void operator=(const vtkPiecewiseFunctionItem&) = delete;
 };
 
 #endif

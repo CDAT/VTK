@@ -27,31 +27,31 @@
  * or is a tarball along with installation instructions at
  * http://www.vtk.org/files/support/ffmpeg_source.tar.gz
  *
-*/
+ */
 
 #ifndef vtkFFMPEGWriter_h
 #define vtkFFMPEGWriter_h
 
-#include "vtkIOFFMPEGModule.h" // For export macro
 #include "vtkGenericMovieWriter.h"
+#include "vtkIOFFMPEGModule.h" // For export macro
 
 class vtkFFMPEGWriterInternal;
 
 class VTKIOFFMPEG_EXPORT vtkFFMPEGWriter : public vtkGenericMovieWriter
 {
 public:
-  static vtkFFMPEGWriter *New();
-  vtkTypeMacro(vtkFFMPEGWriter,vtkGenericMovieWriter);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkFFMPEGWriter* New();
+  vtkTypeMacro(vtkFFMPEGWriter, vtkGenericMovieWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * These methods start writing an Movie file, write a frame to the file
    * and then end the writing process.
    */
-  void Start();
-  void Write();
-  void End();
+  void Start() override;
+  void Write() override;
+  void End() override;
   //@}
 
   //@{
@@ -78,7 +78,7 @@ public:
   /**
    * Set/Get the frame rate, in frame/s.
    */
-  vtkSetClampMacro(Rate, int , 1, 5000);
+  vtkSetClampMacro(Rate, int, 1, 5000);
   vtkGetMacro(Rate, int);
   //@}
 
@@ -100,9 +100,9 @@ public:
 
 protected:
   vtkFFMPEGWriter();
-  ~vtkFFMPEGWriter();
+  ~vtkFFMPEGWriter() override;
 
-  vtkFFMPEGWriterInternal *Internals;
+  vtkFFMPEGWriterInternal* Internals;
 
   int Initialized;
   int Quality;
@@ -112,8 +112,8 @@ protected:
   bool Compression;
 
 private:
-  vtkFFMPEGWriter(const vtkFFMPEGWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFFMPEGWriter&) VTK_DELETE_FUNCTION;
+  vtkFFMPEGWriter(const vtkFFMPEGWriter&) = delete;
+  void operator=(const vtkFFMPEGWriter&) = delete;
 };
 
 #endif

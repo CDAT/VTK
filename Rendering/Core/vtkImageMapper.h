@@ -25,13 +25,13 @@
  *
  * @sa
  * vtkMapper2D vtkActor2D
-*/
+ */
 
 #ifndef vtkImageMapper_h
 #define vtkImageMapper_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkMapper2D.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkWindow;
 class vtkViewport;
@@ -42,13 +42,13 @@ class VTKRENDERINGCORE_EXPORT vtkImageMapper : public vtkMapper2D
 {
 public:
   vtkTypeMacro(vtkImageMapper, vtkMapper2D);
-  static vtkImageMapper *New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageMapper* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Override Modifiedtime as we have added a lookuptable
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -90,7 +90,7 @@ public:
   /**
    * Function called by Render to actually draw the image to to the screen
    */
-  virtual void RenderData(vtkViewport*, vtkImageData*, vtkActor2D* )=0;
+  virtual void RenderData(vtkViewport*, vtkImageData*, vtkActor2D*) = 0;
 
   //@{
   /**
@@ -107,8 +107,8 @@ public:
   /**
    * Set the Input of a filter.
    */
-  virtual void SetInputData(vtkImageData *input);
-  vtkImageData *GetInput();
+  virtual void SetInputData(vtkImageData* input);
+  vtkImageData* GetInput();
   //@}
 
   //@{
@@ -117,9 +117,9 @@ public:
    * will render the image into the rectangle supplied by the Actor2D's
    * PositionCoordinate and Position2Coordinate
    */
-  vtkSetMacro(RenderToRectangle, int);
-  vtkGetMacro(RenderToRectangle, int);
-  vtkBooleanMacro(RenderToRectangle, int);
+  vtkSetMacro(RenderToRectangle, vtkTypeBool);
+  vtkGetMacro(RenderToRectangle, vtkTypeBool);
+  vtkBooleanMacro(RenderToRectangle, vtkTypeBool);
   //@}
 
   //@{
@@ -130,9 +130,9 @@ public:
    * Note that the Custom extents are x,y only and the zslice is still
    * applied
    */
-  vtkSetMacro(UseCustomExtents, int);
-  vtkGetMacro(UseCustomExtents, int);
-  vtkBooleanMacro(UseCustomExtents, int);
+  vtkSetMacro(UseCustomExtents, vtkTypeBool);
+  vtkGetMacro(UseCustomExtents, vtkTypeBool);
+  vtkBooleanMacro(UseCustomExtents, vtkTypeBool);
   //@}
 
   //@{
@@ -147,21 +147,22 @@ public:
 
 protected:
   vtkImageMapper();
-  ~vtkImageMapper() VTK_OVERRIDE;
+  ~vtkImageMapper() override;
 
   double ColorWindow;
   double ColorLevel;
 
   int PositionAdjustment[2];
   int ZSlice;
-  int UseCustomExtents;
+  vtkTypeBool UseCustomExtents;
   int CustomDisplayExtents[4];
-  int RenderToRectangle;
+  vtkTypeBool RenderToRectangle;
 
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
+
 private:
-  vtkImageMapper(const vtkImageMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageMapper&) VTK_DELETE_FUNCTION;
+  vtkImageMapper(const vtkImageMapper&) = delete;
+  void operator=(const vtkImageMapper&) = delete;
 };
 
 #endif

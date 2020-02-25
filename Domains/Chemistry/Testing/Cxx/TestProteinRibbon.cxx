@@ -12,31 +12,30 @@
 
 =========================================================================*/
 
-#include "vtkTestUtilities.h"
 #include "vtkRegressionTestImage.h"
+#include "vtkTestUtilities.h"
 
 #include "vtkActor.h"
 #include "vtkCamera.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkNew.h"
-#include "vtkProperty.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderer.h"
-#include "vtkProteinRibbonFilter.h"
-#include "vtkPDBReader.h"
 #include "vtkInteractorStyleSwitch.h"
+#include "vtkNew.h"
+#include "vtkPDBReader.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkProteinRibbonFilter.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 
-int TestProteinRibbon(int argc, char *argv[])
+int TestProteinRibbon(int argc, char* argv[])
 {
-  char* fileName =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/3GQP.pdb");
+  char* fileName = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/3GQP.pdb");
 
   // read protein from pdb
   vtkNew<vtkPDBReader> reader;
   reader->SetFileName(fileName);
 
-  delete [] fileName;
+  delete[] fileName;
 
   // setup ribbon filter
   vtkNew<vtkProteinRibbonFilter> ribbonFilter;
@@ -50,21 +49,21 @@ int TestProteinRibbon(int argc, char *argv[])
 
   // setup actor
   vtkNew<vtkActor> actor;
-  actor->SetMapper(polyDataMapper.GetPointer());
+  actor->SetMapper(polyDataMapper);
 
   // setup render window
   vtkNew<vtkRenderer> ren;
   vtkNew<vtkRenderWindow> win;
-  win->AddRenderer(ren.GetPointer());
+  win->AddRenderer(ren);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(win.GetPointer());
+  iren->SetRenderWindow(win);
   vtkInteractorStyleSwitch* is = vtkInteractorStyleSwitch::SafeDownCast(iren->GetInteractorStyle());
   if (is)
   {
     is->SetCurrentStyleToTrackballCamera();
   }
-  ren->AddActor(actor.GetPointer());
-  ren->SetBackground(0,0,0);
+  ren->AddActor(actor);
+  ren->SetBackground(0, 0, 0);
   win->SetSize(450, 450);
   ren->ResetCamera();
   ren->GetActiveCamera()->Zoom(1.5);

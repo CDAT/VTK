@@ -26,7 +26,7 @@
  * The MathText backend does not currently support UTF16 strings, thus
  * UTF16 strings passed to the MathText renderer will be converted to
  * UTF8.
-*/
+ */
 
 #ifndef vtkMathTextFreeTypeTextRenderer_h
 #define vtkMathTextFreeTypeTextRenderer_h
@@ -37,67 +37,59 @@
 class vtkFreeTypeTools;
 class vtkMathTextUtilities;
 
-class VTKRENDERINGFREETYPE_EXPORT vtkMathTextFreeTypeTextRenderer :
-    public vtkTextRenderer
+class VTKRENDERINGFREETYPE_EXPORT vtkMathTextFreeTypeTextRenderer : public vtkTextRenderer
 {
 public:
-  vtkTypeMacro(vtkMathTextFreeTypeTextRenderer, vtkTextRenderer)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMathTextFreeTypeTextRenderer, vtkTextRenderer);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkMathTextFreeTypeTextRenderer *New();
+  static vtkMathTextFreeTypeTextRenderer* New();
 
   //@{
   /**
    * Test for availability of various backends
    */
-  bool FreeTypeIsSupported() VTK_OVERRIDE;
-  bool MathTextIsSupported() VTK_OVERRIDE;
+  bool FreeTypeIsSupported() override;
+  bool MathTextIsSupported() override;
   //@}
 
 protected:
   vtkMathTextFreeTypeTextRenderer();
-  ~vtkMathTextFreeTypeTextRenderer() VTK_OVERRIDE;
+  ~vtkMathTextFreeTypeTextRenderer() override;
 
   //@{
   /**
    * Reimplemented from vtkTextRenderer.
    */
-  bool GetBoundingBoxInternal(vtkTextProperty *tprop, const vtkStdString &str,
-                              int bbox[4], int dpi, int backend) VTK_OVERRIDE;
-  bool GetBoundingBoxInternal(vtkTextProperty *tprop,
-                              const vtkUnicodeString &str,
-                              int bbox[4], int dpi, int backend) VTK_OVERRIDE;
-  bool GetMetricsInternal(vtkTextProperty *tprop, const vtkStdString &str,
-                          Metrics &metrics, int dpi, int backend) VTK_OVERRIDE;
-  bool GetMetricsInternal(vtkTextProperty *tprop, const vtkUnicodeString &str,
-                          Metrics &metrics, int dpi, int backend) VTK_OVERRIDE;
-  bool RenderStringInternal(vtkTextProperty *tprop, const vtkStdString &str,
-                            vtkImageData *data, int textDims[2], int dpi,
-                            int backend) VTK_OVERRIDE;
-  bool RenderStringInternal(vtkTextProperty *tprop, const vtkUnicodeString &str,
-                            vtkImageData *data, int textDims[2], int dpi,
-                            int backend) VTK_OVERRIDE;
-  int GetConstrainedFontSizeInternal(const vtkStdString &str,
-                                     vtkTextProperty *tprop,
-                                     int targetWidth, int targetHeight, int dpi,
-                                     int backend) VTK_OVERRIDE;
-  int GetConstrainedFontSizeInternal(const vtkUnicodeString &str,
-                                     vtkTextProperty *tprop,
-                                     int targetWidth, int targetHeight, int dpi,
-                                     int backend) VTK_OVERRIDE;
-  bool StringToPathInternal(vtkTextProperty *tprop, const vtkStdString &str,
-                            vtkPath *path, int dpi, int backend) VTK_OVERRIDE;
-  bool StringToPathInternal(vtkTextProperty *tprop, const vtkUnicodeString &str,
-                            vtkPath *path, int dpi, int backend) VTK_OVERRIDE;
-  void SetScaleToPowerOfTwoInternal(bool scale) VTK_OVERRIDE;
+  bool GetBoundingBoxInternal(
+    vtkTextProperty* tprop, const vtkStdString& str, int bbox[4], int dpi, int backend) override;
+  bool GetBoundingBoxInternal(vtkTextProperty* tprop, const vtkUnicodeString& str, int bbox[4],
+    int dpi, int backend) override;
+  bool GetMetricsInternal(vtkTextProperty* tprop, const vtkStdString& str, Metrics& metrics,
+    int dpi, int backend) override;
+  bool GetMetricsInternal(vtkTextProperty* tprop, const vtkUnicodeString& str, Metrics& metrics,
+    int dpi, int backend) override;
+  bool RenderStringInternal(vtkTextProperty* tprop, const vtkStdString& str, vtkImageData* data,
+    int textDims[2], int dpi, int backend) override;
+  bool RenderStringInternal(vtkTextProperty* tprop, const vtkUnicodeString& str, vtkImageData* data,
+    int textDims[2], int dpi, int backend) override;
+  int GetConstrainedFontSizeInternal(const vtkStdString& str, vtkTextProperty* tprop,
+    int targetWidth, int targetHeight, int dpi, int backend) override;
+  int GetConstrainedFontSizeInternal(const vtkUnicodeString& str, vtkTextProperty* tprop,
+    int targetWidth, int targetHeight, int dpi, int backend) override;
+  bool StringToPathInternal(
+    vtkTextProperty* tprop, const vtkStdString& str, vtkPath* path, int dpi, int backend) override;
+  bool StringToPathInternal(vtkTextProperty* tprop, const vtkUnicodeString& str, vtkPath* path,
+    int dpi, int backend) override;
+  void SetScaleToPowerOfTwoInternal(bool scale) override;
   //@}
 
 private:
-  vtkMathTextFreeTypeTextRenderer(const vtkMathTextFreeTypeTextRenderer &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMathTextFreeTypeTextRenderer &) VTK_DELETE_FUNCTION;
+  vtkMathTextFreeTypeTextRenderer(const vtkMathTextFreeTypeTextRenderer&) = delete;
+  void operator=(const vtkMathTextFreeTypeTextRenderer&) = delete;
 
-  vtkFreeTypeTools *FreeTypeTools;
-  vtkMathTextUtilities *MathTextUtilities;
+  vtkFreeTypeTools* FreeTypeTools;
+  vtkMathTextUtilities* MathTextUtilities;
 };
 
-#endif //vtkMathTextFreeTypeTextRenderer_h
+#endif // vtkMathTextFreeTypeTextRenderer_h

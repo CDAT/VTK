@@ -57,7 +57,7 @@
  *
  * @sa
  * vtkImageWriter vtkMetaImageReader
-*/
+ */
 
 #ifndef vtkMetaImageWriter_h
 #define vtkMetaImageWriter_h
@@ -65,24 +65,27 @@
 #include "vtkIOImageModule.h" // For export macro
 #include "vtkImageWriter.h"
 
-namespace vtkmetaio { class MetaImage; } // forward declaration
+namespace vtkmetaio
+{
+class MetaImage;
+} // forward declaration
 
 class VTKIOIMAGE_EXPORT vtkMetaImageWriter : public vtkImageWriter
 {
 public:
-  vtkTypeMacro(vtkMetaImageWriter,vtkImageWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMetaImageWriter, vtkImageWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object with FlipNormals turned off and Normals set to true.
    */
-  static vtkMetaImageWriter *New();
+  static vtkMetaImageWriter* New();
 
   /**
    * Specify file name of meta file
    */
-  void SetFileName(const char* fname) VTK_OVERRIDE;
-  char* GetFileName() VTK_OVERRIDE { return this->MHDFileName; }
+  void SetFileName(const char* fname) override;
+  char* GetFileName() override { return this->MHDFileName; }
 
   //@{
   /**
@@ -92,36 +95,26 @@ public:
   virtual char* GetRAWFileName();
   //@}
 
-  virtual void SetCompression( bool compress )
-  {
-    this->Compress = compress;
-  }
-  virtual bool GetCompression( void )
-  {
-    return this->Compress;
-  }
+  virtual void SetCompression(bool compress) { this->Compress = compress; }
+  virtual bool GetCompression(void) { return this->Compress; }
 
   // This is called by the superclass.
   // This is the method you should override.
-  void Write() VTK_OVERRIDE;
+  void Write() override;
 
 protected:
   vtkMetaImageWriter();
-  ~vtkMetaImageWriter() VTK_OVERRIDE;
+  ~vtkMetaImageWriter() override;
 
   vtkSetStringMacro(MHDFileName);
   char* MHDFileName;
   bool Compress;
 
 private:
-  vtkMetaImageWriter(const vtkMetaImageWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMetaImageWriter&) VTK_DELETE_FUNCTION;
+  vtkMetaImageWriter(const vtkMetaImageWriter&) = delete;
+  void operator=(const vtkMetaImageWriter&) = delete;
 
-  vtkmetaio::MetaImage * MetaImagePtr;
-
+  vtkmetaio::MetaImage* MetaImagePtr;
 };
 
 #endif
-
-
-

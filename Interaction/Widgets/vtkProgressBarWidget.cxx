@@ -13,9 +13,9 @@
 
 =========================================================================*/
 #include "vtkProgressBarWidget.h"
-#include "vtkProgressBarRepresentation.h"
 #include "vtkCallbackCommand.h"
 #include "vtkObjectFactory.h"
+#include "vtkProgressBarRepresentation.h"
 
 vtkStandardNewMacro(vtkProgressBarWidget);
 
@@ -26,9 +26,7 @@ vtkProgressBarWidget::vtkProgressBarWidget()
 }
 
 //-------------------------------------------------------------------------
-vtkProgressBarWidget::~vtkProgressBarWidget()
-{
-}
+vtkProgressBarWidget::~vtkProgressBarWidget() = default;
 
 //----------------------------------------------------------------------
 void vtkProgressBarWidget::CreateDefaultRepresentation()

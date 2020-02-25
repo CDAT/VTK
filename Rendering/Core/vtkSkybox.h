@@ -22,30 +22,63 @@
 #ifndef vtkSkybox_h
 #define vtkSkybox_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkActor.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
-class VTKRENDERINGCORE_EXPORT vtkSkybox: public vtkActor
+class VTKRENDERINGCORE_EXPORT vtkSkybox : public vtkActor
 {
 public:
   static vtkSkybox* New();
-  vtkTypeMacro(vtkSkybox, vtkActor)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSkybox, vtkActor);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
    * method GetBounds(double bounds[6]) is available from the superclass.)
    */
   using Superclass::GetBounds;
-  double *GetBounds() VTK_OVERRIDE;
+  double* GetBounds() override;
+
+  //@{
+  /**
+   * Set/Get the projection to be used
+   */
+  enum Projection
+  {
+    Cube,
+    Sphere,
+    Floor,
+    StereoSphere
+  };
+  vtkGetMacro(Projection, int);
+  vtkSetMacro(Projection, int);
+  void SetProjectionToCube() { this->SetProjection(vtkSkybox::Cube); }
+  void SetProjectionToSphere() { this->SetProjection(vtkSkybox::Sphere); }
+  void SetProjectionToStereoSphere() { this->SetProjection(vtkSkybox::StereoSphere); }
+  void SetProjectionToFloor() { this->SetProjection(vtkSkybox::Floor); }
+  //@}
+
+  //@{
+  /**
+   * Set/Get the plane equation for the floor.
+   */
+  vtkSetVector4Macro(FloorPlane, float);
+  vtkGetVector4Macro(FloorPlane, float);
+  vtkSetVector3Macro(FloorRight, float);
+  vtkGetVector3Macro(FloorRight, float);
+  //@}
 
 protected:
   vtkSkybox();
-  ~vtkSkybox() VTK_OVERRIDE;
+  ~vtkSkybox() override;
+
+  int Projection;
+  float FloorPlane[4];
+  float FloorRight[3];
 
 private:
-  vtkSkybox(const vtkSkybox&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSkybox&) VTK_DELETE_FUNCTION;
+  vtkSkybox(const vtkSkybox&) = delete;
+  void operator=(const vtkSkybox&) = delete;
 };
 
 #endif // vtkSkybox_h

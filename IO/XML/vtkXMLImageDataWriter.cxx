@@ -13,21 +13,18 @@
 
 =========================================================================*/
 #include "vtkXMLImageDataWriter.h"
-#include "vtkObjectFactory.h"
 #include "vtkImageData.h"
 #include "vtkInformation.h"
+#include "vtkMatrix3x3.h"
+#include "vtkObjectFactory.h"
 
 vtkStandardNewMacro(vtkXMLImageDataWriter);
 
 //----------------------------------------------------------------------------
-vtkXMLImageDataWriter::vtkXMLImageDataWriter()
-{
-}
+vtkXMLImageDataWriter::vtkXMLImageDataWriter() = default;
 
 //----------------------------------------------------------------------------
-vtkXMLImageDataWriter::~vtkXMLImageDataWriter()
-{
-}
+vtkXMLImageDataWriter::~vtkXMLImageDataWriter() = default;
 
 //----------------------------------------------------------------------------
 void vtkXMLImageDataWriter::PrintSelf(ostream& os, vtkIndent indent)
@@ -60,17 +57,17 @@ const char* vtkXMLImageDataWriter::GetDefaultFileExtension()
 }
 
 //----------------------------------------------------------------------------
-void vtkXMLImageDataWriter::WritePrimaryElementAttributes(ostream &os, vtkIndent indent)
+void vtkXMLImageDataWriter::WritePrimaryElementAttributes(ostream& os, vtkIndent indent)
 {
   this->Superclass::WritePrimaryElementAttributes(os, indent);
   vtkImageData* input = this->GetInput();
   this->WriteVectorAttribute("Origin", 3, input->GetOrigin());
   this->WriteVectorAttribute("Spacing", 3, input->GetSpacing());
+  this->WriteVectorAttribute("Direction", 9, input->GetDirectionMatrix()->GetData());
 }
 
 //----------------------------------------------------------------------------
-int vtkXMLImageDataWriter::FillInputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
+int vtkXMLImageDataWriter::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* info)
 {
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkImageData");
   return 1;

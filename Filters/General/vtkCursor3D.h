@@ -25,7 +25,7 @@
  * This filter generates two output datasets. The first (Output) is just the
  * geometric representation of the cursor. The second (Focus) is a single
  * point at the focal point.
-*/
+ */
 
 #ifndef vtkCursor3D_h
 #define vtkCursor3D_h
@@ -36,23 +36,22 @@
 class VTKFILTERSGENERAL_EXPORT vtkCursor3D : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkCursor3D,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkCursor3D, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct with model bounds = (-1,1,-1,1,-1,1), focal point = (0,0,0),
    * all parts of cursor visible, and wrapping off.
    */
-  static vtkCursor3D *New();
+  static vtkCursor3D* New();
 
   //@{
   /**
    * Set / get the boundary of the 3D cursor.
    */
-  void SetModelBounds(double xmin, double xmax, double ymin, double ymax,
-                      double zmin, double zmax);
+  void SetModelBounds(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
   void SetModelBounds(const double bounds[6]);
-  vtkGetVectorMacro(ModelBounds,double,6);
+  vtkGetVectorMacro(ModelBounds, double, 6);
   //@}
 
   //@{
@@ -66,56 +65,58 @@ public:
   void SetFocalPoint(double x[3]);
   void SetFocalPoint(double x, double y, double z)
   {
-      double xyz[3];
-      xyz[0] = x; xyz[1] = y; xyz[2] = z;
-      this->SetFocalPoint(xyz);
+    double xyz[3];
+    xyz[0] = x;
+    xyz[1] = y;
+    xyz[2] = z;
+    this->SetFocalPoint(xyz);
   }
-  vtkGetVectorMacro(FocalPoint,double,3);
+  vtkGetVectorMacro(FocalPoint, double, 3);
   //@}
 
   //@{
   /**
    * Turn on/off the wireframe bounding box.
    */
-  vtkSetMacro(Outline,int);
-  vtkGetMacro(Outline,int);
-  vtkBooleanMacro(Outline,int);
+  vtkSetMacro(Outline, vtkTypeBool);
+  vtkGetMacro(Outline, vtkTypeBool);
+  vtkBooleanMacro(Outline, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off the wireframe axes.
    */
-  vtkSetMacro(Axes,int);
-  vtkGetMacro(Axes,int);
-  vtkBooleanMacro(Axes,int);
+  vtkSetMacro(Axes, vtkTypeBool);
+  vtkGetMacro(Axes, vtkTypeBool);
+  vtkBooleanMacro(Axes, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off the wireframe x-shadows.
    */
-  vtkSetMacro(XShadows,int);
-  vtkGetMacro(XShadows,int);
-  vtkBooleanMacro(XShadows,int);
+  vtkSetMacro(XShadows, vtkTypeBool);
+  vtkGetMacro(XShadows, vtkTypeBool);
+  vtkBooleanMacro(XShadows, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off the wireframe y-shadows.
    */
-  vtkSetMacro(YShadows,int);
-  vtkGetMacro(YShadows,int);
-  vtkBooleanMacro(YShadows,int);
+  vtkSetMacro(YShadows, vtkTypeBool);
+  vtkGetMacro(YShadows, vtkTypeBool);
+  vtkBooleanMacro(YShadows, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off the wireframe z-shadows.
    */
-  vtkSetMacro(ZShadows,int);
-  vtkGetMacro(ZShadows,int);
-  vtkBooleanMacro(ZShadows,int);
+  vtkSetMacro(ZShadows, vtkTypeBool);
+  vtkGetMacro(ZShadows, vtkTypeBool);
+  vtkBooleanMacro(ZShadows, vtkTypeBool);
   //@}
 
   //@{
@@ -124,9 +125,9 @@ public:
    * cause the entire widget to translate along with the cursor.
    * By default, translation mode is off.
    */
-  vtkSetMacro(TranslationMode,int);
-  vtkGetMacro(TranslationMode,int);
-  vtkBooleanMacro(TranslationMode,int);
+  vtkSetMacro(TranslationMode, vtkTypeBool);
+  vtkGetMacro(TranslationMode, vtkTypeBool);
+  vtkBooleanMacro(TranslationMode, vtkTypeBool);
   //@}
 
   //@{
@@ -135,15 +136,15 @@ public:
    * specified bounds, the cursor will either be restrained against the
    * nearest "wall" (Wrap=off), or it will wrap around (Wrap=on).
    */
-  vtkSetMacro(Wrap,int);
-  vtkGetMacro(Wrap,int);
-  vtkBooleanMacro(Wrap,int);
+  vtkSetMacro(Wrap, vtkTypeBool);
+  vtkGetMacro(Wrap, vtkTypeBool);
+  vtkBooleanMacro(Wrap, vtkTypeBool);
   //@}
 
   /**
    * Get the focus for this filter.
    */
-  vtkPolyData *GetFocus() {return this->Focus;};
+  vtkPolyData* GetFocus() { return this->Focus; }
 
   //@{
   /**
@@ -155,24 +156,24 @@ public:
 
 protected:
   vtkCursor3D();
-  ~vtkCursor3D() VTK_OVERRIDE;
+  ~vtkCursor3D() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  vtkPolyData *Focus;
+  vtkPolyData* Focus;
   double ModelBounds[6];
   double FocalPoint[3];
-  int Outline;
-  int Axes;
-  int XShadows;
-  int YShadows;
-  int ZShadows;
-  int TranslationMode;
-  int Wrap;
+  vtkTypeBool Outline;
+  vtkTypeBool Axes;
+  vtkTypeBool XShadows;
+  vtkTypeBool YShadows;
+  vtkTypeBool ZShadows;
+  vtkTypeBool TranslationMode;
+  vtkTypeBool Wrap;
 
 private:
-  vtkCursor3D(const vtkCursor3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCursor3D&) VTK_DELETE_FUNCTION;
+  vtkCursor3D(const vtkCursor3D&) = delete;
+  void operator=(const vtkCursor3D&) = delete;
 };
 
 #endif

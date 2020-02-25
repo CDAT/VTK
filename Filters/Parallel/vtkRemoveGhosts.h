@@ -20,7 +20,7 @@
  *
  * Removes ghost points, cells and associated data arrays. Works on
  * vtkPolyDatas and vtkUnstructuredGrids.
-*/
+ */
 
 #ifndef vtkRemoveGhosts_h
 #define vtkRemoveGhosts_h
@@ -35,26 +35,23 @@ class VTKFILTERSPARALLEL_EXPORT vtkRemoveGhosts : public vtkPassInputTypeAlgorit
 {
 public:
   vtkTypeMacro(vtkRemoveGhosts, vtkPassInputTypeAlgorithm);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkRemoveGhosts *New();
+  static vtkRemoveGhosts* New();
 
 protected:
   vtkRemoveGhosts();
-  ~vtkRemoveGhosts() VTK_OVERRIDE;
+  ~vtkRemoveGhosts() override;
 
-  int RequestUpdateExtent(vtkInformation *,
-                          vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   // see algorithm for more info
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkRemoveGhosts(const vtkRemoveGhosts &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRemoveGhosts &) VTK_DELETE_FUNCTION;
+  vtkRemoveGhosts(const vtkRemoveGhosts&) = delete;
+  void operator=(const vtkRemoveGhosts&) = delete;
 };
 
 #endif //_vtkRemoveGhosts_h

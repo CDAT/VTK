@@ -18,15 +18,15 @@
 #include "vtkElevationFilter.h"
 #include "vtkImageData.h"
 #include "vtkImageMandelbrotSource.h"
-#include "vtkmContour.h"
 #include "vtkNew.h"
 #include "vtkPointData.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRTAnalyticSource.h"
+#include "vtkRegressionTestImage.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkmContour.h"
 
 const int EXTENT = 30;
 int TestVTKMMarchingCubes2(int argc, char* argv[])
@@ -35,8 +35,8 @@ int TestVTKMMarchingCubes2(int argc, char* argv[])
   vtkNew<vtkRenderWindow> renWin;
   vtkNew<vtkRenderWindowInteractor> iren;
 
-  renWin->AddRenderer(ren.GetPointer());
-  iren->SetRenderWindow(renWin.GetPointer());
+  renWin->AddRenderer(ren);
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkRTAnalyticSource> imageSource;
   imageSource->SetWholeExtent(-EXTENT, EXTENT, -EXTENT, EXTENT, -EXTENT, EXTENT);
@@ -48,8 +48,7 @@ int TestVTKMMarchingCubes2(int argc, char* argv[])
 
   vtkNew<vtkmContour> cg;
   cg->SetInputConnection(ev->GetOutputPort());
-  cg->SetInputArrayToProcess(
-      0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "RTData");
+  cg->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "RTData");
   cg->SetValue(0, 200.0);
   cg->SetValue(1, 220.0);
   cg->ComputeScalarsOn();
@@ -63,18 +62,18 @@ int TestVTKMMarchingCubes2(int argc, char* argv[])
   mapper->SetScalarRange(0.0, 1.0);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
-  ren->AddActor(actor.GetPointer());
+  ren->AddActor(actor);
   ren->ResetCamera();
   renWin->Render();
 
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
-  if(retVal == vtkRegressionTester::DO_INTERACTOR)
-    {
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
+  {
     iren->Start();
     retVal = vtkRegressionTester::PASSED;
-    }
+  }
 
   if (!cg->GetOutput()->GetPointData()->GetNormals())
   {

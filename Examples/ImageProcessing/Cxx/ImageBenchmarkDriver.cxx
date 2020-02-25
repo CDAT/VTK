@@ -16,91 +16,85 @@
 // This program is a driver for the benchmarking tests.
 // It runs several benchmarks and writes them to the output directory.
 
-#include "vtkMultiThreader.h"
 #include "vtkThreadedImageAlgorithm.h"
 #include "vtkVersion.h"
 
+#include <vtksys/FStream.hxx>
 #include <vtksys/Process.h>
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-const char *HelpText =
-"Usage: ImageBenchmarkDriver --prefix <path/prefix> ...\n"
-"\n"
-"Options:\n"
-"  --prefix <path/prefix>  Prefix for output filenames.\n"
-"  Any options from ImageBenchmark can also be used.\n"
-"\n"
-"Details:\n"
-"\n"
-"This program runs a series of image processing benchmarks,\n"
-"by running ImageBenchmark with various parameters:\n"
-"\n";
+const char* HelpText = "Usage: ImageBenchmarkDriver --prefix <path/prefix> ...\n"
+                       "\n"
+                       "Options:\n"
+                       "  --prefix <path/prefix>  Prefix for output filenames.\n"
+                       "  Any options from ImageBenchmark can also be used.\n"
+                       "\n"
+                       "Details:\n"
+                       "\n"
+                       "This program runs a series of image processing benchmarks,\n"
+                       "by running ImageBenchmark with various parameters:\n"
+                       "\n";
 
 // A struct to give a short name to each ImageBenchmark option
 struct BenchOption
 {
-  const char *Name;
-  const char *Option;
+  const char* Name;
+  const char* Option;
 };
 
 // A struct to link a range of options to a benchmark parameter
 struct BenchParameter
 {
-  const char *Parameter;
-  BenchOption *Options;
+  const char* Parameter;
+  BenchOption* Options;
 };
 
-static BenchOption FilterList[] =
-{
-  { "Median3",        "median:kernelsize=3" },
-  { "Reslice2D",      "reslice:kernel=linear:rotation=45/0/0/1" },
-  { "Reslice3D",      "reslice:kernel=linear:rotation=60/0/1/1" },
-  { "Colors4",        "colormap:components=4" },
-  { NULL, NULL }
+static BenchOption FilterList[] = {
+  { "Median3", "median:kernelsize=3" },
+  { "Reslice2D", "reslice:kernel=linear:rotation=45/0/0/1" },
+  { "Reslice3D", "reslice:kernel=linear:rotation=60/0/1/1" },
+  { "Colors4", "colormap:components=4" },
+  { nullptr, nullptr },
 };
 
-static BenchOption SplitModeList[] =
-{
+static BenchOption SplitModeList[] = {
   { "Slab", "slab" },
   { "Beam", "beam" },
   { "Block", "block" },
-  { NULL, NULL }
+  { nullptr, nullptr },
 };
 
 // These are only for --enable-smp on
-static BenchOption BlockByteList[] =
-{
-  { "1KiB",   "1024" },
-  { "4KiB",   "4096" },
-  { "16KiB",  "16384" },
-  { "64KiB",  "65536" },
+static BenchOption BlockByteList[] = {
+  { "1KiB", "1024" },
+  { "4KiB", "4096" },
+  { "16KiB", "16384" },
+  { "64KiB", "65536" },
   { "256KiB", "262144" },
-  { "1MiB",   "1048576" },
-  { "4MiB",   "4194304" },
-  { "16MiB",  "16777216" },
-  { NULL, NULL }
+  { "1MiB", "1048576" },
+  { "4MiB", "4194304" },
+  { "16MiB", "16777216" },
+  { nullptr, nullptr },
 };
 
-static BenchOption ImageSizeList[] =
-{
-  { "4096x4096",   "4096x4096x1" },
+static BenchOption ImageSizeList[] = {
+  { "4096x4096", "4096x4096x1" },
   { "256x256x256", "256x256x256" },
-  { NULL, NULL }
+  { nullptr, nullptr },
 };
 
-static BenchParameter Parameters[] =
-{
+static BenchParameter Parameters[] = {
   { "--filter", FilterList },
   { "--split-mode", SplitModeList },
   { "--bytes-per-piece", BlockByteList },
   { "--size", ImageSizeList },
-  { NULL, NULL }
+  { nullptr, nullptr },
 };
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   // Create the path to the ImageBenchmark executable (assume that
   // it is in same directory)
@@ -118,7 +112,7 @@ int main(int argc, char *argv[])
   // Go through the arguments to create args for ImageBenchmark
   bool useSMP = vtkThreadedImageAlgorithm::GetGlobalDefaultEnableSMP();
   std::string prefix;
-  std::vector<const char *> args;
+  std::vector<const char*> args;
   args.push_back(exename.c_str());
   int argi = 1;
   while (argi < argc)
@@ -127,13 +121,12 @@ int main(int argc, char *argv[])
     if (arg == "-h" || arg == "-help" || arg == "--help")
     {
       std::cout << HelpText;
-      for (BenchParameter *p = Parameters; p->Parameter; p++)
+      for (BenchParameter* p = Parameters; p->Parameter; p++)
       {
         std::string opt = p->Parameter;
-        for (BenchOption *o = p->Options; o->Option; o++)
+        for (BenchOption* o = p->Options; o->Option; o++)
         {
-          std::cout << "  " << opt << " " << o->Option << "    ("
-                    << o->Name << ")\n";
+          std::cout << "  " << opt << " " << o->Option << "    (" << o->Name << ")\n";
         }
         std::cout << std::endl;
       }
@@ -141,8 +134,7 @@ int main(int argc, char *argv[])
     }
     else if (arg == "--version")
     {
-      std::cout << "ImageBenchmarkDriver "
-                << vtkVersion::GetVTKVersion() << "\n";
+      std::cout << "ImageBenchmarkDriver " << vtkVersion::GetVTKVersion() << "\n";
       return 0;
     }
     else if (arg == "--prefix")
@@ -178,15 +170,14 @@ int main(int argc, char *argv[])
   // Count the number of benchmarks to do
   int total = 1;
   std::vector<int> overrides;
-  for (BenchParameter *p = Parameters; p->Parameter; p++)
+  for (BenchParameter* p = Parameters; p->Parameter; p++)
   {
     // Check if this parameter was overridden on the command line
     std::string arg = p->Parameter;
     bool overRidden = false;
     for (size_t j = 1; j < args.size(); j++)
     {
-      if (arg == args[j] ||
-          (!useSMP && arg == "--bytes-per-piece"))
+      if (arg == args[j] || (!useSMP && arg == "--bytes-per-piece"))
       {
         overRidden = true;
         break;
@@ -199,7 +190,7 @@ int main(int argc, char *argv[])
     }
 
     int count = 0;
-    for (BenchOption *o = p->Options; o->Option; o++)
+    for (BenchOption* o = p->Options; o->Option; o++)
     {
       count++;
     }
@@ -209,14 +200,12 @@ int main(int argc, char *argv[])
   for (int i = 0; i < total; i++)
   {
     std::string filename = prefix;
-    if (prefix.empty() ||
-        prefix[prefix.length()-1] == '/' ||
-        prefix[prefix.length()-1] == '\\')
+    if (prefix.empty() || prefix[prefix.length() - 1] == '/' || prefix[prefix.length() - 1] == '\\')
     {
       filename += (useSMP ? "SMP" : "MT");
     }
 
-    std::vector<const char *> commandLine;
+    std::vector<const char*> commandLine;
     commandLine.push_back(args[0]);
     for (size_t j = 1; j < args.size(); j++)
     {
@@ -225,7 +214,7 @@ int main(int argc, char *argv[])
 
     int part = 1;
     std::vector<int>::iterator skip = overrides.begin();
-    for (BenchParameter *p = Parameters; p->Parameter; ++p, ++skip)
+    for (BenchParameter* p = Parameters; p->Parameter; ++p, ++skip)
     {
       if (*skip)
       {
@@ -233,11 +222,11 @@ int main(int argc, char *argv[])
       }
 
       int count = 0;
-      for (BenchOption *o = p->Options; o->Option; o++)
+      for (BenchOption* o = p->Options; o->Option; o++)
       {
         count++;
       }
-      int k = (i/part) % count;
+      int k = (i / part) % count;
       commandLine.push_back(p->Parameter);
       commandLine.push_back(p->Options[k].Option);
       filename.push_back('_');
@@ -246,22 +235,22 @@ int main(int argc, char *argv[])
     }
 
     commandLine.push_back("--slave");
-    commandLine.push_back(NULL);
+    commandLine.push_back(nullptr);
 
     filename += ".csv";
-    std::ofstream outfile(filename.c_str());
+    vtksys::ofstream outfile(filename.c_str());
 
     // create and run the subprocess
-    vtksysProcess *process = vtksysProcess_New();
+    vtksysProcess* process = vtksysProcess_New();
     vtksysProcess_SetCommand(process, &commandLine[0]);
     vtksysProcess_Execute(process);
 
     int pipe;
     do
     {
-      char *cp;
+      char* cp;
       int length;
-      pipe = vtksysProcess_WaitForData(process, &cp, &length, NULL);
+      pipe = vtksysProcess_WaitForData(process, &cp, &length, nullptr);
       switch (pipe)
       {
         case vtksysProcess_Pipe_STDOUT:
@@ -272,10 +261,9 @@ int main(int argc, char *argv[])
           std::cerr.write(cp, length);
           break;
       }
-    }
-    while (pipe != vtksysProcess_Pipe_None);
+    } while (pipe != vtksysProcess_Pipe_None);
 
-    vtksysProcess_WaitForExit(process, NULL);
+    vtksysProcess_WaitForExit(process, nullptr);
     int rval = vtksysProcess_GetExitValue(process);
     if (rval != 0)
     {

@@ -32,13 +32,13 @@
  *
  * @sa
  * vtkLight vtkConeSource vtkFrustumSource vtkCameraActor
-*/
+ */
 
 #ifndef vtkLightActor_h
 #define vtkLightActor_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkProp3D.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkLight;
 class vtkConeSource;
@@ -51,15 +51,15 @@ class vtkBoundingBox;
 class VTKRENDERINGCORE_EXPORT vtkLightActor : public vtkProp3D
 {
 public:
-  static vtkLightActor *New();
+  static vtkLightActor* New();
   vtkTypeMacro(vtkLightActor, vtkProp3D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * The spotlight to represent. Initial value is NULL.
    */
-  void SetLight(vtkLight *light);
+  void SetLight(vtkLight* light);
   vtkGetObjectMacro(Light, vtkLight);
   //@}
 
@@ -77,51 +77,51 @@ public:
   /**
    * Support the standard render methods.
    */
-  int RenderOpaqueGeometry(vtkViewport *viewport) VTK_OVERRIDE;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
 
   /**
    * Does this prop have some translucent polygonal geometry? No.
    */
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
 
   /**
    * Release any graphics resources that are being consumed by this actor.
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
   /**
    * Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
    */
-  double *GetBounds() VTK_OVERRIDE;
+  double* GetBounds() override;
 
   /**
    * Get the actors mtime plus consider its properties and texture if set.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkLightActor();
-  ~vtkLightActor() VTK_OVERRIDE;
+  ~vtkLightActor() override;
 
   void UpdateViewProps();
 
-  vtkLight *Light;
+  vtkLight* Light;
   double ClippingRange[2];
 
-  vtkConeSource *ConeSource;
-  vtkPolyDataMapper *ConeMapper;
-  vtkActor *ConeActor;
+  vtkConeSource* ConeSource;
+  vtkPolyDataMapper* ConeMapper;
+  vtkActor* ConeActor;
 
-  vtkCamera *CameraLight;
-  vtkCameraActor *FrustumActor;
+  vtkCamera* CameraLight;
+  vtkCameraActor* FrustumActor;
 
-  vtkBoundingBox *BoundingBox;
+  vtkBoundingBox* BoundingBox;
 
 private:
-  vtkLightActor(const vtkLightActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLightActor&) VTK_DELETE_FUNCTION;
+  vtkLightActor(const vtkLightActor&) = delete;
+  void operator=(const vtkLightActor&) = delete;
 };
 
 #endif

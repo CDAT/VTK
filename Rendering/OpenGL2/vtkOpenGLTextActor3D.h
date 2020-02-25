@@ -16,7 +16,7 @@
 /**
  * @class   vtkOpenGLTextActor3D
  * @brief   OpenGL2 override for vtkTextActor3D.
-*/
+ */
 
 #ifndef vtkOpenGLTextActor3D_h
 #define vtkOpenGLTextActor3D_h
@@ -26,24 +26,24 @@
 
 class vtkOpenGLGL2PSHelper;
 
-class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLTextActor3D: public vtkTextActor3D
+class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLTextActor3D : public vtkTextActor3D
 {
 public:
   static vtkOpenGLTextActor3D* New();
-  vtkTypeMacro(vtkOpenGLTextActor3D, vtkTextActor3D)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOpenGLTextActor3D, vtkTextActor3D);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) VTK_OVERRIDE;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) override;
 
 protected:
   vtkOpenGLTextActor3D();
-  ~vtkOpenGLTextActor3D() VTK_OVERRIDE;
+  ~vtkOpenGLTextActor3D() override;
 
-  int RenderGL2PS(vtkViewport *vp, vtkOpenGLGL2PSHelper *gl2ps);
+  int RenderGL2PS(vtkViewport* vp, vtkOpenGLGL2PSHelper* gl2ps);
 
 private:
-  vtkOpenGLTextActor3D(const vtkOpenGLTextActor3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLTextActor3D&) VTK_DELETE_FUNCTION;
+  vtkOpenGLTextActor3D(const vtkOpenGLTextActor3D&) = delete;
+  void operator=(const vtkOpenGLTextActor3D&) = delete;
 };
 
 #endif // vtkOpenGLTextActor3D_h

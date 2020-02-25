@@ -17,13 +17,13 @@
  * @brief   abstract interface to OpenGL FBOs
  *
  * API for classes that encapsulate an OpenGL Frame Buffer Object.
-*/
+ */
 
 #ifndef vtkFrameBufferObjectBase_h
 #define vtkFrameBufferObjectBase_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkRenderer;
 class vtkProp;
@@ -31,26 +31,26 @@ class vtkInformation;
 
 class VTKRENDERINGCORE_EXPORT vtkFrameBufferObjectBase : public vtkObject
 {
- public:
+public:
   vtkTypeMacro(vtkFrameBufferObjectBase, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Dimensions in pixels of the framebuffer.
    */
-  virtual int *GetLastSize() = 0;
-  virtual void GetLastSize (int &_arg1, int &_arg2) = 0;
-  virtual void GetLastSize (int _arg[2]) = 0;
+  virtual int* GetLastSize() = 0;
+  virtual void GetLastSize(int& _arg1, int& _arg2) = 0;
+  virtual void GetLastSize(int _arg[2]) = 0;
   //@}
 
 protected:
   vtkFrameBufferObjectBase(); // no default constructor.
-  ~vtkFrameBufferObjectBase() VTK_OVERRIDE;
+  ~vtkFrameBufferObjectBase() override;
 
 private:
-  vtkFrameBufferObjectBase(const vtkFrameBufferObjectBase &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFrameBufferObjectBase &) VTK_DELETE_FUNCTION;
+  vtkFrameBufferObjectBase(const vtkFrameBufferObjectBase&) = delete;
+  void operator=(const vtkFrameBufferObjectBase&) = delete;
 };
 
 #endif

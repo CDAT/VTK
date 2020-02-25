@@ -25,24 +25,24 @@
 
 #include "vtkCamera.h"
 #include "vtkColorTransferFunction.h"
-#include "vtkSmartVolumeMapper.h"
 #include "vtkImageData.h"
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkNew.h"
 #include "vtkPiecewiseFunction.h"
-#include "vtkRenderer.h"
+#include "vtkPointDataToCellData.h"
+#include "vtkRegressionTestImage.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRegressionTestImage.h"
+#include "vtkRenderer.h"
+#include "vtkSmartVolumeMapper.h"
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
 
-
-int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
+int TestGPURayCastIndependentVectorMode(int argc, char* argv[])
 {
-  //cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
+  // cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
-  int dims[3] = {20, 20, 20};
+  int dims[3] = { 20, 20, 20 };
 
   // Create a vtkImageData with two components
   vtkNew<vtkImageData> image;
@@ -55,14 +55,14 @@ int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
     {
       for (int x = 0; x < dims[0]; ++x)
       {
-      // The 3-component vector field is described by:
-      // V = coords_x *  iHat   +   10 * coords_y * jHat   +   coords_z * kHat
-      float const valueX = static_cast<float>(x) - dims[0]/2.0f;
-      float const valueY = static_cast<float>(y) - dims[1]/2.0f;
-      float const valueZ = static_cast<float>(z) - dims[2]/2.0f;
-      image->SetScalarComponentFromFloat(x, y, z, 0, valueX);
-      image->SetScalarComponentFromFloat(x, y, z, 1, valueY * 10.f);
-      image->SetScalarComponentFromFloat(x, y, z, 2, valueZ);
+        // The 3-component vector field is described by:
+        // V = coords_x *  iHat   +   10 * coords_y * jHat   +   coords_z * kHat
+        float const valueX = static_cast<float>(x) - dims[0] / 2.0f;
+        float const valueY = static_cast<float>(y) - dims[1] / 2.0f;
+        float const valueZ = static_cast<float>(z) - dims[2] / 2.0f;
+        image->SetScalarComponentFromFloat(x, y, z, 0, valueX);
+        image->SetScalarComponentFromFloat(x, y, z, 1, valueY * 10.f);
+        image->SetScalarComponentFromFloat(x, y, z, 2, valueZ);
       }
     }
   }
@@ -73,12 +73,12 @@ int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
 
   vtkNew<vtkRenderer> ren;
   ren->SetBackground(0.3176, 0.3412, 0.4314);
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
 
   vtkNew<vtkRenderWindowInteractor> iren;
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetInteractorStyle(style);
+  iren->SetRenderWindow(renWin);
 
   renWin->Render();
 
@@ -86,7 +86,7 @@ int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
   vtkNew<vtkSmartVolumeMapper> mapper;
   mapper->AutoAdjustSampleDistancesOff();
   mapper->SetSampleDistance(0.5);
-  mapper->SetInputData(image.GetPointer());
+  mapper->SetInputData(image);
 
   // TFs (known x values from V)
   vtkNew<vtkColorTransferFunction> ctf1;
@@ -101,19 +101,19 @@ int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
 
   vtkNew<vtkVolumeProperty> property;
   property->IndependentComponentsOn();
-  property->SetColor(0, ctf1.GetPointer());
-  property->SetScalarOpacity(0, pf1.GetPointer());
+  property->SetColor(0, ctf1);
+  property->SetScalarOpacity(0, pf1);
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(property.GetPointer());
-  ren->AddVolume(volume.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(property);
+  ren->AddVolume(volume);
 
   // Mapper 2 (final render as magnitude)
   vtkNew<vtkSmartVolumeMapper> mapperMag;
   mapperMag->AutoAdjustSampleDistancesOff();
   mapperMag->SetSampleDistance(0.5);
-  mapperMag->SetInputData(image.GetPointer());
+  mapperMag->SetInputData(image);
 
   // TFs (known x values from V)
   vtkNew<vtkColorTransferFunction> ctf2;
@@ -127,14 +127,31 @@ int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
   pf2->AddPoint(101, 1.0);
 
   vtkNew<vtkVolumeProperty> propertyMag;
-  propertyMag->SetColor(0, ctf2.GetPointer());
-  propertyMag->SetScalarOpacity(0, pf2.GetPointer());
+  propertyMag->SetColor(0, ctf2);
+  propertyMag->SetScalarOpacity(0, pf2);
 
   vtkNew<vtkVolume> volumeMag;
-  volumeMag->SetMapper(mapperMag.GetPointer());
-  volumeMag->SetProperty(propertyMag.GetPointer());
-  ren->AddVolume(volumeMag.GetPointer());
+  volumeMag->SetMapper(mapperMag);
+  volumeMag->SetProperty(propertyMag);
+  ren->AddVolume(volumeMag);
   volumeMag->SetPosition(20.0, 20.0, 0.0);
+  ren->ResetCamera();
+
+  // Mapper 3 (final render as magnitude - cell data)
+  vtkNew<vtkPointDataToCellData> pointsToCells;
+  pointsToCells->SetInputData(image);
+  pointsToCells->Update();
+
+  vtkNew<vtkSmartVolumeMapper> mapperMagCells;
+  mapperMagCells->AutoAdjustSampleDistancesOff();
+  mapperMagCells->SetSampleDistance(0.5);
+  mapperMagCells->SetInputData(pointsToCells->GetOutput());
+
+  vtkNew<vtkVolume> volumeMagCells;
+  volumeMagCells->SetMapper(mapperMagCells);
+  volumeMagCells->SetProperty(propertyMag);
+  ren->AddVolume(volumeMagCells);
+  volumeMagCells->SetPosition(20.0, 0.0, 0.0);
   ren->ResetCamera();
 
   // Switch between components and magnitude to ensure no errors
@@ -154,8 +171,15 @@ int TestGPURayCastIndependentVectorMode(int argc, char *argv[])
   mapperMag->SetVectorMode(vtkSmartVolumeMapper::MAGNITUDE);
   renWin->Render();
 
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
-  if( retVal == vtkRegressionTester::DO_INTERACTOR)
+  mapperMagCells->SetVectorMode(vtkSmartVolumeMapper::COMPONENT);
+  mapperMagCells->SetVectorComponent(2);
+  renWin->Render();
+
+  mapperMagCells->SetVectorMode(vtkSmartVolumeMapper::MAGNITUDE);
+  renWin->Render();
+
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

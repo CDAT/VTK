@@ -18,19 +18,19 @@
 // this program tests vtkLabelPlacementMapper which uses a sophisticated algorithm to
 // prune labels/icons preventing them from overlapping.
 
-#include <vtkCellArray.h>
-#include <vtkProperty2D.h>
-#include <vtkPolyData.h>
-#include <vtkNew.h>
-#include <vtkPolyDataMapper2D.h>
 #include <vtkActor2D.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkTestUtilities.h>
+#include <vtkCellArray.h>
+#include <vtkNew.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper2D.h>
+#include <vtkProperty2D.h>
 #include <vtkRegressionTestImage.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkTestUtilities.h>
 
-int TestTransformCoordinateUseDouble(int argc, char *argv[])
+int TestTransformCoordinateUseDouble(int argc, char* argv[])
 {
   vtkNew<vtkRenderWindow> renderWindow;
   renderWindow->SetSize(400, 400);
@@ -55,8 +55,8 @@ int TestTransformCoordinateUseDouble(int argc, char *argv[])
   cells->InsertCellPoint(3);
   cells->InsertCellPoint(0);
 
-  poly->SetPoints(points.GetPointer());
-  poly->SetLines(cells.GetPointer());
+  poly->SetPoints(points);
+  poly->SetLines(cells);
 
   int i = 6;
   double x = 0.;
@@ -65,31 +65,31 @@ int TestTransformCoordinateUseDouble(int argc, char *argv[])
   double height = 1. / 8.;
 
   vtkNew<vtkRenderer> emptyRenderer;
-  emptyRenderer->SetViewport(0 , 0 , width, height);
-  renderWindow->AddRenderer(emptyRenderer.GetPointer());
+  emptyRenderer->SetViewport(0, 0, width, height);
+  renderWindow->AddRenderer(emptyRenderer);
 
   while (--i)
   {
     vtkNew<vtkRenderer> renderer;
-    renderer->SetViewport(x , y , x + width, y + height);
+    renderer->SetViewport(x, y, x + width, y + height);
 
     vtkNew<vtkCoordinate> boxCoordinate;
     boxCoordinate->SetCoordinateSystemToNormalizedViewport();
-    boxCoordinate->SetViewport(renderer.GetPointer());
+    boxCoordinate->SetViewport(renderer);
 
     vtkNew<vtkPolyDataMapper2D> polyDataMapper;
-    polyDataMapper->SetInputData(poly.GetPointer());
-    polyDataMapper->SetTransformCoordinate(boxCoordinate.GetPointer());
+    polyDataMapper->SetInputData(poly);
+    polyDataMapper->SetTransformCoordinate(boxCoordinate);
     polyDataMapper->SetTransformCoordinateUseDouble(true);
 
     vtkNew<vtkActor2D> boxActor;
-    boxActor->SetMapper(polyDataMapper.GetPointer());
+    boxActor->SetMapper(polyDataMapper);
 
-    renderer->AddActor2D(boxActor.GetPointer());
+    renderer->AddActor2D(boxActor);
 
-    renderWindow->AddRenderer(renderer.GetPointer());
+    renderWindow->AddRenderer(renderer);
 
-    if ( i % 2 )
+    if (i % 2)
     {
       x += width;
       y -= height;
@@ -103,15 +103,15 @@ int TestTransformCoordinateUseDouble(int argc, char *argv[])
     }
   }
 
-  //Render and interact
+  // Render and interact
   vtkNew<vtkRenderWindowInteractor> interactor;
-  interactor->SetRenderWindow(renderWindow.GetPointer());
+  interactor->SetRenderWindow(renderWindow);
 
   renderWindow->SetMultiSamples(0);
   renderWindow->Render();
 
-  int retVal = vtkRegressionTestImage(renderWindow.GetPointer());
-  if(retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renderWindow);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     interactor->Start();
   }

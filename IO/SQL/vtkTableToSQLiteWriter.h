@@ -18,7 +18,7 @@
  *
  * vtkTableToSQLiteWriter reads a vtkTable and inserts it into an SQLite
  * database.
-*/
+ */
 
 #ifndef vtkTableToSQLiteWriter_h
 #define vtkTableToSQLiteWriter_h
@@ -31,9 +31,9 @@ class vtkSQLiteDatabase;
 class VTKIOSQL_EXPORT vtkTableToSQLiteWriter : public vtkTableToDatabaseWriter
 {
 public:
-  static vtkTableToSQLiteWriter *New();
-  vtkTypeMacro(vtkTableToSQLiteWriter,vtkTableToDatabaseWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTableToSQLiteWriter* New();
+  vtkTypeMacro(vtkTableToSQLiteWriter, vtkTableToDatabaseWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -44,15 +44,15 @@ public:
   //@}
 
 protected:
-   vtkTableToSQLiteWriter();
-  ~vtkTableToSQLiteWriter() VTK_OVERRIDE;
-  void WriteData() VTK_OVERRIDE;
+  vtkTableToSQLiteWriter();
+  ~vtkTableToSQLiteWriter() override;
+  void WriteData() override;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkTableToSQLiteWriter(const vtkTableToSQLiteWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTableToSQLiteWriter&) VTK_DELETE_FUNCTION;
+  vtkTableToSQLiteWriter(const vtkTableToSQLiteWriter&) = delete;
+  void operator=(const vtkTableToSQLiteWriter&) = delete;
 };
 
 #endif

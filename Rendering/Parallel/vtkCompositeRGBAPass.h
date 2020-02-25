@@ -26,13 +26,13 @@
  *
  * @sa
  * vtkRenderPass
-*/
+ */
 
 #ifndef vtkCompositeRGBAPass_h
 #define vtkCompositeRGBAPass_h
 
-#include "vtkRenderingParallelModule.h" // For export macro
 #include "vtkRenderPass.h"
+#include "vtkRenderingParallelModule.h" // For export macro
 
 class vtkMultiProcessController;
 
@@ -44,22 +44,22 @@ class vtkPKdTree;
 class VTKRENDERINGPARALLEL_EXPORT vtkCompositeRGBAPass : public vtkRenderPass
 {
 public:
-  static vtkCompositeRGBAPass *New();
-  vtkTypeMacro(vtkCompositeRGBAPass,vtkRenderPass);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkCompositeRGBAPass* New();
+  vtkTypeMacro(vtkCompositeRGBAPass, vtkRenderPass);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform rendering according to a render state \p s.
    * \pre s_exists: s!=0
    */
-  virtual void Render(const vtkRenderState *s) VTK_OVERRIDE;
+  void Render(const vtkRenderState* s) override;
 
   /**
    * Release graphics resources and ask components to release their own
    * resources.
    * \pre w_exists: w!=0
    */
-  void ReleaseGraphicsResources(vtkWindow *w) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* w) override;
 
   //@{
   /**
@@ -67,24 +67,24 @@ public:
    * If it is NULL, nothing will be rendered and a warning will be emitted.
    * Initial value is a NULL pointer.
    */
-  vtkGetObjectMacro(Controller,vtkMultiProcessController);
-  virtual void SetController(vtkMultiProcessController *controller);
+  vtkGetObjectMacro(Controller, vtkMultiProcessController);
+  virtual void SetController(vtkMultiProcessController* controller);
   //@}
 
   //@{
   /**
    * kd tree that gives processes ordering. Initial value is a NULL pointer.
    */
-  vtkGetObjectMacro(Kdtree,vtkPKdTree);
-  virtual void SetKdtree(vtkPKdTree *kdtree);
+  vtkGetObjectMacro(Kdtree, vtkPKdTree);
+  virtual void SetKdtree(vtkPKdTree* kdtree);
   //@}
 
   /**
    * Is the pass supported by the OpenGL context?
    */
-  bool IsSupported(vtkOpenGLRenderWindow *context);
+  bool IsSupported(vtkOpenGLRenderWindow* context);
 
- protected:
+protected:
   /**
    * Default constructor. Controller is set to NULL.
    */
@@ -93,20 +93,20 @@ public:
   /**
    * Destructor.
    */
-  virtual ~vtkCompositeRGBAPass();
+  ~vtkCompositeRGBAPass() override;
 
-  vtkMultiProcessController *Controller;
-  vtkPKdTree *Kdtree;
+  vtkMultiProcessController* Controller;
+  vtkPKdTree* Kdtree;
 
-  vtkPixelBufferObject *PBO;
-  vtkTextureObject *RGBATexture;
-  vtkTextureObject *RootTexture;
-  float *RawRGBABuffer;
+  vtkPixelBufferObject* PBO;
+  vtkTextureObject* RGBATexture;
+  vtkTextureObject* RootTexture;
+  float* RawRGBABuffer;
   size_t RawRGBABufferSize;
 
- private:
-  vtkCompositeRGBAPass(const vtkCompositeRGBAPass&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositeRGBAPass&) VTK_DELETE_FUNCTION;
+private:
+  vtkCompositeRGBAPass(const vtkCompositeRGBAPass&) = delete;
+  void operator=(const vtkCompositeRGBAPass&) = delete;
 };
 
 #endif

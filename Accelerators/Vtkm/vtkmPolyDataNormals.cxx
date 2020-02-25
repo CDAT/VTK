@@ -23,16 +23,12 @@
 
 #include "vtkmlib/ArrayConverters.h"
 #include "vtkmlib/PolyDataConverter.h"
-#include "vtkmlib/Storage.h"
 
-#include "vtkmCellSetExplicit.h"
-#include "vtkmCellSetSingleType.h"
 #include "vtkmFilterPolicy.h"
 
 #include "vtkm/filter/SurfaceNormals.h"
 
-
-vtkStandardNewMacro(vtkmPolyDataNormals)
+vtkStandardNewMacro(vtkmPolyDataNormals);
 
 //------------------------------------------------------------------------------
 void vtkmPolyDataNormals::PrintSelf(ostream& os, vtkIndent indent)
@@ -57,63 +53,57 @@ vtkmPolyDataNormals::~vtkmPolyDataNormals() = default;
 
 //------------------------------------------------------------------------------
 int vtkmPolyDataNormals::RequestData(
-  vtkInformation *request,
-  vtkInformationVector **inputVector,
-  vtkInformationVector *outputVector)
+  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // get the info objects
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
   // get the input and output
-  vtkPolyData *input = vtkPolyData::SafeDownCast(
-    inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  vtkPolyData *output = vtkPolyData::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPolyData* input = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  // convert the input dataset to a vtkm::cont::DataSet
-  vtkm::cont::DataSet in = tovtkm::Convert(input);
-  if (in.GetNumberOfCoordinateSystems() <= 0 || in.GetNumberOfCellSets() <= 0)
+  try
   {
-    vtkErrorMacro(<< "Could not convert vtk dataset to vtkm dataset");
-    return 0;
-  }
+    // convert the input dataset to a vtkm::cont::DataSet
+    auto in = tovtkm::Convert(input, tovtkm::FieldsFlag::None);
 
-  vtkmInputFilterPolicy policy;
-  vtkm::cont::DataSet out;
+    vtkm::cont::DataSet result;
 
-  // check for flags that vtkm filter cannot handle
-  bool unsupported = this->Splitting || this->Consistency || this->FlipNormals;
-  bool vtkmSuccess = false;
-  if (!unsupported)
-  {
-    vtkm::filter::SurfaceNormals filter;
-    filter.SetGenerateCellNormals(this->ComputeCellNormals);
-    filter.SetCellNormalsName("Normals");
-    filter.SetGeneratePointNormals(this->ComputePointNormals);
-    filter.SetPointNormalsName("Normals");
-    auto result = filter.Execute(in, policy);
-
-    if (result.IsValid())
+    // check for flags that vtkm filter cannot handle
+    bool unsupported = this->Splitting != 0;
+    if (!unsupported)
     {
-      out = result.GetDataSet();
-      vtkmSuccess = true;
+      vtkmInputFilterPolicy policy;
+      vtkm::filter::SurfaceNormals filter;
+      filter.SetGenerateCellNormals((this->ComputeCellNormals != 0));
+      filter.SetCellNormalsName("Normals");
+      filter.SetGeneratePointNormals((this->ComputePointNormals != 0));
+      filter.SetPointNormalsName("Normals");
+      filter.SetAutoOrientNormals(this->AutoOrientNormals != 0);
+      filter.SetFlipNormals(this->FlipNormals != 0);
+      filter.SetConsistency(this->Consistency != 0);
+      result = filter.Execute(in, policy);
+    }
+    else
+    {
+      vtkWarningMacro(<< "Unsupported options\n"
+                      << "Falling back to vtkPolyDataNormals.");
+      return this->Superclass::RequestData(request, inputVector, outputVector);
+    }
+
+    if (!fromvtkm::Convert(result, output, input))
+    {
+      vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
+      return 0;
     }
   }
-
-  if (!vtkmSuccess)
+  catch (const vtkm::cont::Error& e)
   {
-    vtkWarningMacro(<< "VTKm SurfaceNormals algorithm failed to run"
-                    << (unsupported ? ": unsupported settings." : ".")
-                    << "Falling back to vtkPolyDataNormals.");
+    vtkWarningMacro(<< "VTK-m error: " << e.GetMessage() << "Falling back to vtkPolyDataNormals");
     return this->Superclass::RequestData(request, inputVector, outputVector);
   }
 
-  if (!fromvtkm::Convert(out, output, input))
-  {
-    vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
-    return 0;
-  }
   vtkSmartPointer<vtkDataArray> pointNormals = output->GetPointData()->GetArray("Normals");
   vtkSmartPointer<vtkDataArray> cellNormals = output->GetCellData()->GetArray("Normals");
 
@@ -124,11 +114,11 @@ int vtkmPolyDataNormals::RequestData(
 
   if (pointNormals)
   {
-    output->GetPointData()->SetNormals(pointNormals.GetPointer());
+    output->GetPointData()->SetNormals(pointNormals);
   }
   if (cellNormals)
   {
-    output->GetCellData()->SetNormals(cellNormals.GetPointer());
+    output->GetCellData()->SetNormals(cellNormals);
   }
 
   return 1;

@@ -48,28 +48,28 @@
  * @par Thanks:
  * Thanks to William McLendon from Sandia National Laboratories for providing this
  * implementation.
-*/
+ */
 
 #ifndef vtkKCoreLayout_h
 #define vtkKCoreLayout_h
 
-#include "vtkInfovisLayoutModule.h" // For export macro
 #include "vtkGraphAlgorithm.h"
+#include "vtkInfovisLayoutModule.h" // For export macro
 
 class VTKINFOVISLAYOUT_EXPORT vtkKCoreLayout : public vtkGraphAlgorithm
 {
 public:
   static vtkKCoreLayout* New();
-  vtkTypeMacro(vtkKCoreLayout,vtkGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkKCoreLayout, vtkGraphAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /// Convenience function provided for setting the graph input.
   void SetGraphConnection(vtkAlgorithmOutput*);
 
   vtkKCoreLayout();
-  ~vtkKCoreLayout() VTK_OVERRIDE;
+  ~vtkKCoreLayout() override;
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   //@{
   /**
@@ -85,9 +85,9 @@ public:
    * coord_radius, coord_angle.
    * Default: False
    */
-  vtkGetMacro( Polar, bool );
-  vtkSetMacro( Polar, bool );
-  vtkBooleanMacro( Polar, bool );
+  vtkGetMacro(Polar, bool);
+  vtkSetMacro(Polar, bool);
+  vtkBooleanMacro(Polar, bool);
   //@}
 
   //@{
@@ -96,9 +96,9 @@ public:
    * will be returned in polar coordinates (radius, angle).
    * Default: True
    */
-  vtkGetMacro( Cartesian, bool );
-  vtkSetMacro( Cartesian, bool );
-  vtkBooleanMacro( Cartesian, bool );
+  vtkGetMacro(Cartesian, bool);
+  vtkSetMacro(Cartesian, bool);
+  vtkBooleanMacro(Cartesian, bool);
   //@}
 
   //@{
@@ -146,8 +146,8 @@ public:
    * Epsilon value used in the algorithm.
    * Default = 0.2
    */
-  vtkSetMacro( Epsilon, float );
-  vtkGetMacro( Epsilon, float );
+  vtkSetMacro(Epsilon, float);
+  vtkGetMacro(Epsilon, float);
   //@}
 
   //@{
@@ -155,21 +155,20 @@ public:
    * Unit Radius value used in the algorithm.
    * Default = 1.0
    */
-  vtkSetMacro( UnitRadius, float );
-  vtkGetMacro( UnitRadius, float );
+  vtkSetMacro(UnitRadius, float);
+  vtkGetMacro(UnitRadius, float);
   //@}
 
-
-  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
-  char * KCoreLabelArrayName;
+  char* KCoreLabelArrayName;
 
-  char * PolarCoordsRadiusArrayName;
-  char * PolarCoordsAngleArrayName;
+  char* PolarCoordsRadiusArrayName;
+  char* PolarCoordsAngleArrayName;
 
-  char * CartesianCoordsXArrayName;
-  char * CartesianCoordsYArrayName;
+  char* CartesianCoordsXArrayName;
+  char* CartesianCoordsYArrayName;
 
   bool Cartesian;
   bool Polar;
@@ -178,8 +177,8 @@ protected:
   float UnitRadius;
 
 private:
-  vtkKCoreLayout(const vtkKCoreLayout&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkKCoreLayout&) VTK_DELETE_FUNCTION;
+  vtkKCoreLayout(const vtkKCoreLayout&) = delete;
+  void operator=(const vtkKCoreLayout&) = delete;
 };
 
 #endif

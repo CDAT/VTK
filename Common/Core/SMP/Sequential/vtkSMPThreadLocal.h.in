@@ -38,6 +38,7 @@
 
 #include "vtkSystemIncludes.h"
 
+#include <iterator>
 #include <vector>
 
 template <typename T>
@@ -66,7 +67,7 @@ public:
   // Description:
   // Returns an object of type T that is local to the current thread.
   // This needs to be called mainly within a threaded execution path.
-  // It will create a new object (local to the tread so each thread
+  // It will create a new object (local to the thread so each thread
   // get their own when calling Local) which is a copy of exemplar as passed
   // to the constructor (or a default object if no exemplar was provided)
   // the first time it is called. After the first time, it will return
@@ -99,6 +100,7 @@ public:
   // as long as each thread uses its own iterator and does not modify
   // objects in the container.
   class iterator
+      : public std::iterator<std::forward_iterator_tag, T> // for iterator_traits
   {
   public:
     iterator& operator++()

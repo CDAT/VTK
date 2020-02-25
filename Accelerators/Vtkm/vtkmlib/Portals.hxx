@@ -25,49 +25,55 @@
 #include <vtkm/cont/internal/IteratorFromArrayPortal.h>
 #include <vtkm/internal/Assume.h>
 
-namespace {
+namespace
+{
 
-template <int N> struct fillComponents
+template <int N>
+struct fillComponents
 {
   template <typename T, typename Tuple>
-  void operator()(T* t, const Tuple& tuple) const
+  VTKM_EXEC void operator()(T* t, const Tuple& tuple) const
   {
     fillComponents<N - 1>()(t, tuple);
     t[N - 1] = vtkm::VecTraits<Tuple>::GetComponent(tuple, N - 1);
   }
 };
 
-template <> struct fillComponents<1>
+template <>
+struct fillComponents<1>
 {
   template <typename T, typename Tuple>
-  void operator()(T* t, const Tuple& tuple) const
+  VTKM_EXEC void operator()(T* t, const Tuple& tuple) const
   {
     t[0] = vtkm::VecTraits<Tuple>::GetComponent(tuple, 0);
   }
 };
 }
 
-namespace tovtkm {
+namespace tovtkm
+{
 
 //------------------------------------------------------------------------------
 template <typename VType, typename VTKDataArrayType>
-vtkArrayPortal<VType, VTKDataArrayType>::vtkArrayPortal()
-  : VTKData(NULL), Size(0)
+VTKM_EXEC_CONT vtkArrayPortal<VType, VTKDataArrayType>::vtkArrayPortal()
+  : VTKData(nullptr)
+  , Size(0)
 {
 }
 
 //------------------------------------------------------------------------------
 template <typename VType, typename VTKDataArrayType>
-vtkArrayPortal<VType, VTKDataArrayType>::vtkArrayPortal(VTKDataArrayType* array,
-                                                        vtkm::Id size)
-  : VTKData(array), Size(size)
+VTKM_CONT vtkArrayPortal<VType, VTKDataArrayType>::vtkArrayPortal(
+  VTKDataArrayType* array, vtkm::Id size)
+  : VTKData(array)
+  , Size(size)
 {
   VTKM_ASSERT(this->GetNumberOfValues() >= 0);
 }
 
 //------------------------------------------------------------------------------
 template <typename VType, typename VTKDataArrayType>
-typename vtkArrayPortal<VType, VTKDataArrayType>::ValueType
+typename vtkArrayPortal<VType, VTKDataArrayType>::ValueType VTKM_EXEC
 vtkArrayPortal<VType, VTKDataArrayType>::Get(vtkm::Id index) const
 {
   VTKM_ASSUME(this->VTKData->GetNumberOfComponents() == NUM_COMPONENTS);
@@ -83,8 +89,8 @@ vtkArrayPortal<VType, VTKDataArrayType>::Get(vtkm::Id index) const
 
 //------------------------------------------------------------------------------
 template <typename VType, typename VTKDataArrayType>
-void vtkArrayPortal<VType, VTKDataArrayType>::Set(vtkm::Id index,
-                                                  const ValueType& value) const
+VTKM_EXEC void vtkArrayPortal<VType, VTKDataArrayType>::Set(
+  vtkm::Id index, const ValueType& value) const
 {
   VTKM_ASSUME((this->VTKData->GetNumberOfComponents() == NUM_COMPONENTS));
 
@@ -97,38 +103,26 @@ void vtkArrayPortal<VType, VTKDataArrayType>::Set(vtkm::Id index,
 
 //------------------------------------------------------------------------------
 template <typename Type>
-vtkPointsPortal<Type>::vtkPointsPortal() : Points(NULL), Array(NULL), Size(0)
+VTKM_EXEC_CONT vtkPointsPortal<Type>::vtkPointsPortal()
+  : Points(nullptr)
+  , Array(nullptr)
+  , Size(0)
 {
 }
 
 //------------------------------------------------------------------------------
 template <typename Type>
-vtkPointsPortal<Type>::vtkPointsPortal(vtkPoints* points, vtkm::Id size)
-  : Points(points),
-    Array(static_cast<ComponentType*>(points->GetVoidPointer(0))),
-    Size(size)
+VTKM_CONT vtkPointsPortal<Type>::vtkPointsPortal(vtkPoints* points, vtkm::Id size)
+  : Points(points)
+  , Array(static_cast<ComponentType*>(points->GetVoidPointer(0)))
+  , Size(size)
 {
   VTKM_ASSERT(this->GetNumberOfValues() >= 0);
 }
 
 //------------------------------------------------------------------------------
-/// Copy constructor for any other vtkArrayPortal with an iterator
-/// type that can be copied to this iterator type. This allows us to do any
-/// type casting that the iterators do (like the non-const to const cast).
-///
 template <typename Type>
-template <typename OtherType>
-vtkPointsPortal<Type>::vtkPointsPortal(const vtkPointsPortal<OtherType>& src)
-  : Points(src.GetVtkData()),
-    Array(static_cast<ComponentType*>(src.GetVtkData()->GetVoidPointer(0))),
-    Size(src.GetNumberOfValues())
-{
-}
-
-//------------------------------------------------------------------------------
-template <typename Type>
-typename vtkPointsPortal<Type>::ValueType
-vtkPointsPortal<Type>::Get(vtkm::Id index) const
+typename vtkPointsPortal<Type>::ValueType VTKM_EXEC vtkPointsPortal<Type>::Get(vtkm::Id index) const
 {
   const ComponentType* const raw = this->Array + (index * NUM_COMPONENTS);
   return ValueType(raw[0], raw[1], raw[2]);
@@ -136,7 +130,7 @@ vtkPointsPortal<Type>::Get(vtkm::Id index) const
 
 //------------------------------------------------------------------------------
 template <typename Type>
-void vtkPointsPortal<Type>::Set(vtkm::Id index, const ValueType& value) const
+VTKM_EXEC void vtkPointsPortal<Type>::Set(vtkm::Id index, const ValueType& value) const
 {
   ComponentType* rawArray = this->Array + (index * NUM_COMPONENTS);
   // use template magic to auto unroll insertion

@@ -21,25 +21,20 @@ vtkStandardNewMacro(vtkGPUInfo);
 // ----------------------------------------------------------------------------
 vtkGPUInfo::vtkGPUInfo()
 {
-  this->DedicatedVideoMemory=0;
-  this->DedicatedSystemMemory=0;
-  this->SharedSystemMemory=0;
+  this->DedicatedVideoMemory = 0;
+  this->DedicatedSystemMemory = 0;
+  this->SharedSystemMemory = 0;
 }
 
 // ----------------------------------------------------------------------------
-vtkGPUInfo::~vtkGPUInfo()
-{
-}
+vtkGPUInfo::~vtkGPUInfo() = default;
 
 // ----------------------------------------------------------------------------
 void vtkGPUInfo::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "Dedicated Video Memory in bytes: " << this->DedicatedVideoMemory
-     << endl;
-  os << indent << "Dedicated System Memory in bytes: " << this->DedicatedSystemMemory
-     << endl;
-  os << indent << "Shared System Memory in bytes: " << this->SharedSystemMemory
-     << endl;
+  os << indent << "Dedicated Video Memory in bytes: " << this->DedicatedVideoMemory << endl;
+  os << indent << "Dedicated System Memory in bytes: " << this->DedicatedSystemMemory << endl;
+  os << indent << "Shared System Memory in bytes: " << this->SharedSystemMemory << endl;
 }

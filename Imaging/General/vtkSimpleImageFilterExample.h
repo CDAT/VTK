@@ -21,7 +21,7 @@
  * to support various data types.
  * @sa
  * vtkSimpleImageToImageFilter
-*/
+ */
 
 #ifndef vtkSimpleImageFilterExample_h
 #define vtkSimpleImageFilterExample_h
@@ -32,26 +32,20 @@
 class VTKIMAGINGGENERAL_EXPORT vtkSimpleImageFilterExample : public vtkSimpleImageToImageFilter
 {
 public:
-  static vtkSimpleImageFilterExample *New();
-  vtkTypeMacro(vtkSimpleImageFilterExample,vtkSimpleImageToImageFilter);
+  static vtkSimpleImageFilterExample* New();
+  vtkTypeMacro(vtkSimpleImageFilterExample, vtkSimpleImageToImageFilter);
 
 protected:
-
   vtkSimpleImageFilterExample() {}
-  ~vtkSimpleImageFilterExample()VTK_OVERRIDE {}
+  ~vtkSimpleImageFilterExample() override {}
 
-  void SimpleExecute(vtkImageData* input, vtkImageData* output) VTK_OVERRIDE;
+  void SimpleExecute(vtkImageData* input, vtkImageData* output) override;
+
 private:
-  vtkSimpleImageFilterExample(const vtkSimpleImageFilterExample&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSimpleImageFilterExample&) VTK_DELETE_FUNCTION;
+  vtkSimpleImageFilterExample(const vtkSimpleImageFilterExample&) = delete;
+  void operator=(const vtkSimpleImageFilterExample&) = delete;
 };
 
 #endif
-
-
-
-
-
-
 
 // VTK-HeaderTest-Exclude: vtkSimpleImageFilterExample.h

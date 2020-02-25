@@ -17,9 +17,9 @@
  * @brief   Return a piece of a point cloud
  *
  * This filter takes the output of a vtkHierarchicalBinningFilter and allows
- * the pipeline to stream it. Pieces are detemined from an offset integral
- * array is associated with the field data of the input.
-*/
+ * the pipeline to stream it. Pieces are determined from an offset integral
+ * array associated with the field data of the input.
+ */
 
 #ifndef vtkExtractPointCloudPiece_h
 #define vtkExtractPointCloudPiece_h
@@ -37,9 +37,9 @@ public:
   /**
    * Standard methods for instantiation, printing, and type information.
    */
-  static vtkExtractPointCloudPiece *New();
+  static vtkExtractPointCloudPiece* New();
   vtkTypeMacro(vtkExtractPointCloudPiece, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -48,23 +48,23 @@ public:
    * points in a given piece will be reordered in an attempt to reduce spatial
    * coherency.
    */
-  vtkSetMacro(ModuloOrdering,bool);
-  vtkGetMacro(ModuloOrdering,bool);
-  vtkBooleanMacro(ModuloOrdering,bool);
+  vtkSetMacro(ModuloOrdering, bool);
+  vtkGetMacro(ModuloOrdering, bool);
+  vtkBooleanMacro(ModuloOrdering, bool);
   //@}
 
 protected:
   vtkExtractPointCloudPiece();
-  ~vtkExtractPointCloudPiece() VTK_OVERRIDE {}
+  ~vtkExtractPointCloudPiece() override {}
 
   // Usual data generation method
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   bool ModuloOrdering;
 
 private:
-  vtkExtractPointCloudPiece(const vtkExtractPointCloudPiece&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractPointCloudPiece&) VTK_DELETE_FUNCTION;
+  vtkExtractPointCloudPiece(const vtkExtractPointCloudPiece&) = delete;
+  void operator=(const vtkExtractPointCloudPiece&) = delete;
 };
 
 #endif

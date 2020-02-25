@@ -19,14 +19,14 @@
  * vtkWebApplication defines the core interface for a ParaViewWeb application.
  * This exposes methods that make it easier to manage views and rendered images
  * from views.
-*/
+ */
 
 #ifndef vtkWebApplication_h
 #define vtkWebApplication_h
 
 #include "vtkObject.h"
 #include "vtkWebCoreModule.h" // needed for exports
-#include <string> // needed for std::string
+#include <string>             // needed for std::string
 
 class vtkObjectIdMap;
 class vtkRenderWindow;
@@ -38,7 +38,7 @@ class VTKWEBCORE_EXPORT vtkWebApplication : public vtkObject
 public:
   static vtkWebApplication* New();
   vtkTypeMacro(vtkWebApplication, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -46,8 +46,8 @@ public:
    */
   enum
   {
-    ENCODING_NONE=0,
-    ENCODING_BASE64=1
+    ENCODING_NONE = 0,
+    ENCODING_BASE64 = 1
   };
   vtkSetClampMacro(ImageEncoding, int, ENCODING_NONE, ENCODING_BASE64);
   vtkGetMacro(ImageEncoding, int);
@@ -59,12 +59,21 @@ public:
    */
   enum
   {
-    COMPRESSION_NONE=0,
-    COMPRESSION_PNG=1,
-    COMPRESSION_JPEG=2
+    COMPRESSION_NONE = 0,
+    COMPRESSION_PNG = 1,
+    COMPRESSION_JPEG = 2
   };
   vtkSetClampMacro(ImageCompression, int, COMPRESSION_NONE, COMPRESSION_JPEG);
   vtkGetMacro(ImageCompression, int);
+  //@}
+
+  //@{
+  /**
+   * Set the number of worker threads to use for image encoding.  Calling this
+   * method with a number greater than 32 or less than zero will have no effect.
+   */
+  void SetNumberOfEncoderThreads(vtkTypeUInt32);
+  vtkTypeUInt32 GetNumberOfEncoderThreads();
   //@}
 
   //@{
@@ -74,6 +83,8 @@ public:
   vtkUnsignedCharArray* StillRender(vtkRenderWindow* view, int quality = 100);
   vtkUnsignedCharArray* InteractiveRender(vtkRenderWindow* view, int quality = 50);
   const char* StillRenderToString(vtkRenderWindow* view, vtkMTimeType time = 0, int quality = 100);
+  vtkUnsignedCharArray* StillRenderToBuffer(
+    vtkRenderWindow* view, vtkMTimeType time = 0, int quality = 100);
   //@}
 
   /**
@@ -87,8 +98,7 @@ public:
    * Communicate mouse interaction to a view.
    * Returns true if the interaction changed the view state, otherwise returns false.
    */
-  bool HandleInteractionEvent(
-    vtkRenderWindow* view, vtkWebInteractionEvent* event);
+  bool HandleInteractionEvent(vtkRenderWindow* view, vtkWebInteractionEvent* event);
 
   /**
    * Invalidate view cache
@@ -113,7 +123,7 @@ public:
    * Return the binary data given the part index
    * and the webGL object piece id in the scene.
    */
-  const char* GetWebGLBinaryData(vtkRenderWindow *view, const char* id, int partIndex);
+  const char* GetWebGLBinaryData(vtkRenderWindow* view, const char* id, int partIndex);
 
   vtkObjectIdMap* GetObjectIdMap();
 
@@ -134,12 +144,11 @@ protected:
   vtkMTimeType LastStillRenderToMTime;
 
 private:
-  vtkWebApplication(const vtkWebApplication&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWebApplication&) VTK_DELETE_FUNCTION;
+  vtkWebApplication(const vtkWebApplication&) = delete;
+  void operator=(const vtkWebApplication&) = delete;
 
   class vtkInternals;
   vtkInternals* Internals;
-
 };
 
 #endif

@@ -71,13 +71,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @par Thanks:
  * Li-Ta Lo (ollie@lanl.gov) and Jim Ahrens (ahrens@lanl.gov)
  * Los Alamos National Laboratory
-*/
+ */
 
 #ifndef vtkPOVExporter_h
 #define vtkPOVExporter_h
 
-#include "vtkIOExportModule.h" // For export macro
 #include "vtkExporter.h"
+#include "vtkIOExportModule.h" // For export macro
 
 class vtkRenderer;
 class vtkActor;
@@ -91,40 +91,40 @@ class vtkPOVInternals;
 class VTKIOEXPORT_EXPORT vtkPOVExporter : public vtkExporter
 {
 public:
-    static vtkPOVExporter *New();
-    vtkTypeMacro(vtkPOVExporter, vtkExporter);
-    void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPOVExporter* New();
+  vtkTypeMacro(vtkPOVExporter, vtkExporter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-    //@{
-    /**
-     * The filename to save into.
-     */
-    vtkSetStringMacro(FileName);
-    vtkGetStringMacro(FileName);
-    //@}
+  //@{
+  /**
+   * The filename to save into.
+   */
+  vtkSetStringMacro(FileName);
+  vtkGetStringMacro(FileName);
+  //@}
 
 protected:
-    vtkPOVExporter();
-    ~vtkPOVExporter() VTK_OVERRIDE;
+  vtkPOVExporter();
+  ~vtkPOVExporter() override;
 
-    void WriteData() VTK_OVERRIDE;
-    virtual void WriteHeader(vtkRenderer *renderer);
-    void WriteCamera(vtkCamera *camera);
-    void WriteLight(vtkLight *light);
-    void WriteProperty(vtkProperty *property);
-    void WritePolygons(vtkPolyData *polydata, bool scalar_visible);
-    void WriteTriangleStrips(vtkPolyData *strip, bool scalar_visible);
+  void WriteData() override;
+  virtual void WriteHeader(vtkRenderer* renderer);
+  void WriteCamera(vtkCamera* camera);
+  void WriteLight(vtkLight* light);
+  void WriteProperty(vtkProperty* property);
+  void WritePolygons(vtkPolyData* polydata, bool scalar_visible);
+  void WriteTriangleStrips(vtkPolyData* strip, bool scalar_visible);
 
-    virtual void WriteActor(vtkActor *actor);
+  virtual void WriteActor(vtkActor* actor);
 
-    char *FileName;
-    FILE *FilePtr;
+  char* FileName;
+  FILE* FilePtr;
 
 private:
-    vtkPOVExporter(const vtkPOVExporter&) VTK_DELETE_FUNCTION;
-    void operator=(const vtkPOVExporter&) VTK_DELETE_FUNCTION;
+  vtkPOVExporter(const vtkPOVExporter&) = delete;
+  void operator=(const vtkPOVExporter&) = delete;
 
-    vtkPOVInternals *Internals;
+  vtkPOVInternals* Internals;
 };
 
 #endif

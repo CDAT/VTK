@@ -16,8 +16,8 @@
 #include "vtkObjectFactory.h"
 
 //----------------------------------------------------------------------------
-// Return NULL if no override is supplied.
-vtkAbstractObjectFactoryNewMacro(vtkRayCastImageDisplayHelper)
+// Return nullptr if no override is supplied.
+vtkAbstractObjectFactoryNewMacro(vtkRayCastImageDisplayHelper);
 //----------------------------------------------------------------------------
 
 // Construct a new vtkRayCastImageDisplayHelper with default values
@@ -28,16 +28,13 @@ vtkRayCastImageDisplayHelper::vtkRayCastImageDisplayHelper()
 }
 
 // Destruct a vtkRayCastImageDisplayHelper - clean up any memory used
-vtkRayCastImageDisplayHelper::~vtkRayCastImageDisplayHelper()
-{
-}
+vtkRayCastImageDisplayHelper::~vtkRayCastImageDisplayHelper() = default;
 
 void vtkRayCastImageDisplayHelper::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "PreMultiplied Colors: "
-     << (this->PreMultipliedColors ? "On" : "Off") << endl;
+  os << indent << "PreMultiplied Colors: " << (this->PreMultipliedColors ? "On" : "Off") << endl;
 
   os << indent << "Pixel Scale: " << this->PixelScale << endl;
 }

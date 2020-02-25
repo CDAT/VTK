@@ -32,7 +32,7 @@
  *
  * @sa
  * vtkSPHKernel vtkSPHInterpolator
-*/
+ */
 
 #ifndef vtkWendlandQuinticKernel_h
 #define vtkWendlandQuinticKernel_h
@@ -44,7 +44,6 @@
 class vtkIdList;
 class vtkDoubleArray;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkWendlandQuinticKernel : public vtkSPHKernel
 {
 public:
@@ -52,17 +51,16 @@ public:
   /**
    * Standard methods for instantiation, obtaining type information, and printing.
    */
-  static vtkWendlandQuinticKernel *New();
-  vtkTypeMacro(vtkWendlandQuinticKernel,vtkSPHKernel);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkWendlandQuinticKernel* New();
+  vtkTypeMacro(vtkWendlandQuinticKernel, vtkSPHKernel);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * Produce the computational parameters for the kernel. Invoke this method
    * after setting initial values like SpatialStep.
    */
-  void Initialize(vtkAbstractPointLocator *loc, vtkDataSet *ds,
-                          vtkPointData *pd) VTK_OVERRIDE;
+  void Initialize(vtkAbstractPointLocator* loc, vtkDataSet* ds, vtkPointData* pd) override;
 
   //@{
   /**
@@ -70,16 +68,16 @@ public:
    * Note that the formulation is slightly different to avoid an extra operation
    * (which has the effect of affecting the NormFactor by 1/16).
    */
-  double ComputeFunctionWeight(const double d) VTK_OVERRIDE
+  double ComputeFunctionWeight(const double d) override
   {
-    if ( d >= 2.0 )
+    if (d >= 2.0)
     {
       return 0.0;
     }
     else
     {
-      double tmp = 1.0 - 0.5*d;
-      return (tmp*tmp*tmp*tmp) * (1.0 + 2.0*d);
+      double tmp = 1.0 - 0.5 * d;
+      return (tmp * tmp * tmp * tmp) * (1.0 + 2.0 * d);
     }
   }
   //@}
@@ -89,28 +87,27 @@ public:
    * Compute weighting factor for derivative quantities given a normalized
    * distance from a sample point.
    */
-  double ComputeDerivWeight(const double d) VTK_OVERRIDE
+  double ComputeDerivWeight(const double d) override
   {
-    if ( d >= 2.0 )
+    if (d >= 2.0)
     {
       return 0.0;
     }
     else
     {
-      double tmp = 1.0 - 0.5*d;
-      return -2.0*(tmp*tmp*tmp) * (1.0 + 2.0*d) +
-        2.0*(tmp*tmp*tmp*tmp);
+      double tmp = 1.0 - 0.5 * d;
+      return -2.0 * (tmp * tmp * tmp) * (1.0 + 2.0 * d) + 2.0 * (tmp * tmp * tmp * tmp);
     }
   }
   //@}
 
 protected:
   vtkWendlandQuinticKernel();
-  ~vtkWendlandQuinticKernel() VTK_OVERRIDE;
+  ~vtkWendlandQuinticKernel() override;
 
 private:
-  vtkWendlandQuinticKernel(const vtkWendlandQuinticKernel&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWendlandQuinticKernel&) VTK_DELETE_FUNCTION;
+  vtkWendlandQuinticKernel(const vtkWendlandQuinticKernel&) = delete;
+  void operator=(const vtkWendlandQuinticKernel&) = delete;
 };
 
 #endif

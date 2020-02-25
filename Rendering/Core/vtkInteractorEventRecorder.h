@@ -29,25 +29,25 @@
  *
  * @sa
  * vtkInteractorObserver vtkCallback
-*/
+ */
 
 #ifndef vtkInteractorEventRecorder_h
 #define vtkInteractorEventRecorder_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkInteractorObserver.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 // The superclass that all commands should be subclasses of
 class VTKRENDERINGCORE_EXPORT vtkInteractorEventRecorder : public vtkInteractorObserver
 {
 public:
-  static vtkInteractorEventRecorder *New();
-  vtkTypeMacro(vtkInteractorEventRecorder,vtkInteractorObserver);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkInteractorEventRecorder* New();
+  vtkTypeMacro(vtkInteractorEventRecorder, vtkInteractorObserver);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Satisfy the superclass API. Enable/disable listening for events.
-  void SetEnabled(int) VTK_OVERRIDE;
-  void SetInteractor(vtkRenderWindowInteractor* iren) VTK_OVERRIDE;
+  void SetEnabled(int) override;
+  void SetInteractor(vtkRenderWindowInteractor* iren) override;
 
   //@{
   /**
@@ -84,9 +84,9 @@ public:
    * Enable reading from an InputString as compared to the default
    * behavior, which is to read from a file.
    */
-  vtkSetMacro(ReadFromInputString,int);
-  vtkGetMacro(ReadFromInputString,int);
-  vtkBooleanMacro(ReadFromInputString,int);
+  vtkSetMacro(ReadFromInputString, vtkTypeBool);
+  vtkGetMacro(ReadFromInputString, vtkTypeBool);
+  vtkBooleanMacro(ReadFromInputString, vtkTypeBool);
   //@}
 
   //@{
@@ -99,33 +99,32 @@ public:
 
 protected:
   vtkInteractorEventRecorder();
-  ~vtkInteractorEventRecorder() VTK_OVERRIDE;
+  ~vtkInteractorEventRecorder() override;
 
   // file to read/write from
-  char *FileName;
+  char* FileName;
 
-  //listens to delete events
+  // listens to delete events
   vtkCallbackCommand* DeleteEventCallbackCommand;
 
   // control whether to read from string
-  int ReadFromInputString;
-  char *InputString;
+  vtkTypeBool ReadFromInputString;
+  char* InputString;
 
   // for reading and writing
-  istream *InputStream;
-  ostream *OutputStream;
+  istream* InputStream;
+  ostream* OutputStream;
 
-  //methods for processing events
-  static void ProcessCharEvent(vtkObject* object, unsigned long event,
-                               void* clientdata, void* calldata);
-  static void ProcessDeleteEvent(vtkObject* object, unsigned long event,
-                                 void* clientdata, void* calldata);
-  static void ProcessEvents(vtkObject* object, unsigned long event,
-                            void* clientdata, void* calldata);
+  // methods for processing events
+  static void ProcessCharEvent(
+    vtkObject* object, unsigned long event, void* clientdata, void* calldata);
+  static void ProcessDeleteEvent(
+    vtkObject* object, unsigned long event, void* clientdata, void* calldata);
+  static void ProcessEvents(
+    vtkObject* object, unsigned long event, void* clientdata, void* calldata);
 
-  virtual void WriteEvent(const char* event, int pos[2], int ctrlKey,
-                          int shiftKey, int keyCode, int repeatCount,
-                          char* keySym);
+  virtual void WriteEvent(
+    const char* event, int pos[2], int modifiers, int keyCode, int repeatCount, char* keySym);
 
   virtual void ReadEvent();
 
@@ -133,18 +132,24 @@ protected:
   int State;
   enum WidgetState
   {
-    Start=0,
+    Start = 0,
     Playing,
     Recording
+  };
+
+  // Associate a modifier with a bit
+  enum ModifierKey
+  {
+    ShiftKey = 1,
+    ControlKey = 2,
+    AltKey = 4
   };
 
   static float StreamVersion;
 
 private:
-  vtkInteractorEventRecorder(const vtkInteractorEventRecorder&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorEventRecorder&) VTK_DELETE_FUNCTION;
-
+  vtkInteractorEventRecorder(const vtkInteractorEventRecorder&) = delete;
+  void operator=(const vtkInteractorEventRecorder&) = delete;
 };
 
 #endif /* vtkInteractorEventRecorder_h */
-

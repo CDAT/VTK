@@ -50,7 +50,7 @@ POSSIBILITY OF SUCH DAMAGES.
  * @brief   A writer for MNI tag point files.
  *
  * The MNI .tag file format is used to store tag points, for use in
- * either registration or labelling of data volumes.  This file
+ * either registration or labeling of data volumes.  This file
  * format was developed at the McConnell Brain Imaging Centre at
  * the Montreal Neurological Institute and is used by their software.
  * Tag points can be stored for either one volume or two volumes,
@@ -60,7 +60,7 @@ POSSIBILITY OF SUCH DAMAGES.
  * vtkMINCImageReader vtkMNIObjectReader vtkMNITransformReader
  * @par Thanks:
  * Thanks to David Gobbi for contributing this class to VTK.
-*/
+ */
 
 #ifndef vtkMNITagPointWriter_h
 #define vtkMNITagPointWriter_h
@@ -78,33 +78,29 @@ class vtkPoints;
 class VTKIOMINC_EXPORT vtkMNITagPointWriter : public vtkWriter
 {
 public:
-  vtkTypeMacro(vtkMNITagPointWriter,vtkWriter);
+  vtkTypeMacro(vtkMNITagPointWriter, vtkWriter);
 
-  static vtkMNITagPointWriter *New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkMNITagPointWriter* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
-   * Get the entension for this file format.
+   * Get the extension for this file format.
    */
-  virtual const char* GetFileExtensions() {
-    return ".tag"; }
+  virtual const char* GetFileExtensions() { return ".tag"; }
 
   /**
    * Get the name of this file format.
    */
-  virtual const char* GetDescriptiveName() {
-    return "MNI tags"; }
+  virtual const char* GetDescriptiveName() { return "MNI tags"; }
 
   //@{
   /**
    * Set the points (unless you set them as inputs).
    */
-  virtual void SetPoints(int port, vtkPoints *points);
-  virtual void SetPoints(vtkPoints *points) {
-    this->SetPoints(0, points); }
-  virtual vtkPoints *GetPoints(int port);
-  virtual vtkPoints *GetPoints() {
-    return this->GetPoints(0); }
+  virtual void SetPoints(int port, vtkPoints* points);
+  virtual void SetPoints(vtkPoints* points) { this->SetPoints(0, points); }
+  virtual vtkPoints* GetPoints(int port);
+  virtual vtkPoints* GetPoints() { return this->GetPoints(0); }
   //@}
 
   //@{
@@ -112,7 +108,7 @@ public:
    * Set the labels (unless the input PointData has an
    * array called LabelText). Labels are optional.
    */
-  virtual void SetLabelText(vtkStringArray *a);
+  virtual void SetLabelText(vtkStringArray* a);
   vtkGetObjectMacro(LabelText, vtkStringArray);
   //@}
 
@@ -121,7 +117,7 @@ public:
    * Set the weights (unless the input PointData has an
    * array called Weights).  Weights are optional.
    */
-  virtual void SetWeights(vtkDoubleArray *a);
+  virtual void SetWeights(vtkDoubleArray* a);
   vtkGetObjectMacro(Weights, vtkDoubleArray);
   //@}
 
@@ -130,7 +126,7 @@ public:
    * Set the structure ids (unless the input PointData has
    * an array called StructureIds).  These are optional.
    */
-  virtual void SetStructureIds(vtkIntArray *a);
+  virtual void SetStructureIds(vtkIntArray* a);
   vtkGetObjectMacro(StructureIds, vtkIntArray);
   //@}
 
@@ -139,7 +135,7 @@ public:
    * Set the structure ids (unless the input PointData has
    * an array called PatientIds).  These are optional.
    */
-  virtual void SetPatientIds(vtkIntArray *a);
+  virtual void SetPatientIds(vtkIntArray* a);
   vtkGetObjectMacro(PatientIds, vtkIntArray);
   //@}
 
@@ -154,12 +150,12 @@ public:
   /**
    * Write the file.
    */
-  int Write() VTK_OVERRIDE;
+  int Write() override;
 
   /**
    * Get the MTime.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -171,34 +167,32 @@ public:
 
 protected:
   vtkMNITagPointWriter();
-  ~vtkMNITagPointWriter() VTK_OVERRIDE;
+  ~vtkMNITagPointWriter() override;
 
-  vtkPoints *Points[2];
-  vtkStringArray *LabelText;
-  vtkDoubleArray *Weights;
-  vtkIntArray *StructureIds;
-  vtkIntArray *PatientIds;
-  char *Comments;
+  vtkPoints* Points[2];
+  vtkStringArray* LabelText;
+  vtkDoubleArray* Weights;
+  vtkIntArray* StructureIds;
+  vtkIntArray* PatientIds;
+  char* Comments;
 
-  void WriteData() VTK_OVERRIDE {}
-  virtual void WriteData(vtkPointSet *inputs[2]);
+  void WriteData() override {}
+  virtual void WriteData(vtkPointSet* inputs[2]);
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   char* FileName;
 
   int FileType;
 
-  ostream *OpenFile();
-  void CloseFile(ostream *fp);
+  ostream* OpenFile();
+  void CloseFile(ostream* fp);
 
 private:
-  vtkMNITagPointWriter(const vtkMNITagPointWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMNITagPointWriter&) VTK_DELETE_FUNCTION;
-
+  vtkMNITagPointWriter(const vtkMNITagPointWriter&) = delete;
+  void operator=(const vtkMNITagPointWriter&) = delete;
 };
 
 #endif

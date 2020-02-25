@@ -26,51 +26,51 @@
  * Binary files written on one system may not be readable on other systems.
  * @sa
  * vtkRectilinearGrid vtkDataReader
-*/
+ */
 
 #ifndef vtkRectilinearGridReader_h
 #define vtkRectilinearGridReader_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataReader.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkRectilinearGrid;
 
 class VTKIOLEGACY_EXPORT vtkRectilinearGridReader : public vtkDataReader
 {
 public:
-  static vtkRectilinearGridReader *New();
-  vtkTypeMacro(vtkRectilinearGridReader,vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkRectilinearGridReader* New();
+  vtkTypeMacro(vtkRectilinearGridReader, vtkDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get and set the output of this reader.
    */
-  vtkRectilinearGrid *GetOutput();
-  vtkRectilinearGrid *GetOutput(int idx);
-  void SetOutput(vtkRectilinearGrid *output);
+  vtkRectilinearGrid* GetOutput();
+  vtkRectilinearGrid* GetOutput(int idx);
+  void SetOutput(vtkRectilinearGrid* output);
   //@}
 
   /**
-   * Read the meta information from the file.  This needs to be public to it
-   * can be accessed by vtkDataSetReader.
+   * Read the meta information from the file (WHOLE_EXTENT).
    */
-  int ReadMetaData(vtkInformation *outInfo) VTK_OVERRIDE;
+  int ReadMetaDataSimple(const std::string& fname, vtkInformation* metadata) override;
+
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname, vtkDataObject* output) override;
 
 protected:
   vtkRectilinearGridReader();
-  ~vtkRectilinearGridReader() VTK_OVERRIDE;
+  ~vtkRectilinearGridReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 private:
-  vtkRectilinearGridReader(const vtkRectilinearGridReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRectilinearGridReader&) VTK_DELETE_FUNCTION;
+  vtkRectilinearGridReader(const vtkRectilinearGridReader&) = delete;
+  void operator=(const vtkRectilinearGridReader&) = delete;
 };
 
 #endif

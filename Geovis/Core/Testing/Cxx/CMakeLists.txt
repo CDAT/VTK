@@ -1,15 +1,5 @@
-vtk_add_test_cxx(${vtk-module}CxxTests tests
-  TestGeoAssignCoordinates.cxx
-  TestGeoGraticule.cxx
+vtk_add_test_cxx(vtkGeovisCoreCxxTests tests
   TestGeoProjection.cxx,NO_VALID
-  TestGlobeSource.cxx
   )
 
-if(NOT VTK_REPLACE_OPENGL_OVERRIDES)
-  vtk_add_test_cxx(${vtk-module}CxxTests tests
-    TestCoincidentGeoGraphRepresentation2D.cxx
-    TestLabeledGeoView2D.cxx
-    )
-endif()
-
-vtk_test_cxx_executable(${vtk-module}CxxTests tests)
+vtk_test_cxx_executable(vtkGeovisCoreCxxTests tests)

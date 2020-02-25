@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.3...3.12 FATAL_ERROR)
 
 
 project (VolumeRendering)
@@ -8,7 +8,7 @@ vtk_module_config(VTK
   vtkIOImage
   vtkIOXML
   vtkInteractionWidgets
-  vtkRenderingVolume${VTK_RENDERING_BACKEND}
+  vtkRenderingVolumeOpenGL2
 )
 include(${VTK_USE_FILE})
 

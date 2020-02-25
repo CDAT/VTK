@@ -34,13 +34,18 @@
  * but starting with VTK 5.0 is now a subclass of NSView.
  * - starting with VTK 6.3 this class overrides the more modern
  * updateTrackingAreas instead of resetCursorRects.
+ * - starting with VTK 8.1 this class properly supports Retina
+ * displays and implements viewWillMoveToWindow: and
+ * viewDidChangeBackingProperties to do so.
  *
  * @sa
  * vtkCocoaRenderWindow vtkCocoaRenderWindowInteractor
-*/
+ */
 
 #ifndef vtkCocoaGLView_h
 #define vtkCocoaGLView_h
+#ifndef __VTK_WRAP__
+#ifndef VTK_WRAPPING_CXX
 
 #include "vtkRenderingOpenGL2Module.h" // For export macro
 #import <Cocoa/Cocoa.h>
@@ -48,23 +53,23 @@
 // Note: This file should be includable by both pure Objective-C and Objective-C++ source files.
 // To achieve this, we use the neat technique below:
 #ifdef __cplusplus
-  // Forward declarations
-  class vtkCocoaRenderWindow;
-  class vtkCocoaRenderWindowInteractor;
+// Forward declarations
+class vtkCocoaRenderWindow;
+class vtkCocoaRenderWindowInteractor;
 
-  // Type declarations
-  typedef vtkCocoaRenderWindow *vtkCocoaRenderWindowRef;
-  typedef vtkCocoaRenderWindowInteractor *vtkCocoaRenderWindowInteractorRef;
+// Type declarations
+typedef vtkCocoaRenderWindow* vtkCocoaRenderWindowRef;
+typedef vtkCocoaRenderWindowInteractor* vtkCocoaRenderWindowInteractorRef;
 #else
-  // Type declarations
-  typedef void *vtkCocoaRenderWindowRef;
-  typedef void *vtkCocoaRenderWindowInteractorRef;
+// Type declarations
+typedef void* vtkCocoaRenderWindowRef;
+typedef void* vtkCocoaRenderWindowInteractorRef;
 #endif
 
 VTKRENDERINGOPENGL2_EXPORT
 @interface vtkCocoaGLView : NSView
 {
-  @private
+@private
   vtkCocoaRenderWindowRef _myVTKRenderWindow;
   NSTrackingArea* _rolloverTrackingArea;
 }
@@ -76,5 +81,7 @@ VTKRENDERINGOPENGL2_EXPORT
 
 @end
 
+#endif
+#endif
 #endif /* vtkCocoaGLView_h */
 // VTK-HeaderTest-Exclude: vtkCocoaGLView.h

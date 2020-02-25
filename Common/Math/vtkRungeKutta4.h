@@ -24,7 +24,7 @@
  *
  * @sa
  * vtkInitialValueProblemSolver vtkRungeKutta45 vtkRungeKutta2 vtkFunctionSet
-*/
+ */
 
 #ifndef vtkRungeKutta4_h
 #define vtkRungeKutta4_h
@@ -35,15 +35,15 @@
 class VTKCOMMONMATH_EXPORT vtkRungeKutta4 : public vtkInitialValueProblemSolver
 {
 public:
-  vtkTypeMacro(vtkRungeKutta4,vtkInitialValueProblemSolver);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkRungeKutta4, vtkInitialValueProblemSolver);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct a vtkRungeKutta4 with no initial FunctionSet.
    */
-  static vtkRungeKutta4 *New();
+  static vtkRungeKutta4* New();
 
-
+  using Superclass::ComputeNextStep;
   //@{
   /**
    * Given initial values, xprev , initial time, t and a requested time
@@ -58,58 +58,46 @@ public:
    * NotInitialized = 2,
    * UnexpectedValue = 3
    */
-  int ComputeNextStep(double* xprev, double* xnext,
-                      double t, double& delT,
-                      double maxError, double& error) VTK_OVERRIDE
+  int ComputeNextStep(double* xprev, double* xnext, double t, double& delT, double maxError,
+    double& error, void* userData) override
   {
-      double minStep = delT;
-      double maxStep = delT;
-      double delTActual;
-      return this->ComputeNextStep(xprev, nullptr, xnext, t, delT, delTActual,
-                                   minStep, maxStep, maxError, error);
+    double minStep = delT;
+    double maxStep = delT;
+    double delTActual;
+    return this->ComputeNextStep(
+      xprev, nullptr, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, userData);
   }
-  int ComputeNextStep(double* xprev, double* dxprev, double* xnext,
-                      double t, double& delT,
-                      double maxError, double& error) VTK_OVERRIDE
+  int ComputeNextStep(double* xprev, double* dxprev, double* xnext, double t, double& delT,
+    double maxError, double& error, void* userData) override
   {
-      double minStep = delT;
-      double maxStep = delT;
-      double delTActual;
-      return this->ComputeNextStep(xprev, dxprev, xnext, t, delT, delTActual,
-                                   minStep, maxStep, maxError, error);
+    double minStep = delT;
+    double maxStep = delT;
+    double delTActual;
+    return this->ComputeNextStep(
+      xprev, dxprev, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, userData);
   }
-  int ComputeNextStep(double* xprev, double* xnext,
-                      double t, double& delT, double& delTActual,
-                      double minStep, double maxStep,
-                      double maxError, double& error) VTK_OVERRIDE
+  int ComputeNextStep(double* xprev, double* xnext, double t, double& delT, double& delTActual,
+    double minStep, double maxStep, double maxError, double& error, void* userData) override
   {
-      return this->ComputeNextStep(xprev, nullptr, xnext, t, delT, delTActual,
-                                   minStep, maxStep, maxError, error);
+    return this->ComputeNextStep(
+      xprev, nullptr, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, userData);
   }
-  int ComputeNextStep(double* xprev, double* dxprev, double* xnext,
-                      double t, double& delT, double& delTActual,
-                      double minStep, double maxStep,
-                      double maxError, double& error) VTK_OVERRIDE;
+  int ComputeNextStep(double* xprev, double* dxprev, double* xnext, double t, double& delT,
+    double& delTActual, double minStep, double maxStep, double maxError, double& error,
+    void* userData) override;
   //@}
 
 protected:
   vtkRungeKutta4();
-  ~vtkRungeKutta4() VTK_OVERRIDE;
+  ~vtkRungeKutta4() override;
 
-  void Initialize() VTK_OVERRIDE;
+  void Initialize() override;
 
   double* NextDerivs[3];
+
 private:
-  vtkRungeKutta4(const vtkRungeKutta4&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRungeKutta4&) VTK_DELETE_FUNCTION;
+  vtkRungeKutta4(const vtkRungeKutta4&) = delete;
+  void operator=(const vtkRungeKutta4&) = delete;
 };
 
 #endif
-
-
-
-
-
-
-
-

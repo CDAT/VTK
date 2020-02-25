@@ -18,12 +18,10 @@
  *
  * vtkImageDotProduct interprets the scalar components of two images
  * as vectors and takes the dot product vector by vector (pixel by pixel).
-*/
+ */
 
 #ifndef vtkImageDotProduct_h
 #define vtkImageDotProduct_h
-
-
 
 #include "vtkImagingMathModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -31,37 +29,30 @@
 class VTKIMAGINGMATH_EXPORT vtkImageDotProduct : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageDotProduct *New();
-  vtkTypeMacro(vtkImageDotProduct,vtkThreadedImageAlgorithm);
+  static vtkImageDotProduct* New();
+  vtkTypeMacro(vtkImageDotProduct, vtkThreadedImageAlgorithm);
 
   /**
    * Set the two inputs to this filter
    */
-  virtual void SetInput1Data(vtkDataObject *in) { this->SetInputData(0,in); }
-  virtual void SetInput2Data(vtkDataObject *in) { this->SetInputData(1,in); }
+  virtual void SetInput1Data(vtkDataObject* in) { this->SetInputData(0, in); }
+  virtual void SetInput2Data(vtkDataObject* in) { this->SetInputData(1, in); }
 
 protected:
   vtkImageDotProduct();
-  ~vtkImageDotProduct() VTK_OVERRIDE {}
+  ~vtkImageDotProduct() override {}
 
-  int RequestInformation (vtkInformation *,
-                                  vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void ThreadedRequestData(vtkInformation *request,
-                                   vtkInformationVector **inputVector,
-                                   vtkInformationVector *outputVector,
-                                   vtkImageData ***inData,
-                                   vtkImageData **outData,
-                                   int extent[6], int threadId) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData,
+    int extent[6], int threadId) override;
 
 private:
-  vtkImageDotProduct(const vtkImageDotProduct&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageDotProduct&) VTK_DELETE_FUNCTION;
+  vtkImageDotProduct(const vtkImageDotProduct&) = delete;
+  void operator=(const vtkImageDotProduct&) = delete;
 };
 
 #endif
-
-
 
 // VTK-HeaderTest-Exclude: vtkImageDotProduct.h

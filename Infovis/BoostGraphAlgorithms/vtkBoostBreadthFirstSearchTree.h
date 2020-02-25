@@ -19,7 +19,7 @@
 -------------------------------------------------------------------------*/
 /**
  * @class   vtkBoostBreadthFirstSearchTree
- * @brief   Contructs a BFS tree from a graph
+ * @brief   Constructs a BFS tree from a graph
  *
  *
  *
@@ -31,23 +31,23 @@
  *
  * @sa
  * vtkGraph vtkBoostGraphAdapter
-*/
+ */
 
 #ifndef vtkBoostBreadthFirstSearchTree_h
 #define vtkBoostBreadthFirstSearchTree_h
 
 #include "vtkInfovisBoostGraphAlgorithmsModule.h" // For export macro
-#include "vtkStdString.h" // For string type
-#include "vtkVariant.h" // For variant type
+#include "vtkStdString.h"                         // For string type
+#include "vtkVariant.h"                           // For variant type
 
 #include "vtkTreeAlgorithm.h"
 
 class VTKINFOVISBOOSTGRAPHALGORITHMS_EXPORT vtkBoostBreadthFirstSearchTree : public vtkTreeAlgorithm
 {
 public:
-  static vtkBoostBreadthFirstSearchTree *New();
+  static vtkBoostBreadthFirstSearchTree* New();
   vtkTypeMacro(vtkBoostBreadthFirstSearchTree, vtkTreeAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Set the index (into the vertex array) of the
@@ -85,14 +85,13 @@ public:
 
 protected:
   vtkBoostBreadthFirstSearchTree();
-  ~vtkBoostBreadthFirstSearchTree();
+  ~vtkBoostBreadthFirstSearchTree() override;
 
-  int FillInputPortInformation(int port, vtkInformation* info);
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-
   vtkIdType OriginVertexIndex;
   char* ArrayName;
   vtkVariant OriginValue;
@@ -111,11 +110,10 @@ private:
    * This method is basically a helper function to find
    * the index of a specific value within a specific array
    */
-  vtkIdType GetVertexIndex(
-    vtkAbstractArray *abstract,vtkVariant value);
+  vtkIdType GetVertexIndex(vtkAbstractArray* abstract, vtkVariant value);
 
-  vtkBoostBreadthFirstSearchTree(const vtkBoostBreadthFirstSearchTree&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBoostBreadthFirstSearchTree&) VTK_DELETE_FUNCTION;
+  vtkBoostBreadthFirstSearchTree(const vtkBoostBreadthFirstSearchTree&) = delete;
+  void operator=(const vtkBoostBreadthFirstSearchTree&) = delete;
 };
 
 #endif

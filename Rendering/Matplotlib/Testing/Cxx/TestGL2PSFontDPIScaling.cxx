@@ -17,9 +17,9 @@
 
 #include "vtkGL2PSExporter.h"
 #include "vtkNew.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkStdString.h"
 #include "vtkTestingInteractor.h"
 #include "vtkTextActor.h"
@@ -29,7 +29,7 @@
 #include <string>
 
 //----------------------------------------------------------------------------
-int TestGL2PSFontDPIScaling(int argc, char *argv[])
+int TestGL2PSFontDPIScaling(int argc, char* argv[])
 {
   if (argc < 2)
   {
@@ -201,38 +201,38 @@ int TestGL2PSFontDPIScaling(int argc, char *argv[])
   win->SetMultiSamples(0);
   win->SetDPI(96);
   win->SetSize(600, 600);
-  win->AddRenderer(ren.GetPointer());
+  win->AddRenderer(ren);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(win.GetPointer());
+  iren->SetRenderWindow(win);
 
-  ren->AddActor(actor1.GetPointer());
-  ren->AddActor(actor2.GetPointer());
-  ren->AddActor(actor3.GetPointer());
-  ren->AddActor(actor4.GetPointer());
-  ren->AddActor(actor5.GetPointer());
-  ren->AddActor(actor6.GetPointer());
-  ren->AddActor(actor7.GetPointer());
-  ren->AddActor(actor8.GetPointer());
-  ren->AddActor(actor9.GetPointer());
-  ren->AddActor(actor10.GetPointer());
-  ren->AddActor(actor11.GetPointer());
-  ren->AddActor(actor12.GetPointer());
-  ren->AddActor(actor13.GetPointer());
-  ren->AddActor(actor14.GetPointer());
-  ren->AddActor(actor15.GetPointer());
-  ren->AddActor(actor16.GetPointer());
+  ren->AddActor(actor1);
+  ren->AddActor(actor2);
+  ren->AddActor(actor3);
+  ren->AddActor(actor4);
+  ren->AddActor(actor5);
+  ren->AddActor(actor6);
+  ren->AddActor(actor7);
+  ren->AddActor(actor8);
+  ren->AddActor(actor9);
+  ren->AddActor(actor10);
+  ren->AddActor(actor11);
+  ren->AddActor(actor12);
+  ren->AddActor(actor13);
+  ren->AddActor(actor14);
+  ren->AddActor(actor15);
+  ren->AddActor(actor16);
   win->Render();
 
   vtkNew<vtkGL2PSExporter> exp;
-  exp->SetRenderWindow(win.GetPointer());
+  exp->SetRenderWindow(win);
   exp->SetFileFormatToPS();
   exp->CompressOff();
   exp->SetSortToSimple();
   exp->TextAsPathOn();
   exp->DrawBackgroundOn();
 
-  std::string fileprefix = vtkTestingInteractor::TempDirectory +
-      std::string("/TestGL2PSFontDPIScaling");
+  std::string fileprefix =
+    vtkTestingInteractor::TempDirectory + std::string("/TestGL2PSFontDPIScaling");
 
   exp->SetFilePrefix(fileprefix.c_str());
   exp->Write();

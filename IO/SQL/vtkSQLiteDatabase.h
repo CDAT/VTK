@@ -33,7 +33,7 @@
  *
  * If you want to open a database that stays in memory and never gets
  * written to disk, pass in the URL 'sqlite://:memory:'; otherwise,
- * specifiy the file path by passing the URL 'sqlite://<file_path>'.
+ * specify the file path by passing the URL 'sqlite://<file_path>'.
  *
  * @par Thanks:
  * Thanks to Andrew Wilson and Philippe Pebay from Sandia National
@@ -41,7 +41,7 @@
  *
  * @sa
  * vtkSQLiteQuery
-*/
+ */
 
 #ifndef vtkSQLiteDatabase_h
 #define vtkSQLiteDatabase_h
@@ -52,7 +52,7 @@
 class vtkSQLQuery;
 class vtkSQLiteQuery;
 class vtkStringArray;
-struct vtk_sqlite3;
+class vtkSQLiteDatabaseInternals;
 
 class VTKIOSQL_EXPORT vtkSQLiteDatabase : public vtkSQLDatabase
 {
@@ -61,10 +61,11 @@ class VTKIOSQL_EXPORT vtkSQLiteDatabase : public vtkSQLDatabase
 
 public:
   vtkTypeMacro(vtkSQLiteDatabase, vtkSQLDatabase);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkSQLiteDatabase *New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkSQLiteDatabase* New();
 
-  enum {
+  enum
+  {
     USE_EXISTING,
     USE_EXISTING_OR_CREATE,
     CREATE_OR_CLEAR,
@@ -81,58 +82,55 @@ public:
    * - CREATE_OR_CLEAR - Create new or clear existing file.
    * - CREATE - Create new, fail if file exists.
    */
-  bool Open(const char* password) VTK_OVERRIDE;
+  bool Open(const char* password) override;
   bool Open(const char* password, int mode);
   //@}
 
   /**
    * Close the connection to the database.
    */
-  void Close() VTK_OVERRIDE;
+  void Close() override;
 
   /**
    * Return whether the database has an open connection
    */
-  bool IsOpen() VTK_OVERRIDE;
+  bool IsOpen() override;
 
   /**
    * Return an empty query on this database.
    */
-  vtkSQLQuery* GetQueryInstance() VTK_OVERRIDE;
+  vtkSQLQuery* GetQueryInstance() override;
 
   /**
    * Get the list of tables from the database
    */
-  vtkStringArray* GetTables() VTK_OVERRIDE;
+  vtkStringArray* GetTables() override;
 
   /**
    * Get the list of fields for a particular table
    */
-  vtkStringArray* GetRecord(const char *table) VTK_OVERRIDE;
+  vtkStringArray* GetRecord(const char* table) override;
 
   /**
    * Return whether a feature is supported by the database.
    */
-  bool IsSupported(int feature) VTK_OVERRIDE;
+  bool IsSupported(int feature) override;
 
   /**
    * Did the last operation generate an error
    */
-  bool HasError() VTK_OVERRIDE;
+  bool HasError() override;
 
   /**
    * Get the last error text from the database
    */
-  const char* GetLastErrorText() VTK_OVERRIDE;
+  const char* GetLastErrorText() override;
 
   //@{
   /**
    * String representing database type (e.g. "sqlite").
    */
-  const char* GetDatabaseType() VTK_OVERRIDE
-  {
-    return this->DatabaseType;
-  }
+  const char* GetDatabaseType() override { return this->DatabaseType; }
   //@}
 
   //@{
@@ -146,7 +144,7 @@ public:
   /**
    * Get the URL of the database.
    */
-  vtkStdString GetURL() VTK_OVERRIDE;
+  vtkStdString GetURL() override;
 
   /**
    * Return the SQL string with the syntax to create a column inside a
@@ -154,38 +152,36 @@ public:
    * NB: this method implements the SQLite-specific syntax:
    * <column name> <column type> <column attributes>
    */
-  vtkStdString GetColumnSpecification( vtkSQLDatabaseSchema* schema,
-                                               int tblHandle,
-                                               int colHandle ) VTK_OVERRIDE;
+  vtkStdString GetColumnSpecification(
+    vtkSQLDatabaseSchema* schema, int tblHandle, int colHandle) override;
 
 protected:
   vtkSQLiteDatabase();
-  ~vtkSQLiteDatabase() VTK_OVERRIDE;
+  ~vtkSQLiteDatabase() override;
 
   /**
    * Overridden to determine connection parameters given the URL.
    * This is called by CreateFromURL() to initialize the instance.
    * Look at CreateFromURL() for details about the URL format.
    */
-  bool ParseURL(const char* url) VTK_OVERRIDE;
+  bool ParseURL(const char* url) override;
 
 private:
-  vtk_sqlite3 *SQLiteInstance;
+  vtkSQLiteDatabaseInternals* Internal;
 
   // We want this to be private, a user of this class
   // should not be setting this for any reason
   vtkSetStringMacro(DatabaseType);
 
-  vtkStringArray *Tables;
+  vtkStringArray* Tables;
 
   char* DatabaseType;
   char* DatabaseFileName;
 
   vtkStdString TempURL;
 
-  vtkSQLiteDatabase(const vtkSQLiteDatabase &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSQLiteDatabase &) VTK_DELETE_FUNCTION;
+  vtkSQLiteDatabase(const vtkSQLiteDatabase&) = delete;
+  void operator=(const vtkSQLiteDatabase&) = delete;
 };
 
 #endif // vtkSQLiteDatabase_h
-

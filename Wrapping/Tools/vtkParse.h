@@ -21,57 +21,85 @@
 #ifndef vtkParse_h
 #define vtkParse_h
 
-#include "vtkParseType.h"
 #include "vtkParseData.h"
+#include "vtkParseType.h"
+#include "vtkWrappingToolsModule.h"
 #include <stdio.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-/**
- * Define a preprocessor macro. Function macros are not supported.
- */
-void vtkParse_DefineMacro(const char *name, const char *definition);
+  /**
+   * Define a preprocessor macro. Function macros are not supported.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_DefineMacro(const char* name, const char* definition);
 
-/**
- * Undefine a preprocessor macro.
- */
-void vtkParse_UndefineMacro(const char *name);
+  /**
+   * Undefine a preprocessor macro.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_UndefineMacro(const char* name);
 
-/**
- * Add an include directory, for use with the "-I" option.
- */
-void vtkParse_IncludeDirectory(const char *dirname);
+  /**
+   * Do not pre-define any macros related to the system or platform.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_UndefinePlatformMacros(void);
 
-/**
- * Return the full path to a header file.
- */
-const char *vtkParse_FindIncludeFile(const char *filename);
+  /**
+   * Read macros from the provided header file.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_IncludeMacros(const char* filename);
 
-/**
- * Set the command name, for error reporting and diagnostics.
- */
-void vtkParse_SetCommandName(const char *name);
+  /**
+   * Dump macros to the specified file (stdout if NULL).
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_DumpMacros(const char* filename);
 
-/**
- * Parse a header file and return a FileInfo struct
- */
-FileInfo *vtkParse_ParseFile(
-  const char *filename, FILE *ifile, FILE *errfile);
+  /**
+   * Add an include directory, for use with the "-I" option.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_IncludeDirectory(const char* dirname);
 
-/**
- * Read a hints file and update the FileInfo
- */
-int vtkParse_ReadHints(FileInfo *data, FILE *hfile, FILE *errfile);
+  /**
+   * Return the full path to a header file.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  const char* vtkParse_FindIncludeFile(const char* filename);
 
-/**
- * Free the FileInfo struct returned by vtkParse_ParseFile()
- */
-void vtkParse_Free(FileInfo *data);
+  /**
+   * Set the command name, for error reporting and diagnostics.
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_SetCommandName(const char* name);
+
+  /**
+   * Parse a header file and return a FileInfo struct
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  FileInfo* vtkParse_ParseFile(const char* filename, FILE* ifile, FILE* errfile);
+
+  /**
+   * Read a hints file and update the FileInfo
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  int vtkParse_ReadHints(FileInfo* data, FILE* hfile, FILE* errfile);
+
+  /**
+   * Free the FileInfo struct returned by vtkParse_ParseFile()
+   */
+  VTKWRAPPINGTOOLS_EXPORT
+  void vtkParse_Free(FileInfo* data);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
 #endif
+/* VTK-HeaderTest-Exclude: vtkParse.h */

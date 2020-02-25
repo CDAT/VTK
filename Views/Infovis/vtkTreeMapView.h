@@ -25,13 +25,13 @@
  * vtkTreeMapView shows a vtkTree in a tree map, where each vertex in the
  * tree is represented by a box.  Child boxes are contained within the
  * parent box, and may be colored and sized by various parameters.
-*/
+ */
 
 #ifndef vtkTreeMapView_h
 #define vtkTreeMapView_h
 
-#include "vtkViewsInfovisModule.h" // For export macro
 #include "vtkTreeAreaView.h"
+#include "vtkViewsInfovisModule.h" // For export macro
 
 class vtkBoxLayoutStrategy;
 class vtkSliceAndDiceLayoutStrategy;
@@ -40,15 +40,15 @@ class vtkSquarifyLayoutStrategy;
 class VTKVIEWSINFOVIS_EXPORT vtkTreeMapView : public vtkTreeAreaView
 {
 public:
-  static vtkTreeMapView *New();
+  static vtkTreeMapView* New();
   vtkTypeMacro(vtkTreeMapView, vtkTreeAreaView);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Sets the treemap layout strategy
    */
-  void SetLayoutStrategy(vtkAreaLayoutStrategy* s) VTK_OVERRIDE;
+  void SetLayoutStrategy(vtkAreaLayoutStrategy* s) override;
   virtual void SetLayoutStrategy(const char* name);
   virtual void SetLayoutStrategyToBox();
   virtual void SetLayoutStrategyToSliceAndDice();
@@ -59,22 +59,21 @@ public:
   /**
    * The sizes of the fonts used for labeling.
    */
-  virtual void SetFontSizeRange(
-    const int maxSize, const int minSize, const int delta=4);
+  virtual void SetFontSizeRange(const int maxSize, const int minSize, const int delta = 4);
   virtual void GetFontSizeRange(int range[3]);
   //@}
 
 protected:
   vtkTreeMapView();
-  ~vtkTreeMapView() VTK_OVERRIDE;
+  ~vtkTreeMapView() override;
 
   vtkSmartPointer<vtkBoxLayoutStrategy> BoxLayout;
   vtkSmartPointer<vtkSliceAndDiceLayoutStrategy> SliceAndDiceLayout;
   vtkSmartPointer<vtkSquarifyLayoutStrategy> SquarifyLayout;
 
 private:
-  vtkTreeMapView(const vtkTreeMapView&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTreeMapView&) VTK_DELETE_FUNCTION;
+  vtkTreeMapView(const vtkTreeMapView&) = delete;
+  void operator=(const vtkTreeMapView&) = delete;
 };
 
 #endif

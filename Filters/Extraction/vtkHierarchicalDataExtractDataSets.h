@@ -20,33 +20,30 @@
  *
  * @sa
  * vtkExtractDataSets
-*/
+ */
 
 #ifndef vtkHierarchicalDataExtractDataSets_h
 #define vtkHierarchicalDataExtractDataSets_h
 
-#include "vtkFiltersExtractionModule.h" // For export macro
 #include "vtkExtractDataSets.h"
+#include "vtkFiltersExtractionModule.h" // For export macro
 
 struct vtkHierarchicalDataExtractDataSetsInternals;
 
-class VTKFILTERSEXTRACTION_EXPORT vtkHierarchicalDataExtractDataSets :
-  public vtkExtractDataSets
+class VTKFILTERSEXTRACTION_EXPORT vtkHierarchicalDataExtractDataSets : public vtkExtractDataSets
 {
 public:
-  vtkTypeMacro(vtkHierarchicalDataExtractDataSets,vtkExtractDataSets);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkHierarchicalDataExtractDataSets *New();
+  vtkTypeMacro(vtkHierarchicalDataExtractDataSets, vtkExtractDataSets);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkHierarchicalDataExtractDataSets* New();
 
 protected:
   vtkHierarchicalDataExtractDataSets();
-  ~vtkHierarchicalDataExtractDataSets() VTK_OVERRIDE;
+  ~vtkHierarchicalDataExtractDataSets() override;
 
 private:
-  vtkHierarchicalDataExtractDataSets(const vtkHierarchicalDataExtractDataSets&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHierarchicalDataExtractDataSets&) VTK_DELETE_FUNCTION;
+  vtkHierarchicalDataExtractDataSets(const vtkHierarchicalDataExtractDataSets&) = delete;
+  void operator=(const vtkHierarchicalDataExtractDataSets&) = delete;
 };
 
 #endif
-
-

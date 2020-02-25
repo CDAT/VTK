@@ -30,11 +30,10 @@ public:
   vtkTypeMacro(vtkTemporalRTAnalyticSource, vtkRTAnalyticSource);
 
 protected:
-  vtkTemporalRTAnalyticSource() {}
+  vtkTemporalRTAnalyticSource() = default;
 
-  int RequestInformation(vtkInformation* request,
-                         vtkInformationVector** inputVector,
-                         vtkInformationVector* outputVector) VTK_OVERRIDE
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override
   {
     vtkInformation* outInfo = outputVector->GetInformationObject(0);
     double range[2] = { 0, 5 };
@@ -45,7 +44,7 @@ protected:
     return 1;
   }
 
-  void ExecuteDataWithInformation(vtkDataObject* output, vtkInformation* outInfo) VTK_OVERRIDE
+  void ExecuteDataWithInformation(vtkDataObject* output, vtkInformation* outInfo) override
   {
     Superclass::ExecuteDataWithInformation(output, outInfo);
 
@@ -61,7 +60,7 @@ protected:
     vtkNew<vtkDoubleArray> timeArray;
     timeArray->SetName("timeData");
     timeArray->SetNumberOfValues(maxX * maxY * maxZ);
-    data->GetPointData()->SetScalars(timeArray.Get());
+    data->GetPointData()->SetScalars(timeArray);
 
     double t = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
     vtkIdType cnt = 0;
@@ -78,8 +77,8 @@ protected:
   }
 
 private:
-  vtkTemporalRTAnalyticSource(const vtkTemporalRTAnalyticSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTemporalRTAnalyticSource&) VTK_DELETE_FUNCTION;
+  vtkTemporalRTAnalyticSource(const vtkTemporalRTAnalyticSource&) = delete;
+  void operator=(const vtkTemporalRTAnalyticSource&) = delete;
 };
 
 vtkStandardNewMacro(vtkTemporalRTAnalyticSource);
@@ -96,8 +95,8 @@ int TestTemporalArrayOperatorFilter(int, char*[])
 
   operatorFilter->SetFirstTimeStepIndex(3);
   operatorFilter->SetSecondTimeStepIndex(0);
-  operatorFilter->SetInputArrayToProcess(0, 0, 0,
-    vtkDataObject::FIELD_ASSOCIATION_POINTS, "timeData");
+  operatorFilter->SetInputArrayToProcess(
+    0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "timeData");
   operatorFilter->SetOperator(vtkTemporalArrayOperatorFilter::ADD);
 
   operatorFilter->UpdateInformation();
@@ -105,8 +104,7 @@ int TestTemporalArrayOperatorFilter(int, char*[])
     vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP(), 2);
   operatorFilter->Update();
 
-  vtkDataSet* diff =
-    vtkDataSet::SafeDownCast(operatorFilter->GetOutputDataObject(0));
+  vtkDataSet* diff = vtkDataSet::SafeDownCast(operatorFilter->GetOutputDataObject(0));
 
   double range[2];
   diff->GetPointData()->GetArray("timeData")->GetRange(range);

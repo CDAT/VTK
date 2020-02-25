@@ -19,14 +19,13 @@
 #include "vtkGeometryFilter.h"
 #include "vtkNew.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkRTAnalyticSource.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRTAnalyticSource.h"
+#include "vtkRenderer.h"
 
-
-int TestVTKMCleanGrid(int argc, char *argv[])
+int TestVTKMCleanGrid(int argc, char* argv[])
 {
   vtkNew<vtkRTAnalyticSource> wavelet;
   wavelet->SetWholeExtent(-10, 10, -10, 10, -10, 10);
@@ -43,21 +42,21 @@ int TestVTKMCleanGrid(int argc, char *argv[])
   mapper->SetScalarRange(37, 277);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.GetPointer());
+  renderer->AddActor(actor);
   renderer->ResetCamera();
 
   vtkNew<vtkRenderWindow> renWin;
-  renWin->AddRenderer(renderer.GetPointer());
+  renWin->AddRenderer(renderer);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
   iren->Initialize();
 
   renWin->Render();
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
+  int retVal = vtkRegressionTestImage(renWin);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

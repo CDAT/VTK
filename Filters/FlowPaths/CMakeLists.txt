@@ -1,35 +1,25 @@
-set(Module_SRCS
-  vtkAbstractInterpolatedVelocityField.cxx
-  vtkAMRInterpolatedVelocityField.cxx
-  vtkCachingInterpolatedVelocityField.cxx
-  vtkCellLocatorInterpolatedVelocityField.cxx
-  vtkCompositeInterpolatedVelocityField.cxx
-  vtkEvenlySpacedStreamlines2D.cxx
-  vtkInterpolatedVelocityField.cxx
-  vtkLagrangianParticleTracker.cxx
-  vtkLagrangianBasicIntegrationModel.cxx
-  vtkLagrangianParticle.cxx
-  vtkLagrangianMatidaIntegrationModel.cxx
-  vtkModifiedBSPTree.cxx
-  vtkParticlePathFilter.cxx
-  vtkParticleTracer.cxx
-  vtkParticleTracerBase.cxx
-  vtkStreaklineFilter.cxx
-  vtkStreamTracer.cxx
-  vtkTemporalInterpolatedVelocityField.cxx
-  vtkTemporalStreamTracer.cxx
-  )
-
-set_source_files_properties(
+set(classes
   vtkAbstractInterpolatedVelocityField
-  vtkCompositeInterpolatedVelocityField.cxx
+  vtkAMRInterpolatedVelocityField
+  vtkCachingInterpolatedVelocityField
+  vtkCellLocatorInterpolatedVelocityField
+  vtkCompositeInterpolatedVelocityField
+  vtkEvenlySpacedStreamlines2D
+  vtkInterpolatedVelocityField
+  vtkLagrangianBasicIntegrationModel
+  vtkLagrangianMatidaIntegrationModel
+  vtkLagrangianParticle
+  vtkLagrangianParticleTracker
+  vtkModifiedBSPTree
+  vtkParticlePathFilter
+  vtkParticleTracer
   vtkParticleTracerBase
-  ABSTRACT
-  )
+  vtkStreaklineFilter
+  vtkStreamTracer
+  vtkTemporalInterpolatedVelocityField)
 
-set_source_files_properties(
-  vtkLagrangianParticle.cxx
-  WRAP_EXCLUDE
-  )
-
-vtk_module_library(vtkFiltersFlowPaths ${Module_SRCS})
+if (NOT VTK_LEGACY_REMOVE)
+  list(APPEND classes vtkTemporalStreamTracer)
+endif()
+vtk_module_add_module(VTK::FiltersFlowPaths
+  CLASSES ${classes})

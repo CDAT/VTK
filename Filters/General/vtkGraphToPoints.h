@@ -26,7 +26,7 @@
  * This assumes that the points
  * of the graph have already been filled (perhaps by vtkGraphLayout).
  * The vertex data is passed along to the point data.
-*/
+ */
 
 #ifndef vtkGraphToPoints_h
 #define vtkGraphToPoints_h
@@ -37,27 +37,27 @@
 class VTKFILTERSGENERAL_EXPORT vtkGraphToPoints : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkGraphToPoints *New();
-  vtkTypeMacro(vtkGraphToPoints,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkGraphToPoints* New();
+  vtkTypeMacro(vtkGraphToPoints, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkGraphToPoints();
-  ~vtkGraphToPoints() VTK_OVERRIDE {}
+  ~vtkGraphToPoints() override {}
 
   /**
    * Convert the vtkGraph into vtkPolyData.
    */
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Set the input type of the algorithm to vtkGraph.
    */
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkGraphToPoints(const vtkGraphToPoints&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGraphToPoints&) VTK_DELETE_FUNCTION;
+  vtkGraphToPoints(const vtkGraphToPoints&) = delete;
+  void operator=(const vtkGraphToPoints&) = delete;
 };
 
 #endif

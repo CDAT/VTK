@@ -21,13 +21,13 @@
  *
  * @sa
  * vtkActor2D
-*/
+ */
 
 #ifndef vtkMapper2D_h
 #define vtkMapper2D_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkAbstractMapper.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkViewport;
 class vtkActor2D;
@@ -36,20 +36,20 @@ class VTKRENDERINGCORE_EXPORT vtkMapper2D : public vtkAbstractMapper
 {
 public:
   vtkTypeMacro(vtkMapper2D, vtkAbstractMapper);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   virtual void RenderOverlay(vtkViewport*, vtkActor2D*) {}
   virtual void RenderOpaqueGeometry(vtkViewport*, vtkActor2D*) {}
   virtual void RenderTranslucentPolygonalGeometry(vtkViewport*, vtkActor2D*) {}
-  virtual int HasTranslucentPolygonalGeometry() { return 0; }
+  virtual vtkTypeBool HasTranslucentPolygonalGeometry() { return 0; }
 
 protected:
   vtkMapper2D() {}
-  ~vtkMapper2D() VTK_OVERRIDE {}
+  ~vtkMapper2D() override {}
 
 private:
-  vtkMapper2D(const vtkMapper2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMapper2D&) VTK_DELETE_FUNCTION;
+  vtkMapper2D(const vtkMapper2D&) = delete;
+  void operator=(const vtkMapper2D&) = delete;
 };
 
 #endif

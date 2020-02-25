@@ -13,18 +13,18 @@
 
 =========================================================================*/
 
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkSmartPointer.h"
 #include "vtkBlockItem.h"
+#include "vtkContextScene.h"
 #include "vtkContextTransform.h"
 #include "vtkContextView.h"
-#include "vtkContextScene.h"
 #include "vtkNew.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
 
 //----------------------------------------------------------------------------
-int TestContextItemStacking(int ,char * [] )
+int TestContextItemStacking(int, char*[])
 {
   // Set up a 2D context view, context test object and add it to the scene
   vtkNew<vtkContextView> view;
@@ -36,7 +36,7 @@ int TestContextItemStacking(int ,char * [] )
 
   int i = 0;
   int s = 120;
-  int step = s/3;
+  int step = s / 3;
   vtkNew<vtkBlockItem> test1;
   test1->SetDimensions(i, i, s, s);
   test1->SetLabel("1");
@@ -70,99 +70,94 @@ int TestContextItemStacking(int ,char * [] )
   test5->SetLabel("5");
 
   // Build up our multi-level scene
-  unsigned int index1 = rootItem->AddItem(test1.GetPointer());
-  unsigned int index2 = rootItem->AddItem(test2.GetPointer());
-  unsigned int index3 = rootItem->AddItem(test3.GetPointer());
-  unsigned int index4 = rootItem->AddItem(test4.GetPointer());
-  unsigned int index41 = test4->AddItem(test41.GetPointer());
-  unsigned int index411 = test41->AddItem(test411.GetPointer());
-  unsigned int index42 = test4->AddItem(test42.GetPointer());
-  unsigned int index5 = rootItem->AddItem(test5.GetPointer());
-  view->GetScene()->AddItem(rootItem.GetPointer());
+  vtkIdType index1 = rootItem->AddItem(test1);
+  vtkIdType index2 = rootItem->AddItem(test2);
+  vtkIdType index3 = rootItem->AddItem(test3);
+  vtkIdType index4 = rootItem->AddItem(test4);
+  vtkIdType index41 = test4->AddItem(test41);
+  vtkIdType index411 = test41->AddItem(test411);
+  vtkIdType index42 = test4->AddItem(test42);
+  vtkIdType index5 = rootItem->AddItem(test5);
+  view->GetScene()->AddItem(rootItem);
 
   // Check indexes
-  if (index1 != 0 || index2 != 1 || index3 != 2 || index4 != 3 ||
-      index41 != 0 || index411 != 0 || index42 != 1 || index5 != 4)
+  if (index1 != 0 || index2 != 1 || index3 != 2 || index4 != 3 || index41 != 0 || index411 != 0 ||
+    index42 != 1 || index5 != 4)
   {
-    std::cerr << "AddItem, bad indexes: "
-              << index1 << ", " << index2 << ", " << index3 << ", "
-              << index4 << ", " << index41 << ", " << index411 << ", "
-              << index42 << ", " << index5 << std::endl;
+    std::cerr << "AddItem, bad indexes: " << index1 << ", " << index2 << ", " << index3 << ", "
+              << index4 << ", " << index41 << ", " << index411 << ", " << index42 << ", " << index5
+              << std::endl;
     return EXIT_FAILURE;
   }
   // Restack item 3 under all items
-  int res = rootItem->Lower(rootItem->GetItemIndex(test3.GetPointer()));
-  index1 = rootItem->GetItemIndex(test1.GetPointer());
-  index2 = rootItem->GetItemIndex(test2.GetPointer());
-  index3 = rootItem->GetItemIndex(test3.GetPointer());
-  index4 = rootItem->GetItemIndex(test4.GetPointer());
+  int res = rootItem->Lower(rootItem->GetItemIndex(test3));
+  index1 = rootItem->GetItemIndex(test1);
+  index2 = rootItem->GetItemIndex(test2);
+  index3 = rootItem->GetItemIndex(test3);
+  index4 = rootItem->GetItemIndex(test4);
   if (res != 0 || index1 != 1 || index2 != 2 || index3 != 0 || index4 != 3)
   {
-    std::cerr << "Lower, bad indexes: " << res << "->"
-              << index1 << ", " << index2 << ", " << index3 << ", "
-              << index4 << ", " << index41 << ", " << index411 << ", "
-              << index42 << ", " << index5 << std::endl;
+    std::cerr << "Lower, bad indexes: " << res << "->" << index1 << ", " << index2 << ", " << index3
+              << ", " << index4 << ", " << index41 << ", " << index411 << ", " << index42 << ", "
+              << index5 << std::endl;
     return EXIT_FAILURE;
   }
   // Restack item 1 above 4
   res = rootItem->StackAbove(index1, index4);
-  index1 = rootItem->GetItemIndex(test1.GetPointer());
-  index2 = rootItem->GetItemIndex(test2.GetPointer());
-  index3 = rootItem->GetItemIndex(test3.GetPointer());
-  index4 = rootItem->GetItemIndex(test4.GetPointer());
-  index41 = test4->GetItemIndex(test41.GetPointer());
-  index42 = test4->GetItemIndex(test42.GetPointer());
-  index5 = rootItem->GetItemIndex(test5.GetPointer());
-  if (res != 3 || index1 != 3 || index2 != 1 || index3 != 0 || index4 != 2 ||
-      index41 != 0 || index411 != 0 || index42 != 1 || index5 != 4)
+  index1 = rootItem->GetItemIndex(test1);
+  index2 = rootItem->GetItemIndex(test2);
+  index3 = rootItem->GetItemIndex(test3);
+  index4 = rootItem->GetItemIndex(test4);
+  index41 = test4->GetItemIndex(test41);
+  index42 = test4->GetItemIndex(test42);
+  index5 = rootItem->GetItemIndex(test5);
+  if (res != 3 || index1 != 3 || index2 != 1 || index3 != 0 || index4 != 2 || index41 != 0 ||
+    index411 != 0 || index42 != 1 || index5 != 4)
   {
-    std::cerr << "StackAbove, bad indexes: " << res << "->"
-              << index1 << ", " << index2 << ", " << index3 << ", "
-              << index4 << ", " << index41 << ", " << index411 << ", "
-              << index42 << ", " << index5 << std::endl;
+    std::cerr << "StackAbove, bad indexes: " << res << "->" << index1 << ", " << index2 << ", "
+              << index3 << ", " << index4 << ", " << index41 << ", " << index411 << ", " << index42
+              << ", " << index5 << std::endl;
     return EXIT_FAILURE;
   }
   // Restack item 41 above 42
   res = test4->Raise(index41);
-  index1 = rootItem->GetItemIndex(test1.GetPointer());
-  index2 = rootItem->GetItemIndex(test2.GetPointer());
-  index3 = rootItem->GetItemIndex(test3.GetPointer());
-  index4 = rootItem->GetItemIndex(test4.GetPointer());
-  index41 = test4->GetItemIndex(test41.GetPointer());
-  index42 = test4->GetItemIndex(test42.GetPointer());
-  index5 = rootItem->GetItemIndex(test5.GetPointer());
-  if (res != 1 || index1 != 3 || index2 != 1 || index3 != 0 || index4 != 2 ||
-      index41 != 1 || index411 != 0 || index42 != 0 || index5 != 4)
+  index1 = rootItem->GetItemIndex(test1);
+  index2 = rootItem->GetItemIndex(test2);
+  index3 = rootItem->GetItemIndex(test3);
+  index4 = rootItem->GetItemIndex(test4);
+  index41 = test4->GetItemIndex(test41);
+  index42 = test4->GetItemIndex(test42);
+  index5 = rootItem->GetItemIndex(test5);
+  if (res != 1 || index1 != 3 || index2 != 1 || index3 != 0 || index4 != 2 || index41 != 1 ||
+    index411 != 0 || index42 != 0 || index5 != 4)
   {
-    std::cerr << "Raise, bad indexes: "  << res << "->"
-              << index1 << ", " << index2 << ", " << index3 << ", "
-              << index4 << ", " << index41 << ", " << index411 << ", "
-              << index42 << ", " << index5 << std::endl;
+    std::cerr << "Raise, bad indexes: " << res << "->" << index1 << ", " << index2 << ", " << index3
+              << ", " << index4 << ", " << index41 << ", " << index411 << ", " << index42 << ", "
+              << index5 << std::endl;
     return EXIT_FAILURE;
   }
   // Restack item 1 above 4
   res = rootItem->StackUnder(index2, index3);
-  index1 = rootItem->GetItemIndex(test1.GetPointer());
-  index2 = rootItem->GetItemIndex(test2.GetPointer());
-  index3 = rootItem->GetItemIndex(test3.GetPointer());
-  index4 = rootItem->GetItemIndex(test4.GetPointer());
-  index41 = test4->GetItemIndex(test41.GetPointer());
-  index42 = test4->GetItemIndex(test42.GetPointer());
-  index5 = rootItem->GetItemIndex(test5.GetPointer());
-  if (res != 0 || index1 != 3 || index2 != 0 || index3 != 1 || index4 != 2 ||
-      index41 != 1 || index411 != 0 || index42 != 0 || index5 != 4)
+  index1 = rootItem->GetItemIndex(test1);
+  index2 = rootItem->GetItemIndex(test2);
+  index3 = rootItem->GetItemIndex(test3);
+  index4 = rootItem->GetItemIndex(test4);
+  index41 = test4->GetItemIndex(test41);
+  index42 = test4->GetItemIndex(test42);
+  index5 = rootItem->GetItemIndex(test5);
+  if (res != 0 || index1 != 3 || index2 != 0 || index3 != 1 || index4 != 2 || index41 != 1 ||
+    index411 != 0 || index42 != 0 || index5 != 4)
   {
-    std::cerr << "StackUnder, bad indexes: "  << res << "->"
-              << index1 << ", " << index2 << ", " << index3 << ", "
-              << index4 << ", " << index41 << ", " << index411 << ", "
-              << index42 << ", " << index5 << std::endl;
+    std::cerr << "StackUnder, bad indexes: " << res << "->" << index1 << ", " << index2 << ", "
+              << index3 << ", " << index4 << ", " << index41 << ", " << index411 << ", " << index42
+              << ", " << index5 << std::endl;
     return EXIT_FAILURE;
   }
 
   // Turn off the color buffer
   view->GetScene()->SetUseBufferId(false);
 
-  //Finally render the scene and compare the image to a reference image
+  // Finally render the scene and compare the image to a reference image
   view->GetRenderWindow()->SetMultiSamples(0);
   view->GetInteractor()->Initialize();
   view->GetInteractor()->Start();

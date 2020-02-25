@@ -19,7 +19,9 @@
  * vtkPointDataToCellData is a filter that transforms point data (i.e., data
  * specified per point) into cell data (i.e., data specified per cell).
  * The method of transformation is based on averaging the data
- * values of all points defining a particular cell. Optionally, the input point
+ * values of all points defining a particular cell. For large datasets with
+ * several cell data arrays, the filter optionally supports selective
+ * processing to speed up processing. Optionally, the input point
  * data can be passed through to the output as well.
  *
  * @warning
@@ -30,20 +32,20 @@
  *
  * @sa
  * vtkPointData vtkCellData vtkCellDataToPointData
-*/
+ */
 
 #ifndef vtkPointDataToCellData_h
 #define vtkPointDataToCellData_h
 
-#include "vtkFiltersCoreModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersCoreModule.h" // For export macro
 
 class VTKFILTERSCORE_EXPORT vtkPointDataToCellData : public vtkDataSetAlgorithm
 {
 public:
-  static vtkPointDataToCellData *New();
-  vtkTypeMacro(vtkPointDataToCellData,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPointDataToCellData* New();
+  vtkTypeMacro(vtkPointDataToCellData, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -51,9 +53,9 @@ public:
    * on, then the input point data is passed through to the output; otherwise,
    * only generated point data is placed into the output.
    */
-  vtkSetMacro(PassPointData,int);
-  vtkGetMacro(PassPointData,int);
-  vtkBooleanMacro(PassPointData,int);
+  vtkSetMacro(PassPointData, bool);
+  vtkGetMacro(PassPointData, bool);
+  vtkBooleanMacro(PassPointData, bool);
   //@}
 
   //@{
@@ -62,24 +64,58 @@ public:
    * the data is categorical, then the resultant cell data will be determined by
    * a "majority rules" vote, with ties going to the smaller value.
    */
-  vtkSetMacro(CategoricalData,int);
-  vtkGetMacro(CategoricalData,int);
-  vtkBooleanMacro(CategoricalData,int);
+  vtkSetMacro(CategoricalData, bool);
+  vtkGetMacro(CategoricalData, bool);
+  vtkBooleanMacro(CategoricalData, bool);
   //@}
+
+  //@{
+  /**
+   * Activate selective processing of arrays. If inactive, only arrays selected
+   * by the user will be considered by this filter. The default is true.
+   */
+  vtkSetMacro(ProcessAllArrays, bool);
+  vtkGetMacro(ProcessAllArrays, bool);
+  vtkBooleanMacro(ProcessAllArrays, bool);
+  //@}
+
+  /**
+   * Adds an array to be processed. This only has an effect if the
+   * ProcessAllArrays option is turned off. If a name is already present,
+   * nothing happens.
+   */
+  virtual void AddPointDataArray(const char* name);
+
+  /**
+   * Removes an array to be processed. This only has an effect if the
+   * ProcessAllArrays option is turned off. If the specified name is not
+   * present, nothing happens.
+   */
+  virtual void RemovePointDataArray(const char* name);
+
+  /**
+   * Removes all arrays to be processed from the list. This only has an effect
+   * if the ProcessAllArrays option is turned off.
+   */
+  virtual void ClearPointDataArrays();
 
 protected:
   vtkPointDataToCellData();
-  ~vtkPointDataToCellData() VTK_OVERRIDE {}
+  ~vtkPointDataToCellData() override;
 
-  int RequestData(vtkInformation* request,
-                  vtkInformationVector** inputVector,
-                  vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int PassPointData;
-  int CategoricalData;
+  bool PassPointData;
+  bool CategoricalData;
+  bool ProcessAllArrays;
+
+  class Internals;
+  Internals* Implementation;
+
 private:
-  vtkPointDataToCellData(const vtkPointDataToCellData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPointDataToCellData&) VTK_DELETE_FUNCTION;
+  vtkPointDataToCellData(const vtkPointDataToCellData&) = delete;
+  void operator=(const vtkPointDataToCellData&) = delete;
 };
 
 #endif

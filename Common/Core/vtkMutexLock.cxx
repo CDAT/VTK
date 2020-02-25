@@ -16,13 +16,13 @@
 #include "vtkObjectFactory.h"
 
 #ifdef VTK_USE_WIN32_THREADS
-# include "vtkWindows.h"
+#include "vtkWindows.h"
 #endif
 
 vtkStandardNewMacro(vtkMutexLock);
 
 // New for the SimpleMutex
-vtkSimpleMutexLock *vtkSimpleMutexLock::New()
+vtkSimpleMutexLock* vtkSimpleMutexLock::New()
 {
   return new vtkSimpleMutexLock;
 }
@@ -30,22 +30,13 @@ vtkSimpleMutexLock *vtkSimpleMutexLock::New()
 // Construct a new vtkMutexLock
 vtkSimpleMutexLock::vtkSimpleMutexLock()
 {
-#ifdef VTK_USE_SPROC
-  init_lock( &this->MutexLock );
-#endif
-
 #ifdef VTK_USE_WIN32_THREADS
-  this->MutexLock = CreateMutex( nullptr, FALSE, nullptr );
+  this->MutexLock = CreateMutex(nullptr, FALSE, nullptr);
 #endif
 
 #ifdef VTK_USE_PTHREADS
-#ifdef VTK_HP_PTHREADS
-  pthread_mutex_init(&(this->MutexLock), pthread_mutexattr_default);
-#else
   pthread_mutex_init(&(this->MutexLock), nullptr);
 #endif
-#endif
-
 }
 
 // Destruct the vtkMutexVariable
@@ -56,39 +47,31 @@ vtkSimpleMutexLock::~vtkSimpleMutexLock()
 #endif
 
 #ifdef VTK_USE_PTHREADS
-  pthread_mutex_destroy( &this->MutexLock);
+  pthread_mutex_destroy(&this->MutexLock);
 #endif
 }
 
 // Lock the vtkMutexLock
 void vtkSimpleMutexLock::Lock()
 {
-#ifdef VTK_USE_SPROC
-  spin_lock( &this->MutexLock );
-#endif
-
 #ifdef VTK_USE_WIN32_THREADS
-  WaitForSingleObject( this->MutexLock, INFINITE );
+  WaitForSingleObject(this->MutexLock, INFINITE);
 #endif
 
 #ifdef VTK_USE_PTHREADS
-  pthread_mutex_lock( &this->MutexLock);
+  pthread_mutex_lock(&this->MutexLock);
 #endif
 }
 
 // Unlock the vtkMutexLock
 void vtkSimpleMutexLock::Unlock()
 {
-#ifdef VTK_USE_SPROC
-  release_lock( &this->MutexLock );
-#endif
-
 #ifdef VTK_USE_WIN32_THREADS
-  ReleaseMutex( this->MutexLock );
+  ReleaseMutex(this->MutexLock);
 #endif
 
 #ifdef VTK_USE_PTHREADS
-  pthread_mutex_unlock( &this->MutexLock);
+  pthread_mutex_unlock(&this->MutexLock);
 #endif
 }
 
@@ -96,4 +79,3 @@ void vtkMutexLock::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
-

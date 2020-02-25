@@ -18,7 +18,7 @@
  *
  * vtkPNMWriter writes PNM file. The data type
  * of the file is unsigned char regardless of the input type.
-*/
+ */
 
 #ifndef vtkPNMWriter_h
 #define vtkPNMWriter_h
@@ -29,23 +29,20 @@
 class VTKIOIMAGE_EXPORT vtkPNMWriter : public vtkImageWriter
 {
 public:
-  static vtkPNMWriter *New();
-  vtkTypeMacro(vtkPNMWriter,vtkImageWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPNMWriter* New();
+  vtkTypeMacro(vtkPNMWriter, vtkImageWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkPNMWriter() {}
-  ~vtkPNMWriter() VTK_OVERRIDE {}
+  ~vtkPNMWriter() override {}
 
-  void WriteFile(
-    ofstream *file, vtkImageData *data, int extent[6], int wExt[6]) VTK_OVERRIDE;
-  void WriteFileHeader(
-    ofstream *, vtkImageData *, int wExt[6]) VTK_OVERRIDE;
+  void WriteFile(ostream* file, vtkImageData* data, int extent[6], int wExt[6]) override;
+  void WriteFileHeader(ostream*, vtkImageData*, int wExt[6]) override;
+
 private:
-  vtkPNMWriter(const vtkPNMWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPNMWriter&) VTK_DELETE_FUNCTION;
+  vtkPNMWriter(const vtkPNMWriter&) = delete;
+  void operator=(const vtkPNMWriter&) = delete;
 };
 
 #endif
-
-

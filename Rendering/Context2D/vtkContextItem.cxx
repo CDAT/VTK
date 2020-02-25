@@ -22,12 +22,10 @@ vtkContextItem::vtkContextItem()
 }
 
 //-----------------------------------------------------------------------------
-vtkContextItem::~vtkContextItem()
-{
-}
+vtkContextItem::~vtkContextItem() = default;
 
 //-----------------------------------------------------------------------------
-void vtkContextItem::PrintSelf(ostream &os, vtkIndent indent)
+void vtkContextItem::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }

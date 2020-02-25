@@ -23,7 +23,7 @@
  *
  *
  * vtkQtTimePointUtility is provides methods to perform common time operations.
-*/
+ */
 
 #ifndef vtkQtTimePointUtility_h
 #define vtkQtTimePointUtility_h
@@ -35,7 +35,7 @@
 class VTKGUISUPPORTQTSQL_EXPORT vtkQtTimePointUtility : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkQtTimePointUtility,vtkObject);
+  vtkTypeMacro(vtkQtTimePointUtility, vtkObject);
 
   static QDateTime TimePointToQDateTime(vtkTypeUInt64 time);
   static vtkTypeUInt64 QDateTimeToTimePoint(QDateTime time);
@@ -44,11 +44,12 @@ public:
 
 protected:
   vtkQtTimePointUtility() {}
-  ~vtkQtTimePointUtility() VTK_OVERRIDE {}
+  ~vtkQtTimePointUtility() override {}
 
 private:
-  vtkQtTimePointUtility(const vtkQtTimePointUtility&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtTimePointUtility&) VTK_DELETE_FUNCTION;
+  vtkQtTimePointUtility(const vtkQtTimePointUtility&) = delete;
+  void operator=(const vtkQtTimePointUtility&) = delete;
 };
 
 #endif
+// VTK-HeaderTest-Exclude: vtkQtTimePointUtility.h

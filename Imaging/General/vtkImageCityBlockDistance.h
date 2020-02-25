@@ -27,43 +27,35 @@
  * mask is initially negative, the output distances will be negative.
  * Distances maps can have inside (negative regions)
  * and outsides (positive regions).
-*/
+ */
 
 #ifndef vtkImageCityBlockDistance_h
 #define vtkImageCityBlockDistance_h
 
-
-#include "vtkImagingGeneralModule.h" // For export macro
 #include "vtkImageDecomposeFilter.h"
+#include "vtkImagingGeneralModule.h" // For export macro
 
 class VTKIMAGINGGENERAL_EXPORT vtkImageCityBlockDistance : public vtkImageDecomposeFilter
 {
 public:
-  static vtkImageCityBlockDistance *New();
-  vtkTypeMacro(vtkImageCityBlockDistance,vtkImageDecomposeFilter);
+  static vtkImageCityBlockDistance* New();
+  vtkTypeMacro(vtkImageCityBlockDistance, vtkImageDecomposeFilter);
 
 protected:
   vtkImageCityBlockDistance();
-  ~vtkImageCityBlockDistance()VTK_OVERRIDE {}
+  ~vtkImageCityBlockDistance() override {}
 
-  int IterativeRequestUpdateExtent(vtkInformation* in,
-                                           vtkInformation* out) VTK_OVERRIDE;
-  int IterativeRequestData(vtkInformation*,
-                                    vtkInformationVector**,
-                                    vtkInformationVector*) VTK_OVERRIDE;
+  int IterativeRequestUpdateExtent(vtkInformation* in, vtkInformation* out) override;
+  int IterativeRequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void AllocateOutputScalars(vtkImageData *outData,
-                             int* updateExtent,
-                             int* wholeExtent,
-                             vtkInformation* outInfo);
+  void AllocateOutputScalars(
+    vtkImageData* outData, int* updateExtent, int* wholeExtent, vtkInformation* outInfo);
 
 private:
-  vtkImageCityBlockDistance(const vtkImageCityBlockDistance&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageCityBlockDistance&) VTK_DELETE_FUNCTION;
+  vtkImageCityBlockDistance(const vtkImageCityBlockDistance&) = delete;
+  void operator=(const vtkImageCityBlockDistance&) = delete;
 };
 
 #endif
-
-
 
 // VTK-HeaderTest-Exclude: vtkImageCityBlockDistance.h

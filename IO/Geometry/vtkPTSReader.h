@@ -19,28 +19,27 @@
  * vtkPTSReader reads either a text file of
  *  points. The first line is the number of points. Point information is
  *  either x y z intensity or x y z intensity r g b
-*/
+ */
 
 #ifndef vtkPTSReader_h
 #define vtkPTSReader_h
 
+#include "vtkBoundingBox.h"      // For Bounding Box Data Member
 #include "vtkIOGeometryModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
-#include "vtkBoundingBox.h" // For Bounding Box Data Member
-
 
 class VTKIOGEOMETRY_EXPORT vtkPTSReader : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkPTSReader *New();
-  vtkTypeMacro(vtkPTSReader,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPTSReader* New();
+  vtkTypeMacro(vtkPTSReader, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Specify file name.
    */
-  void SetFileName(const char *filename);
+  void SetFileName(const char* filename);
   vtkGetStringMacro(FileName);
   //@}
 
@@ -86,8 +85,8 @@ public:
    * The maximum number of points to load if LimitToMaxNumberOfPoints is on/true.
    * Sets a temporary onRatio.
    */
-  vtkSetClampMacro(MaxNumberOfPoints,vtkIdType,1,VTK_INT_MAX);
-  vtkGetMacro(MaxNumberOfPoints,vtkIdType);
+  vtkSetClampMacro(MaxNumberOfPoints, vtkIdType, 1, VTK_INT_MAX);
+  vtkGetMacro(MaxNumberOfPoints, vtkIdType);
   //@}
 
   //@{
@@ -114,12 +113,12 @@ public:
 
 protected:
   vtkPTSReader();
-  ~vtkPTSReader() VTK_OVERRIDE;
+  ~vtkPTSReader() override;
 
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  char *FileName;
+  char* FileName;
   bool OutputDataTypeIsDouble;
 
   bool LimitReadToBounds;
@@ -131,8 +130,8 @@ protected:
   bool IncludeColorAndLuminance;
 
 private:
-  vtkPTSReader(const vtkPTSReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPTSReader&) VTK_DELETE_FUNCTION;
+  vtkPTSReader(const vtkPTSReader&) = delete;
+  void operator=(const vtkPTSReader&) = delete;
 };
 
 #endif

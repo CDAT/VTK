@@ -23,7 +23,7 @@
  * cells.  The reader requires 2 NetCDF files: the main file has all
  * attributes, the connectivity file has point positions and cell
  * connectivity information.
-*/
+ */
 
 #ifndef vtkNetCDFCAMReader_h
 #define vtkNetCDFCAMReader_h
@@ -31,17 +31,15 @@
 #include "vtkIONetCDFModule.h" // For export macro
 #include "vtkUnstructuredGridAlgorithm.h"
 
-#include "vtk_netcdfcpp_fwd.h" // Forward declarations for vtknetcdfcpp
-
 class vtkCallbackCommand;
 class vtkDataArraySelection;
 
 class VTKIONETCDF_EXPORT vtkNetCDFCAMReader : public vtkUnstructuredGridAlgorithm
 {
 public:
-  static vtkNetCDFCAMReader *New();
-  vtkTypeMacro(vtkNetCDFCAMReader,vtkUnstructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkNetCDFCAMReader* New();
+  vtkTypeMacro(vtkNetCDFCAMReader, vtkUnstructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Returns 1 if this file can be read and 0 if the file cannot be read.
@@ -56,24 +54,6 @@ public:
 
   void SetConnectivityFileName(const char* fileName);
   vtkGetStringMacro(ConnectivityFileName);
-
-  //@{
-  /**
-   * Set whether or not to read a single level.  A
-   * value of one indicates that only a single level will be read in.
-   * The NetCDF variables loaded will then be ones with dimensions
-   * of (time, ncol).  This will result in a surface grid. Otherwise
-   * a volumetric grid will be created (if lev > 1) and the variables
-   * with dimensions of (time, lev, ncol) will be read in.
-   * By default, SingleLevel = 0.
-   * @deprecated in VTK 7.1 use SetVerticalDimension or
-   *             GetVerticalDimension instead.
-   */
-  VTK_LEGACY(virtual void SingleLevelOn ());
-  VTK_LEGACY(virtual void SingleLevelOff ());
-  VTK_LEGACY(virtual void SetSingleLevel (int level));
-  VTK_LEGACY(virtual int GetSingleLevel ());
-  //@}
 
   //@{
   /**
@@ -106,16 +86,16 @@ public:
    * midpoint layer variables ( which have dimension 'lev') or for
    * interface layer variables (which have dimension 'ilev').
    */
-  vtkBooleanMacro(SingleMidpointLayer, int);
-  vtkSetMacro(SingleMidpointLayer, int);
-  vtkGetMacro(SingleMidpointLayer, int);
+  vtkBooleanMacro(SingleMidpointLayer, vtkTypeBool);
+  vtkSetMacro(SingleMidpointLayer, vtkTypeBool);
+  vtkGetMacro(SingleMidpointLayer, vtkTypeBool);
   vtkSetMacro(MidpointLayerIndex, int);
   vtkGetMacro(MidpointLayerIndex, int);
   vtkGetVector2Macro(MidpointLayersRange, int);
 
-  vtkBooleanMacro(SingleInterfaceLayer, int);
-  vtkSetMacro(SingleInterfaceLayer, int);
-  vtkGetMacro(SingleInterfaceLayer, int);
+  vtkBooleanMacro(SingleInterfaceLayer, vtkTypeBool);
+  vtkSetMacro(SingleInterfaceLayer, vtkTypeBool);
+  vtkGetMacro(SingleInterfaceLayer, vtkTypeBool);
   vtkSetMacro(InterfaceLayerIndex, int);
   vtkGetMacro(InterfaceLayerIndex, int);
   vtkGetVector2Macro(InterfaceLayersRange, int);
@@ -134,49 +114,32 @@ public:
   void EnableAllPointArrays();
   //@}
 
-
-  //@{
-  /**
-   * Specify which "side" of the domain to add the connecting
-   * cells at.  0 indicates left side and 1 indicates right side.
-   * The default is the right side.
-   * @deprecated This method is no longer supported. The reader automatically
-   * decides which side to pad cells on. Using this method has no effect.
-   */
-  VTK_LEGACY(void SetCellLayerRight(int));
-  VTK_LEGACY(int GetCellLayerRight());
-  //@}
-
 protected:
   vtkNetCDFCAMReader();
-  ~vtkNetCDFCAMReader() VTK_OVERRIDE;
+  ~vtkNetCDFCAMReader() override;
 
-  int RequestInformation(vtkInformation*, vtkInformationVector**,
-                         vtkInformationVector*) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Returns true for success.  Based on the piece, number of pieces,
    * number of levels of cells, and the number of cells per level, gives
    * a partitioned space of levels and cells.
    */
-  bool GetPartitioning(
-    int piece, int numPieces,int numCellLevels, int numCellsPerLevel,
-    int & beginCellLevel, int & endCellLevel, int & beginCell, int & endCell);
+  bool GetPartitioning(size_t piece, size_t numPieces, size_t numCellLevels,
+    size_t numCellsPerLevel, size_t& beginCellLevel, size_t& endCellLevel, size_t& beginCell,
+    size_t& endCell);
 
   void BuildVarArray();
-  static void SelectionCallback(vtkObject* caller, unsigned long eid,
-                                void* clientdata, void* calldata);
-
+  static void SelectionCallback(
+    vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
 
 private:
-  vtkNetCDFCAMReader(const vtkNetCDFCAMReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkNetCDFCAMReader&) VTK_DELETE_FUNCTION;
+  vtkNetCDFCAMReader(const vtkNetCDFCAMReader&) = delete;
+  void operator=(const vtkNetCDFCAMReader&) = delete;
 
   //@{
   /**
@@ -198,28 +161,21 @@ private:
   //@}
 
   int VerticalDimension;
-  double * TimeSteps;
-  long NumberOfTimeSteps;
+  double* TimeSteps;
+  size_t NumberOfTimeSteps;
   vtkDataArraySelection* PointDataArraySelection;
   vtkCallbackCommand* SelectionObserver;
 
-  int SingleMidpointLayer;
+  vtkTypeBool SingleMidpointLayer;
   int MidpointLayerIndex;
   int MidpointLayersRange[2];
 
-  int SingleInterfaceLayer;
+  vtkTypeBool SingleInterfaceLayer;
   int InterfaceLayerIndex;
   int InterfaceLayersRange[2];
 
-
-  //@{
-  /**
-   * The NetCDF file descriptors.  nullptr indicates they haven't
-   * been opened.
-   */
-  NcFile* PointsFile;
-  NcFile* ConnectivityFile;
+  class Internal;
+  Internal* Internals;
 };
-  //@}
 
 #endif

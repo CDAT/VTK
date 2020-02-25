@@ -17,7 +17,7 @@
  * @brief   vtkViewNode specialized for vtkCameras
  *
  * State storage and graph traversal for vtkCamera
-*/
+ */
 
 #ifndef vtkCameraNode_h
 #define vtkCameraNode_h
@@ -25,21 +25,20 @@
 #include "vtkRenderingSceneGraphModule.h" // For export macro
 #include "vtkViewNode.h"
 
-class VTKRENDERINGSCENEGRAPH_EXPORT vtkCameraNode :
-  public vtkViewNode
+class VTKRENDERINGSCENEGRAPH_EXPORT vtkCameraNode : public vtkViewNode
 {
 public:
   static vtkCameraNode* New();
   vtkTypeMacro(vtkCameraNode, vtkViewNode);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkCameraNode();
-  ~vtkCameraNode();
+  ~vtkCameraNode() override;
 
 private:
-  vtkCameraNode(const vtkCameraNode&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCameraNode&) VTK_DELETE_FUNCTION;
+  vtkCameraNode(const vtkCameraNode&) = delete;
+  void operator=(const vtkCameraNode&) = delete;
 };
 
 #endif

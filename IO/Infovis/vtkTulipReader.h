@@ -60,7 +60,7 @@
  *
  * @par Thanks:
  * Thanks to Colin Myers, University of Leeds for extending this implementation.
-*/
+ */
 
 #ifndef vtkTulipReader_h
 #define vtkTulipReader_h
@@ -71,9 +71,9 @@
 class VTKIOINFOVIS_EXPORT vtkTulipReader : public vtkUndirectedGraphAlgorithm
 {
 public:
-  static vtkTulipReader *New();
+  static vtkTulipReader* New();
   vtkTypeMacro(vtkTulipReader, vtkUndirectedGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -85,23 +85,20 @@ public:
 
 protected:
   vtkTulipReader();
-  ~vtkTulipReader() VTK_OVERRIDE;
+  ~vtkTulipReader() override;
 
-  int RequestData(
-    vtkInformation *,
-    vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Set the outputs to vtkUndirectedGraph and vtkAnnotationLayers.
    */
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
 private:
   char* FileName;
 
-  vtkTulipReader(const vtkTulipReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTulipReader&) VTK_DELETE_FUNCTION;
+  vtkTulipReader(const vtkTulipReader&) = delete;
+  void operator=(const vtkTulipReader&) = delete;
 };
 
 #endif // vtkTulipReader_h

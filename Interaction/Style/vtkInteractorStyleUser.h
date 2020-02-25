@@ -22,13 +22,13 @@
  * of vtkInteractorStyle: vtkInteractorStyleUser allows you to customize
  * the interaction to without subclassing vtkInteractorStyle.  This is
  * particularly useful for setting up custom interaction modes in
- * scripting languages such as Tcl and Python.  This class allows you
+ * scripting languages such as Python.  This class allows you
  * to hook into the MouseMove, ButtonPress/Release, KeyPress/Release,
  * etc. events.  If you want to hook into just a single mouse button,
  * but leave the interaction modes for the others unchanged, you
  * must use e.g. SetMiddleButtonPressMethod() instead of the more
  * general SetButtonPressMethod().
-*/
+ */
 
 #ifndef vtkInteractorStyleUser_h
 #define vtkInteractorStyleUser_h
@@ -42,9 +42,9 @@
 class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleUser : public vtkInteractorStyle
 {
 public:
-  static vtkInteractorStyleUser *New();
-  vtkTypeMacro(vtkInteractorStyleUser,vtkInteractorStyle);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkInteractorStyleUser* New();
+  vtkTypeMacro(vtkInteractorStyleUser, vtkInteractorStyle);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -53,7 +53,7 @@ public:
    * the mouse movement.  Do not use GetEventPosition(), which records
    * the last position where a mouse button was pressed.
    */
-  vtkGetVector2Macro(LastPos,int);
+  vtkGetVector2Macro(LastPos, int);
   //@}
 
   //@{
@@ -62,29 +62,29 @@ public:
    * a key press.  This can be used to calculate the relative
    * displacement of the mouse.
    */
-  vtkGetVector2Macro(OldPos,int);
+  vtkGetVector2Macro(OldPos, int);
   //@}
 
   //@{
   /**
    * Test whether modifiers were held down when mouse button or key
-   * was pressed
+   * was pressed.
    */
-  vtkGetMacro(ShiftKey,int);
-  vtkGetMacro(CtrlKey,int);
+  vtkGetMacro(ShiftKey, int);
+  vtkGetMacro(CtrlKey, int);
   //@}
 
   //@{
   /**
    * Get the character for a Char event.
    */
-  vtkGetMacro(Char,int);
+  vtkGetMacro(Char, int);
   //@}
 
   //@{
   /**
-   * Get the KeySym (in the same format as Tk KeySyms) for a
-   * KeyPress or KeyRelease method.
+   * Get the KeySym (in the same format as vtkRenderWindowInteractor KeySyms)
+   * for a KeyPress or KeyRelease method.
    */
   vtkGetStringMacro(KeySym);
   //@}
@@ -94,49 +94,48 @@ public:
    * Get the mouse button that was last pressed inside the window
    * (returns zero when the button is released).
    */
-  vtkGetMacro(Button,int);
+  vtkGetMacro(Button, int);
   //@}
 
   //@{
   /**
    * Generic event bindings
    */
-  void OnMouseMove() VTK_OVERRIDE;
-  void OnLeftButtonDown() VTK_OVERRIDE;
-  void OnLeftButtonUp() VTK_OVERRIDE;
-  void OnMiddleButtonDown() VTK_OVERRIDE;
-  void OnMiddleButtonUp() VTK_OVERRIDE;
-  void OnRightButtonDown() VTK_OVERRIDE;
-  void OnRightButtonUp() VTK_OVERRIDE;
-  void OnMouseWheelForward() VTK_OVERRIDE;
-  void OnMouseWheelBackward() VTK_OVERRIDE;
+  void OnMouseMove() override;
+  void OnLeftButtonDown() override;
+  void OnLeftButtonUp() override;
+  void OnMiddleButtonDown() override;
+  void OnMiddleButtonUp() override;
+  void OnRightButtonDown() override;
+  void OnRightButtonUp() override;
+  void OnMouseWheelForward() override;
+  void OnMouseWheelBackward() override;
   //@}
 
   //@{
   /**
    * Keyboard functions
    */
-  void OnChar() VTK_OVERRIDE;
-  void OnKeyPress() VTK_OVERRIDE;
-  void OnKeyRelease() VTK_OVERRIDE;
+  void OnChar() override;
+  void OnKeyPress() override;
+  void OnKeyRelease() override;
   //@}
 
   //@{
   /**
    * These are more esoteric events, but are useful in some cases.
    */
-  void OnExpose() VTK_OVERRIDE;
-  void OnConfigure() VTK_OVERRIDE;
-  void OnEnter() VTK_OVERRIDE;
-  void OnLeave() VTK_OVERRIDE;
+  void OnExpose() override;
+  void OnConfigure() override;
+  void OnEnter() override;
+  void OnLeave() override;
   //@}
 
-  void OnTimer() VTK_OVERRIDE;
+  void OnTimer() override;
 
 protected:
-
   vtkInteractorStyleUser();
-  ~vtkInteractorStyleUser() VTK_OVERRIDE;
+  ~vtkInteractorStyleUser() override;
 
   int LastPos[2];
   int OldPos[2];
@@ -144,12 +143,12 @@ protected:
   int ShiftKey;
   int CtrlKey;
   int Char;
-  char *KeySym;
+  char* KeySym;
   int Button;
 
 private:
-  vtkInteractorStyleUser(const vtkInteractorStyleUser&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorStyleUser&) VTK_DELETE_FUNCTION;
+  vtkInteractorStyleUser(const vtkInteractorStyleUser&) = delete;
+  void operator=(const vtkInteractorStyleUser&) = delete;
 };
 
 #endif

@@ -51,13 +51,13 @@
  *
  * @sa
  * vtkLineIntegralConvolution2D
-*/
+ */
 
 #ifndef vtkSurfaceLICMapper_h
 #define vtkSurfaceLICMapper_h
 
-#include "vtkRenderingLICOpenGL2Module.h" // For export macro
 #include "vtkOpenGLPolyDataMapper.h"
+#include "vtkRenderingLICOpenGL2Module.h" // For export macro
 
 class vtkSurfaceLICInterface;
 class vtkPainterCommunicator;
@@ -67,35 +67,35 @@ class VTKRENDERINGLICOPENGL2_EXPORT vtkSurfaceLICMapper : public vtkOpenGLPolyDa
 public:
   static vtkSurfaceLICMapper* New();
   vtkTypeMacro(vtkSurfaceLICMapper, vtkOpenGLPolyDataMapper);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Release any graphics resources that are being consumed by this mapper.
    * The parameter window could be used to determine which graphic
    * resources to release. In this case, releases the display lists.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow * win) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* win) override;
 
   /**
    * Implemented by sub classes. Actual rendering is done here.
    */
-  virtual void RenderPiece(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void RenderPiece(vtkRenderer* ren, vtkActor* act) override;
 
   /**
    * Shallow copy of an actor.
    */
-  void ShallowCopy(vtkAbstractMapper *);
+  void ShallowCopy(vtkAbstractMapper*) override;
 
   //@{
   /**
    * Get the vtkSurfaceLICInterface used by this mapper
    */
-  vtkGetObjectMacro(LICInterface,vtkSurfaceLICInterface);
+  vtkGetObjectMacro(LICInterface, vtkSurfaceLICInterface);
   //@}
 
 protected:
   vtkSurfaceLICMapper();
-  ~vtkSurfaceLICMapper();
+  ~vtkSurfaceLICMapper() override;
 
   /**
    * Methods used for parallel benchmarks. Use cmake to define
@@ -103,32 +103,31 @@ protected:
    * update timing information is stored, it can be written to
    * disk by calling WriteLog.
    */
-  virtual void StartTimerEvent(const char *){}
-  virtual void EndTimerEvent(const char *){}
+  virtual void StartTimerEvent(const char*) {}
+  virtual void EndTimerEvent(const char*) {}
 
   /**
    * Build the VBO/IBO, called by UpdateBufferObjects
    */
-  virtual void BuildBufferObjects(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void BuildBufferObjects(vtkRenderer* ren, vtkActor* act) override;
 
 protected:
   /**
    * Set the shader parameteres related to the mapper/input data, called by UpdateShader
    */
-  virtual void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void SetMapperShaderParameters(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act) override;
 
   /**
-   * Perform string replacments on the shader templates
+   * Perform string replacements on the shader templates
    */
-  virtual void ReplaceShaderValues(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void ReplaceShaderValues(
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act) override;
 
-  vtkSurfaceLICInterface *LICInterface;
+  vtkSurfaceLICInterface* LICInterface;
 
 private:
-  vtkSurfaceLICMapper(const vtkSurfaceLICMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSurfaceLICMapper&) VTK_DELETE_FUNCTION;
+  vtkSurfaceLICMapper(const vtkSurfaceLICMapper&) = delete;
+  void operator=(const vtkSurfaceLICMapper&) = delete;
 };
 
 #endif

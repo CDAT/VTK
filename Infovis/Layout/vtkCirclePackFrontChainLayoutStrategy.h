@@ -40,31 +40,31 @@
  * Conference: Proceedings of the SIGCHI conference on Human Factors in computing systems
  * Year: 2006
  *
-*/
+ */
 
 #ifndef vtkCirclePackFrontChainLayoutStrategy_h
 #define vtkCirclePackFrontChainLayoutStrategy_h
 
-#include "vtkInfovisLayoutModule.h" // For export macro
 #include "vtkCirclePackLayoutStrategy.h"
+#include "vtkInfovisLayoutModule.h" // For export macro
 
 class vtkCirclePackFrontChainLayoutStrategyImplementation;
 
-class VTKINFOVISLAYOUT_EXPORT vtkCirclePackFrontChainLayoutStrategy : public vtkCirclePackLayoutStrategy
+class VTKINFOVISLAYOUT_EXPORT vtkCirclePackFrontChainLayoutStrategy
+  : public vtkCirclePackLayoutStrategy
 {
 public:
-  static vtkCirclePackFrontChainLayoutStrategy *New();
+  static vtkCirclePackFrontChainLayoutStrategy* New();
 
-  vtkTypeMacro(vtkCirclePackFrontChainLayoutStrategy,vtkCirclePackLayoutStrategy);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkCirclePackFrontChainLayoutStrategy, vtkCirclePackLayoutStrategy);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform the layout of the input tree, and store the circle
    * bounds of each vertex as a tuple in a data array.
    * (Xcenter, Ycenter, Radius).
    */
-  void Layout(vtkTree *inputTree, vtkDataArray *areaArray,
-                      vtkDataArray* sizeArray) VTK_OVERRIDE;
+  void Layout(vtkTree* inputTree, vtkDataArray* areaArray, vtkDataArray* sizeArray) override;
 
   //@{
   /**
@@ -79,18 +79,17 @@ public:
 
 protected:
   vtkCirclePackFrontChainLayoutStrategy();
-  ~vtkCirclePackFrontChainLayoutStrategy() VTK_OVERRIDE;
+  ~vtkCirclePackFrontChainLayoutStrategy() override;
 
-  char * CirclesFieldName;
+  char* CirclesFieldName;
   int Width;
   int Height;
 
 private:
-
   vtkCirclePackFrontChainLayoutStrategyImplementation* pimpl; // Private implementation
 
-  vtkCirclePackFrontChainLayoutStrategy(const vtkCirclePackFrontChainLayoutStrategy&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCirclePackFrontChainLayoutStrategy&) VTK_DELETE_FUNCTION;
+  vtkCirclePackFrontChainLayoutStrategy(const vtkCirclePackFrontChainLayoutStrategy&) = delete;
+  void operator=(const vtkCirclePackFrontChainLayoutStrategy&) = delete;
 };
 
 #endif

@@ -63,13 +63,13 @@ vtkContinuousScatterplot::vtkContinuousScatterplot()
   this->Fields[0] = this->Fields[1] = nullptr;
 }
 //----------------------------------------------------------------------------
-void vtkContinuousScatterplot::SetField1(char* nm, vtkIdType xRes)
+void vtkContinuousScatterplot::SetField1(const char* nm, vtkIdType xRes)
 {
   this->Fields[0] = nm;
   this->ResX = xRes;
 }
 //----------------------------------------------------------------------------
-void vtkContinuousScatterplot::SetField2(char* nm, vtkIdType yRes)
+void vtkContinuousScatterplot::SetField2(const char* nm, vtkIdType yRes)
 {
   this->Fields[1] = nm;
   this->ResY = yRes;
@@ -175,7 +175,7 @@ int vtkContinuousScatterplot::RequestData(
     return 1;
   }
 
-  // Devide the tetrahedron into four faces. The index of each face.
+  // Divide the tetrahedron into four faces. The index of each face.
   const int tetTemplate[4][3] = { { 0, 1, 2 }, { 0, 1, 3 }, { 0, 2, 3 }, { 1, 2, 3 } };
 
   // fragments of current cell: each cell is placed into the inputQ,
@@ -323,7 +323,7 @@ int vtkContinuousScatterplot::RequestData(
   newPoints->Allocate(estOutputPointSize);
 
   // main loop ...
-  // For each tetrahedron in a gird
+  // For each tetrahedron in a grid
   for (vtkIdType tetraIndex = 0; tetraIndex < input->GetNumberOfCells(); tetraIndex++)
   {
     // current tetrahedron vertex list.
@@ -357,7 +357,7 @@ int vtkContinuousScatterplot::RequestData(
     // Initialise the scalar values in this tetrahedral cell.
     for (vtkIdType cellIndex = 0; cellIndex < cell->GetNumberOfIds(); cellIndex++)
     {
-      int pointId = cell->GetId(cellIndex);
+      vtkIdType pointId = cell->GetId(cellIndex);
       pointLocator->InsertNextPoint(inputGridPoints->GetPoint(pointId));
       tetraF1->SetComponent(
         cellIndex, 0, inPD->GetArray(this->Fields[0])->GetComponent(pointId, 0));
@@ -432,7 +432,7 @@ int vtkContinuousScatterplot::RequestData(
       maxCell = minField;
 
       ////cout << "tet " << tetraIndex << ", field " << fieldNr << ", pnr: " <<
-      ///newPointsPD->GetNumberOfTuples() << endl;
+      /// newPointsPD->GetNumberOfTuples() << endl;
       ////cout << "min/max init: " << minCell << ", " << maxCell << endl;
 
       // obtain the minimal and maximal scalar values of the cell.
@@ -509,8 +509,7 @@ int vtkContinuousScatterplot::RequestData(
             // get the previous point id in the face
             prevPointId = (*faceIt)->GetId(nrFaceIds - 1);
             // the scalar value of the previous point in the face
-            prevScalar = newPointsPD->GetArray(
-              (int)fieldNr)->GetComponent(prevPointId, 0);
+            prevScalar = newPointsPD->GetArray((int)fieldNr)->GetComponent(prevPointId, 0);
 
             // Walk around the edge, comparing the range values between the current
             // cutting plane and the edge end points. Classify the each end point of the
@@ -525,8 +524,7 @@ int vtkContinuousScatterplot::RequestData(
               // get the current point Id in the face
               thisPointId = (*faceIt)->GetId(i);
               // get scalar value of the current point
-              thisScalar = newPointsPD->GetArray(
-                (int)fieldNr)->GetComponent(thisPointId, 0);
+              thisScalar = newPointsPD->GetArray((int)fieldNr)->GetComponent(thisPointId, 0);
 
               ////cout <<  ">>> " << thisPointId << " " << thisScalar << " " << prevPointId << " "
               ///<< prevScalar << endl;
@@ -797,7 +795,7 @@ int vtkContinuousScatterplot::RequestData(
             working->pop_back();
           }
 
-          if(working)
+          if (working)
           {
             delete working;
             working = nullptr;
@@ -817,7 +815,7 @@ int vtkContinuousScatterplot::RequestData(
       // The current fragment needs to be converted to a polygonal mesh.
       // Array for recording the vertices of the polygonal mesh.
       polyhedra->Initialize();
-      polyhedra->Allocate((vtkIdType)outputQ[co]->size());
+      polyhedra->AllocateEstimate(static_cast<vtkIdType>(outputQ[co]->size()), 1);
 
       // for each face of the fragment
       vtkSmartPointer<vtkIdList> poly = vtkSmartPointer<vtkIdList>::New();
@@ -861,7 +859,7 @@ int vtkContinuousScatterplot::RequestData(
         (fragRangeValue[1] - inPD->GetArray(this->Fields[1])->GetRange()[0]) / fieldInterval[1];
 
       ////cout << "biF: " << binIndexFirst << "\tbiS: " << binIndexSecond << "\t" << fragVolume <<
-      ///endl;
+      /// endl;
 
       // aggregate the fragment volumes in each bin
       if (binIndexFirst >= 0 && binIndexFirst < this->ResX && binIndexSecond >= 0 &&
@@ -904,7 +902,6 @@ int vtkContinuousScatterplot::RequestData(
     delete residual;
     residual = nullptr;
   }
-
 
   // Create the output image data.
   output->SetExtent(0, this->ResX - 1, 0, this->ResY - 1, 0, 0);

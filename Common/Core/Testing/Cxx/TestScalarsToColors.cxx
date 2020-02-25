@@ -12,7 +12,7 @@ static bool TestRange()
   vtkNew<vtkScalarsToColors> lut;
 
   // Check default range.
-  const double *range = lut->GetRange();
+  const double* range = lut->GetRange();
   if (range[0] != 0.0 || range[1] != 255.0)
   {
     cerr << "Default range wrong\n";
@@ -82,8 +82,8 @@ static bool TestGetColorAndMapValue()
 
   vtkNew<vtkScalarsToColors> lut;
 
-  double rgb[3] = {0.1, 0.2, 0.3};
-  const unsigned char * rgba = nullptr;
+  double rgb[3] = { 0.1, 0.2, 0.3 };
+  const unsigned char* rgba = nullptr;
 
   // Sane range.
   lut->SetRange(0.0, 1.0);
@@ -100,7 +100,6 @@ static bool TestGetColorAndMapValue()
     cerr << "MapValue result wrong\n";
     success = false;
   }
-
 
   // Tiny range.
   lut->SetRange(0.0, 1e-80);
@@ -132,7 +131,7 @@ static bool TestDeepCopy()
   ann->InsertNextValue("HelloWorld");
   vtkNew<vtkVariantArray> val;
   val->InsertNextValue(vtkVariant(123.4));
-  lut->SetAnnotations(val.Get(), ann.Get());
+  lut->SetAnnotations(val, ann);
 
   // Test nop DeepCopy.
   vtkNew<vtkScalarsToColors> copy1;
@@ -140,7 +139,7 @@ static bool TestDeepCopy()
 
   // Test actual copy.
   vtkNew<vtkScalarsToColors> copy2;
-  copy2->DeepCopy(lut.Get());
+  copy2->DeepCopy(lut);
 
   vtkStringArray* ann2 = copy2->GetAnnotations();
   vtkAbstractArray* val2 = copy2->GetAnnotatedValues();
@@ -149,7 +148,7 @@ static bool TestDeepCopy()
     cerr << "Annotations not copied\n";
     success = false;
   }
-  if (ann.Get() == ann2 || val.Get() == val2)
+  if (ann == ann2 || val == val2)
   {
     cerr << "Annotations only shallow copied\n";
     success = false;
@@ -184,7 +183,7 @@ static bool TestGeneral()
   ann->InsertNextValue("Foo");
   vtkNew<vtkVariantArray> val;
   val->InsertNextValue(vtkVariant(10.3));
-  lut->SetAnnotations(val.Get(), ann.Get());
+  lut->SetAnnotations(val, ann);
   ann2 = lut->GetAnnotations();
   val2 = lut->GetAnnotatedValues();
   if (!ann2 || !val2)
@@ -211,7 +210,7 @@ static bool TestGeneral()
   val->InsertNextValue("Narf");
   ann->InsertNextValue("Fezzik");
   val->InsertNextValue(vtkVariant(20));
-  lut->SetAnnotations(val.Get(), ann.Get());
+  lut->SetAnnotations(val, ann);
 
   idx = lut->GetAnnotatedValueIndex("Narf");
   if (idx != 1)

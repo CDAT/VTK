@@ -35,7 +35,7 @@
  * vtkImageData->vtkImageGradientMagnitude->vtkImageShiftScale
  * wherein the gradient magnitude image is inverted so that strong edges
  * have low cost value.  Costs in moving from a vertex v to a vertex u
- * are calculated using a weighted additive sheme:
+ * are calculated using a weighted additive scheme:
  * cost = Iw*f(I) + Ew*f(u,v) + Cw*f(t,u,v)
  * where Iw is the weight associated with f(I): the normalized image cost,
  * Ew is the weight associated with f(u,v): the normalized distance between
@@ -45,39 +45,37 @@
  *
  * @par Thanks:
  * The class was contributed by Dean Inglis.
-*/
+ */
 
 #ifndef vtkDijkstraImageGeodesicPath_h
 #define vtkDijkstraImageGeodesicPath_h
 
-#include "vtkFiltersModelingModule.h" // For export macro
 #include "vtkDijkstraGraphGeodesicPath.h"
+#include "vtkFiltersModelingModule.h" // For export macro
 
 class vtkImageData;
 
-class VTKFILTERSMODELING_EXPORT vtkDijkstraImageGeodesicPath :
-                           public vtkDijkstraGraphGeodesicPath
+class VTKFILTERSMODELING_EXPORT vtkDijkstraImageGeodesicPath : public vtkDijkstraGraphGeodesicPath
 {
 public:
-
   /**
    * Instantiate the class
    */
-  static vtkDijkstraImageGeodesicPath *New();
+  static vtkDijkstraImageGeodesicPath* New();
 
   //@{
   /**
-   * Standard methids for printing and determining type information.
+   * Standard methods for printing and determining type information.
    */
-  vtkTypeMacro( vtkDijkstraImageGeodesicPath, vtkDijkstraGraphGeodesicPath );
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  vtkTypeMacro(vtkDijkstraImageGeodesicPath, vtkDijkstraGraphGeodesicPath);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
   /**
    * Specify the image object which is used as a cost function.
    */
-  void SetInputData( vtkDataObject* );
+  void SetInputData(vtkDataObject*);
   vtkImageData* GetInputAsImageData();
   //@}
 
@@ -85,43 +83,42 @@ public:
   /**
    * Image cost weight.
    */
-  void SetImageWeight( double );
-  vtkGetMacro( ImageWeight, double );
+  void SetImageWeight(double);
+  vtkGetMacro(ImageWeight, double);
   //@}
 
   //@{
   /**
    * Edge length cost weight.
    */
-  void SetEdgeLengthWeight( double );
-  vtkGetMacro( EdgeLengthWeight, double );
+  void SetEdgeLengthWeight(double);
+  vtkGetMacro(EdgeLengthWeight, double);
   //@}
 
   //@{
   /**
    * Curvature cost weight.
    */
-  vtkSetClampMacro( CurvatureWeight, double, 0.0, 1.0 );
-  vtkGetMacro( CurvatureWeight, double );
+  vtkSetClampMacro(CurvatureWeight, double, 0.0, 1.0);
+  vtkGetMacro(CurvatureWeight, double);
   //@}
 
 protected:
   vtkDijkstraImageGeodesicPath();
-  ~vtkDijkstraImageGeodesicPath() VTK_OVERRIDE;
+  ~vtkDijkstraImageGeodesicPath() override;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   // Build a graph description of the image
-  void BuildAdjacency( vtkDataSet *inData ) VTK_OVERRIDE;
+  void BuildAdjacency(vtkDataSet* inData) override;
 
   // Update static costs without rebuilding adjacencyh when static weights change
-  void UpdateStaticCosts( vtkImageData *image );
+  void UpdateStaticCosts(vtkImageData* image);
 
   // Override parent class methods.
-  double CalculateStaticEdgeCost( vtkDataSet *inData , vtkIdType u, vtkIdType v) VTK_OVERRIDE;
-  double CalculateDynamicEdgeCost( vtkDataSet *inData , vtkIdType u, vtkIdType v) VTK_OVERRIDE;
+  double CalculateStaticEdgeCost(vtkDataSet* inData, vtkIdType u, vtkIdType v) override;
+  double CalculateDynamicEdgeCost(vtkDataSet* inData, vtkIdType u, vtkIdType v) override;
 
   double PixelSize;
   double ImageWeight;
@@ -130,10 +127,8 @@ protected:
   bool RebuildStaticCosts;
 
 private:
-  vtkDijkstraImageGeodesicPath(const vtkDijkstraImageGeodesicPath&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDijkstraImageGeodesicPath&) VTK_DELETE_FUNCTION;
-
+  vtkDijkstraImageGeodesicPath(const vtkDijkstraImageGeodesicPath&) = delete;
+  void operator=(const vtkDijkstraImageGeodesicPath&) = delete;
 };
 
 #endif
-

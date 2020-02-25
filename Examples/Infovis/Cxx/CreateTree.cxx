@@ -16,14 +16,13 @@
 // This example...
 //
 
-
 #include "vtkDataSetAttributes.h"
 #include "vtkGraphLayoutView.h"
 #include "vtkMutableDirectedGraph.h"
 #include "vtkRandomGraphSource.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkStringArray.h"
 #include "vtkTree.h"
 #include "vtkViewTheme.h"
@@ -77,5 +76,5 @@ int main(int, char*[])
   tree->Delete();
   view->Delete();
 
-  return EXIT_SUCCESS;;
+  return EXIT_SUCCESS;
 }

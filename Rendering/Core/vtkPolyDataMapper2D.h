@@ -28,14 +28,13 @@
  *
  * @sa
  * vtkMapper2D vtkActor2D
-*/
+ */
 
 #ifndef vtkPolyDataMapper2D_h
 #define vtkPolyDataMapper2D_h
 
-
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkMapper2D.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkCoordinate;
 class vtkPolyData;
@@ -45,24 +44,24 @@ class vtkUnsignedCharArray;
 class VTKRENDERINGCORE_EXPORT vtkPolyDataMapper2D : public vtkMapper2D
 {
 public:
-  vtkTypeMacro(vtkPolyDataMapper2D,vtkMapper2D);
-  static vtkPolyDataMapper2D *New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPolyDataMapper2D, vtkMapper2D);
+  static vtkPolyDataMapper2D* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set the input to the mapper.
    */
-  void SetInputData(vtkPolyData *in);
-  vtkPolyData *GetInput();
+  void SetInputData(vtkPolyData* in);
+  vtkPolyData* GetInput();
   //@}
 
   //@{
   /**
    * Specify a lookup table for the mapper to use.
    */
-  void SetLookupTable(vtkScalarsToColors *lut);
-  vtkScalarsToColors *GetLookupTable();
+  void SetLookupTable(vtkScalarsToColors* lut);
+  vtkScalarsToColors* GetLookupTable();
   //@}
 
   /**
@@ -75,9 +74,9 @@ public:
   /**
    * Turn on/off flag to control whether scalar data is used to color objects.
    */
-  vtkSetMacro(ScalarVisibility, int);
-  vtkGetMacro(ScalarVisibility, int);
-  vtkBooleanMacro(ScalarVisibility, int);
+  vtkSetMacro(ScalarVisibility, vtkTypeBool);
+  vtkGetMacro(ScalarVisibility, vtkTypeBool);
+  vtkBooleanMacro(ScalarVisibility, vtkTypeBool);
   //@}
 
   //@{
@@ -104,7 +103,7 @@ public:
   /**
    * Return the method of coloring scalar data.
    */
-  const char *GetColorModeAsString();
+  const char* GetColorModeAsString();
 
   //@{
   /**
@@ -115,9 +114,9 @@ public:
    * mappers/actors will probably wish to force the mapper to use the
    * LookupTable unchanged.
    */
-  vtkSetMacro(UseLookupTableScalarRange, int);
-  vtkGetMacro(UseLookupTableScalarRange, int);
-  vtkBooleanMacro(UseLookupTableScalarRange, int);
+  vtkSetMacro(UseLookupTableScalarRange, vtkTypeBool);
+  vtkGetMacro(UseLookupTableScalarRange, vtkTypeBool);
+  vtkBooleanMacro(UseLookupTableScalarRange, vtkTypeBool);
   //@}
 
   //@{
@@ -145,16 +144,17 @@ public:
    */
   vtkSetMacro(ScalarMode, int);
   vtkGetMacro(ScalarMode, int);
-  void SetScalarModeToDefault()
-    { this->SetScalarMode(VTK_SCALAR_MODE_DEFAULT); }
-  void SetScalarModeToUsePointData()
-    { this->SetScalarMode(VTK_SCALAR_MODE_USE_POINT_DATA); }
-  void SetScalarModeToUseCellData()
-    { this->SetScalarMode(VTK_SCALAR_MODE_USE_CELL_DATA); }
+  void SetScalarModeToDefault() { this->SetScalarMode(VTK_SCALAR_MODE_DEFAULT); }
+  void SetScalarModeToUsePointData() { this->SetScalarMode(VTK_SCALAR_MODE_USE_POINT_DATA); }
+  void SetScalarModeToUseCellData() { this->SetScalarMode(VTK_SCALAR_MODE_USE_CELL_DATA); }
   void SetScalarModeToUsePointFieldData()
-    { this->SetScalarMode(VTK_SCALAR_MODE_USE_POINT_FIELD_DATA); }
+  {
+    this->SetScalarMode(VTK_SCALAR_MODE_USE_POINT_FIELD_DATA);
+  }
   void SetScalarModeToUseCellFieldData()
-    { this->SetScalarMode(VTK_SCALAR_MODE_USE_CELL_FIELD_DATA); }
+  {
+    this->SetScalarMode(VTK_SCALAR_MODE_USE_CELL_FIELD_DATA);
+  }
   //@}
 
   //@{
@@ -162,13 +162,13 @@ public:
    * Choose which component of which field data array to color by.
    */
   void ColorByArrayComponent(int arrayNum, int component);
-  void ColorByArrayComponent(char* arrayName, int component);
+  void ColorByArrayComponent(const char* arrayName, int component);
   //@}
 
   /**
    * Get the array name or number and component to color by.
    */
-  char* GetArrayName() { return this->ArrayName; }
+  const char* GetArrayName() { return this->ArrayName; }
   int GetArrayId() { return this->ArrayId; }
   int GetArrayAccessMode() { return this->ArrayAccessMode; }
   int GetArrayComponent() { return this->ArrayComponent; }
@@ -177,7 +177,7 @@ public:
    * Overload standard modified time function. If lookup table is modified,
    * then this object is modified as well.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -207,30 +207,30 @@ public:
    * allows the blending of the scalars with an additional alpha (typically
    * which comes from a vtkActor, etc.)
    */
-  vtkUnsignedCharArray *MapScalars(double alpha);
+  vtkUnsignedCharArray* MapScalars(double alpha);
 
   /**
    * Make a shallow copy of this mapper.
    */
-  void ShallowCopy(vtkAbstractMapper *m);
+  void ShallowCopy(vtkAbstractMapper* m) override;
 
 protected:
   vtkPolyDataMapper2D();
-  ~vtkPolyDataMapper2D() VTK_OVERRIDE;
+  ~vtkPolyDataMapper2D() override;
 
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
-  vtkUnsignedCharArray *Colors;
+  vtkUnsignedCharArray* Colors;
 
-  vtkScalarsToColors *LookupTable;
-  int ScalarVisibility;
+  vtkScalarsToColors* LookupTable;
+  vtkTypeBool ScalarVisibility;
   vtkTimeStamp BuildTime;
   double ScalarRange[2];
-  int UseLookupTableScalarRange;
+  vtkTypeBool UseLookupTableScalarRange;
   int ColorMode;
   int ScalarMode;
 
-  vtkCoordinate *TransformCoordinate;
+  vtkCoordinate* TransformCoordinate;
   bool TransformCoordinateUseDouble;
 
   // for coloring by a component of a field data array
@@ -238,10 +238,10 @@ protected:
   char ArrayName[256];
   int ArrayComponent;
   int ArrayAccessMode;
-private:
-  vtkPolyDataMapper2D(const vtkPolyDataMapper2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolyDataMapper2D&) VTK_DELETE_FUNCTION;
-};
 
+private:
+  vtkPolyDataMapper2D(const vtkPolyDataMapper2D&) = delete;
+  void operator=(const vtkPolyDataMapper2D&) = delete;
+};
 
 #endif

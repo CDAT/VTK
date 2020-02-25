@@ -25,38 +25,36 @@
  *
  * @sa
  * vtkFixedPointVolumeRayCastMapper
-*/
+ */
 
 #ifndef vtkFixedPointVolumeRayCastCompositeHelper_h
 #define vtkFixedPointVolumeRayCastCompositeHelper_h
 
-#include "vtkRenderingVolumeModule.h" // For export macro
 #include "vtkFixedPointVolumeRayCastHelper.h"
+#include "vtkRenderingVolumeModule.h" // For export macro
 
 class vtkFixedPointVolumeRayCastMapper;
 class vtkVolume;
 
-class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeHelper : public vtkFixedPointVolumeRayCastHelper
+class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeHelper
+  : public vtkFixedPointVolumeRayCastHelper
 {
 public:
-  static vtkFixedPointVolumeRayCastCompositeHelper *New();
-  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeHelper,vtkFixedPointVolumeRayCastHelper);
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  static vtkFixedPointVolumeRayCastCompositeHelper* New();
+  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeHelper, vtkFixedPointVolumeRayCastHelper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void  GenerateImage( int threadID,
-                               int threadCount,
-                               vtkVolume *vol,
-                               vtkFixedPointVolumeRayCastMapper *mapper) VTK_OVERRIDE;
+  void GenerateImage(int threadID, int threadCount, vtkVolume* vol,
+    vtkFixedPointVolumeRayCastMapper* mapper) override;
 
 protected:
   vtkFixedPointVolumeRayCastCompositeHelper();
-  ~vtkFixedPointVolumeRayCastCompositeHelper() VTK_OVERRIDE;
+  ~vtkFixedPointVolumeRayCastCompositeHelper() override;
 
 private:
-  vtkFixedPointVolumeRayCastCompositeHelper(const vtkFixedPointVolumeRayCastCompositeHelper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFixedPointVolumeRayCastCompositeHelper&) VTK_DELETE_FUNCTION;
+  vtkFixedPointVolumeRayCastCompositeHelper(
+    const vtkFixedPointVolumeRayCastCompositeHelper&) = delete;
+  void operator=(const vtkFixedPointVolumeRayCastCompositeHelper&) = delete;
 };
 
 #endif
-
-

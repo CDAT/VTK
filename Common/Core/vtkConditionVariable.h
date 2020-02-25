@@ -25,7 +25,7 @@
  * Department of Computer Science,
  * Washington University, St. Louis, Missouri.
  * http://www.cs.wustl.edu/~schmidt/win32-cv-1.html
-*/
+ */
 
 #ifndef vtkConditionVariable_h
 #define vtkConditionVariable_h
@@ -35,19 +35,18 @@
 
 #include "vtkMutexLock.h" // Need for friend access to vtkSimpleMutexLock
 
-#if defined(VTK_USE_PTHREADS) || defined(VTK_HP_PTHREADS)
-#  include <pthread.h> // Need POSIX thread implementation of mutex (even win32 provides mutexes)
+#if defined(VTK_USE_PTHREADS)
+#include <pthread.h> // Need POSIX thread implementation of mutex (even win32 provides mutexes)
 typedef pthread_cond_t vtkConditionType;
 #endif
-
 
 // Typically a top level windows application sets _WIN32_WINNT. If it is not set we set it to
 // 0x0501 (Windows XP)
 #ifdef VTK_USE_WIN32_THREADS
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x0501 // 0x0501 means target Windows XP or later
-#  endif
-#  include "vtkWindows.h" // Needed for win32 CRITICAL_SECTION, HANDLE, etc.
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501 // 0x0501 means target Windows XP or later
+#endif
+#include "vtkWindows.h" // Needed for win32 CRITICAL_SECTION, HANDLE, etc.
 #endif
 
 #ifdef VTK_USE_WIN32_THREADS
@@ -72,7 +71,7 @@ typedef struct
 } pthread_cond_t;
 
 typedef pthread_cond_t vtkConditionType;
-#  else // 0
+#else  // 0
 typedef struct
 {
   // Number of threads waiting on condition.
@@ -94,14 +93,12 @@ typedef struct
 } pthread_cond_t;
 
 typedef pthread_cond_t vtkConditionType;
-#  endif // 0
+#endif // 0
 #endif // VTK_USE_WIN32_THREADS
 
 #ifndef VTK_USE_PTHREADS
-#ifndef VTK_HP_PTHREADS
 #ifndef VTK_USE_WIN32_THREADS
 typedef int vtkConditionType;
-#endif
 #endif
 #endif
 
@@ -132,25 +129,27 @@ public:
    * Upon exit, the mutex will be locked and held by the calling thread.
    * Between entry and exit, the mutex will be unlocked and may be held by other threads.
 
-   * @param mutex The mutex that should be locked on entry and will be locked on exit (but not in between)
-   * @retval Normally, this function returns 0. Should a thread be interrupted by a signal, a non-zero value may be returned.
+   * @param mutex The mutex that should be locked on entry and will be locked on exit (but not in
+   between)
+   * @retval Normally, this function returns 0. Should a thread be interrupted by a signal, a
+   non-zero value may be returned.
    */
-  int Wait( vtkSimpleMutexLock& mutex );
+  int Wait(vtkSimpleMutexLock& mutex);
 
 protected:
-  vtkConditionType   ConditionVariable;
+  vtkConditionType ConditionVariable;
 
 private:
-  vtkSimpleConditionVariable(const vtkSimpleConditionVariable& other) VTK_DELETE_FUNCTION;
-  vtkSimpleConditionVariable& operator=(const vtkSimpleConditionVariable& rhs) VTK_DELETE_FUNCTION;
+  vtkSimpleConditionVariable(const vtkSimpleConditionVariable& other) = delete;
+  vtkSimpleConditionVariable& operator=(const vtkSimpleConditionVariable& rhs) = delete;
 };
 
 class VTKCOMMONCORE_EXPORT vtkConditionVariable : public vtkObject
 {
 public:
   static vtkConditionVariable* New();
-  vtkTypeMacro(vtkConditionVariable,vtkObject);
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  vtkTypeMacro(vtkConditionVariable, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Wake one thread waiting for the condition to change.
@@ -168,19 +167,21 @@ public:
    * Upon exit, the mutex will be locked and held by the calling thread.
    * Between entry and exit, the mutex will be unlocked and may be held by other threads.
 
-   * @param mutex The mutex that should be locked on entry and will be locked on exit (but not in between)
-   * @retval Normally, this function returns 0. Should a thread be interrupted by a signal, a non-zero value may be returned.
+   * @param mutex The mutex that should be locked on entry and will be locked on exit (but not in
+   between)
+   * @retval Normally, this function returns 0. Should a thread be interrupted by a signal, a
+   non-zero value may be returned.
    */
-  int Wait( vtkMutexLock* mutex );
+  int Wait(vtkMutexLock* mutex);
 
 protected:
-  vtkConditionVariable() { }
+  vtkConditionVariable() {}
 
   vtkSimpleConditionVariable SimpleConditionVariable;
 
 private:
-  vtkConditionVariable( const vtkConditionVariable& ) VTK_DELETE_FUNCTION;
-  void operator = ( const vtkConditionVariable& ) VTK_DELETE_FUNCTION;
+  vtkConditionVariable(const vtkConditionVariable&) = delete;
+  void operator=(const vtkConditionVariable&) = delete;
 };
 
 inline void vtkConditionVariable::Signal()
@@ -193,9 +194,9 @@ inline void vtkConditionVariable::Broadcast()
   this->SimpleConditionVariable.Broadcast();
 }
 
-inline int vtkConditionVariable::Wait( vtkMutexLock* lock )
+inline int vtkConditionVariable::Wait(vtkMutexLock* lock)
 {
-  return this->SimpleConditionVariable.Wait( lock->SimpleMutexLock );
+  return this->SimpleConditionVariable.Wait(lock->SimpleMutexLock);
 }
 
 #endif // vtkConditionVariable_h

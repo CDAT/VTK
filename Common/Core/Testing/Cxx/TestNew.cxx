@@ -25,7 +25,7 @@
 
 #include "vtkTestNewVar.h"
 
-int TestNew(int,char *[])
+int TestNew(int, char*[])
 {
   bool error = false;
   // This one should be cleaned up when the main function ends.
@@ -33,8 +33,7 @@ int TestNew(int,char *[])
   if (a->GetReferenceCount() != 1)
   {
     error = true;
-    cerr << "Error, reference count should be 1, was " << a->GetReferenceCount()
-         << endl;
+    cerr << "Error, reference count should be 1, was " << a->GetReferenceCount() << endl;
   }
   cout << "vtkNew streaming " << a << endl;
 
@@ -43,13 +42,12 @@ int TestNew(int,char *[])
   if (wf == nullptr)
   {
     vtkNew<vtkFloatArray> f;
-    wf = f.GetPointer();
+    wf = f;
   }
   if (wf != nullptr)
   {
     error = true;
-    cerr << "Error, vtkNew failed to delete the object it contained."
-         << endl;
+    cerr << "Error, vtkNew failed to delete the object it contained." << endl;
   }
   // Test implicit conversion vtkNew::operator T* () const
   if (wf == nullptr)
@@ -69,7 +67,7 @@ int TestNew(int,char *[])
   if (si == nullptr)
   {
     vtkNew<vtkIntArray> i;
-    si = i.Get();
+    si = i;
   }
   if (si->GetReferenceCount() != 1)
   {
@@ -80,15 +78,14 @@ int TestNew(int,char *[])
   }
 
   // Test raw object reference
-  vtkObject &p = *si;
+  vtkObject& p = *si;
   if (p.GetReferenceCount() != 1)
   {
     error = true;
     cerr << "Error, vtkNew failed to keep the object it contained, "
-      << "or setting a raw reference incremented it. Reference count: "
-      << p.GetReferenceCount() << endl;
+         << "or setting a raw reference incremented it. Reference count: " << p.GetReferenceCount()
+         << endl;
   }
-
 
   vtkNew<vtkTestNewVar> newVarObj;
   if (newVarObj->GetPointsRefCount() != 1)
@@ -113,6 +110,30 @@ int TestNew(int,char *[])
     cerr << "Error, vtkNew failed to keep the object it contained, "
          << "or the smart pointer failed to increment it. Reference count: "
          << points->GetReferenceCount() << endl;
+  }
+
+  vtkNew<vtkIntArray> intarray;
+  vtkIntArray* intarrayp = intarray.GetPointer();
+  if (intarrayp != intarray || intarray != intarrayp)
+  {
+    error = true;
+    cerr << "Error, comparison of vtkNew object to it's raw pointer fails\n";
+  }
+
+  {
+    vtkNew<vtkIntArray> testArray1;
+    vtkNew<vtkIntArray> testArray2(std::move(testArray1));
+    if (testArray1 || !testArray2)
+    {
+      std::cerr << "Error, move construction of vtkNew failed.\n";
+      error = true;
+    }
+    vtkNew<vtkDataArray> testArray3(std::move(testArray2));
+    if (testArray2 || !testArray3)
+    {
+      std::cerr << "Error, move construction of vtkNew failed.\n";
+      error = true;
+    }
   }
 
   return error ? 1 : 0;

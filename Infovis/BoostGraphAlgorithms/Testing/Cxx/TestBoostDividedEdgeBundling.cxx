@@ -22,19 +22,19 @@
 #include "vtkObjectFactory.h"
 #include "vtkPoints.h"
 #include "vtkStringArray.h"
-#include "vtkXMLTreeReader.h"
 #include "vtkViewTheme.h"
+#include "vtkXMLTreeReader.h"
 
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
 #include "vtkContext2D.h"
+#include "vtkContextActor.h"
 #include "vtkContextInteractorStyle.h"
 #include "vtkContextItem.h"
-#include "vtkContextActor.h"
 #include "vtkContextScene.h"
 #include "vtkContextTransform.h"
 #include "vtkNew.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 
 #include "vtkRegressionTestImage.h"
 
@@ -59,7 +59,7 @@ void BuildSampleGraph(vtkMutableDirectedGraph* graph)
   points->InsertNextPoint(380, 120, 0);
   graph->AddVertex();
   points->InsertNextPoint(380, 160, 0);
-  graph->SetPoints(points.GetPointer());
+  graph->SetPoints(points);
 
   graph->AddEdge(0, 4);
   graph->AddEdge(0, 5);
@@ -82,21 +82,21 @@ void BuildGraphMLGraph(vtkMutableDirectedGraph* graph, std::string file)
   reader->SetFileName(file.c_str());
   reader->ReadCharDataOn();
   reader->Update();
-  vtkTree *tree = reader->GetOutput();
-  vtkStringArray *keyArr = vtkArrayDownCast<vtkStringArray>(
-    tree->GetVertexData()->GetAbstractArray("key"));
-  vtkStringArray *sourceArr = vtkArrayDownCast<vtkStringArray>(
-    tree->GetVertexData()->GetAbstractArray("source"));
-  vtkStringArray *targetArr = vtkArrayDownCast<vtkStringArray>(
-    tree->GetVertexData()->GetAbstractArray("target"));
-  vtkStringArray *contentArr = vtkArrayDownCast<vtkStringArray>(
-    tree->GetVertexData()->GetAbstractArray(".chardata"));
+  vtkTree* tree = reader->GetOutput();
+  vtkStringArray* keyArr =
+    vtkArrayDownCast<vtkStringArray>(tree->GetVertexData()->GetAbstractArray("key"));
+  vtkStringArray* sourceArr =
+    vtkArrayDownCast<vtkStringArray>(tree->GetVertexData()->GetAbstractArray("source"));
+  vtkStringArray* targetArr =
+    vtkArrayDownCast<vtkStringArray>(tree->GetVertexData()->GetAbstractArray("target"));
+  vtkStringArray* contentArr =
+    vtkArrayDownCast<vtkStringArray>(tree->GetVertexData()->GetAbstractArray(".chardata"));
   double x = 0.0;
   double y = 0.0;
   vtkIdType source = 0;
   vtkIdType target = 0;
   vtkNew<vtkPoints> points;
-  graph->SetPoints(points.GetPointer());
+  graph->SetPoints(points);
   for (vtkIdType i = 0; i < tree->GetNumberOfVertices(); ++i)
   {
     vtkStdString k = keyArr->GetValue(i);
@@ -128,15 +128,15 @@ void BuildGraphMLGraph(vtkMutableDirectedGraph* graph, std::string file)
 class vtkBundledGraphItem : public vtkGraphItem
 {
 public:
-  static vtkBundledGraphItem *New();
+  static vtkBundledGraphItem* New();
   vtkTypeMacro(vtkBundledGraphItem, vtkGraphItem);
 
 protected:
-  vtkBundledGraphItem() { }
-  ~vtkBundledGraphItem() { }
+  vtkBundledGraphItem() {}
+  ~vtkBundledGraphItem() override {}
 
-  virtual vtkColor4ub EdgeColor(vtkIdType line, vtkIdType point);
-  virtual float EdgeWidth(vtkIdType line, vtkIdType point);
+  virtual vtkColor4ub EdgeColor(vtkIdType line, vtkIdType point) override;
+  virtual float EdgeWidth(vtkIdType line, vtkIdType point) override;
 };
 
 //----------------------------------------------------------------------------
@@ -146,12 +146,11 @@ vtkStandardNewMacro(vtkBundledGraphItem);
 vtkColor4ub vtkBundledGraphItem::EdgeColor(vtkIdType edgeIdx, vtkIdType pointIdx)
 {
   float fraction = static_cast<float>(pointIdx) / (this->NumberOfEdgePoints(edgeIdx) - 1);
-  return vtkColor4ub(fraction*255, 0, 255 - fraction*255, 255);
+  return vtkColor4ub(fraction * 255, 0, 255 - fraction * 255, 255);
 }
 
 //----------------------------------------------------------------------------
-float vtkBundledGraphItem::EdgeWidth(vtkIdType vtkNotUsed(lineIdx),
-                                     vtkIdType vtkNotUsed(pointIdx))
+float vtkBundledGraphItem::EdgeWidth(vtkIdType vtkNotUsed(lineIdx), vtkIdType vtkNotUsed(pointIdx))
 {
   return 4.0f;
 }
@@ -162,13 +161,13 @@ int TestBoostDividedEdgeBundling(int argc, char* argv[])
   vtkNew<vtkMutableDirectedGraph> graph;
   vtkNew<vtkBoostDividedEdgeBundling> bundle;
 
-  BuildSampleGraph(graph.GetPointer());
-  //BuildGraphMLGraph(graph.GetPointer(), "airlines_flipped.graphml");
+  BuildSampleGraph(graph);
+  // BuildGraphMLGraph(graph, "airlines_flipped.graphml");
 
-  bundle->SetInputData(graph.GetPointer());
+  bundle->SetInputData(graph);
   bundle->Update();
 
-  vtkDirectedGraph *output = bundle->GetOutput();
+  vtkDirectedGraph* output = bundle->GetOutput();
 
   vtkNew<vtkContextActor> actor;
 
@@ -177,27 +176,27 @@ int TestBoostDividedEdgeBundling(int argc, char* argv[])
 
   vtkNew<vtkContextTransform> trans;
   trans->SetInteractive(true);
-  trans->AddItem(graphItem.GetPointer());
-  actor->GetScene()->AddItem(trans.GetPointer());
+  trans->AddItem(graphItem);
+  actor->GetScene()->AddItem(trans);
 
   vtkNew<vtkRenderer> renderer;
   renderer->SetBackground(1.0, 1.0, 1.0);
 
   vtkNew<vtkRenderWindow> renderWindow;
   renderWindow->SetSize(400, 200);
-  renderWindow->AddRenderer(renderer.GetPointer());
-  renderer->AddActor(actor.GetPointer());
+  renderWindow->AddRenderer(renderer);
+  renderer->AddActor(actor);
 
   vtkNew<vtkContextInteractorStyle> interactorStyle;
   interactorStyle->SetScene(actor->GetScene());
 
   vtkNew<vtkRenderWindowInteractor> interactor;
-  interactor->SetInteractorStyle(interactorStyle.GetPointer());
-  interactor->SetRenderWindow(renderWindow.GetPointer());
+  interactor->SetInteractorStyle(interactorStyle);
+  interactor->SetRenderWindow(renderWindow);
   renderWindow->SetMultiSamples(0);
   renderWindow->Render();
 
-  int retVal = vtkRegressionTestImage(renderWindow.GetPointer());
+  int retVal = vtkRegressionTestImage(renderWindow);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     renderWindow->Render();
@@ -206,4 +205,3 @@ int TestBoostDividedEdgeBundling(int argc, char* argv[])
   }
   return !retVal;
 }
-

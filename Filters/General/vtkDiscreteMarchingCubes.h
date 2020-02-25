@@ -62,7 +62,7 @@
  * want to contour an image (i.e., a volume slice), use vtkMarchingSquares.
  * @sa
  * vtkContourFilter vtkSliceCubes vtkMarchingSquares vtkDividingCubes
-*/
+ */
 
 #ifndef vtkDiscreteMarchingCubes_h
 #define vtkDiscreteMarchingCubes_h
@@ -73,32 +73,28 @@
 class VTKFILTERSGENERAL_EXPORT vtkDiscreteMarchingCubes : public vtkMarchingCubes
 {
 public:
-  static vtkDiscreteMarchingCubes *New();
-  vtkTypeMacro(vtkDiscreteMarchingCubes,vtkMarchingCubes);
+  static vtkDiscreteMarchingCubes* New();
+  vtkTypeMacro(vtkDiscreteMarchingCubes, vtkMarchingCubes);
 
   //@{
   /**
    * Set/Get the computation of neighbouring voxel values.
    */
-  vtkSetMacro(ComputeAdjacentScalars,int);
-  vtkGetMacro(ComputeAdjacentScalars,int);
-  vtkBooleanMacro(ComputeAdjacentScalars,int);
+  vtkSetMacro(ComputeAdjacentScalars, vtkTypeBool);
+  vtkGetMacro(ComputeAdjacentScalars, vtkTypeBool);
+  vtkBooleanMacro(ComputeAdjacentScalars, vtkTypeBool);
   //@}
 
 protected:
   vtkDiscreteMarchingCubes();
-  ~vtkDiscreteMarchingCubes() VTK_OVERRIDE;
+  ~vtkDiscreteMarchingCubes() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int ComputeAdjacentScalars;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  vtkTypeBool ComputeAdjacentScalars;
 
 private:
-  vtkDiscreteMarchingCubes(const vtkDiscreteMarchingCubes&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDiscreteMarchingCubes&) VTK_DELETE_FUNCTION;
-
+  vtkDiscreteMarchingCubes(const vtkDiscreteMarchingCubes&) = delete;
+  void operator=(const vtkDiscreteMarchingCubes&) = delete;
 };
 
 #endif
-
-

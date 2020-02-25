@@ -7,7 +7,7 @@ results for performance.
 
 When writing your own shaders you can use any approach you want. In the end they
 are just strings of code. For vtkOpenGLPolyDataMapper we make use of heavy
-string replacments.  In other classes we do very little processing as the shader
+string replacements.  In other classes we do very little processing as the shader
 has far fewer options. Regardless there are a few conventions you should be
 aware of.
 
@@ -30,14 +30,14 @@ your fragment shader) is
 
 //VTK::Output::Dec
 
-which VTK uses to map shader outputs to the framebufer.
+which VTK uses to map shader outputs to the framebuffer.
 
 All vertex shaders should name their outputs with a postfix of VSOutput All
 geometry shaders should name their outputs with a postfix of GSOutput All
 fragment shaders should name their inputs with a postfix of VSOutput.  Put
 another way fragment shaders should assuming their input is coming from the
 vertex shader.  If a geometry shader is present VTK will rename the fragment
-shader inputs from VSOutput to GSOuput automatically.
+shader inputs from VSOutput to GSOutput automatically.
 
 All variables that represent positions or directions usually have a suffix
 indicating the coordinate system they are in. The possible values are

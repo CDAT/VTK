@@ -14,19 +14,14 @@
 =========================================================================*/
 #include "vtkHyperTreeCursor.h"
 
+//-----------------------------------------------------------------------------
+vtkHyperTreeCursor::vtkHyperTreeCursor() = default;
 
 //-----------------------------------------------------------------------------
-// Constructor.
-vtkHyperTreeCursor::vtkHyperTreeCursor()
-{
-}
+vtkHyperTreeCursor::~vtkHyperTreeCursor() = default;
 
-//-----------------------------------------------------------------------------
-vtkHyperTreeCursor::~vtkHyperTreeCursor()
-{
-}
 //-----------------------------------------------------------------------------
 void vtkHyperTreeCursor::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

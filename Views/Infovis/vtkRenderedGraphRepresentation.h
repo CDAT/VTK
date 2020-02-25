@@ -21,14 +21,14 @@
  * @class   vtkRenderedGraphRepresentation
  *
  *
-*/
+ */
 
 #ifndef vtkRenderedGraphRepresentation_h
 #define vtkRenderedGraphRepresentation_h
 
-#include "vtkViewsInfovisModule.h" // For export macro
 #include "vtkRenderedRepresentation.h"
-#include "vtkSmartPointer.h" // for SP ivars
+#include "vtkSmartPointer.h"       // for SP ivars
+#include "vtkViewsInfovisModule.h" // For export macro
 
 class vtkActor;
 class vtkApplyColors;
@@ -66,7 +66,7 @@ class VTKVIEWSINFOVIS_EXPORT vtkRenderedGraphRepresentation : public vtkRendered
 public:
   static vtkRenderedGraphRepresentation* New();
   vtkTypeMacro(vtkRenderedGraphRepresentation, vtkRenderedRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // ------------------------------------------------------------------------
   // Vertex labels
@@ -86,9 +86,9 @@ public:
   /**
    * Whether to hide the display of vertex labels during mouse interaction.  Default is off.
    */
-  vtkSetMacro(HideVertexLabelsOnInteraction, bool)
-  vtkGetMacro(HideVertexLabelsOnInteraction, bool)
-  vtkBooleanMacro(HideVertexLabelsOnInteraction, bool)
+  vtkSetMacro(HideVertexLabelsOnInteraction, bool);
+  vtkGetMacro(HideVertexLabelsOnInteraction, bool);
+  vtkBooleanMacro(HideVertexLabelsOnInteraction, bool);
   //@}
 
   // ------------------------------------------------------------------------
@@ -109,9 +109,9 @@ public:
   /**
    * Whether to hide the display of edge labels during mouse interaction.  Default is off.
    */
-  vtkSetMacro(HideEdgeLabelsOnInteraction, bool)
-  vtkGetMacro(HideEdgeLabelsOnInteraction, bool)
-  vtkBooleanMacro(HideEdgeLabelsOnInteraction, bool)
+  vtkSetMacro(HideEdgeLabelsOnInteraction, bool);
+  vtkGetMacro(HideEdgeLabelsOnInteraction, bool);
+  vtkBooleanMacro(HideEdgeLabelsOnInteraction, bool);
   //@}
 
   // ------------------------------------------------------------------------
@@ -149,14 +149,13 @@ public:
    */
   virtual void SetVertexIconSelectionMode(int mode);
   virtual int GetVertexIconSelectionMode();
-  virtual void SetVertexIconSelectionModeToSelectedIcon()
-    { this->SetVertexIconSelectionMode(0); }
-  virtual void SetVertexIconSelectionModeToSelectedOffset()
-    { this->SetVertexIconSelectionMode(1); }
-  virtual void SetVertexIconSelectionModeToAnnotationIcon()
-    { this->SetVertexIconSelectionMode(2); }
+  virtual void SetVertexIconSelectionModeToSelectedIcon() { this->SetVertexIconSelectionMode(0); }
+  virtual void SetVertexIconSelectionModeToSelectedOffset() { this->SetVertexIconSelectionMode(1); }
+  virtual void SetVertexIconSelectionModeToAnnotationIcon() { this->SetVertexIconSelectionMode(2); }
   virtual void SetVertexIconSelectionModeToIgnoreSelection()
-    { this->SetVertexIconSelectionMode(3); }
+  {
+    this->SetVertexIconSelectionMode(3);
+  }
   //@}
 
   // ------------------------------------------------------------------------
@@ -242,30 +241,18 @@ public:
   /**
    * Set predefined layout strategies.
    */
-  void SetLayoutStrategyToRandom()
-    { this->SetLayoutStrategy("Random"); }
-  void SetLayoutStrategyToForceDirected()
-    { this->SetLayoutStrategy("Force Directed"); }
-  void SetLayoutStrategyToSimple2D()
-    { this->SetLayoutStrategy("Simple 2D"); }
-  void SetLayoutStrategyToClustering2D()
-    { this->SetLayoutStrategy("Clustering 2D"); }
-  void SetLayoutStrategyToCommunity2D()
-    { this->SetLayoutStrategy("Community 2D"); }
-  void SetLayoutStrategyToFast2D()
-    { this->SetLayoutStrategy("Fast 2D"); }
-  void SetLayoutStrategyToPassThrough()
-    { this->SetLayoutStrategy("Pass Through"); }
-  void SetLayoutStrategyToCircular()
-    { this->SetLayoutStrategy("Circular"); }
-  void SetLayoutStrategyToTree()
-    { this->SetLayoutStrategy("Tree"); }
-  void SetLayoutStrategyToCosmicTree()
-    { this->SetLayoutStrategy("Cosmic Tree"); }
-  void SetLayoutStrategyToCone()
-    { this->SetLayoutStrategy("Cone"); }
-  void SetLayoutStrategyToSpanTree()
-    { this->SetLayoutStrategy("Span Tree"); }
+  void SetLayoutStrategyToRandom() { this->SetLayoutStrategy("Random"); }
+  void SetLayoutStrategyToForceDirected() { this->SetLayoutStrategy("Force Directed"); }
+  void SetLayoutStrategyToSimple2D() { this->SetLayoutStrategy("Simple 2D"); }
+  void SetLayoutStrategyToClustering2D() { this->SetLayoutStrategy("Clustering 2D"); }
+  void SetLayoutStrategyToCommunity2D() { this->SetLayoutStrategy("Community 2D"); }
+  void SetLayoutStrategyToFast2D() { this->SetLayoutStrategy("Fast 2D"); }
+  void SetLayoutStrategyToPassThrough() { this->SetLayoutStrategy("Pass Through"); }
+  void SetLayoutStrategyToCircular() { this->SetLayoutStrategy("Circular"); }
+  void SetLayoutStrategyToTree() { this->SetLayoutStrategy("Tree"); }
+  void SetLayoutStrategyToCosmicTree() { this->SetLayoutStrategy("Cosmic Tree"); }
+  void SetLayoutStrategyToCone() { this->SetLayoutStrategy("Cone"); }
+  void SetLayoutStrategyToSpanTree() { this->SetLayoutStrategy("Span Tree"); }
 
   /**
    * Set the layout strategy to use coordinates from arrays.
@@ -285,14 +272,11 @@ public:
    * vtkTreeLayoutStrategy for more information.
    */
   virtual void SetLayoutStrategyToTree(
-    bool radial,
-    double angle = 90,
-    double leafSpacing = 0.9,
-    double logSpacing = 1.0);
+    bool radial, double angle = 90, double leafSpacing = 0.9, double logSpacing = 1.0);
 
   /**
    * Set the layout strategy to a cosmic tree layout. nodeSizeArrayName is
-   * the array used to size the circles (default is NULL, which makes leaf
+   * the array used to size the circles (default is nullptr, which makes leaf
    * nodes the same size). sizeLeafNodesOnly only uses the leaf node sizes,
    * and computes the parent size as the sum of the child sizes (default true).
    * layoutDepth stops layout at a certain depth (default is 0, which does the
@@ -300,11 +284,8 @@ public:
    * node of the layout (default is -1, which will use the tree's root).
    * See vtkCosmicTreeLayoutStrategy for more information.
    */
-  virtual void SetLayoutStrategyToCosmicTree(
-    const char* nodeSizeArrayName,
-    bool sizeLeafNodesOnly = true,
-    int layoutDepth = 0,
-    vtkIdType layoutRoot = -1);
+  virtual void SetLayoutStrategyToCosmicTree(const char* nodeSizeArrayName,
+    bool sizeLeafNodesOnly = true, int layoutDepth = 0, vtkIdType layoutRoot = -1);
 
   // ------------------------------------------------------------------------
   // Edge layout strategy
@@ -315,10 +296,8 @@ public:
    */
   virtual void SetEdgeLayoutStrategy(vtkEdgeLayoutStrategy* strategy);
   virtual vtkEdgeLayoutStrategy* GetEdgeLayoutStrategy();
-  void SetEdgeLayoutStrategyToArcParallel()
-    { this->SetEdgeLayoutStrategy("Arc Parallel"); }
-  void SetEdgeLayoutStrategyToPassThrough()
-    { this->SetEdgeLayoutStrategy("Pass Through"); }
+  void SetEdgeLayoutStrategyToArcParallel() { this->SetEdgeLayoutStrategy("Arc Parallel"); }
+  void SetEdgeLayoutStrategyToPassThrough() { this->SetEdgeLayoutStrategy("Pass Through"); }
   //@}
 
   /**
@@ -341,7 +320,7 @@ public:
   /**
    * Apply a theme to this representation.
    */
-  void ApplyViewTheme(vtkViewTheme* theme) VTK_OVERRIDE;
+  void ApplyViewTheme(vtkViewTheme* theme) override;
 
   //@{
   /**
@@ -399,66 +378,64 @@ public:
   /**
    * Compute the bounding box of the selected subgraph.
    */
-  void ComputeSelectedGraphBounds( double bounds[6] );
+  void ComputeSelectedGraphBounds(double bounds[6]);
 
 protected:
   vtkRenderedGraphRepresentation();
-  ~vtkRenderedGraphRepresentation() VTK_OVERRIDE;
+  ~vtkRenderedGraphRepresentation() override;
 
   //@{
   /**
    * Called by the view to add/remove this representation.
    */
-  bool AddToView(vtkView* view) VTK_OVERRIDE;
-  bool RemoveFromView(vtkView* view) VTK_OVERRIDE;
+  bool AddToView(vtkView* view) override;
+  bool RemoveFromView(vtkView* view) override;
   //@}
 
-  void PrepareForRendering(vtkRenderView* view) VTK_OVERRIDE;
+  void PrepareForRendering(vtkRenderView* view) override;
 
-  vtkSelection* ConvertSelection(vtkView* view, vtkSelection* sel) VTK_OVERRIDE;
+  vtkSelection* ConvertSelection(vtkView* view, vtkSelection* sel) override;
 
-  vtkUnicodeString GetHoverTextInternal(vtkSelection* sel) VTK_OVERRIDE;
+  vtkUnicodeString GetHoverTextInternal(vtkSelection* sel) override;
 
   /**
    * Connect inputs to internal pipeline.
    */
-  int RequestData(
-    vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   //@{
   /**
    * Internal filter classes.
    */
-  vtkSmartPointer<vtkApplyColors>          ApplyColors;
-  vtkSmartPointer<vtkVertexDegree>         VertexDegree;
-  vtkSmartPointer<vtkPolyData>             EmptyPolyData;
-  vtkSmartPointer<vtkEdgeCenters>          EdgeCenters;
-  vtkSmartPointer<vtkGraphToPoints>        GraphToPoints;
+  vtkSmartPointer<vtkApplyColors> ApplyColors;
+  vtkSmartPointer<vtkVertexDegree> VertexDegree;
+  vtkSmartPointer<vtkPolyData> EmptyPolyData;
+  vtkSmartPointer<vtkEdgeCenters> EdgeCenters;
+  vtkSmartPointer<vtkGraphToPoints> GraphToPoints;
   vtkSmartPointer<vtkPointSetToLabelHierarchy> VertexLabelHierarchy;
   vtkSmartPointer<vtkPointSetToLabelHierarchy> EdgeLabelHierarchy;
-  vtkSmartPointer<vtkGraphLayout>          Layout;
+  vtkSmartPointer<vtkGraphLayout> Layout;
   vtkSmartPointer<vtkPerturbCoincidentVertices> Coincident;
-  vtkSmartPointer<vtkEdgeLayout>           EdgeLayout;
-  vtkSmartPointer<vtkGraphToPolyData>      GraphToPoly;
-  vtkSmartPointer<vtkPolyDataMapper>       EdgeMapper;
-  vtkSmartPointer<vtkActor>                EdgeActor;
-  vtkSmartPointer<vtkGraphToGlyphs>        VertexGlyph;
-  vtkSmartPointer<vtkPolyDataMapper>       VertexMapper;
-  vtkSmartPointer<vtkActor>                VertexActor;
-  vtkSmartPointer<vtkGraphToGlyphs>        OutlineGlyph;
-  vtkSmartPointer<vtkPolyDataMapper>       OutlineMapper;
-  vtkSmartPointer<vtkActor>                OutlineActor;
-  vtkSmartPointer<vtkScalarBarWidget>      VertexScalarBar;
-  vtkSmartPointer<vtkScalarBarWidget>      EdgeScalarBar;
-  vtkSmartPointer<vtkRemoveHiddenData>     RemoveHiddenGraph;
-  vtkSmartPointer<vtkApplyIcons>           ApplyVertexIcons;
-  vtkSmartPointer<vtkGraphToPoints>        VertexIconPoints;
+  vtkSmartPointer<vtkEdgeLayout> EdgeLayout;
+  vtkSmartPointer<vtkGraphToPolyData> GraphToPoly;
+  vtkSmartPointer<vtkPolyDataMapper> EdgeMapper;
+  vtkSmartPointer<vtkActor> EdgeActor;
+  vtkSmartPointer<vtkGraphToGlyphs> VertexGlyph;
+  vtkSmartPointer<vtkPolyDataMapper> VertexMapper;
+  vtkSmartPointer<vtkActor> VertexActor;
+  vtkSmartPointer<vtkGraphToGlyphs> OutlineGlyph;
+  vtkSmartPointer<vtkPolyDataMapper> OutlineMapper;
+  vtkSmartPointer<vtkActor> OutlineActor;
+  vtkSmartPointer<vtkScalarBarWidget> VertexScalarBar;
+  vtkSmartPointer<vtkScalarBarWidget> EdgeScalarBar;
+  vtkSmartPointer<vtkRemoveHiddenData> RemoveHiddenGraph;
+  vtkSmartPointer<vtkApplyIcons> ApplyVertexIcons;
+  vtkSmartPointer<vtkGraphToPoints> VertexIconPoints;
   vtkSmartPointer<vtkTransformCoordinateSystems> VertexIconTransform;
-  vtkSmartPointer<vtkIconGlyphFilter>      VertexIconGlyph;
-  vtkSmartPointer<vtkPolyDataMapper2D>     VertexIconMapper;
-  vtkSmartPointer<vtkTexturedActor2D>      VertexIconActor;
+  vtkSmartPointer<vtkIconGlyphFilter> VertexIconGlyph;
+  vtkSmartPointer<vtkPolyDataMapper2D> VertexIconMapper;
+  vtkSmartPointer<vtkTexturedActor2D> VertexIconActor;
   //@}
 
   char* VertexHoverArrayName;
@@ -486,9 +463,8 @@ protected:
   bool EdgeSelection;
 
 private:
-  vtkRenderedGraphRepresentation(const vtkRenderedGraphRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRenderedGraphRepresentation&) VTK_DELETE_FUNCTION;
+  vtkRenderedGraphRepresentation(const vtkRenderedGraphRepresentation&) = delete;
+  void operator=(const vtkRenderedGraphRepresentation&) = delete;
 };
 
 #endif
-

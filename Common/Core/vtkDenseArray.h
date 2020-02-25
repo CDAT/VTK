@@ -41,7 +41,7 @@
  *
  * @par Thanks:
  * Developed by Timothy M. Shead (tshead@sandia.gov) at Sandia National Laboratories.
-*/
+ */
 
 #ifndef vtkDenseArray_h
 #define vtkDenseArray_h
@@ -50,36 +50,36 @@
 #include "vtkObjectFactory.h"
 #include "vtkTypedArray.h"
 
-template<typename T>
+template <typename T>
 class vtkDenseArray : public vtkTypedArray<T>
 {
 public:
   static vtkDenseArray<T>* New();
-  vtkTemplateTypeMacro(vtkDenseArray<T>, vtkTypedArray<T>)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTemplateTypeMacro(vtkDenseArray<T>, vtkTypedArray<T>);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   typedef typename vtkArray::CoordinateT CoordinateT;
   typedef typename vtkArray::DimensionT DimensionT;
   typedef typename vtkArray::SizeT SizeT;
 
   // vtkArray API
-  bool IsDense() VTK_OVERRIDE;
-  const vtkArrayExtents& GetExtents() VTK_OVERRIDE;
-  SizeT GetNonNullSize() VTK_OVERRIDE;
-  void GetCoordinatesN(const SizeT n, vtkArrayCoordinates& coordinates) VTK_OVERRIDE;
-  vtkArray* DeepCopy() VTK_OVERRIDE;
+  bool IsDense() override;
+  const vtkArrayExtents& GetExtents() override;
+  SizeT GetNonNullSize() override;
+  void GetCoordinatesN(const SizeT n, vtkArrayCoordinates& coordinates) override;
+  vtkArray* DeepCopy() override;
 
   // vtkTypedArray API
-  const T& GetValue(CoordinateT i) VTK_OVERRIDE;
-  const T& GetValue(CoordinateT i, CoordinateT j) VTK_OVERRIDE;
-  const T& GetValue(CoordinateT i, CoordinateT j, CoordinateT k) VTK_OVERRIDE;
-  const T& GetValue(const vtkArrayCoordinates& coordinates) VTK_OVERRIDE;
-  const T& GetValueN(const SizeT n) VTK_OVERRIDE;
-  void SetValue(CoordinateT i, const T& value) VTK_OVERRIDE;
-  void SetValue(CoordinateT i, CoordinateT j, const T& value) VTK_OVERRIDE;
-  void SetValue(CoordinateT i, CoordinateT j, CoordinateT k, const T& value) VTK_OVERRIDE;
-  void SetValue(const vtkArrayCoordinates& coordinates, const T& value) VTK_OVERRIDE;
-  void SetValueN(const SizeT n, const T& value) VTK_OVERRIDE;
+  const T& GetValue(CoordinateT i) override;
+  const T& GetValue(CoordinateT i, CoordinateT j) override;
+  const T& GetValue(CoordinateT i, CoordinateT j, CoordinateT k) override;
+  const T& GetValue(const vtkArrayCoordinates& coordinates) override;
+  const T& GetValueN(const SizeT n) override;
+  void SetValue(CoordinateT i, const T& value) override;
+  void SetValue(CoordinateT i, CoordinateT j, const T& value) override;
+  void SetValue(CoordinateT i, CoordinateT j, CoordinateT k, const T& value) override;
+  void SetValue(const vtkArrayCoordinates& coordinates, const T& value) override;
+  void SetValueN(const SizeT n, const T& value) override;
 
   // vtkDenseArray API
 
@@ -97,8 +97,8 @@ public:
      * Returns a pointer to the block of memory to be used for storage.
      */
     virtual T* GetAddress() = 0;
-  };
     //@}
+  };
 
   //@{
   /**
@@ -106,14 +106,13 @@ public:
    * new[] and delete[].  Note: HeapMemoryBlock is the default used by vtkDenseArray
    * for its "normal" internal memory allocation.
    */
-  class HeapMemoryBlock :
-    public MemoryBlock
+  class HeapMemoryBlock : public MemoryBlock
   {
   public:
     HeapMemoryBlock(const vtkArrayExtents& extents);
-    ~HeapMemoryBlock() VTK_OVERRIDE;
-    T* GetAddress() VTK_OVERRIDE;
-  //@}
+    ~HeapMemoryBlock() override;
+    T* GetAddress() override;
+    //@}
 
   private:
     T* Storage;
@@ -123,13 +122,12 @@ public:
   /**
    * MemoryBlock implementation that manages a static (will not be freed) memory block.
    */
-  class StaticMemoryBlock :
-    public MemoryBlock
+  class StaticMemoryBlock : public MemoryBlock
   {
   public:
     StaticMemoryBlock(T* const storage);
-    virtual T* GetAddress();
-  //@}
+    T* GetAddress() override;
+    //@}
 
   private:
     T* Storage;
@@ -177,15 +175,15 @@ public:
 
 protected:
   vtkDenseArray();
-  ~vtkDenseArray() VTK_OVERRIDE;
+  ~vtkDenseArray() override;
 
 private:
-  vtkDenseArray(const vtkDenseArray&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDenseArray&) VTK_DELETE_FUNCTION;
+  vtkDenseArray(const vtkDenseArray&) = delete;
+  void operator=(const vtkDenseArray&) = delete;
 
-  void InternalResize(const vtkArrayExtents& extents) VTK_OVERRIDE;
-  void InternalSetDimensionLabel(DimensionT i, const vtkStdString& label) VTK_OVERRIDE;
-  vtkStdString InternalGetDimensionLabel(DimensionT i) VTK_OVERRIDE;
+  void InternalResize(const vtkArrayExtents& extents) override;
+  void InternalSetDimensionLabel(DimensionT i, const vtkStdString& label) override;
+  vtkStdString InternalGetDimensionLabel(DimensionT i) override;
   inline vtkIdType MapCoordinates(CoordinateT i);
   inline vtkIdType MapCoordinates(CoordinateT i, CoordinateT j);
   inline vtkIdType MapCoordinates(CoordinateT i, CoordinateT j, CoordinateT k);
@@ -228,8 +226,8 @@ private:
    * Stores the stride along each array dimension (used for fast lookups).
    */
   std::vector<vtkIdType> Strides;
-};
   //@}
+};
 
 #include "vtkDenseArray.txx"
 

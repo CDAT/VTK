@@ -15,23 +15,16 @@
 #include "vtkLevelIdScalars.h"
 #include "vtkObjectFactory.h"
 
-
 vtkStandardNewMacro(vtkLevelIdScalars);
 
 //------------------------------------------------------------------------------
-vtkLevelIdScalars::vtkLevelIdScalars()
-{
-
-}
+vtkLevelIdScalars::vtkLevelIdScalars() = default;
 
 //------------------------------------------------------------------------------
-vtkLevelIdScalars::~vtkLevelIdScalars()
-{
-
-}
+vtkLevelIdScalars::~vtkLevelIdScalars() = default;
 
 //------------------------------------------------------------------------------
 void vtkLevelIdScalars::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

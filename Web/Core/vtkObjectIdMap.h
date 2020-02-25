@@ -16,7 +16,7 @@
  * @class   vtkObjectIdMap
  * @brief   class used to assign Id to any VTK object and be able
  * to retrieve it base on its id.
-*/
+ */
 
 #ifndef vtkObjectIdMap_h
 #define vtkObjectIdMap_h
@@ -29,7 +29,7 @@ class VTKWEBCORE_EXPORT vtkObjectIdMap : public vtkObject
 public:
   static vtkObjectIdMap* New();
   vtkTypeMacro(vtkObjectIdMap, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Retrieve a unique identifier for the given object or generate a new one
@@ -38,7 +38,7 @@ public:
   vtkTypeUInt32 GetGlobalId(vtkObject* obj);
 
   /**
-   * Retrieve a vtkObject based on its global id. If not found return NULL
+   * Retrieve a vtkObject based on its global id. If not found return nullptr
    */
   vtkObject* GetVTKObject(vtkTypeUInt32 globalId);
 
@@ -65,12 +65,11 @@ protected:
   ~vtkObjectIdMap() override;
 
 private:
-  vtkObjectIdMap(const vtkObjectIdMap&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkObjectIdMap&) VTK_DELETE_FUNCTION;
+  vtkObjectIdMap(const vtkObjectIdMap&) = delete;
+  void operator=(const vtkObjectIdMap&) = delete;
 
   struct vtkInternals;
   vtkInternals* Internals;
-
 };
 
 #endif

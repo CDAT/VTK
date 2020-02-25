@@ -26,7 +26,7 @@
  *
  * @warning
  * Normals can be operated on only if they are present in the data.
-*/
+ */
 
 #ifndef vtkReverseSense_h
 #define vtkReverseSense_h
@@ -37,46 +37,46 @@
 class VTKFILTERSCORE_EXPORT vtkReverseSense : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkReverseSense,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkReverseSense, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object so that behavior is to reverse cell ordering and
    * leave normal orientation as is.
    */
-  static vtkReverseSense *New();
+  static vtkReverseSense* New();
 
   //@{
   /**
    * Flag controls whether to reverse cell ordering.
    */
-  vtkSetMacro(ReverseCells,int);
-  vtkGetMacro(ReverseCells,int);
-  vtkBooleanMacro(ReverseCells,int);
+  vtkSetMacro(ReverseCells, vtkTypeBool);
+  vtkGetMacro(ReverseCells, vtkTypeBool);
+  vtkBooleanMacro(ReverseCells, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Flag controls whether to reverse normal orientation.
    */
-  vtkSetMacro(ReverseNormals,int);
-  vtkGetMacro(ReverseNormals,int);
-  vtkBooleanMacro(ReverseNormals,int);
+  vtkSetMacro(ReverseNormals, vtkTypeBool);
+  vtkGetMacro(ReverseNormals, vtkTypeBool);
+  vtkBooleanMacro(ReverseNormals, vtkTypeBool);
   //@}
-
 
 protected:
   vtkReverseSense();
-  ~vtkReverseSense() VTK_OVERRIDE {}
+  ~vtkReverseSense() override {}
 
   // Usual data generation method
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int ReverseCells;
-  int ReverseNormals;
+  vtkTypeBool ReverseCells;
+  vtkTypeBool ReverseNormals;
+
 private:
-  vtkReverseSense(const vtkReverseSense&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkReverseSense&) VTK_DELETE_FUNCTION;
+  vtkReverseSense(const vtkReverseSense&) = delete;
+  void operator=(const vtkReverseSense&) = delete;
 };
 
 #endif

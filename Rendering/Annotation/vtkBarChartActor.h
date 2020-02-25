@@ -29,13 +29,13 @@
  * @sa
  * vtkParallelCoordinatesActor vtkXYPlotActor vtkSpiderPlotActor
  * vtkPieChartActor
-*/
+ */
 
 #ifndef vtkBarChartActor_h
 #define vtkBarChartActor_h
 
-#include "vtkRenderingAnnotationModule.h" // For export macro
 #include "vtkActor2D.h"
+#include "vtkRenderingAnnotationModule.h" // For export macro
 
 class vtkAxisActor2D;
 class vtkDataObject;
@@ -54,14 +54,14 @@ public:
   /**
    * Standard methods for type information and printing.
    */
-  vtkTypeMacro(vtkBarChartActor,vtkActor2D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkBarChartActor, vtkActor2D);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * Instantiate this class.
    */
-  static vtkBarChartActor *New();
+  static vtkBarChartActor* New();
 
   /**
    * Set the input to the bar chart actor.
@@ -72,16 +72,16 @@ public:
   /**
    * Get the input data object to this actor.
    */
-  vtkGetObjectMacro(Input,vtkDataObject);
+  vtkGetObjectMacro(Input, vtkDataObject);
   //@}
 
   //@{
   /**
    * Enable/Disable the display of a plot title.
    */
-  vtkSetMacro(TitleVisibility, int);
-  vtkGetMacro(TitleVisibility, int);
-  vtkBooleanMacro(TitleVisibility, int);
+  vtkSetMacro(TitleVisibility, vtkTypeBool);
+  vtkGetMacro(TitleVisibility, vtkTypeBool);
+  vtkBooleanMacro(TitleVisibility, vtkTypeBool);
   //@}
 
   //@{
@@ -97,17 +97,17 @@ public:
    * Set/Get the title text property. The property controls the
    * appearance of the plot title.
    */
-  virtual void SetTitleTextProperty(vtkTextProperty *p);
-  vtkGetObjectMacro(TitleTextProperty,vtkTextProperty);
+  virtual void SetTitleTextProperty(vtkTextProperty* p);
+  vtkGetObjectMacro(TitleTextProperty, vtkTextProperty);
   //@}
 
   //@{
   /**
    * Enable/Disable the display of bar labels.
    */
-  vtkSetMacro(LabelVisibility, int);
-  vtkGetMacro(LabelVisibility, int);
-  vtkBooleanMacro(LabelVisibility, int);
+  vtkSetMacro(LabelVisibility, vtkTypeBool);
+  vtkGetMacro(LabelVisibility, vtkTypeBool);
+  vtkBooleanMacro(LabelVisibility, vtkTypeBool);
   //@}
 
   //@{
@@ -115,8 +115,8 @@ public:
    * Set/Get the labels text property. This controls the appearance
    * of all bar bar labels.
    */
-  virtual void SetLabelTextProperty(vtkTextProperty *p);
-  vtkGetObjectMacro(LabelTextProperty,vtkTextProperty);
+  virtual void SetLabelTextProperty(vtkTextProperty* p);
+  vtkGetObjectMacro(LabelTextProperty, vtkTextProperty);
   //@}
 
   //@{
@@ -126,8 +126,10 @@ public:
    */
   void SetBarColor(int i, double r, double g, double b);
   void SetBarColor(int i, const double color[3])
-    { this->SetBarColor(i, color[0], color[1], color[2]); }
-  double *GetBarColor(int i);
+  {
+    this->SetBarColor(i, color[0], color[1], color[2]);
+  }
+  double* GetBarColor(int i);
   //@}
 
   //@{
@@ -135,7 +137,7 @@ public:
    * Specify the names of each bar. If
    * not specified, then an integer number is automatically generated.
    */
-  void SetBarLabel(const int i, const char *);
+  void SetBarLabel(const int i, const char*);
   const char* GetBarLabel(int i);
   //@}
 
@@ -153,9 +155,9 @@ public:
    * be created automatically unless the per plot legend symbol has been
    * set.
    */
-  vtkSetMacro(LegendVisibility, int);
-  vtkGetMacro(LegendVisibility, int);
-  vtkBooleanMacro(LegendVisibility, int);
+  vtkSetMacro(LegendVisibility, vtkTypeBool);
+  vtkGetMacro(LegendVisibility, vtkTypeBool);
+  vtkBooleanMacro(LegendVisibility, vtkTypeBool);
   //@}
 
   //@{
@@ -163,85 +165,83 @@ public:
    * Retrieve handles to the legend box. This is useful if you would like
    * to manually control the legend appearance.
    */
-  vtkGetObjectMacro(LegendActor,vtkLegendBoxActor);
+  vtkGetObjectMacro(LegendActor, vtkLegendBoxActor);
   //@}
 
   //@{
   /**
    * Draw the bar plot.
    */
-  int RenderOverlay(vtkViewport*) VTK_OVERRIDE;
-  int RenderOpaqueGeometry(vtkViewport*) VTK_OVERRIDE;
-  int RenderTranslucentPolygonalGeometry(vtkViewport* ) VTK_OVERRIDE {return 0;}
+  int RenderOverlay(vtkViewport*) override;
+  int RenderOpaqueGeometry(vtkViewport*) override;
+  int RenderTranslucentPolygonalGeometry(vtkViewport*) override { return 0; }
   //@}
 
   /**
    * Does this prop have some translucent polygonal geometry?
    */
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
 
   /**
    * Release any graphics resources that are being consumed by this actor.
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
 protected:
   vtkBarChartActor();
-  ~vtkBarChartActor() VTK_OVERRIDE;
+  ~vtkBarChartActor() override;
 
 private:
-  vtkDataObject *Input;        // List of data sets to plot
+  vtkDataObject* Input; // List of data sets to plot
   vtkIdType ArrayNumber;
   vtkIdType ComponentNumber;
-  int TitleVisibility;         // Should I see the title?
-  char *Title;                 // The title string
-  vtkTextProperty *TitleTextProperty;
-  int LabelVisibility;
-  vtkTextProperty *LabelTextProperty;
-  vtkBarLabelArray *Labels;
-  int LegendVisibility;
-  vtkLegendBoxActor *LegendActor;
-  vtkGlyphSource2D *GlyphSource;
+  vtkTypeBool TitleVisibility; // Should I see the title?
+  char* Title;                 // The title string
+  vtkTextProperty* TitleTextProperty;
+  vtkTypeBool LabelVisibility;
+  vtkTextProperty* LabelTextProperty;
+  vtkBarLabelArray* Labels;
+  vtkTypeBool LegendVisibility;
+  vtkLegendBoxActor* LegendActor;
+  vtkGlyphSource2D* GlyphSource;
 
   // Local variables needed to plot
-  vtkIdType N;        // The number of values
-  double   *Heights;  // The heights of each bar
-  double    MinHeight; //The maximum and minimum height
-  double    MaxHeight;
-  double    LowerLeft[2];
-  double    UpperRight[2];
+  vtkIdType N;      // The number of values
+  double* Heights;  // The heights of each bar
+  double MinHeight; // The maximum and minimum height
+  double MaxHeight;
+  double LowerLeft[2];
+  double UpperRight[2];
 
-  vtkTextMapper    **BarMappers; //a label for each bar
-  vtkActor2D       **BarActors;
+  vtkTextMapper** BarMappers; // a label for each bar
+  vtkActor2D** BarActors;
 
-  vtkTextMapper    *TitleMapper;
-  vtkActor2D       *TitleActor;
+  vtkTextMapper* TitleMapper;
+  vtkActor2D* TitleActor;
 
-  vtkPolyData         *PlotData;    // The actual bars plus the x-axis
-  vtkPolyDataMapper2D *PlotMapper;
-  vtkActor2D          *PlotActor;
+  vtkPolyData* PlotData; // The actual bars plus the x-axis
+  vtkPolyDataMapper2D* PlotMapper;
+  vtkActor2D* PlotActor;
 
-  vtkAxisActor2D *YAxis;  //The y-axis
-  char           *YTitle;
+  vtkAxisActor2D* YAxis; // The y-axis
+  char* YTitle;
 
-  vtkTimeStamp  BuildTime;
+  vtkTimeStamp BuildTime;
 
-  int    LastPosition[2];
-  int    LastPosition2[2];
+  int LastPosition[2];
+  int LastPosition2[2];
   double P1[3];
   double P2[3];
 
   void Initialize();
-  int PlaceAxes(vtkViewport *viewport, int *size);
+  int PlaceAxes(vtkViewport* viewport, int* size);
   int BuildPlot(vtkViewport*);
 
 private:
-  vtkBarChartActor(const vtkBarChartActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBarChartActor&) VTK_DELETE_FUNCTION;
+  vtkBarChartActor(const vtkBarChartActor&) = delete;
+  void operator=(const vtkBarChartActor&) = delete;
 };
 
-
 #endif
-

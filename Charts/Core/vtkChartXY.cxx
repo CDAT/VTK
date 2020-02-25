@@ -15,54 +15,46 @@
 
 #include "vtkChartXY.h"
 
+#include "vtkAnnotationLink.h"
+#include "vtkAxis.h"
 #include "vtkBrush.h"
-#include "vtkChartSelectionHelper.h"
+#include "vtkChartLegend.h"
 #include "vtkColorSeries.h"
+#include "vtkCommand.h"
 #include "vtkContext2D.h"
-#include "vtkPen.h"
-
 #include "vtkContextClip.h"
 #include "vtkContextKeyEvent.h"
+#include "vtkContextMapper2D.h"
 #include "vtkContextMouseEvent.h"
 #include "vtkContextScene.h"
 #include "vtkContextTransform.h"
+#include "vtkDataArray.h"
+#include "vtkDataSetAttributes.h"
+#include "vtkIdTypeArray.h"
+#include "vtkInformation.h"
 #include "vtkMath.h"
-#include "vtkPoints2D.h"
-#include "vtkTransform2D.h"
-#include "vtkVector.h"
-#include "vtkVectorOperators.h"
-
-#include "vtkContextMapper2D.h"
+#include "vtkObjectFactory.h"
+#include "vtkPen.h"
 #include "vtkPlotArea.h"
 #include "vtkPlotBag.h"
 #include "vtkPlotBar.h"
 #include "vtkPlotFunctionalBag.h"
+#include "vtkPlotGrid.h"
 #include "vtkPlotLine.h"
 #include "vtkPlotPoints.h"
 #include "vtkPlotStacked.h"
-
-#include "vtkAxis.h"
-#include "vtkChartLegend.h"
-#include "vtkPlotGrid.h"
-#include "vtkTooltipItem.h"
-
-#include "vtkDataSetAttributes.h"
-#include "vtkIdTypeArray.h"
-#include "vtkTable.h"
-
-#include "vtkAnnotationLink.h"
+#include "vtkPoints2D.h"
 #include "vtkSelection.h"
 #include "vtkSelectionNode.h"
 #include "vtkSmartPointer.h"
-
-#include "vtkCommand.h"
-#include "vtkObjectFactory.h"
-
 #include "vtkStdString.h"
-#include "vtkTextProperty.h"
-
-#include "vtkDataArray.h"
 #include "vtkStringArray.h"
+#include "vtkTable.h"
+#include "vtkTextProperty.h"
+#include "vtkTooltipItem.h"
+#include "vtkTransform2D.h"
+#include "vtkVector.h"
+#include "vtkVectorOperators.h"
 
 // My STL containers
 #include <algorithm>
@@ -104,6 +96,7 @@ public:
   vtkSmartPointer<vtkColorSeries> Colors;        // Colors in the chart
   vtkSmartPointer<vtkContextClip> Clip;          // Colors in the chart
   int Borders[4];
+  vtkTimeStamp TransformCalculatedTime;
 };
 
 //-----------------------------------------------------------------------------
@@ -180,6 +173,10 @@ vtkChartXY::vtkChartXY()
   this->ForceAxesToBounds = false;
   this->ZoomWithMouseWheel = true;
   this->AdjustLowerBoundForLogPlot = false;
+
+  this->DragPoint = false;
+  this->DragPointAlongX = true;
+  this->DragPointAlongY = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -311,7 +308,7 @@ void vtkChartXY::Update()
     for (int i = 0; i < static_cast<int>(this->ChartPrivate->PlotCorners.size()); ++i)
     {
       int visible = 0;
-      for (unsigned int j = 0; j < this->ChartPrivate->PlotCorners[i]->GetNumberOfItems(); ++j)
+      for (vtkIdType j = 0; j < this->ChartPrivate->PlotCorners[i]->GetNumberOfItems(); ++j)
       {
         if (vtkPlot::SafeDownCast(this->ChartPrivate->PlotCorners[i]->GetItem(j))->GetVisible())
         {
@@ -372,7 +369,10 @@ bool vtkChartXY::Paint(vtkContext2D* painter)
   this->UpdateLayout(painter);
 
   // Axes may have changed during updateLayout
-  if (this->MTime < this->ChartPrivate->axes[0]->GetMTime())
+  if (this->ChartPrivate->TransformCalculatedTime < this->ChartPrivate->axes[0]->GetMTime() ||
+    this->ChartPrivate->TransformCalculatedTime < this->ChartPrivate->axes[1]->GetMTime() ||
+    this->ChartPrivate->TransformCalculatedTime < this->ChartPrivate->axes[2]->GetMTime() ||
+    this->ChartPrivate->TransformCalculatedTime < this->ChartPrivate->axes[3]->GetMTime())
   {
     // Cause the plot transform to be recalculated if necessary
     recalculateTransform = true;
@@ -569,7 +569,7 @@ void vtkChartXY::RecalculatePlotTransforms()
       // their input data when necessary.
       vtkRectd shiftScale(
         xAxis->GetShift(), yAxis->GetShift(), xAxis->GetScalingFactor(), yAxis->GetScalingFactor());
-      for (unsigned int j = 0; j < this->ChartPrivate->PlotCorners[i]->GetNumberOfItems(); ++j)
+      for (vtkIdType j = 0; j < this->ChartPrivate->PlotCorners[i]->GetNumberOfItems(); ++j)
       {
         vtkPlot* plot = vtkPlot::SafeDownCast(this->ChartPrivate->PlotCorners[i]->GetItem(j));
         if (plot)
@@ -580,6 +580,7 @@ void vtkChartXY::RecalculatePlotTransforms()
     }
   }
   this->PlotTransformValid = true;
+  this->ChartPrivate->TransformCalculatedTime.Modified();
 }
 
 //-----------------------------------------------------------------------------
@@ -631,8 +632,8 @@ void vtkChartXY::SetPlotCorner(vtkPlot* plot, int corner)
   while (static_cast<int>(this->ChartPrivate->PlotCorners.size() - 1) < corner)
   {
     vtkNew<vtkContextTransform> transform;
-    this->ChartPrivate->PlotCorners.push_back(transform.GetPointer());
-    this->ChartPrivate->Clip->AddItem(transform.GetPointer()); // Clip maintains ownership.
+    this->ChartPrivate->PlotCorners.push_back(transform);
+    this->ChartPrivate->Clip->AddItem(transform); // Clip maintains ownership.
   }
   this->ChartPrivate->PlotCorners[corner]->AddItem(plot);
   if (corner == 0)
@@ -696,11 +697,11 @@ void vtkChartXY::RecalculatePlotBounds()
       }
       else
       {
-        if (y1[0] > bounds[2]) // min
+        if (y1[0] > bounds[2] || std::isnan(bounds[2])) // min
         {
           y1[0] = bounds[2];
         }
-        if (y1[1] < bounds[3]) // max
+        if (y1[1] < bounds[3] || std::isnan(bounds[3])) // max
         {
           y1[1] = bounds[3];
         }
@@ -716,11 +717,11 @@ void vtkChartXY::RecalculatePlotBounds()
       }
       else
       {
-        if (x1[0] > bounds[0]) // min
+        if (x1[0] > bounds[0] || std::isnan(bounds[0])) // min
         {
           x1[0] = bounds[0];
         }
-        if (x1[1] < bounds[1]) // max
+        if (x1[1] < bounds[1] || std::isnan(bounds[1])) // max
         {
           x1[1] = bounds[1];
         }
@@ -736,11 +737,11 @@ void vtkChartXY::RecalculatePlotBounds()
       }
       else
       {
-        if (y2[0] > bounds[2]) // min
+        if (y2[0] > bounds[2] || std::isnan(bounds[2])) // min
         {
           y2[0] = bounds[2];
         }
-        if (y2[1] < bounds[3]) // max
+        if (y2[1] < bounds[3] || std::isnan(bounds[3])) // max
         {
           y2[1] = bounds[3];
         }
@@ -756,11 +757,11 @@ void vtkChartXY::RecalculatePlotBounds()
       }
       else
       {
-        if (x2[0] > bounds[0]) // min
+        if (x2[0] > bounds[0] || std::isnan(bounds[0])) // min
         {
           x2[0] = bounds[0];
         }
-        if (x2[1] < bounds[1]) // max
+        if (x2[1] < bounds[1] || std::isnan(bounds[1])) // max
         {
           x2[1] = bounds[1];
         }
@@ -791,19 +792,32 @@ void vtkChartXY::RecalculatePlotBounds()
         return;
     }
 
-    if (this->AdjustLowerBoundForLogPlot && axis->GetLogScale() && range[0] <= 0.)
+    if (this->AdjustLowerBoundForLogPlot && axis->GetLogScale() &&
+      (range[0] <= 0.0 || vtkMath::IsNan(range[0])))
     {
-      if (range[1] <= 0.)
+      if (range[1] <= 0.0 || vtkMath::IsNan(range[1]))
       {
         // All of the data is negative, so we arbitrarily set the axis range to
         // be positive and show no data
         range[1] = 1.;
       }
+
       // The minimum value is set to either 4 decades below the max or to 1,
-      // regardless of the true minimum value (which is less than 0)
-      range[0] = (range[1] < 1.e4 ? range[1] / 1.e4 : 1.);
+      // regardless of the true minimum value (which is less than 0).
+      if (axis->GetLogScaleActive())
+      {
+        // Need to adjust in log (scaled) space
+        double candidateMin = range[1] - 4.0;
+        range[0] = (candidateMin < 0.0 ? candidateMin : 0.0);
+      }
+      else
+      {
+        // Need to adjust in unscaled space
+        double candidateMin = range[1] * 1.0e-4;
+        range[0] = (candidateMin < 1.0 ? candidateMin : 1.0);
+      }
     }
-    if (this->ForceAxesToBounds)
+    if (this->ForceAxesToBounds && (range[0] != range[1]))
     {
       axis->SetMinimumLimit(range[0]);
       axis->SetMaximumLimit(range[1]);
@@ -816,6 +830,23 @@ void vtkChartXY::RecalculatePlotBounds()
   }
 
   this->Modified();
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::ReleasePlotSelections()
+{
+  std::vector<vtkPlot*>::iterator it = this->ChartPrivate->plots.begin();
+  for (; it != this->ChartPrivate->plots.end(); ++it)
+  {
+    vtkPlot* plot = *it;
+    if (!plot)
+    {
+      continue;
+    }
+    vtkNew<vtkIdTypeArray> emptySelectionArray;
+    emptySelectionArray->Initialize();
+    plot->SetSelection(emptySelectionArray);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -1371,6 +1402,43 @@ vtkAxis* vtkChartXY::GetAxis(int axisIndex)
 }
 
 //-----------------------------------------------------------------------------
+void vtkChartXY::SetAxis(int axisIndex, vtkAxis* axis)
+{
+  if ((axisIndex < 4) && (axisIndex >= 0))
+  {
+    vtkAxis* old_axis = this->ChartPrivate->axes[axisIndex];
+    this->ChartPrivate->axes[axisIndex] = axis;
+    this->ChartPrivate->axes[axisIndex]->SetVisible(old_axis->GetVisible());
+
+    // remove the old axis
+    this->RemoveItem(old_axis);
+
+    this->AttachAxisRangeListener(this->ChartPrivate->axes[axisIndex]);
+    this->AddItem(this->ChartPrivate->axes[axisIndex]);
+
+    this->ChartPrivate->axes[axisIndex]->SetPosition(axisIndex);
+
+    vtkPlotGrid* grid1 = static_cast<vtkPlotGrid*>(this->ChartPrivate->Clip->GetItem(0));
+    vtkPlotGrid* grid2 = static_cast<vtkPlotGrid*>(this->ChartPrivate->Clip->GetItem(1));
+    switch (axisIndex)
+    {
+      case vtkAxis::BOTTOM:
+        grid1->SetXAxis(this->ChartPrivate->axes[vtkAxis::BOTTOM]);
+        break;
+      case vtkAxis::LEFT:
+        grid1->SetYAxis(this->ChartPrivate->axes[vtkAxis::LEFT]);
+        break;
+      case vtkAxis::TOP:
+        grid2->SetXAxis(this->ChartPrivate->axes[vtkAxis::TOP]);
+        break;
+      case vtkAxis::RIGHT:
+        grid2->SetYAxis(this->ChartPrivate->axes[vtkAxis::RIGHT]);
+        break;
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 vtkIdType vtkChartXY::GetNumberOfAxes()
 {
   return 4;
@@ -1406,6 +1474,24 @@ void vtkChartXY::SetSelectionMethod(int method)
     }
   }
   Superclass::SetSelectionMethod(method);
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::RemovePlotSelections()
+{
+  std::vector<vtkPlot*>::iterator it = this->ChartPrivate->plots.begin();
+  for (; it != this->ChartPrivate->plots.end(); ++it)
+  {
+    vtkPlot* plot = *it;
+    if (!plot)
+    {
+      continue;
+    }
+    vtkNew<vtkIdTypeArray> emptySelectionArray;
+    emptySelectionArray->Initialize();
+    plot->SetSelection(emptySelectionArray);
+  }
+  this->InvokeEvent(vtkCommand::SelectionChangedEvent);
 }
 
 //-----------------------------------------------------------------------------
@@ -1470,10 +1556,8 @@ bool vtkChartXY::MouseMoveEvent(const vtkContextMouseEvent& mouse)
                             : std::max(delta[0], xAxis->GetMinimumLimit() - xAxis->GetMinimum());
     delta[1] = delta[1] > 0 ? std::min(delta[1], yAxis->GetMaximumLimit() - yAxis->GetMaximum())
                             : std::max(delta[1], yAxis->GetMinimumLimit() - yAxis->GetMinimum());
-    xAxis->SetMinimum(xAxis->GetMinimum() + delta[0]);
-    xAxis->SetMaximum(xAxis->GetMaximum() + delta[0]);
-    yAxis->SetMinimum(yAxis->GetMinimum() + delta[1]);
-    yAxis->SetMaximum(yAxis->GetMaximum() + delta[1]);
+    xAxis->SetRange(xAxis->GetMinimum() + delta[0], xAxis->GetMaximum() + delta[0]);
+    yAxis->SetRange(yAxis->GetMinimum() + delta[1], yAxis->GetMaximum() + delta[1]);
 
     if (this->ChartPrivate->PlotCorners.size() == 2)
     {
@@ -1494,8 +1578,7 @@ bool vtkChartXY::MouseMoveEvent(const vtkContextMouseEvent& mouse)
       // Now move the axes and recalculate the transform
       delta[1] = delta[1] > 0 ? std::min(delta[1], yAxis->GetMaximumLimit() - yAxis->GetMaximum())
                               : std::max(delta[1], yAxis->GetMinimumLimit() - yAxis->GetMinimum());
-      yAxis->SetMinimum(yAxis->GetMinimum() + delta[1]);
-      yAxis->SetMaximum(yAxis->GetMaximum() + delta[1]);
+      yAxis->SetRange(yAxis->GetMinimum() + delta[1], yAxis->GetMaximum() + delta[1]);
     }
     else if (this->ChartPrivate->PlotCorners.size() > 2)
     {
@@ -1519,10 +1602,8 @@ bool vtkChartXY::MouseMoveEvent(const vtkContextMouseEvent& mouse)
                               : std::max(delta[0], xAxis->GetMinimumLimit() - xAxis->GetMinimum());
       delta[1] = delta[1] > 0 ? std::min(delta[1], yAxis->GetMaximumLimit() - yAxis->GetMaximum())
                               : std::max(delta[1], yAxis->GetMinimumLimit() - yAxis->GetMinimum());
-      xAxis->SetMinimum(xAxis->GetMinimum() + delta[0]);
-      xAxis->SetMaximum(xAxis->GetMaximum() + delta[0]);
-      yAxis->SetMinimum(yAxis->GetMinimum() + delta[1]);
-      yAxis->SetMaximum(yAxis->GetMaximum() + delta[1]);
+      xAxis->SetRange(xAxis->GetMinimum() + delta[0], xAxis->GetMaximum() + delta[0]);
+      yAxis->SetRange(yAxis->GetMinimum() + delta[1], yAxis->GetMaximum() + delta[1]);
     }
 
     this->RecalculatePlotTransforms();
@@ -1582,8 +1663,7 @@ bool vtkChartXY::MouseMoveEvent(const vtkContextMouseEvent& mouse)
         min -= delta * frac;
         max += delta * frac;
       }
-      axis->SetMinimum(min);
-      axis->SetMaximum(max);
+      axis->SetRange(min, max);
       axis->RecalculateTickSpacing();
     }
 
@@ -1591,6 +1671,8 @@ bool vtkChartXY::MouseMoveEvent(const vtkContextMouseEvent& mouse)
 
     // Mark the scene as dirty
     this->Scene->SetDirty(true);
+
+    this->InvokeEvent(vtkCommand::InteractionEvent);
   }
   else if (mouse.GetButton() == this->Actions.SelectPolygon())
   {
@@ -1606,6 +1688,61 @@ bool vtkChartXY::MouseMoveEvent(const vtkContextMouseEvent& mouse)
 
       // Mark the scene as dirty
       this->Scene->SetDirty(true);
+    }
+  }
+  else if (mouse.GetButton() == this->Actions.ClickAndDrag() && this->DragPoint &&
+    (this->DragPointAlongX || this->DragPointAlongY))
+  {
+    // Iterate through each corner, and check for a nearby point
+    std::vector<vtkContextTransform*>::iterator it = this->ChartPrivate->PlotCorners.begin();
+    for (; it != this->ChartPrivate->PlotCorners.end(); ++it)
+    {
+      vtkContextTransform* plotCorner = *it;
+      if (!plotCorner)
+      {
+        continue;
+      }
+
+      int items = static_cast<int>(plotCorner->GetNumberOfItems());
+      if (items == 0)
+      {
+        continue;
+      }
+
+      vtkVector2f position;
+      vtkTransform2D* transform = plotCorner->GetTransform();
+      transform->InverseTransformPoints(mouse.GetPos().GetData(), position.GetData(), 1);
+      for (int j = 0; j < items; ++j)
+      {
+        vtkPlot* plot = vtkPlot::SafeDownCast(plotCorner->GetItem(j));
+        if (!plot || plot->IsA("vtkPlotBar"))
+        {
+          continue;
+        }
+        vtkIdTypeArray* selectionArray = plot->GetSelection();
+        if (!selectionArray || selectionArray->GetNumberOfValues() < 1)
+        {
+          continue;
+        }
+        if (selectionArray->GetNumberOfValues() > 1)
+        {
+          vtkDebugMacro("Move event (Click and Drag) found more than one point to update.");
+        }
+        vtkIdType index = selectionArray->GetValue(0);
+        if (this->DragPointAlongX)
+        {
+          vtkDataArray* xArray = plot->GetData()->GetInputArrayToProcess(0, plot->GetInput());
+          xArray->SetVariantValue(index, position.GetX());
+        }
+        if (this->DragPointAlongY)
+        {
+          vtkDataArray* yArray = plot->GetData()->GetInputArrayToProcess(1, plot->GetInput());
+          yArray->SetVariantValue(index, position.GetY());
+        }
+        plot->GetSelection()->Modified();
+        plot->GetInput()->Modified();
+        this->Scene->SetDirty(true);
+      }
     }
   }
   else if (mouse.GetButton() == vtkContextMouseEvent::NO_BUTTON)
@@ -1627,16 +1764,7 @@ int vtkChartXY::LocatePointInPlot(const vtkVector2f& position, const vtkVector2f
 {
   if (plot && plot->GetVisible())
   {
-    vtkPlotBar* plotBar = vtkPlotBar::SafeDownCast(plot);
-    if (plotBar)
-    {
-      // If the plot is a vtkPlotBar, get the segment index too
-      return plotBar->GetNearestPoint(position, tolerance, &plotPos, &segmentIndex);
-    }
-    else
-    {
-      return plot->GetNearestPoint(position, tolerance, &plotPos);
-    }
+    return plot->GetNearestPoint(position, tolerance, &plotPos, &segmentIndex);
   }
   return -1;
 }
@@ -1689,12 +1817,11 @@ bool vtkChartXY::LocatePointInPlots(const vtkContextMouseEvent& mouse, int invok
                 // Construct a new selection with the selected point in it.
                 vtkNew<vtkIdTypeArray> selectionIds;
                 selectionIds->InsertNextValue(seriesIndex);
-                plot->SetSelection(selectionIds.GetPointer());
+                plot->SetSelection(selectionIds);
 
                 if (this->AnnotationLink)
                 {
-                  vtkChartSelectionHelper::MakeSelection(
-                    this->AnnotationLink, selectionIds.GetPointer(), plot);
+                  vtkChartXY::MakeSelection(this->AnnotationLink, selectionIds, plot);
                 }
               }
             }
@@ -1780,6 +1907,13 @@ bool vtkChartXY::MouseButtonPressEvent(const vtkContextMouseEvent& mouse)
     this->DrawSelectionPolygon = true;
     return true;
   }
+  else if (mouse.GetButton() == this->Actions.ClickAndDrag())
+  {
+    this->ReleasePlotSelections();
+    this->DragPoint = this->LocatePointInPlots(mouse, vtkCommand::SelectionChangedEvent);
+    this->InvokeEvent(vtkCommand::SelectionChangedEvent);
+    return true;
+  }
   else if (mouse.GetButton() == this->ActionsClick.Select() ||
     mouse.GetButton() == this->ActionsClick.Notify())
   {
@@ -1802,39 +1936,50 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
       return true;
     }
   }
-  if (mouse.GetButton() > vtkContextMouseEvent::NO_BUTTON &&
-    mouse.GetButton() <= vtkContextMouseEvent::RIGHT_BUTTON)
+
+  // Check single action click interaction/selection
+  // First check that the selection actions are invalid or it is a pan selection
+  this->MouseBox.SetWidth(mouse.GetPos().GetX() - this->MouseBox.GetX());
+  this->MouseBox.SetHeight(mouse.GetPos().GetY() - this->MouseBox.GetY());
+  bool isActionSelectInvalid = fabs(this->MouseBox.GetWidth()) < 0.5 &&
+    fabs(this->MouseBox.GetHeight()) < 0.5 && mouse.GetButton() == this->Actions.Select();
+  bool isActionSelectPolygonInvalid = this->SelectionPolygon.GetNumberOfPoints() < 2 &&
+    mouse.GetButton() == this->Actions.SelectPolygon();
+  bool isActionPan = mouse.GetButton() == this->Actions.Pan();
+
+  if (isActionSelectInvalid || isActionSelectPolygonInvalid || isActionPan)
   {
-    this->MouseBox.SetWidth(mouse.GetPos().GetX() - this->MouseBox.GetX());
-    this->MouseBox.SetHeight(mouse.GetPos().GetY() - this->MouseBox.GetY());
-    if ((fabs(this->MouseBox.GetWidth()) < 0.5 && fabs(this->MouseBox.GetHeight()) < 0.5) &&
-      (mouse.GetButton() == this->Actions.Select() || mouse.GetButton() == this->Actions.Pan()))
+    this->MouseBox.SetWidth(0.0);
+    this->MouseBox.SetHeight(0.0);
+    this->SelectionPolygon.Clear();
+    this->DrawBox = false;
+    this->DrawSelectionPolygon = false;
+    // Find the relative interaction/selection point
+    if (mouse.GetButton() == this->ActionsClick.Notify())
     {
-      // Invalid box size - treat as a single clicke event
-      this->MouseBox.SetWidth(0.0);
-      this->MouseBox.SetHeight(0.0);
-      this->DrawBox = false;
-      if (mouse.GetButton() == this->ActionsClick.Notify())
-      {
-        this->LocatePointInPlots(mouse, vtkCommand::InteractionEvent);
-        return true;
-      }
-      else if (mouse.GetButton() == this->ActionsClick.Select())
-      {
-        this->LocatePointInPlots(mouse, vtkCommand::SelectionChangedEvent);
-        return true;
-      }
-      else
-      {
-        return false;
-      }
+      this->LocatePointInPlots(mouse, vtkCommand::InteractionEvent);
+    }
+    if (mouse.GetButton() == this->ActionsClick.Select())
+    {
+      this->LocatePointInPlots(mouse, vtkCommand::SelectionChangedEvent);
+      this->InvokeEvent(vtkCommand::SelectionChangedEvent);
+    }
+    if (mouse.GetButton() != this->ActionsClick.Notify() &&
+      mouse.GetButton() != this->ActionsClick.Select())
+    {
+      return false;
+    }
+    else
+    {
+      return true;
     }
   }
+
   if (mouse.GetButton() == this->Actions.Select() ||
     mouse.GetButton() == this->Actions.SelectPolygon())
   {
     // Modifiers or selection modes can affect how selection is performed.
-    int selectionMode = vtkChartSelectionHelper::GetMouseSelectionMode(mouse, this->SelectionMode);
+    int selectionMode = vtkChartXY::GetMouseSelectionMode(mouse, this->SelectionMode);
     bool polygonMode(mouse.GetButton() == this->Actions.SelectPolygon());
     this->Scene->SetDirty(true);
 
@@ -1909,15 +2054,15 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
               }
 
               // Accumulate the selection in each plot.
-              vtkChartSelectionHelper::BuildSelection(nullptr, vtkContextScene::SELECTION_ADDITION,
-                accumulateSelection.GetPointer(), plot->GetSelection(), nullptr);
+              vtkChartXY::BuildSelection(nullptr, vtkContextScene::SELECTION_ADDITION,
+                accumulateSelection, plot->GetSelection(), nullptr);
             }
           }
         }
       }
       // Now add the accumulated selection to the old selection.
-      vtkChartSelectionHelper::BuildSelection(this->AnnotationLink, selectionMode,
-        accumulateSelection.GetPointer(), oldSelection.GetPointer(), nullptr);
+      vtkChartXY::BuildSelection(
+        this->AnnotationLink, selectionMode, accumulateSelection, oldSelection, nullptr);
     }
     else if (this->SelectionMethod == vtkChart::SELECTION_PLOTS)
     {
@@ -1950,8 +2095,8 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
               }
 
               // Combine the selection in this plot with any previous selection.
-              vtkChartSelectionHelper::BuildSelection(this->AnnotationLink, selectionMode,
-                plot->GetSelection(), oldSelection.GetPointer(), plot);
+              vtkChartXY::BuildSelection(
+                this->AnnotationLink, selectionMode, plot->GetSelection(), oldSelection, plot);
             }
           }
         }
@@ -1964,7 +2109,8 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
         this->AnnotationLink->Update();
         vtkSelection* selection =
           vtkSelection::SafeDownCast(this->AnnotationLink->GetOutputDataObject(2));
-        vtkSelectionNode* node = selection->GetNumberOfNodes() > 0 ? selection->GetNode(0) : nullptr;
+        vtkSelectionNode* node =
+          selection->GetNumberOfNodes() > 0 ? selection->GetNode(0) : nullptr;
         if (node)
         {
           oldSelection->DeepCopy(vtkArrayDownCast<vtkIdTypeArray>(node->GetSelectionList()));
@@ -1998,7 +2144,6 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
               {
                 selected = plot->SelectPoints(min, max);
               }
-              vtkNew<vtkIdTypeArray> plotsSelection;
               if (selected)
               {
                 int idx = 1; // y
@@ -2014,7 +2159,7 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
                     plotSelection->InsertNextValue(k);
                   }
                 }
-                plot->SetSelection(plotSelection.GetPointer());
+                plot->SetSelection(plotSelection);
                 accumulateSelection->InsertNextValue(columnID);
               }
             }
@@ -2025,8 +2170,8 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
         reinterpret_cast<vtkIdType*>(accumulateSelection->GetVoidPointer(0));
       std::sort(ptrSelection, ptrSelection + accumulateSelection->GetNumberOfTuples());
       // Now add the accumulated selection to the old selection
-      vtkChartSelectionHelper::BuildSelection(this->AnnotationLink, selectionMode,
-        accumulateSelection.GetPointer(), oldSelection.GetPointer(), nullptr);
+      vtkChartXY::BuildSelection(
+        this->AnnotationLink, selectionMode, accumulateSelection, oldSelection, nullptr);
     }
     this->InvokeEvent(vtkCommand::SelectionChangedEvent);
     this->MouseBox.SetWidth(0.0);
@@ -2067,13 +2212,20 @@ bool vtkChartXY::MouseButtonReleaseEvent(const vtkContextMouseEvent& mouse)
   {
     return true;
   }
+  else if (mouse.GetButton() == this->Actions.ClickAndDrag())
+  {
+    this->ReleasePlotSelections();
+    this->InvokeEvent(vtkCommand::SelectionChangedEvent);
+    this->DragPoint = false;
+    return true;
+  }
   return false;
 }
 
 void vtkChartXY::ZoomInAxes(vtkAxis* x, vtkAxis* y, float* originf, float* maxf)
 {
   vtkNew<vtkTransform2D> transform;
-  this->CalculateUnscaledPlotTransform(x, y, transform.GetPointer());
+  this->CalculateUnscaledPlotTransform(x, y, transform);
   vtkVector2d origin(originf[0], originf[1]);
   vtkVector2d max(maxf[0], maxf[1]);
   vtkVector2d torigin;
@@ -2084,23 +2236,23 @@ void vtkChartXY::ZoomInAxes(vtkAxis* x, vtkAxis* y, float* originf, float* maxf)
   // Ensure we preserve the directionality of the axes
   if (x->GetMaximum() > x->GetMinimum())
   {
-    x->SetMaximum(torigin[0] > tmax[0] ? torigin[0] : tmax[0]);
-    x->SetMinimum(torigin[0] < tmax[0] ? torigin[0] : tmax[0]);
+    x->SetRange(
+      torigin[0] < tmax[0] ? torigin[0] : tmax[0], torigin[0] > tmax[0] ? torigin[0] : tmax[0]);
   }
   else
   {
-    x->SetMaximum(torigin[0] < tmax[0] ? torigin[0] : tmax[0]);
-    x->SetMinimum(torigin[0] > tmax[0] ? torigin[0] : tmax[0]);
+    x->SetRange(
+      torigin[0] > tmax[0] ? torigin[0] : tmax[0], torigin[0] < tmax[0] ? torigin[0] : tmax[0]);
   }
   if (y->GetMaximum() > y->GetMinimum())
   {
-    y->SetMaximum(torigin[1] > tmax[1] ? torigin[1] : tmax[1]);
-    y->SetMinimum(torigin[1] < tmax[1] ? torigin[1] : tmax[1]);
+    y->SetRange(
+      torigin[1] < tmax[1] ? torigin[1] : tmax[1], torigin[1] > tmax[1] ? torigin[1] : tmax[1]);
   }
   else
   {
-    y->SetMaximum(torigin[1] < tmax[1] ? torigin[1] : tmax[1]);
-    y->SetMinimum(torigin[1] > tmax[1] ? torigin[1] : tmax[1]);
+    y->SetRange(
+      torigin[1] > tmax[1] ? torigin[1] : tmax[1], torigin[1] < tmax[1] ? torigin[1] : tmax[1]);
   }
   x->RecalculateTickSpacing();
   y->RecalculateTickSpacing();
@@ -2135,8 +2287,7 @@ bool vtkChartXY::MouseWheelEvent(const vtkContextMouseEvent&, int delta)
       min -= delta * frac;
       max += delta * frac;
     }
-    axis->SetMinimum(min);
-    axis->SetMaximum(max);
+    axis->SetRange(min, max);
     axis->RecalculateTickSpacing();
   }
 
@@ -2188,7 +2339,7 @@ inline void vtkChartXY::TransformBoxOrPolygon(bool polygonMode, vtkTransform2D* 
     vtkNew<vtkTransform2D> inverseTransform;
     inverseTransform->SetMatrix(transform->GetMatrix());
     inverseTransform->Inverse();
-    polygon = this->SelectionPolygon.Transformed(inverseTransform.GetPointer());
+    polygon = this->SelectionPolygon.Transformed(inverseTransform);
   }
   else
   {
@@ -2229,4 +2380,207 @@ void vtkChartXY::PrintSelf(ostream& os, vtkIndent indent)
     }
   }
   os << indent << "ZoomWithMouseWheel: " << this->ZoomWithMouseWheel << endl;
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::MakeSelection(vtkAnnotationLink* link, vtkIdTypeArray* selectionIds, vtkPlot* plot)
+{
+  assert(link != nullptr && selectionIds != nullptr);
+
+  if (plot)
+  {
+    // We are building up plot-based selections, using multiple nodes.
+    vtkSelection* selection = link->GetCurrentSelection();
+    vtkSmartPointer<vtkSelectionNode> node;
+    for (unsigned int i = 0; i < selection->GetNumberOfNodes(); ++i)
+    {
+      vtkSelectionNode* tmp = selection->GetNode(i);
+      vtkPlot* selectionPlot =
+        vtkPlot::SafeDownCast(tmp->GetProperties()->Get(vtkSelectionNode::PROP()));
+      if (selectionPlot == plot)
+      {
+        node = tmp;
+        break;
+      }
+    }
+    if (!node)
+    {
+      node = vtkSmartPointer<vtkSelectionNode>::New();
+      selection->AddNode(node.GetPointer());
+      node->SetContentType(vtkSelectionNode::INDICES);
+      node->SetFieldType(vtkSelectionNode::POINT);
+      node->GetProperties()->Set(vtkSelectionNode::PROP(), plot);
+      node->GetProperties()->Set(vtkSelectionNode::SOURCE(), plot->GetInput());
+    }
+    node->SetSelectionList(selectionIds);
+  }
+  else
+  {
+    // Use a simple single selection node layout, remove previous selections.
+    vtkNew<vtkSelection> selection;
+    vtkNew<vtkSelectionNode> node;
+    selection->AddNode(node);
+    node->SetContentType(vtkSelectionNode::INDICES);
+    node->SetFieldType(vtkSelectionNode::POINT);
+    node->SetSelectionList(selectionIds);
+    link->SetCurrentSelection(selection);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::MinusSelection(vtkIdTypeArray* selection, vtkIdTypeArray* oldSelection)
+{
+  // We rely on the selection id arrays being sorted.
+  std::vector<vtkIdType> output;
+  vtkIdType* ptrSelection = static_cast<vtkIdType*>(selection->GetVoidPointer(0));
+  vtkIdType* ptrOldSelection = static_cast<vtkIdType*>(oldSelection->GetVoidPointer(0));
+  vtkIdType oldSize = oldSelection->GetNumberOfTuples();
+  vtkIdType size = selection->GetNumberOfTuples();
+  vtkIdType iOld = 0;
+
+  vtkIdType i = 0;
+  while (i < size && iOld < oldSize)
+  {
+    if (ptrSelection[i] > ptrOldSelection[iOld]) // Skip the value.
+    {
+      output.push_back(ptrOldSelection[iOld++]);
+    }
+    else if (ptrSelection[i] == ptrOldSelection[iOld]) // Match - remove.
+    {
+      ++i;
+      ++iOld;
+    }
+    else if (ptrSelection[i] < ptrOldSelection[iOld]) // Add the new value.
+    {
+      ++i;
+    }
+  }
+
+  while (iOld < oldSize)
+  {
+    output.push_back(ptrOldSelection[iOld++]);
+  }
+  selection->SetNumberOfTuples(static_cast<vtkIdType>(output.size()));
+  ptrSelection = static_cast<vtkIdType*>(selection->GetVoidPointer(0));
+  for (std::vector<vtkIdType>::iterator it = output.begin(); it != output.end();
+       ++it, ++ptrSelection)
+  {
+    *ptrSelection = *it;
+  }
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::AddSelection(vtkIdTypeArray* selection, vtkIdTypeArray* oldSelection)
+{
+  // Add all unique array indices to create a new combined array.
+  vtkIdType* ptrSelection = static_cast<vtkIdType*>(selection->GetVoidPointer(0));
+  vtkIdType* ptrOldSelection = static_cast<vtkIdType*>(oldSelection->GetVoidPointer(0));
+  std::vector<vtkIdType> output(selection->GetNumberOfTuples() + oldSelection->GetNumberOfTuples());
+  std::vector<vtkIdType>::iterator it;
+  it = std::set_union(ptrSelection, ptrSelection + selection->GetNumberOfTuples(), ptrOldSelection,
+    ptrOldSelection + oldSelection->GetNumberOfTuples(), output.begin());
+  int newSize = static_cast<int>(it - output.begin());
+  selection->SetNumberOfTuples(newSize);
+  ptrSelection = static_cast<vtkIdType*>(selection->GetVoidPointer(0));
+  for (std::vector<vtkIdType>::iterator i = output.begin(); i != it; ++i, ++ptrSelection)
+  {
+    *ptrSelection = *i;
+  }
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::ToggleSelection(vtkIdTypeArray* selection, vtkIdTypeArray* oldSelection)
+{
+  // We rely on the selection id arrays being sorted.
+  std::vector<vtkIdType> output;
+  vtkIdType* ptrSelection = static_cast<vtkIdType*>(selection->GetVoidPointer(0));
+  vtkIdType* ptrOldSelection = static_cast<vtkIdType*>(oldSelection->GetVoidPointer(0));
+  vtkIdType oldSize = oldSelection->GetNumberOfTuples();
+  vtkIdType size = selection->GetNumberOfTuples();
+  vtkIdType i = 0;
+  vtkIdType iOld = 0;
+  while (i < size && iOld < oldSize)
+  {
+    if (ptrSelection[i] > ptrOldSelection[iOld]) // Retain the value.
+    {
+      output.push_back(ptrOldSelection[iOld++]);
+    }
+    else if (ptrSelection[i] == ptrOldSelection[iOld]) // Match - toggle.
+    {
+      ++i;
+      ++iOld;
+    }
+    else if (ptrSelection[i] < ptrOldSelection[iOld]) // Add the new value.
+    {
+      output.push_back(ptrSelection[i++]);
+    }
+  }
+  while (i < size)
+  {
+    output.push_back(ptrSelection[i++]);
+  }
+  while (iOld < oldSize)
+  {
+    output.push_back(ptrOldSelection[iOld++]);
+  }
+  selection->SetNumberOfTuples(static_cast<vtkIdType>(output.size()));
+  ptrSelection = static_cast<vtkIdType*>(selection->GetVoidPointer(0));
+  for (std::vector<vtkIdType>::iterator it = output.begin(); it != output.end();
+       ++it, ++ptrSelection)
+  {
+    *ptrSelection = *it;
+  }
+}
+
+//-----------------------------------------------------------------------------
+void vtkChartXY::BuildSelection(vtkAnnotationLink* link, int selectionMode,
+  vtkIdTypeArray* plotSelection, vtkIdTypeArray* oldSelection, vtkPlot* plot)
+{
+  if (!plotSelection || !oldSelection)
+  {
+    return;
+  }
+
+  // Build a selection and set it on the annotation link if not null.
+  switch (selectionMode)
+  {
+    case vtkContextScene::SELECTION_ADDITION:
+      AddSelection(plotSelection, oldSelection);
+      break;
+    case vtkContextScene::SELECTION_SUBTRACTION:
+      MinusSelection(plotSelection, oldSelection);
+      break;
+    case vtkContextScene::SELECTION_TOGGLE:
+      ToggleSelection(plotSelection, oldSelection);
+      break;
+    case vtkContextScene::SELECTION_DEFAULT:
+    default:
+      // Nothing necessary - overwrite the old selection.
+      break;
+  }
+
+  if (link)
+  {
+    MakeSelection(link, plotSelection, plot);
+  }
+}
+
+//-----------------------------------------------------------------------------
+int vtkChartXY::GetMouseSelectionMode(const vtkContextMouseEvent& mouse, int selectionMode)
+{
+  // Mouse modifiers override the current selection mode.
+  if (mouse.GetModifiers() & vtkContextMouseEvent::SHIFT_MODIFIER &&
+    mouse.GetModifiers() & vtkContextMouseEvent::CONTROL_MODIFIER)
+  {
+    return vtkContextScene::SELECTION_TOGGLE;
+  }
+  else if (mouse.GetModifiers() & vtkContextMouseEvent::CONTROL_MODIFIER)
+  {
+    return vtkContextScene::SELECTION_ADDITION;
+  }
+  else if (mouse.GetModifiers() & vtkContextMouseEvent::SHIFT_MODIFIER)
+  {
+    return vtkContextScene::SELECTION_SUBTRACTION;
+  }
+  return selectionMode;
 }

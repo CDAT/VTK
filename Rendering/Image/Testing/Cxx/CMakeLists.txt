@@ -1,4 +1,4 @@
-vtk_add_test_cxx(${vtk-module}CxxTests tests
+vtk_add_test_cxx(vtkRenderingImageCxxTests tests
   TestCellPickerImage.cxx
   TestImageSliceMapperAlpha.cxx
   TestImageResliceMapperAlpha.cxx
@@ -11,9 +11,10 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestImageSliceMapperOrient2D.cxx
   TestImageResliceMapperOffAxis.cxx
   TestImageSliceMapperOrient3D.cxx
+  TestImageSliceMapperOriented3D.cxx
   TestImageResliceMapperOrient3D.cxx
   TestImageStack.cxx
   TestImageResliceMapperSlab.cxx
   )
 
-vtk_test_cxx_executable(${vtk-module}CxxTests tests)
+vtk_test_cxx_executable(vtkRenderingImageCxxTests tests)

@@ -286,8 +286,6 @@
          <class id="vtkRungeKutta45" library="Common">
          </class>
       </class>
-      <class id="vtkInstantiator" library="Common">
-      </class>
       <class id="vtkMath" library="Common">
       </class>
       <class id="vtkMatrix4x4" library="Common">
@@ -573,18 +571,6 @@
                      </class>
                      <class id="vtkVolumeProMapper" library="VolumeRendering">
                      </class>
-                     <class id="vtkVolumeRayCastMapper" library="VolumeRendering">
-                     </class>
-                     <class id="vtkVolumeTextureMapper" library="VolumeRendering">
-                        <class id="vtkVolumeTextureMapper2D" library="VolumeRendering">
-                           <class id="vtkOpenGLVolumeTextureMapper2D" library="VolumeRendering">
-                           </class>
-                        </class>
-                     </class>
-                     <class id="vtkVolumeTextureMapper3D" library="VolumeRendering">
-                        <class id="vtkOpenGLVolumeTextureMapper3D" library="VolumeRendering">
-                        </class>
-                     </class>
                   </class>
                </class>
                <class id="vtkMapper" library="Rendering">
@@ -671,10 +657,6 @@
             <class id="vtkFieldDataToAttributeDataFilter" library="Graphics">
             </class>
             <class id="vtkGradientFilter" library="Graphics">
-            </class>
-            <class id="vtkHyperOctreeDepth" library="Graphics">
-            </class>
-            <class id="vtkHyperOctreeLimiter" library="Graphics">
             </class>
             <class id="vtkIdFilter" library="Graphics">
             </class>
@@ -775,12 +757,6 @@
             <class id="vtkLevelIdScalars" library="Graphics">
                <class id="vtkHierarchicalDataLevelFilter" library="Graphics">
                </class>
-            </class>
-         </class>
-         <class id="vtkHyperOctreeAlgorithm" library="Filtering">
-            <class id="vtkHyperOctreeFractalSource" library="Graphics">
-            </class>
-            <class id="vtkHyperOctreeSampleFunction" library="Graphics">
             </class>
          </class>
          <class id="vtkImageAlgorithm" library="Filtering">
@@ -941,8 +917,6 @@
                </class>
                <class id="vtkImageWeightedSum" library="Imaging">
                </class>
-            </class>
-            <class id="vtkHyperOctreeToUniformGridFilter" library="Graphics">
             </class>
             <class id="vtkTimeSourceExample" library="Graphics">
             </class>
@@ -1252,14 +1226,6 @@
             </class>
             <class id="vtkHull" library="Graphics">
             </class>
-            <class id="vtkHyperOctreeContourFilter" library="Graphics">
-            </class>
-            <class id="vtkHyperOctreeCutter" library="Graphics">
-            </class>
-            <class id="vtkHyperOctreeDualGridContourFilter" library="Graphics">
-            </class>
-            <class id="vtkHyperOctreeSurfaceFilter" library="Graphics">
-            </class>
             <class id="vtkHyperStreamline" library="Graphics">
             </class>
             <class id="vtkIconGlyphFilter" library="Graphics">
@@ -1366,8 +1332,6 @@
                <class id="vtkPStreamTracer" library="Parallel">
                   <class id="vtkDistributedStreamTracer" library="Parallel">
                   </class>
-               </class>
-               <class id="vtkTemporalStreamTracer" library="Parallel">
                </class>
             </class>
             <class id="vtkStripper" library="Graphics">
@@ -1654,8 +1618,6 @@
             </class>
             <class id="vtkClipDataSet" library="Graphics">
             </class>
-            <class id="vtkClipHyperOctree" library="Graphics">
-            </class>
             <class id="vtkClipVolume" library="Graphics">
             </class>
             <class id="vtkConnectivityFilter" library="Graphics">
@@ -1797,8 +1759,6 @@
                </class>
             </class>
             <class id="vtkXMLDataReader" library="IO">
-               <class id="vtkXMLHyperOctreeReader" library="IO">
-               </class>
                <class id="vtkXMLStructuredDataReader" library="IO">
                   <class id="vtkXMLImageDataReader" library="IO">
                   </class>
@@ -1845,8 +1805,6 @@
                </class>
             </class>
             <class id="vtkXMLDataSetWriter" library="IO">
-            </class>
-            <class id="vtkXMLHyperOctreeWriter" library="IO">
             </class>
             <class id="vtkXMLPDataWriter" library="IO">
                <class id="vtkXMLPDataSetWriter" library="IO">
@@ -1990,8 +1948,6 @@
             </class>
          </class>
          <class id="vtkDataSet" library="Filtering">
-            <class id="vtkHyperOctree" library="Filtering">
-            </class>
             <class id="vtkImageData" library="Filtering">
                <class id="vtkStructuredPoints" library="Filtering">
                </class>
@@ -2085,12 +2041,6 @@
          </class>
       </class>
       <class id="vtkGraphEdge" library="Filtering">
-      </class>
-      <class id="vtkHyperOctreeCursor" library="Filtering">
-      </class>
-      <class id="vtkHyperOctreePointsGrabber" library="Filtering">
-         <class id="vtkHyperOctreeClipCutPointsGrabber" library="Graphics">
-         </class>
       </class>
       <class id="vtkInEdgeIterator" library="Filtering">
       </class>
@@ -2526,10 +2476,6 @@
             </class>
          </class>
       </class>
-      <class id="vtkPainterDeviceAdapter" library="Rendering">
-         <class id="vtkOpenGLPainterDeviceAdapter" library="Rendering">
-         </class>
-      </class>
       <class id="vtkProperty" library="Rendering">
          <class id="vtkRIBProperty" library="Hybrid">
          </class>
@@ -2632,14 +2578,6 @@
          <class id="vtkUnstructuredGridPartialPreIntegration" library="VolumeRendering">
          </class>
          <class id="vtkUnstructuredGridPreIntegration" library="VolumeRendering">
-         </class>
-      </class>
-      <class id="vtkVolumeRayCastFunction" library="VolumeRendering">
-         <class id="vtkVolumeRayCastCompositeFunction" library="VolumeRendering">
-         </class>
-         <class id="vtkVolumeRayCastIsosurfaceFunction" library="VolumeRendering">
-         </class>
-         <class id="vtkVolumeRayCastMIPFunction" library="VolumeRendering">
          </class>
       </class>
       <class id="vtkVolumeRenderingFactory" library="VolumeRendering">

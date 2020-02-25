@@ -15,7 +15,6 @@
 #include "vtkStringOutputWindow.h"
 #include "vtkObjectFactory.h"
 
-
 vtkStandardNewMacro(vtkStringOutputWindow);
 
 vtkStringOutputWindow::vtkStringOutputWindow()
@@ -24,9 +23,7 @@ vtkStringOutputWindow::vtkStringOutputWindow()
   this->OStream.clear();
 }
 
-vtkStringOutputWindow::~vtkStringOutputWindow()
-{
-}
+vtkStringOutputWindow::~vtkStringOutputWindow() = default;
 
 void vtkStringOutputWindow::Initialize()
 {
@@ -36,7 +33,7 @@ void vtkStringOutputWindow::Initialize()
 
 void vtkStringOutputWindow::DisplayText(const char* text)
 {
-  if(!text)
+  if (!text)
   {
     return;
   }

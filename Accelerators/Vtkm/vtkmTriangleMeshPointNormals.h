@@ -42,32 +42,30 @@
  * are therefore weighted by the triangle area. This is not more nor less
  * correct than normalizing them before adding them, but it is much faster.
  *
-*/
+ */
 
 #ifndef vtkmTriangleMeshPointNormals_h
 #define vtkmTriangleMeshPointNormals_h
 
-#include "vtkTriangleMeshPointNormals.h"
 #include "vtkAcceleratorsVTKmModule.h" // for export macro
+#include "vtkTriangleMeshPointNormals.h"
 
-class VTKACCELERATORSVTKM_EXPORT vtkmTriangleMeshPointNormals
-  : public vtkTriangleMeshPointNormals
+class VTKACCELERATORSVTKM_EXPORT vtkmTriangleMeshPointNormals : public vtkTriangleMeshPointNormals
 {
 public:
-  vtkTypeMacro(vtkmTriangleMeshPointNormals, vtkTriangleMeshPointNormals)
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkmTriangleMeshPointNormals, vtkTriangleMeshPointNormals);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkmTriangleMeshPointNormals* New();
 
 protected:
   vtkmTriangleMeshPointNormals();
-  ~vtkmTriangleMeshPointNormals();
+  ~vtkmTriangleMeshPointNormals() override;
 
-  int RequestData(vtkInformation*, vtkInformationVector**,
-                  vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkmTriangleMeshPointNormals(const vtkmTriangleMeshPointNormals&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkmTriangleMeshPointNormals&) VTK_DELETE_FUNCTION;
+  vtkmTriangleMeshPointNormals(const vtkmTriangleMeshPointNormals&) = delete;
+  void operator=(const vtkmTriangleMeshPointNormals&) = delete;
 };
 
 #endif // vtkmTriangleMeshPointNormals_h

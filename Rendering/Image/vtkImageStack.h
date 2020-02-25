@@ -27,13 +27,13 @@
  * Neurosciences, Foothills Medical Centre, Calgary, for providing this class.
  * @sa
  * vtkImageMapper3D vtkImageProperty vtkProp3D
-*/
+ */
 
 #ifndef vtkImageStack_h
 #define vtkImageStack_h
 
-#include "vtkRenderingImageModule.h" // For export macro
 #include "vtkImageSlice.h"
+#include "vtkRenderingImageModule.h" // For export macro
 
 class vtkImageSliceCollection;
 class vtkImageProperty;
@@ -43,31 +43,31 @@ class vtkCollection;
 class VTKRENDERINGIMAGE_EXPORT vtkImageStack : public vtkImageSlice
 {
 public:
-  vtkTypeMacro(vtkImageStack,vtkImageSlice);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkImageStack *New();
+  vtkTypeMacro(vtkImageStack, vtkImageSlice);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkImageStack* New();
 
   /**
    * Add an image to the stack.  If the image is already present, then
    * this method will do nothing.
    */
-  void AddImage(vtkImageSlice *prop);
+  void AddImage(vtkImageSlice* prop);
 
   /**
    * Remove an image from the stack.  If the image is not present, then
    * this method will do nothing.
    */
-  void RemoveImage(vtkImageSlice *prop);
+  void RemoveImage(vtkImageSlice* prop);
 
   /**
    * Check if an image is present.  The returned value is one or zero.
    */
-  int HasImage(vtkImageSlice *prop);
+  int HasImage(vtkImageSlice* prop);
 
   /**
    * Get the list of images as a vtkImageSliceCollection.
    */
-  vtkImageSliceCollection *GetImages() { return this->Images; }
+  vtkImageSliceCollection* GetImages() { return this->Images; }
 
   //@{
   /**
@@ -83,30 +83,30 @@ public:
    * LayerNumber is the ActiveLayer.  If no image matches, then NULL
    * will be returned.
    */
-  vtkImageSlice *GetActiveImage();
+  vtkImageSlice* GetActiveImage();
 
   /**
    * Get the mapper for the currently active image.
    */
-  vtkImageMapper3D *GetMapper() VTK_OVERRIDE;
+  vtkImageMapper3D* GetMapper() override;
 
   /**
    * Get the property for the currently active image.
    */
-  vtkImageProperty *GetProperty() VTK_OVERRIDE;
+  vtkImageProperty* GetProperty() override;
 
   //@{
   /**
    * Get the combined bounds of all of the images.
    */
-  double *GetBounds() VTK_OVERRIDE;
-  void GetBounds(double bounds[6]) { this->vtkProp3D::GetBounds( bounds ); };
+  double* GetBounds() override;
+  void GetBounds(double bounds[6]) { this->vtkProp3D::GetBounds(bounds); }
   //@}
 
   /**
    * Return the max MTime of all the images.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   /**
    * Return the mtime of anything that would cause the rendered image to
@@ -114,47 +114,47 @@ public:
    * prop plus anything else it depends on such as properties, mappers,
    * etc.
    */
-  vtkMTimeType GetRedrawMTime() VTK_OVERRIDE;
+  vtkMTimeType GetRedrawMTime() override;
 
   /**
    * Shallow copy of this prop. Overloads the virtual vtkProp method.
    */
-  void ShallowCopy(vtkProp *prop) VTK_OVERRIDE;
+  void ShallowCopy(vtkProp* prop) override;
 
   /**
    * For some exporters and other other operations we must be
    * able to collect all the actors, volumes, and images. These
    * methods are used in that process.
    */
-  void GetImages(vtkPropCollection *);
+  void GetImages(vtkPropCollection*);
 
   //@{
   /**
    * Support the standard render methods.
    */
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderOpaqueGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderTranslucentPolygonalGeometry(vtkViewport *viewport) VTK_OVERRIDE;
+  int RenderOverlay(vtkViewport* viewport) override;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) override;
   //@}
 
   /**
    * Does this prop have some translucent polygonal geometry?
    */
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
 
   /**
    * Release any resources held by this prop.
    */
-  void ReleaseGraphicsResources(vtkWindow *win) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* win) override;
 
   //@{
   /**
    * Methods for traversing the stack as if it was an assembly.
    * The traversal only gives the view prop for the active layer.
    */
-  void InitPathTraversal() VTK_OVERRIDE;
-  vtkAssemblyPath *GetNextPath() VTK_OVERRIDE;
-  int GetNumberOfPaths() VTK_OVERRIDE;
+  void InitPathTraversal() override;
+  vtkAssemblyPath* GetNextPath() override;
+  int GetNumberOfPaths() override;
   //@}
 
   /**
@@ -162,26 +162,26 @@ public:
    * DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
    * Used to construct assembly paths and perform part traversal.
    */
-  void BuildPaths(vtkAssemblyPaths *paths, vtkAssemblyPath *path) VTK_OVERRIDE;
+  void BuildPaths(vtkAssemblyPaths* paths, vtkAssemblyPath* path) override;
 
 protected:
   vtkImageStack();
-  ~vtkImageStack() VTK_OVERRIDE;
+  ~vtkImageStack() override;
 
-  void SetMapper(vtkImageMapper3D *mapper);
-  void SetProperty(vtkImageProperty *property);
+  void SetMapper(vtkImageMapper3D* mapper);
+  void SetProperty(vtkImageProperty* property);
 
-  void PokeMatrices(vtkMatrix4x4 *matrix);
+  void PokeMatrices(vtkMatrix4x4* matrix);
   void UpdatePaths();
 
   vtkTimeStamp PathTime;
-  vtkCollection *ImageMatrices;
-  vtkImageSliceCollection *Images;
+  vtkCollection* ImageMatrices;
+  vtkImageSliceCollection* Images;
   int ActiveLayer;
 
 private:
-  vtkImageStack(const vtkImageStack&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageStack&) VTK_DELETE_FUNCTION;
+  vtkImageStack(const vtkImageStack&) = delete;
+  void operator=(const vtkImageStack&) = delete;
 };
 
 #endif

@@ -31,7 +31,7 @@
  * @sa
  * vtkLagrangianParticleTracker vtkLagrangianParticle
  * vtkLagrangianBasicIntegrationModel
-*/
+ */
 
 #ifndef vtkLagrangianMatidaIntegrationModel_h
 #define vtkLagrangianMatidaIntegrationModel_h
@@ -39,12 +39,12 @@
 #include "vtkFiltersFlowPathsModule.h" // For export macro
 #include "vtkLagrangianBasicIntegrationModel.h"
 
-class VTKFILTERSFLOWPATHS_EXPORT vtkLagrangianMatidaIntegrationModel :
-  public vtkLagrangianBasicIntegrationModel
+class VTKFILTERSFLOWPATHS_EXPORT vtkLagrangianMatidaIntegrationModel
+  : public vtkLagrangianBasicIntegrationModel
 {
 public:
   vtkTypeMacro(vtkLagrangianMatidaIntegrationModel, vtkLagrangianBasicIntegrationModel);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkLagrangianMatidaIntegrationModel* New();
 
   // Needed for multiple signatures polymorphism
@@ -54,23 +54,21 @@ public:
    * Evaluate the integration model velocity field
    * f at position x, using data from cell in dataSet with index cellId
    */
-  int FunctionValues(vtkDataSet* dataSet, vtkIdType cellId,
-    double* weights, double* x, double* f) VTK_OVERRIDE;
+  int FunctionValues(vtkLagrangianParticle* particle, vtkDataSet* dataSet, vtkIdType cellId,
+    double* weights, double* x, double* f) override;
 
 protected:
   vtkLagrangianMatidaIntegrationModel();
-  ~vtkLagrangianMatidaIntegrationModel() VTK_OVERRIDE;
+  ~vtkLagrangianMatidaIntegrationModel() override;
 
   static double GetRelaxationTime(double dynVisc, double diameter, double density);
 
-  static double GetDragCoefficient(const double* flowVelocity,
-    const double* particleVelocity,
-    double dynVisc, double particleDiameter,
-    double flowDensity);
+  static double GetDragCoefficient(const double* flowVelocity, const double* particleVelocity,
+    double dynVisc, double particleDiameter, double flowDensity);
 
 private:
-  vtkLagrangianMatidaIntegrationModel(const vtkLagrangianMatidaIntegrationModel&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLagrangianMatidaIntegrationModel&) VTK_DELETE_FUNCTION;
+  vtkLagrangianMatidaIntegrationModel(const vtkLagrangianMatidaIntegrationModel&) = delete;
+  void operator=(const vtkLagrangianMatidaIntegrationModel&) = delete;
 };
 
 #endif

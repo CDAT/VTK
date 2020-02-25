@@ -46,23 +46,22 @@
 class VTKIOPARALLELXDMF3_EXPORT vtkPXdmf3Writer : public vtkXdmf3Writer
 {
 public:
-  static vtkPXdmf3Writer *New ();
-  vtkTypeMacro(vtkPXdmf3Writer,vtkXdmf3Writer);
-  void PrintSelf (ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPXdmf3Writer* New();
+  vtkTypeMacro(vtkPXdmf3Writer, vtkXdmf3Writer);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
-  vtkPXdmf3Writer ();
-  ~vtkPXdmf3Writer ();
-  int CheckParameters () VTK_OVERRIDE;
+  vtkPXdmf3Writer();
+  ~vtkPXdmf3Writer() override;
+  int CheckParameters() override;
 
-  int RequestUpdateExtent (vtkInformation* request,
-                           vtkInformationVector** inputVector,
-                           vtkInformationVector* outputVector) VTK_OVERRIDE;
-  int GlobalContinueExecuting(int localContinue) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int GlobalContinueExecuting(int localContinue) override;
 
 private:
-  vtkPXdmf3Writer (const vtkPXdmf3Writer&) VTK_DELETE_FUNCTION;
-  void operator= (const vtkPXdmf3Writer&) VTK_DELETE_FUNCTION;
+  vtkPXdmf3Writer(const vtkPXdmf3Writer&) = delete;
+  void operator=(const vtkPXdmf3Writer&) = delete;
 };
 
 #endif /* vtkPXdmf3Writer_h */

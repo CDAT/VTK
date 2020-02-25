@@ -30,22 +30,17 @@
 // Standard functions
 //
 
+//----------------------------------------------------------------------------
+
+vtkArray::vtkArray() = default;
 
 //----------------------------------------------------------------------------
 
-vtkArray::vtkArray()
-{
-}
+vtkArray::~vtkArray() = default;
 
 //----------------------------------------------------------------------------
 
-vtkArray::~vtkArray()
-{
-}
-
-//----------------------------------------------------------------------------
-
-void vtkArray::PrintSelf(ostream &os, vtkIndent indent)
+void vtkArray::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os, indent);
 
@@ -55,7 +50,7 @@ void vtkArray::PrintSelf(ostream &os, vtkIndent indent)
   os << indent << "Extents: " << this->GetExtents() << endl;
 
   os << indent << "DimensionLabels:";
-  for(DimensionT i = 0; i != this->GetDimensions(); ++i)
+  for (DimensionT i = 0; i != this->GetDimensions(); ++i)
     os << " " << this->GetDimensionLabel(i);
   os << endl;
 
@@ -65,11 +60,11 @@ void vtkArray::PrintSelf(ostream &os, vtkIndent indent)
 
 vtkArray* vtkArray::CreateArray(int StorageType, int ValueType)
 {
-  switch(StorageType)
+  switch (StorageType)
   {
     case DENSE:
     {
-      switch(ValueType)
+      switch (ValueType)
       {
         case VTK_CHAR:
           return vtkDenseArray<char>::New();
@@ -106,12 +101,14 @@ vtkArray* vtkArray::CreateArray(int StorageType, int ValueType)
         case VTK_VARIANT:
           return vtkDenseArray<vtkVariant>::New();
       }
-      vtkGenericWarningMacro(<< "vtkArrary::CreateArray() cannot create array with unknown value type: " << vtkImageScalarTypeNameMacro(ValueType));
+      vtkGenericWarningMacro(
+        << "vtkArrary::CreateArray() cannot create array with unknown value type: "
+        << vtkImageScalarTypeNameMacro(ValueType));
       return nullptr;
     }
     case SPARSE:
     {
-      switch(ValueType)
+      switch (ValueType)
       {
         case VTK_CHAR:
           return vtkSparseArray<char>::New();
@@ -148,13 +145,16 @@ vtkArray* vtkArray::CreateArray(int StorageType, int ValueType)
         case VTK_VARIANT:
           return vtkSparseArray<vtkVariant>::New();
       }
-      vtkGenericWarningMacro(<< "vtkArrary::CreateArray() cannot create array with unknown value type: " << vtkImageScalarTypeNameMacro(ValueType));
+      vtkGenericWarningMacro(
+        << "vtkArrary::CreateArray() cannot create array with unknown value type: "
+        << vtkImageScalarTypeNameMacro(ValueType));
       return nullptr;
     }
   }
 
-    vtkGenericWarningMacro(<< "vtkArrary::CreateArray() cannot create array with unknown storage type: " << StorageType);
-    return nullptr;
+  vtkGenericWarningMacro(
+    << "vtkArrary::CreateArray() cannot create array with unknown storage type: " << StorageType);
+  return nullptr;
 }
 
 void vtkArray::Resize(const CoordinateT i)
@@ -192,7 +192,7 @@ void vtkArray::Resize(const vtkArrayExtents& extents)
   this->InternalResize(extents);
 }
 
-const vtkArrayRange vtkArray::GetExtent(DimensionT dimension)
+vtkArrayRange vtkArray::GetExtent(DimensionT dimension)
 {
   return this->GetExtents()[dimension];
 }
@@ -224,9 +224,10 @@ vtkStdString vtkArray::GetName()
 
 void vtkArray::SetDimensionLabel(DimensionT i, const vtkStdString& raw_label)
 {
-  if(i < 0 || i >= this->GetDimensions())
+  if (i < 0 || i >= this->GetDimensions())
   {
-    vtkErrorMacro("Cannot set label for dimension " << i << " of a " << this->GetDimensions() << "-way array");
+    vtkErrorMacro(
+      "Cannot set label for dimension " << i << " of a " << this->GetDimensions() << "-way array");
     return;
   }
 
@@ -240,9 +241,10 @@ void vtkArray::SetDimensionLabel(DimensionT i, const vtkStdString& raw_label)
 
 vtkStdString vtkArray::GetDimensionLabel(DimensionT i)
 {
-  if(i < 0 || i >= this->GetDimensions())
+  if (i < 0 || i >= this->GetDimensions())
   {
-    vtkErrorMacro("Cannot get label for dimension " << i << " of a " << this->GetDimensions() << "-way array");
+    vtkErrorMacro(
+      "Cannot get label for dimension " << i << " of a " << this->GetDimensions() << "-way array");
     return "";
   }
 

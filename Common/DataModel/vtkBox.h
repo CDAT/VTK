@@ -22,11 +22,11 @@
  * meeting along shared edges and all faces are orthogonal to the x-y-z
  * coordinate axes.  (If you wish to orient this box differently, recall that
  * the superclass vtkImplicitFunction supports a transformation matrix.)
- * vtkCube is a concrete implementation of vtkImplicitFunction.
+ * vtkBox is a concrete implementation of vtkImplicitFunction.
  *
  * @sa
  * vtkCubeSource vtkImplicitFunction
-*/
+ */
 
 #ifndef vtkBox_h
 #define vtkBox_h
@@ -38,24 +38,24 @@ class vtkBoundingBox;
 class VTKCOMMONDATAMODEL_EXPORT vtkBox : public vtkImplicitFunction
 {
 public:
-  vtkTypeMacro(vtkBox,vtkImplicitFunction);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkBox, vtkImplicitFunction);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct box with center at (0,0,0) and each side of length 1.0.
    */
-  static vtkBox *New();
+  static vtkBox* New();
 
   /**
    * Evaluate box defined by the two points (pMin,pMax).
    */
   using vtkImplicitFunction::EvaluateFunction;
-  double EvaluateFunction(double x[3]) VTK_OVERRIDE;
+  double EvaluateFunction(double x[3]) override;
 
   /**
    * Evaluate the gradient of the box.
    */
-  void EvaluateGradient(double x[3], double n[3]) VTK_OVERRIDE;
+  void EvaluateGradient(double x[3], double n[3]) override;
 
   //@{
   /**
@@ -64,23 +64,20 @@ public:
   void SetXMin(double p[3]);
   void SetXMin(double x, double y, double z);
   void GetXMin(double p[3]);
-  void GetXMin(double &x, double &y, double &z);
+  void GetXMin(double& x, double& y, double& z);
   //@}
 
   void SetXMax(double p[3]);
   void SetXMax(double x, double y, double z);
   void GetXMax(double p[3]);
-  void GetXMax(double &x, double &y, double &z);
+  void GetXMax(double& x, double& y, double& z);
 
-  void SetBounds(double xMin, double xMax,
-                 double yMin, double yMax,
-                 double zMin, double zMax);
+  void SetBounds(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
   void SetBounds(const double bounds[6]);
-  void GetBounds(double &xMin, double &xMax,
-                 double &yMin, double &yMax,
-                 double &zMin, double &zMax);
+  void GetBounds(
+    double& xMin, double& xMax, double& yMin, double& yMax, double& zMin, double& zMax);
   void GetBounds(double bounds[6]);
-  double *GetBounds();
+  double* GetBounds() VTK_SIZEHINT(6);
 
   /**
    * A special method that allows union set operation on bounding boxes.
@@ -99,8 +96,8 @@ public:
    * dir[3] is NOT normalized.  Valid intersections will only occur between
    * 0<=t<=1.)
    */
-  static char IntersectBox(double bounds[6], double origin[3], double dir[3],
-                           double coord[3], double& t);
+  static char IntersectBox(const double bounds[6], const double origin[3], const double dir[3],
+    double coord[3], double& t);
 
   /**
    * Intersect a line with the box.  Give the endpoints of the line in
@@ -114,11 +111,21 @@ public:
    * do not need them to be returned.  The function return value will be
    * zero if the line is wholly outside of the box.
    */
-  static int IntersectWithLine(const double bounds[6],
-                               const double p1[3], const double p2[3],
-                               double &t1, double &t2,
-                               double x1[3], double x2[3],
-                               int &plane1, int &plane2);
+  static int IntersectWithLine(const double bounds[6], const double p1[3], const double p2[3],
+    double& t1, double& t2, double x1[3], double x2[3], int& plane1, int& plane2);
+
+  /**
+   * Same method as vtkBox::IntersectWithLine, except that t1 and t2 can be outside of [0,1].
+   * t1 is the distance of x1 to p1 in parametric coordinates, and t2 is the distance of x2 to p1
+   * in parametric coordinates as well.
+   * In vtkBox::IntersectWithInLine, it is assumed that [p1,p2] is a segment, here, it is
+   * assumed that it is a line with no ends.
+   * t1 <= t2, which means that x1 is always "before" x2 on the line parameterized by [p1,p2].
+   * x1 and x2 can be set to nullptr without crash.
+   */
+  static bool IntersectWithInfiniteLine(const double bounds[6], const double p1[3],
+    const double p2[3], double& t1, double& t2, double x1[3], double x2[3], int& plane1,
+    int& plane2);
 
   /**
    * Plane intersection with the box. The plane is infinite in extent and
@@ -127,22 +134,33 @@ public:
    * The function returns non-zero if the plane and box intersect; zero
    * otherwise.
    */
-  static int IntersectWithPlane(double bounds[6], double origin[3],
-                                double normal[3]);
+  static vtkTypeBool IntersectWithPlane(double bounds[6], double origin[3], double normal[3]);
+
+  /**
+   * Plane intersection with the box. The plane is infinite in extent and
+   * defined by an origin and normal. The function returns the number of
+   * intersection points, and if does, up to six ordered intersection points
+   * are provided (i.e., the points are ordered and form a valid polygon).
+   * Thus the function returns non-zero if the plane and box intersect; zero
+   * otherwise. Note that if there is an intersection, the number of
+   * intersections ranges from [3,6]. xints memory layout is consistent with
+   * vtkPoints array layout and is organized as (xyz, xyz, xyz, xyz, xyz,
+   * xyz).
+   */
+  static vtkTypeBool IntersectWithPlane(
+    double bounds[6], double origin[3], double normal[3], double xints[18]);
 
 protected:
   vtkBox();
-  ~vtkBox() VTK_OVERRIDE;
+  ~vtkBox() override;
 
-  vtkBoundingBox *BBox;
-  double Bounds[6]; //supports the GetBounds() method
+  vtkBoundingBox* BBox;
+  double Bounds[6]; // supports the GetBounds() method
 
 private:
-  vtkBox(const vtkBox&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBox&) VTK_DELETE_FUNCTION;
+  vtkBox(const vtkBox&) = delete;
+  void operator=(const vtkBox&) = delete;
 };
-
-
 
 inline void vtkBox::SetXMin(double p[3])
 {
@@ -153,6 +171,5 @@ inline void vtkBox::SetXMax(double p[3])
 {
   this->SetXMax(p[0], p[1], p[2]);
 }
-
 
 #endif

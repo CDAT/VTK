@@ -19,7 +19,7 @@
  *  A concrete instance of vtkOverlappingAMRAlgorithm which implements
  *  functionality for extracting slices from AMR data. Unlike the conventional
  *  slice filter, the output of this filter is a 2-D AMR dataset itself.
-*/
+ */
 
 #ifndef vtkAMRSliceFilter_h
 #define vtkAMRSliceFilter_h
@@ -37,51 +37,48 @@ class vtkPlane;
 class vtkAMRBox;
 class vtkUniformGrid;
 
-class VTKFILTERSAMR_EXPORT vtkAMRSliceFilter :
-  public vtkOverlappingAMRAlgorithm
+class VTKFILTERSAMR_EXPORT vtkAMRSliceFilter : public vtkOverlappingAMRAlgorithm
 {
 public:
   static vtkAMRSliceFilter* New();
-  vtkTypeMacro( vtkAMRSliceFilter, vtkOverlappingAMRAlgorithm );
-  void PrintSelf(ostream &os, vtkIndent indent ) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAMRSliceFilter, vtkOverlappingAMRAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Inline Gettters & Setters
-  vtkSetMacro(OffSetFromOrigin,double);
-  vtkGetMacro(OffSetFromOrigin,double);
 
   //@{
   /**
-   * Set/Get ForwardUpstream property
+   * Set/Get the offset-from-origin of the slicing plane.
    */
-  vtkSetMacro( ForwardUpstream, int );
-  vtkGetMacro( ForwardUpstream, int );
-  vtkBooleanMacro( ForwardUpstream, int );
-  //@}
-
-  //@{
-  /**
-   * Set/Get EnablePrefetching property
-   */
-  vtkSetMacro( EnablePrefetching, int );
-  vtkGetMacro( EnablePrefetching, int );
-  vtkBooleanMacro( EnablePrefetching, int );
+  vtkSetMacro(OffsetFromOrigin, double);
+  vtkGetMacro(OffsetFromOrigin, double);
   //@}
 
   //@{
   /**
    * Set/Get the maximum resolution used in this instance.
    */
-  vtkSetMacro(MaxResolution,int);
-  vtkGetMacro(MaxResolution,int);
+  vtkSetMacro(MaxResolution, unsigned int);
+  vtkGetMacro(MaxResolution, unsigned int);
   //@}
+
+  /**
+   * Tags to identify normals along the X, Y and Z directions.
+   */
+  enum NormalTag : char
+  {
+    X_NORMAL = 1,
+    Y_NORMAL = 2,
+    Z_NORMAL = 4
+  };
 
   //@{
   /**
-   * Set/Get the Axis normal. There are only 3 acceptable values
-   * 1-(X-Normal); 2-(Y-Normal); 3-(Z-Normal)
+   * Set/Get the Axis normal. The accpetable values are defined in the
+   * NormalTag enum.
    */
-  vtkSetMacro(Normal,int);
-  vtkGetMacro(Normal,int);
+  vtkSetMacro(Normal, int);
+  vtkGetMacro(Normal, int);
   //@}
 
   //@{
@@ -89,109 +86,102 @@ public:
    * Set/Get a multiprocess controller for paralle processing.
    * By default this parameter is set to nullptr by the constructor.
    */
-  vtkSetMacro( Controller, vtkMultiProcessController* );
-  vtkGetMacro( Controller, vtkMultiProcessController* );
+  vtkSetMacro(Controller, vtkMultiProcessController*);
+  vtkGetMacro(Controller, vtkMultiProcessController*);
   //@}
 
   // Standard Pipeline methods
-  int RequestData(
-     vtkInformation*,vtkInformationVector**,vtkInformationVector*) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-  int FillOutputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Makes upstream request to a source, typically, a concrete instance of
    * vtkAMRBaseReader, for which blocks to load.
    */
-  int RequestInformation(
-      vtkInformation *rqst,
-      vtkInformationVector **inputVector,
-      vtkInformationVector *outputVector ) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* rqst, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   /**
    * Performs upstream requests to the reader
    */
-  int RequestUpdateExtent(
-      vtkInformation*, vtkInformationVector**,vtkInformationVector* ) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
   vtkAMRSliceFilter();
-  ~vtkAMRSliceFilter() VTK_OVERRIDE;
+  ~vtkAMRSliceFilter() override = default;
 
   /**
    * Returns the cell index w.r.t. the given input grid which contains
    * the query point x. A -1 is returned if the point is not found.
    */
-  int GetDonorCellIdx( double x[3], vtkUniformGrid *ug );
+  int GetDonorCellIdx(double x[3], vtkUniformGrid* ug);
+
+  /**
+   * Returns the point index w.r.t. the given input grid which contains the
+   * query point x. A -1 is returned if the point is not found.
+   */
+  int GetDonorPointIdx(double x[3], vtkUniformGrid* ug);
 
   /**
    * Computes the cell center of the cell corresponding to the supplied
    * cell index w.r.t. the input uniform grid.
    */
-  void ComputeCellCenter(
-      vtkUniformGrid *ug, const int cellIdx, double centroid[3] );
+  void ComputeCellCenter(vtkUniformGrid* ug, const int cellIdx, double centroid[3]);
 
   /**
    * Gets the slice from the given grid given the plane origin & the
    * user-supplied normal associated with this class instance.
    */
-  vtkUniformGrid* GetSlice( double origin[3], int* dims, double* gorigin, double* spacing );
+  vtkUniformGrid* GetSlice(double origin[3], int* dims, double* gorigin, double* spacing);
 
   /**
    * Copies the cell data for the cells in the slice from the 3-D grid.
    */
-  void GetSliceCellData( vtkUniformGrid *slice, vtkUniformGrid *grid3D );
+  void GetSliceCellData(vtkUniformGrid* slice, vtkUniformGrid* grid3D);
+
+  /**
+   * Copies the point data for the cells in the slice from the 3-D grid.
+   */
+  void GetSlicePointData(vtkUniformGrid* slice, vtkUniformGrid* grid3D);
 
   /**
    * Determines if a plane intersects with an AMR box
    */
-  bool PlaneIntersectsAMRBox( double plane[4], double bounds[6] );
+  bool PlaneIntersectsAMRBox(double plane[4], double bounds[6]);
 
   /**
    * Given the cut-plane and the metadata provided by a module upstream,
    * this method generates the list of linear AMR block indices that need
    * to be loaded.
    */
-  void ComputeAMRBlocksToLoad(
-      vtkPlane *p, vtkOverlappingAMR *metadata );
+  void ComputeAMRBlocksToLoad(vtkPlane* p, vtkOverlappingAMR* metadata);
 
   /**
    * Extracts a 2-D AMR slice from the dataset.
    */
-  void GetAMRSliceInPlane(
-      vtkPlane *p, vtkOverlappingAMR *inp,
-      vtkOverlappingAMR *out );
+  void GetAMRSliceInPlane(vtkPlane* p, vtkOverlappingAMR* inp, vtkOverlappingAMR* out);
 
   /**
    * A utility function that checks if the input AMR data is 2-D.
    */
-  bool IsAMRData2D( vtkOverlappingAMR *input );
+  bool IsAMRData2D(vtkOverlappingAMR* input);
 
   /**
    * Returns the axis-aligned cut plane.
    */
-  vtkPlane* GetCutPlane( vtkOverlappingAMR *input );
+  vtkPlane* GetCutPlane(vtkOverlappingAMR* input);
 
-  /**
-   * Initializes the off-set to be at the center of the input data-set.
-   */
-  void InitializeOffSet(
-    vtkOverlappingAMR *inp, double *min, double *max );
+  double OffsetFromOrigin;
+  int Normal;
+  unsigned int MaxResolution;
+  vtkMultiProcessController* Controller;
 
-  double OffSetFromOrigin;
-  int    Normal; // 1=>X-Normal, 2=>Y-Normal, 3=>Z-Normal
-  bool   initialRequest;
-  int    MaxResolution;
-  vtkMultiProcessController *Controller;
-
-  int ForwardUpstream;
-  int EnablePrefetching;
-
-  std::vector< int > BlocksToLoad;
+  std::vector<int> BlocksToLoad;
 
 private:
-  vtkAMRSliceFilter( const vtkAMRSliceFilter& ) VTK_DELETE_FUNCTION;
-  void operator=( const vtkAMRSliceFilter& ) VTK_DELETE_FUNCTION;
+  vtkAMRSliceFilter(const vtkAMRSliceFilter&) = delete;
+  void operator=(const vtkAMRSliceFilter&) = delete;
 };
 
 #endif /* vtkAMRSliceFilter_h */

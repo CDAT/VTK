@@ -1,4 +1,3 @@
-#include "vtk_libxml2_mangle.h"
 /*
  * Summary: macros for marking symbols as exportable/importable.
  * Description: macros for marking symbols as exportable/importable.
@@ -10,6 +9,8 @@
 
 #ifndef __XML_EXPORTS_H__
 #define __XML_EXPORTS_H__
+
+#include "vtk_libxml2_mangle.h"
 
 /**
  * XMLPUBFUN, XMLPUBVAR, XMLCALL
@@ -44,7 +45,7 @@
 /**
  * XMLCDECL:
  *
- * Macro which declares the calling convention for exported functions that 
+ * Macro which declares the calling convention for exported functions that
  * use '...'.
  */
 #define XMLCDECL
@@ -74,9 +75,6 @@
     #define XMLCALL __cdecl
   #endif
   #define XMLCDECL __cdecl
-  #if !defined _REENTRANT
-    #define _REENTRANT
-  #endif
 #endif
 
 /* Windows platform with Borland compiler */
@@ -98,9 +96,6 @@
   #endif
   #define XMLCALL __cdecl
   #define XMLCDECL __cdecl
-  #if !defined _REENTRANT
-    #define _REENTRANT
-  #endif
 #endif
 
 /* Windows platform with GNU compiler (Mingw) */
@@ -109,9 +104,14 @@
   #undef XMLPUBVAR
   #undef XMLCALL
   #undef XMLCDECL
+  /*
+   * if defined(IN_LIBXML) this raises problems on mingw with msys
+   * _imp__xmlFree listed as missing. Try to workaround the problem
+   * by also making that declaration when compiling client code.
+   */
   #if defined(IN_LIBXML) && !defined(LIBXML_STATIC)
     #define XMLPUBFUN __declspec(dllexport)
-    #define XMLPUBVAR __declspec(dllexport)
+    #define XMLPUBVAR __declspec(dllexport) extern
   #else
     #define XMLPUBFUN
     #if !defined(LIBXML_STATIC)
@@ -122,13 +122,10 @@
   #endif
   #define XMLCALL __cdecl
   #define XMLCDECL __cdecl
-  #if !defined _REENTRANT
-    #define _REENTRANT
-  #endif
 #endif
 
-/* Cygwin platform, GNU compiler */
-#if defined(_WIN32) && defined(__CYGWIN__)
+/* Cygwin platform (does not define _WIN32), GNU compiler */
+#if defined(__CYGWIN__)
   #undef XMLPUBFUN
   #undef XMLPUBVAR
   #undef XMLCALL
@@ -154,3 +151,5 @@
 #endif
 
 #endif /* __XML_EXPORTS_H__ */
+
+

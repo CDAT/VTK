@@ -15,20 +15,20 @@
 
 #include "vtkChartLegend.h"
 
-#include "vtkContext2D.h"
-#include "vtkPen.h"
 #include "vtkBrush.h"
 #include "vtkChart.h"
+#include "vtkContext2D.h"
+#include "vtkContextMouseEvent.h"
+#include "vtkContextScene.h"
+#include "vtkPen.h"
 #include "vtkPlot.h"
-#include "vtkTextProperty.h"
+#include "vtkSmartPointer.h"
 #include "vtkStdString.h"
+#include "vtkStringArray.h"
+#include "vtkTextProperty.h"
 #include "vtkVector.h"
 #include "vtkVectorOperators.h"
 #include "vtkWeakPointer.h"
-#include "vtkSmartPointer.h"
-#include "vtkStringArray.h"
-#include "vtkContextScene.h"
-#include "vtkContextMouseEvent.h"
 
 #include "vtkObjectFactory.h"
 
@@ -38,12 +38,11 @@
 class vtkChartLegend::Private
 {
 public:
-  Private() : Point(0, 0)
+  Private()
+    : Point(0, 0)
   {
   }
-  ~Private()
-  {
-  }
+  ~Private() = default;
 
   vtkVector2f Point;
   vtkWeakPointer<vtkChart> Chart;
@@ -92,8 +91,8 @@ void vtkChartLegend::Update()
   this->Storage->ActivePlots.clear();
   for (int i = 0; i < this->Storage->Chart->GetNumberOfPlots(); ++i)
   {
-    if (this->Storage->Chart->GetPlot(i)->GetVisible()
-        && this->Storage->Chart->GetPlot(i)->GetLabel().length() > 0)
+    if (this->Storage->Chart->GetPlot(i)->GetVisible() &&
+      this->Storage->Chart->GetPlot(i)->GetLabel().length() > 0)
     {
       this->Storage->ActivePlots.push_back(this->Storage->Chart->GetPlot(i));
     }
@@ -101,7 +100,7 @@ void vtkChartLegend::Update()
     // the labels/legend symbols for the first one. So truncate at the first
     // one we encounter.
     if (this->Storage->Chart->GetPlot(i)->GetLabels() &&
-        this->Storage->Chart->GetPlot(i)->GetLabels()->GetNumberOfTuples() > 1)
+      this->Storage->Chart->GetPlot(i)->GetLabels()->GetNumberOfTuples() > 1)
     {
       break;
     }
@@ -110,7 +109,7 @@ void vtkChartLegend::Update()
 }
 
 //-----------------------------------------------------------------------------
-bool vtkChartLegend::Paint(vtkContext2D *painter)
+bool vtkChartLegend::Paint(vtkContext2D* painter)
 {
   // This is where everything should be drawn, or dispatched to other methods.
   vtkDebugMacro(<< "Paint event called in vtkChartLegend.");
@@ -123,12 +122,12 @@ bool vtkChartLegend::Paint(vtkContext2D *painter)
   this->GetBoundingRect(painter);
 
   // Now draw a box for the legend.
-  painter->ApplyPen(this->Pen.GetPointer());
-  painter->ApplyBrush(this->Brush.GetPointer());
-  painter->DrawRect(this->Rect.GetX(), this->Rect.GetY(),
-                    this->Rect.GetWidth(), this->Rect.GetHeight());
+  painter->ApplyPen(this->Pen);
+  painter->ApplyBrush(this->Brush);
+  painter->DrawRect(
+    this->Rect.GetX(), this->Rect.GetY(), this->Rect.GetWidth(), this->Rect.GetHeight());
 
-  painter->ApplyTextProp(this->LabelProperties.GetPointer());
+  painter->ApplyTextProp(this->LabelProperties);
 
   vtkVector2f stringBounds[2];
   painter->ComputeStringBounds("Tgyf", stringBounds->GetData());
@@ -137,12 +136,11 @@ bool vtkChartLegend::Paint(vtkContext2D *painter)
   float baseHeight = stringBounds[1].GetY();
 
   vtkVector2f pos(this->Rect.GetX() + this->Padding + this->SymbolWidth,
-                  this->Rect.GetY() + this->Rect.GetHeight() - this->Padding - floor(height));
-  vtkRectf rect(this->Rect.GetX() + this->Padding, pos.GetY(),
-               this->SymbolWidth-3, ceil(height));
+    this->Rect.GetY() + this->Rect.GetHeight() - this->Padding - floor(height));
+  vtkRectf rect(this->Rect.GetX() + this->Padding, pos.GetY(), this->SymbolWidth - 3, ceil(height));
 
   // Draw all of the legend labels and marks
-  for(size_t i = 0; i < this->Storage->ActivePlots.size(); ++i)
+  for (size_t i = 0; i < this->Storage->ActivePlots.size(); ++i)
   {
     if (!this->Storage->ActivePlots[i]->GetLegendVisibility())
     {
@@ -150,7 +148,7 @@ bool vtkChartLegend::Paint(vtkContext2D *painter)
       continue;
     }
 
-    vtkStringArray *labels = this->Storage->ActivePlots[i]->GetLabels();
+    vtkStringArray* labels = this->Storage->ActivePlots[i]->GetLabels();
     for (vtkIdType l = 0; labels && (l < labels->GetNumberOfValues()); ++l)
     {
       // This is fairly hackish, but gets the text looking reasonable...
@@ -162,8 +160,8 @@ bool vtkChartLegend::Paint(vtkContext2D *painter)
       vtkStdString testString = labels->GetValue(l);
       testString += "T";
       painter->ComputeStringBounds(testString, stringBounds->GetData());
-      painter->DrawString(pos.GetX(), rect.GetY() + (baseHeight-stringBounds[1].GetY()),
-                          labels->GetValue(l));
+      painter->DrawString(
+        pos.GetX(), rect.GetY() + (baseHeight - stringBounds[1].GetY()), labels->GetValue(l));
 
       // Paint the legend mark and increment out y value.
       this->Storage->ActivePlots[i]->PaintLegend(painter, rect, l);
@@ -175,15 +173,14 @@ bool vtkChartLegend::Paint(vtkContext2D *painter)
 }
 
 //-----------------------------------------------------------------------------
-vtkRectf vtkChartLegend::GetBoundingRect(vtkContext2D *painter)
+vtkRectf vtkChartLegend::GetBoundingRect(vtkContext2D* painter)
 {
-  if (this->CacheBounds && this->RectTime > this->GetMTime() &&
-      this->RectTime > this->PlotTime)
+  if (this->CacheBounds && this->RectTime > this->GetMTime() && this->RectTime > this->PlotTime)
   {
     return this->Rect;
   }
 
-  painter->ApplyTextProp(this->LabelProperties.GetPointer());
+  painter->ApplyTextProp(this->LabelProperties);
 
   vtkVector2f stringBounds[2];
   painter->ComputeStringBounds("Tgyf", stringBounds->GetData());
@@ -192,18 +189,17 @@ vtkRectf vtkChartLegend::GetBoundingRect(vtkContext2D *painter)
 
   // Calculate the widest legend label - needs the context to calculate font
   // metrics, but these could be cached.
-  for(size_t i = 0; i < this->Storage->ActivePlots.size(); ++i)
+  for (size_t i = 0; i < this->Storage->ActivePlots.size(); ++i)
   {
     if (!this->Storage->ActivePlots[i]->GetLegendVisibility())
     {
       // skip if legend is not visible.
       continue;
     }
-    vtkStringArray *labels = this->Storage->ActivePlots[i]->GetLabels();
+    vtkStringArray* labels = this->Storage->ActivePlots[i]->GetLabels();
     for (vtkIdType l = 0; labels && (l < labels->GetNumberOfTuples()); ++l)
     {
-      painter->ComputeStringBounds(labels->GetValue(l),
-                                   stringBounds->GetData());
+      painter->ComputeStringBounds(labels->GetValue(l), stringBounds->GetData());
       if (stringBounds[1].GetX() > maxWidth)
       {
         maxWidth = stringBounds[1].GetX();
@@ -213,7 +209,7 @@ vtkRectf vtkChartLegend::GetBoundingRect(vtkContext2D *painter)
 
   // Figure out the size of the legend box and store locally.
   int numLabels = 0;
-  for(size_t i = 0; i < this->Storage->ActivePlots.size(); ++i)
+  for (size_t i = 0; i < this->Storage->ActivePlots.size(); ++i)
   {
     if (!this->Storage->ActivePlots[i]->GetLegendVisibility())
     {
@@ -224,17 +220,16 @@ vtkRectf vtkChartLegend::GetBoundingRect(vtkContext2D *painter)
   }
 
   // Default point placement is bottom left.
-  this->Rect = vtkRectf(floor(this->Storage->Point.GetX()),
-                        floor(this->Storage->Point.GetY()),
-                        ceil(maxWidth + 2 * this->Padding + this->SymbolWidth),
-                        ceil((numLabels * (height + this->Padding)) + this->Padding));
+  this->Rect = vtkRectf(floor(this->Storage->Point.GetX()), floor(this->Storage->Point.GetY()),
+    ceil(maxWidth + 2 * this->Padding + this->SymbolWidth),
+    ceil((numLabels * (height + this->Padding)) + this->Padding));
 
   this->RectTime.Modified();
   return this->Rect;
 }
 
 //-----------------------------------------------------------------------------
-void vtkChartLegend::SetPoint(const vtkVector2f &point)
+void vtkChartLegend::SetPoint(const vtkVector2f& point)
 {
   this->Storage->Point = point;
   this->Modified();
@@ -259,21 +254,21 @@ int vtkChartLegend::GetLabelSize()
 }
 
 //-----------------------------------------------------------------------------
-vtkPen * vtkChartLegend::GetPen()
+vtkPen* vtkChartLegend::GetPen()
 {
-  return this->Pen.GetPointer();
+  return this->Pen;
 }
 
 //-----------------------------------------------------------------------------
-vtkBrush * vtkChartLegend::GetBrush()
+vtkBrush* vtkChartLegend::GetBrush()
 {
-  return this->Brush.GetPointer();
+  return this->Brush;
 }
 
 //-----------------------------------------------------------------------------
-vtkTextProperty * vtkChartLegend::GetLabelProperties()
+vtkTextProperty* vtkChartLegend::GetLabelProperties()
 {
-  return this->LabelProperties.GetPointer();
+  return this->LabelProperties;
 }
 
 //-----------------------------------------------------------------------------
@@ -297,16 +292,16 @@ vtkChart* vtkChartLegend::GetChart()
 }
 
 //-----------------------------------------------------------------------------
-bool vtkChartLegend::Hit(const vtkContextMouseEvent &mouse)
+bool vtkChartLegend::Hit(const vtkContextMouseEvent& mouse)
 {
   if (!this->GetVisible())
   {
     return false;
   }
   if (this->DragEnabled && mouse.GetPos().GetX() > this->Rect.GetX() &&
-      mouse.GetPos().GetX() < this->Rect.GetX() + this->Rect.GetWidth() &&
-      mouse.GetPos().GetY() > this->Rect.GetY() &&
-      mouse.GetPos().GetY() < this->Rect.GetY() + this->Rect.GetHeight())
+    mouse.GetPos().GetX() < this->Rect.GetX() + this->Rect.GetWidth() &&
+    mouse.GetPos().GetY() > this->Rect.GetY() &&
+    mouse.GetPos().GetY() < this->Rect.GetY() + this->Rect.GetHeight())
   {
     return true;
   }
@@ -317,7 +312,7 @@ bool vtkChartLegend::Hit(const vtkContextMouseEvent &mouse)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkChartLegend::MouseMoveEvent(const vtkContextMouseEvent &mouse)
+bool vtkChartLegend::MouseMoveEvent(const vtkContextMouseEvent& mouse)
 {
   if (this->Button == vtkContextMouseEvent::LEFT_BUTTON)
   {
@@ -330,7 +325,7 @@ bool vtkChartLegend::MouseMoveEvent(const vtkContextMouseEvent &mouse)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkChartLegend::MouseButtonPressEvent(const vtkContextMouseEvent &mouse)
+bool vtkChartLegend::MouseButtonPressEvent(const vtkContextMouseEvent& mouse)
 {
   if (mouse.GetButton() == vtkContextMouseEvent::LEFT_BUTTON)
   {
@@ -341,14 +336,14 @@ bool vtkChartLegend::MouseButtonPressEvent(const vtkContextMouseEvent &mouse)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkChartLegend::MouseButtonReleaseEvent(const vtkContextMouseEvent &)
+bool vtkChartLegend::MouseButtonReleaseEvent(const vtkContextMouseEvent&)
 {
   this->Button = -1;
   return true;
 }
 
 //-----------------------------------------------------------------------------
-void vtkChartLegend::PrintSelf(ostream &os, vtkIndent indent)
+void vtkChartLegend::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }

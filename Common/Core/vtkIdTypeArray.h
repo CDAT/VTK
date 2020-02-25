@@ -19,14 +19,14 @@
  * vtkIdTypeArray is an array of values of type vtkIdType.
  * It provides methods for insertion and retrieval of values and will
  * automatically resize itself to hold new data.
-*/
+ */
 
 #ifndef vtkIdTypeArray_h
 #define vtkIdTypeArray_h
 
-#include "vtkCommonCoreModule.h" // For export macro
-#include "vtkDataArray.h"
 #include "vtkAOSDataArrayTemplate.h" // Real Superclass
+#include "vtkCommonCoreModule.h"     // For export macro
+#include "vtkDataArray.h"
 
 // Fake the superclass for the wrappers.
 #ifndef __VTK_WRAP__
@@ -35,38 +35,38 @@
 class VTKCOMMONCORE_EXPORT vtkIdTypeArray : public vtkDataArray
 {
 public:
-  vtkTypeMacro(vtkIdTypeArray, vtkDataArray)
+  vtkTypeMacro(vtkIdTypeArray, vtkDataArray);
 #ifndef __VTK_WRAP__
 #undef vtkDataArray
 #endif
   static vtkIdTypeArray* New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // This macro expands to the set of method declarations that
   // make up the interface of vtkAOSDataArrayTemplate, which is ignored
   // by the wrappers.
-#if defined(__VTK_WRAP__) || defined (__WRAP_GCCXML__)
+#if defined(__VTK_WRAP__) || defined(__WRAP_GCCXML__)
   vtkCreateWrappedArrayInterface(vtkIdType);
 #else
 
   /**
    * Get the data type.
    */
-  int GetDataType() VTK_OVERRIDE
+  int GetDataType() const override
   {
-      // This needs to overwritten from superclass because
-      // the templated superclass is not able to differentiate
-      // vtkIdType from a long long or an int since vtkIdType
-      // is simply a typedef. This means that
-      // vtkAOSDataArrayTemplate<vtkIdType> != vtkIdTypeArray.
-      return VTK_ID_TYPE;
+    // This needs to overwritten from superclass because
+    // the templated superclass is not able to differentiate
+    // vtkIdType from a long long or an int since vtkIdType
+    // is simply a typedef. This means that
+    // vtkAOSDataArrayTemplate<vtkIdType> != vtkIdTypeArray.
+    return VTK_ID_TYPE;
   }
 #endif
 
   /**
    * A faster alternative to SafeDownCast for downcasting vtkAbstractArrays.
    */
-  static vtkIdTypeArray* FastDownCast(vtkAbstractArray *source)
+  static vtkIdTypeArray* FastDownCast(vtkAbstractArray* source)
   {
     return static_cast<vtkIdTypeArray*>(Superclass::FastDownCast(source));
   }
@@ -83,17 +83,16 @@ public:
 
 protected:
   vtkIdTypeArray();
-  ~vtkIdTypeArray() VTK_OVERRIDE;
+  ~vtkIdTypeArray() override;
 
 private:
-
   typedef vtkAOSDataArrayTemplate<vtkIdType> RealSuperclass;
 
-  vtkIdTypeArray(const vtkIdTypeArray&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkIdTypeArray&) VTK_DELETE_FUNCTION;
+  vtkIdTypeArray(const vtkIdTypeArray&) = delete;
+  void operator=(const vtkIdTypeArray&) = delete;
 };
 
 // Define vtkArrayDownCast implementation:
-vtkArrayDownCast_FastCastMacro(vtkIdTypeArray)
+vtkArrayDownCast_FastCastMacro(vtkIdTypeArray);
 
 #endif

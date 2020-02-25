@@ -29,7 +29,7 @@
  * Slice and dice algorithm comes from:
  * Shneiderman, B. 1992. Tree visualization with tree-maps: 2-d space-filling approach.
  * ACM Trans. Graph. 11, 1 (Jan. 1992), 92-99.
-*/
+ */
 
 #ifndef vtkSliceAndDiceLayoutStrategy_h
 #define vtkSliceAndDiceLayoutStrategy_h
@@ -40,28 +40,24 @@
 class VTKINFOVISLAYOUT_EXPORT vtkSliceAndDiceLayoutStrategy : public vtkTreeMapLayoutStrategy
 {
 public:
-  static vtkSliceAndDiceLayoutStrategy *New();
+  static vtkSliceAndDiceLayoutStrategy* New();
 
-  vtkTypeMacro(vtkSliceAndDiceLayoutStrategy,vtkTreeMapLayoutStrategy);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSliceAndDiceLayoutStrategy, vtkTreeMapLayoutStrategy);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform the layout of a tree and place the results as 4-tuples in
    * coordsArray (Xmin, Xmax, Ymin, Ymax).
    */
-  void Layout(
-      vtkTree* inputTree,
-      vtkDataArray* coordsArray,
-      vtkDataArray* sizeArray) VTK_OVERRIDE;
+  void Layout(vtkTree* inputTree, vtkDataArray* coordsArray, vtkDataArray* sizeArray) override;
 
 protected:
   vtkSliceAndDiceLayoutStrategy();
-  ~vtkSliceAndDiceLayoutStrategy() VTK_OVERRIDE;
+  ~vtkSliceAndDiceLayoutStrategy() override;
 
 private:
-  vtkSliceAndDiceLayoutStrategy(const vtkSliceAndDiceLayoutStrategy&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSliceAndDiceLayoutStrategy&) VTK_DELETE_FUNCTION;
+  vtkSliceAndDiceLayoutStrategy(const vtkSliceAndDiceLayoutStrategy&) = delete;
+  void operator=(const vtkSliceAndDiceLayoutStrategy&) = delete;
 };
 
 #endif
-

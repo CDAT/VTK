@@ -32,9 +32,9 @@
  * vtkQuadraticHexahedron vtkQuadraticQuad vtkQuadraticPyramid
  *
  * @par Thanks:
- * Thanks to Soeren Gebbert  who developed this class and
+ * Thanks to Soeren Gebbert who developed this class and
  * integrated it into VTK 5.0.
-*/
+ */
 
 #ifndef vtkQuadraticLinearWedge_h
 #define vtkQuadraticLinearWedge_h
@@ -52,43 +52,40 @@ class vtkDoubleArray;
 class VTKCOMMONDATAMODEL_EXPORT vtkQuadraticLinearWedge : public vtkNonLinearCell
 {
 public:
-  static vtkQuadraticLinearWedge *New ();
-  vtkTypeMacro(vtkQuadraticLinearWedge,vtkNonLinearCell);
-  void PrintSelf (ostream & os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkQuadraticLinearWedge* New();
+  vtkTypeMacro(vtkQuadraticLinearWedge, vtkNonLinearCell);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Implement the vtkCell API. See the vtkCell API for descriptions
    * of these methods.
    */
-  int GetCellType() VTK_OVERRIDE { return VTK_QUADRATIC_LINEAR_WEDGE; }
-  int GetCellDimension() VTK_OVERRIDE { return 3; }
-  int GetNumberOfEdges() VTK_OVERRIDE { return 9; }
-  int GetNumberOfFaces() VTK_OVERRIDE { return 5; }
-  vtkCell *GetEdge (int edgeId) VTK_OVERRIDE;
-  vtkCell *GetFace (int faceId) VTK_OVERRIDE;
+  int GetCellType() override { return VTK_QUADRATIC_LINEAR_WEDGE; }
+  int GetCellDimension() override { return 3; }
+  int GetNumberOfEdges() override { return 9; }
+  int GetNumberOfFaces() override { return 5; }
+  vtkCell* GetEdge(int edgeId) override;
+  vtkCell* GetFace(int faceId) override;
   //@}
 
-  int CellBoundary (int subId, double pcoords[3], vtkIdList * pts) VTK_OVERRIDE;
+  int CellBoundary(int subId, const double pcoords[3], vtkIdList* pts) override;
 
   //@{
   /**
-   * The quadratic linear wege is splitted into 4 linear wedges,
+   * The quadratic linear wedge is split into 4 linear wedges,
    * each of them is contoured by a provided scalar value
    */
-  void Contour (double value, vtkDataArray * cellScalars,
-    vtkIncrementalPointLocator * locator, vtkCellArray * verts,
-    vtkCellArray * lines, vtkCellArray * polys,
-    vtkPointData * inPd, vtkPointData * outPd, vtkCellData * inCd,
-    vtkIdType cellId, vtkCellData * outCd) VTK_OVERRIDE;
-  int EvaluatePosition (double x[3], double *closestPoint,
-    int &subId, double pcoords[3], double &dist2, double *weights) VTK_OVERRIDE;
-  void EvaluateLocation (int &subId, double pcoords[3], double x[3],
-                         double *weights) VTK_OVERRIDE;
-  int Triangulate (int index, vtkIdList * ptIds, vtkPoints * pts) VTK_OVERRIDE;
-  void Derivatives (int subId, double pcoords[3], double *values,
-                    int dim, double *derivs) VTK_OVERRIDE;
-  double *GetParametricCoords () VTK_OVERRIDE;
+  void Contour(double value, vtkDataArray* cellScalars, vtkIncrementalPointLocator* locator,
+    vtkCellArray* verts, vtkCellArray* lines, vtkCellArray* polys, vtkPointData* inPd,
+    vtkPointData* outPd, vtkCellData* inCd, vtkIdType cellId, vtkCellData* outCd) override;
+  int EvaluatePosition(const double x[3], double* closestPoint, int& subId, double pcoords[3],
+    double& dist2, double* weights) override;
+  void EvaluateLocation(int& subId, const double pcoords[3], double x[3], double* weights) override;
+  int Triangulate(int index, vtkIdList* ptIds, vtkPoints* pts) override;
+  void Derivatives(
+    int subId, const double pcoords[3], const double* values, int dim, double* derivs) override;
+  double* GetParametricCoords() override;
   //@}
 
   /**
@@ -96,53 +93,48 @@ public:
    * contouring, except that it cuts the hex to produce linear
    * tetrahedron.
    */
-  void Clip (double value, vtkDataArray * cellScalars,
-       vtkIncrementalPointLocator * locator, vtkCellArray * tetras,
-       vtkPointData * inPd, vtkPointData * outPd,
-       vtkCellData * inCd, vtkIdType cellId, vtkCellData * outCd,
-       int insideOut) VTK_OVERRIDE;
+  void Clip(double value, vtkDataArray* cellScalars, vtkIncrementalPointLocator* locator,
+    vtkCellArray* tetras, vtkPointData* inPd, vtkPointData* outPd, vtkCellData* inCd,
+    vtkIdType cellId, vtkCellData* outCd, int insideOut) override;
 
   /**
    * Line-edge intersection. Intersection has to occur within [0,1] parametric
    * coordinates and with specified tolerance.
    */
-  int IntersectWithLine (double p1[3], double p2[3], double tol, double &t,
-    double x[3], double pcoords[3], int &subId) VTK_OVERRIDE;
+  int IntersectWithLine(const double p1[3], const double p2[3], double tol, double& t, double x[3],
+    double pcoords[3], int& subId) override;
 
   /**
    * Return the center of the quadratic linear wedge in parametric coordinates.
    */
-  int GetParametricCenter (double pcoords[3]) VTK_OVERRIDE;
+  int GetParametricCenter(double pcoords[3]) override;
 
-  /**
-   * @deprecated Replaced by vtkQuadraticLinearWedge::InterpolateFunctions as of VTK 5.2
-   */
-  static void InterpolationFunctions (double pcoords[3], double weights[15]);
-  /**
-   * @deprecated Replaced by vtkQuadraticLinearWedge::InterpolateDerivs as of VTK 5.2
-   */
-  static void InterpolationDerivs (double pcoords[3], double derivs[45]);
+  static void InterpolationFunctions(const double pcoords[3], double weights[15]);
+  static void InterpolationDerivs(const double pcoords[3], double derivs[45]);
   //@{
   /**
    * Compute the interpolation functions/derivatives
    * (aka shape functions/derivatives)
    */
-  void InterpolateFunctions (double pcoords[3], double weights[15]) VTK_OVERRIDE
+  void InterpolateFunctions(const double pcoords[3], double weights[15]) override
   {
-    vtkQuadraticLinearWedge::InterpolationFunctions(pcoords,weights);
+    vtkQuadraticLinearWedge::InterpolationFunctions(pcoords, weights);
   }
-  void InterpolateDerivs (double pcoords[3], double derivs[45]) VTK_OVERRIDE
+  void InterpolateDerivs(const double pcoords[3], double derivs[45]) override
   {
-    vtkQuadraticLinearWedge::InterpolationDerivs(pcoords,derivs);
+    vtkQuadraticLinearWedge::InterpolationDerivs(pcoords, derivs);
   }
   //@}
   //@{
   /**
    * Return the ids of the vertices defining edge/face (`edgeId`/`faceId').
    * Ids are related to the cell, not to the dataset.
+   *
+   * @note The return type changed. It used to be int*, it is now const vtkIdType*.
+   * This is so ids are unified between vtkCell and vtkPoints.
    */
-  static int *GetEdgeArray(int edgeId);
-  static int *GetFaceArray(int faceId);
+  static const vtkIdType* GetEdgeArray(vtkIdType edgeId);
+  static const vtkIdType* GetFaceArray(vtkIdType faceId);
   //@}
 
   /**
@@ -150,31 +142,30 @@ public:
    * matrix. Returns 9 elements of 3x3 inverse Jacobian plus interpolation
    * function derivatives.
    */
-  void JacobianInverse (double pcoords[3], double **inverse, double derivs[45]);
+  void JacobianInverse(const double pcoords[3], double** inverse, double derivs[45]);
 
 protected:
-  vtkQuadraticLinearWedge ();
-  ~vtkQuadraticLinearWedge () VTK_OVERRIDE;
+  vtkQuadraticLinearWedge();
+  ~vtkQuadraticLinearWedge() override;
 
-  vtkQuadraticEdge *QuadEdge;
-  vtkLine *Edge;
-  vtkQuadraticTriangle *TriangleFace;
-  vtkQuadraticLinearQuad *Face;
-  vtkWedge *Wedge;
-  vtkDoubleArray *Scalars;  //used to avoid New/Delete in contouring/clipping
+  vtkQuadraticEdge* QuadEdge;
+  vtkLine* Edge;
+  vtkQuadraticTriangle* TriangleFace;
+  vtkQuadraticLinearQuad* Face;
+  vtkWedge* Wedge;
+  vtkDoubleArray* Scalars; // used to avoid New/Delete in contouring/clipping
 
 private:
-  vtkQuadraticLinearWedge (const vtkQuadraticLinearWedge &) VTK_DELETE_FUNCTION;
-  void operator = (const vtkQuadraticLinearWedge &) VTK_DELETE_FUNCTION;
+  vtkQuadraticLinearWedge(const vtkQuadraticLinearWedge&) = delete;
+  void operator=(const vtkQuadraticLinearWedge&) = delete;
 };
 //----------------------------------------------------------------------------
 // Return the center of the quadratic wedge in parametric coordinates.
 inline int vtkQuadraticLinearWedge::GetParametricCenter(double pcoords[3])
 {
-  pcoords[0] = pcoords[1] = 1./3;
+  pcoords[0] = pcoords[1] = 1. / 3;
   pcoords[2] = 0.5;
   return 0;
 }
-
 
 #endif

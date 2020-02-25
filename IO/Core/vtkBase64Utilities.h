@@ -17,7 +17,7 @@
  * @brief   base64 encode and decode utilities.
  *
  * vtkBase64Utilities implements base64 encoding and decoding.
-*/
+ */
 
 #ifndef vtkBase64Utilities_h
 #define vtkBase64Utilities_h
@@ -28,38 +28,26 @@
 class VTKIOCORE_EXPORT vtkBase64Utilities : public vtkObject
 {
 public:
-  static vtkBase64Utilities *New();
-  vtkTypeMacro(vtkBase64Utilities,vtkObject);
+  static vtkBase64Utilities* New();
+  vtkTypeMacro(vtkBase64Utilities, vtkObject);
 
   /**
    * Encode 3 bytes into 4 bytes
    */
-  static void EncodeTriplet(unsigned char i0,
-                            unsigned char i1,
-                            unsigned char i2,
-                            unsigned char *o0,
-                            unsigned char *o1,
-                            unsigned char *o2,
-                            unsigned char *o3);
+  static void EncodeTriplet(unsigned char i0, unsigned char i1, unsigned char i2, unsigned char* o0,
+    unsigned char* o1, unsigned char* o2, unsigned char* o3);
 
   /**
    * Encode 2 bytes into 4 bytes
    */
-  static void EncodePair(unsigned char i0,
-                         unsigned char i1,
-                         unsigned char *o0,
-                         unsigned char *o1,
-                         unsigned char *o2,
-                         unsigned char *o3);
+  static void EncodePair(unsigned char i0, unsigned char i1, unsigned char* o0, unsigned char* o1,
+    unsigned char* o2, unsigned char* o3);
 
   /**
    * Encode 1 byte into 4 bytes
    */
-  static void EncodeSingle(unsigned char i0,
-                           unsigned char *o0,
-                           unsigned char *o1,
-                           unsigned char *o2,
-                           unsigned char *o3);
+  static void EncodeSingle(
+    unsigned char i0, unsigned char* o0, unsigned char* o1, unsigned char* o2, unsigned char* o3);
 
   /**
    * Encode 'length' bytes from the input buffer and store the
@@ -74,40 +62,15 @@ public:
    * the extra padding needed to complete the encode 4 bytes will stop the
    * decoding anyway).
    */
-  static unsigned long Encode(const unsigned char *input,
-                              unsigned long length,
-                              unsigned char *output,
-                              int mark_end = 0);
-
+  static unsigned long Encode(
+    const unsigned char* input, unsigned long length, unsigned char* output, int mark_end = 0);
 
   /**
    * Decode 4 bytes into 3 bytes.
    * Return the number of bytes actually decoded (0 to 3, inclusive).
    */
-  static int DecodeTriplet(unsigned char i0,
-                           unsigned char i1,
-                           unsigned char i2,
-                           unsigned char i3,
-                           unsigned char *o0,
-                           unsigned char *o1,
-                           unsigned char *o2);
-
-  /**
-   * Decode bytes from the input buffer and store the decoded stream
-   * into the output buffer until 'length' bytes have been decoded.
-   * Return the real length of the decoded stream (which should be equal to
-   * 'length'). Note that the output buffer must be allocated by the caller.
-   * If 'max_input_length' is not 0, then it specifies the number of
-   * encoded bytes that should be at most read from the input buffer. In
-   * that case the 'length' parameter is ignored. This enables the caller
-   * to decode a stream without actually knowing how much decoded data to
-   * expect (of course, the buffer must be large enough).
-   * \deprecated: This method can easily overrun its buffers, use DecodeSafely.
-   */
-  VTK_LEGACY(static unsigned long Decode(const unsigned char *input,
-                                         unsigned long length,
-                                         unsigned char *output,
-                                         unsigned long max_input_length = 0));
+  static int DecodeTriplet(unsigned char i0, unsigned char i1, unsigned char i2, unsigned char i3,
+    unsigned char* o0, unsigned char* o1, unsigned char* o2);
 
   /**
    * Decode 4 bytes at a time from the input buffer and store the decoded
@@ -118,18 +81,16 @@ public:
    * 4/3 overhead, so a tighter bound is possible.
    * Return the number of bytes atually placed into the output buffer.
    */
-  static size_t DecodeSafely(const unsigned char *input,
-                             size_t inputLen,
-                             unsigned char *output,
-                             size_t outputLen);
+  static size_t DecodeSafely(
+    const unsigned char* input, size_t inputLen, unsigned char* output, size_t outputLen);
 
 protected:
   vtkBase64Utilities() {}
-  ~vtkBase64Utilities() VTK_OVERRIDE {}
+  ~vtkBase64Utilities() override {}
 
 private:
-  vtkBase64Utilities(const vtkBase64Utilities&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBase64Utilities&) VTK_DELETE_FUNCTION;
+  vtkBase64Utilities(const vtkBase64Utilities&) = delete;
+  void operator=(const vtkBase64Utilities&) = delete;
 };
 
 #endif

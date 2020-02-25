@@ -25,17 +25,13 @@ VTK_AOS_DATA_ARRAY_TEMPLATE_INSTANTIATE(unsigned char);
 vtkStandardNewMacro(vtkUnsignedCharArray);
 
 //----------------------------------------------------------------------------
-vtkUnsignedCharArray::vtkUnsignedCharArray()
-{
-}
+vtkUnsignedCharArray::vtkUnsignedCharArray() = default;
 
 //----------------------------------------------------------------------------
-vtkUnsignedCharArray::~vtkUnsignedCharArray()
-{
-}
+vtkUnsignedCharArray::~vtkUnsignedCharArray() = default;
 
 //----------------------------------------------------------------------------
 void vtkUnsignedCharArray::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->RealSuperclass::PrintSelf(os,indent);
+  this->RealSuperclass::PrintSelf(os, indent);
 }

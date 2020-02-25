@@ -14,17 +14,17 @@
 =========================================================================*/
 #include "vtkImageCacheFilter.h"
 
+#include "vtkCachedStreamingDemandDrivenPipeline.h"
 #include "vtkImageData.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
-#include "vtkCachedStreamingDemandDrivenPipeline.h"
 
 vtkStandardNewMacro(vtkImageCacheFilter);
 
 //----------------------------------------------------------------------------
 vtkImageCacheFilter::vtkImageCacheFilter()
 {
-  vtkExecutive *exec = this->CreateDefaultExecutive();
+  vtkExecutive* exec = this->CreateDefaultExecutive();
   this->SetExecutive(exec);
   exec->Delete();
 
@@ -32,9 +32,7 @@ vtkImageCacheFilter::vtkImageCacheFilter()
 }
 
 //----------------------------------------------------------------------------
-vtkImageCacheFilter::~vtkImageCacheFilter()
-{
-}
+vtkImageCacheFilter::~vtkImageCacheFilter() = default;
 
 //----------------------------------------------------------------------------
 vtkExecutive* vtkImageCacheFilter::CreateDefaultExecutive()
@@ -45,7 +43,7 @@ vtkExecutive* vtkImageCacheFilter::CreateDefaultExecutive()
 //----------------------------------------------------------------------------
 void vtkImageCacheFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "CacheSize: " << this->GetCacheSize() << endl;
 }
@@ -53,7 +51,7 @@ void vtkImageCacheFilter::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 void vtkImageCacheFilter::SetCacheSize(int size)
 {
-  vtkCachedStreamingDemandDrivenPipeline *csddp =
+  vtkCachedStreamingDemandDrivenPipeline* csddp =
     vtkCachedStreamingDemandDrivenPipeline::SafeDownCast(this->GetExecutive());
   if (csddp)
   {
@@ -64,7 +62,7 @@ void vtkImageCacheFilter::SetCacheSize(int size)
 //----------------------------------------------------------------------------
 int vtkImageCacheFilter::GetCacheSize()
 {
-  vtkCachedStreamingDemandDrivenPipeline *csddp =
+  vtkCachedStreamingDemandDrivenPipeline* csddp =
     vtkCachedStreamingDemandDrivenPipeline::SafeDownCast(this->GetExecutive());
   if (csddp)
   {
@@ -75,7 +73,7 @@ int vtkImageCacheFilter::GetCacheSize()
 
 //----------------------------------------------------------------------------
 // This method simply copies by reference the input data to the output.
-void vtkImageCacheFilter::ExecuteData(vtkDataObject *)
+void vtkImageCacheFilter::ExecuteData(vtkDataObject*)
 {
   // do nothing just override superclass to prevent warning
 }

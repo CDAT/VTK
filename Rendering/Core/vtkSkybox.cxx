@@ -14,21 +14,21 @@
 =========================================================================*/
 
 #include "vtkSkybox.h"
-#include "vtkObjectFactory.h"
 #include "vtkMath.h"
+#include "vtkObjectFactory.h"
 
 //------------------------------------------------------------------------------
-vtkObjectFactoryNewMacro(vtkSkybox)
+vtkObjectFactoryNewMacro(vtkSkybox);
 
 //------------------------------------------------------------------------------
-void vtkSkybox::PrintSelf(std::ostream &os, vtkIndent indent)
+void vtkSkybox::PrintSelf(std::ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //----------------------------------------------------------------------------
 // Always return uninitialized
-double *vtkSkybox::GetBounds()
+double* vtkSkybox::GetBounds()
 {
   return nullptr;
 }
@@ -36,9 +36,15 @@ double *vtkSkybox::GetBounds()
 //------------------------------------------------------------------------------
 vtkSkybox::vtkSkybox()
 {
+  this->Projection = vtkSkybox::Cube;
+  this->FloorPlane[0] = 0.0;
+  this->FloorPlane[1] = 1.0;
+  this->FloorPlane[2] = 0.0;
+  this->FloorPlane[3] = 0.0;
+  this->FloorRight[0] = 1.0;
+  this->FloorRight[1] = 0.0;
+  this->FloorRight[2] = 0.0;
 }
 
 //------------------------------------------------------------------------------
-vtkSkybox::~vtkSkybox()
-{
-}
+vtkSkybox::~vtkSkybox() = default;

@@ -21,28 +21,29 @@
  *
  * @sa
  * vtkLookupTable
-*/
+ */
 
 #ifndef vtkLogLookupTable_h
 #define vtkLogLookupTable_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkLookupTable.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class VTKRENDERINGCORE_EXPORT vtkLogLookupTable : public vtkLookupTable
 {
 public:
-  static vtkLogLookupTable *New();
+  static vtkLogLookupTable* New();
 
   vtkTypeMacro(vtkLogLookupTable, vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkLogLookupTable(int sze = 256, int ext = 256);
-  ~vtkLogLookupTable() VTK_OVERRIDE {}
+  ~vtkLogLookupTable() override {}
+
 private:
-  vtkLogLookupTable(const vtkLogLookupTable&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLogLookupTable&) VTK_DELETE_FUNCTION;
+  vtkLogLookupTable(const vtkLogLookupTable&) = delete;
+  void operator=(const vtkLogLookupTable&) = delete;
 };
 
 #endif

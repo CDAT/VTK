@@ -71,11 +71,12 @@
  *
  * @sa
  * vtkRibbonFilter vtkRuledSurfaceFilter vtkInitialValueProblemSolver
- * vtkRungeKutta2 vtkRungeKutta4 vtkRungeKutta45 vtkTemporalStreamTracer
+ * vtkRungeKutta2 vtkRungeKutta4 vtkRungeKutta45 vtkParticleTracerBase
+ * vtkParticleTracer vtkParticlePathFilter vtkStreaklineFilter
  * vtkAbstractInterpolatedVelocityField vtkInterpolatedVelocityField
  * vtkCellLocatorInterpolatedVelocityField
  *
-*/
+ */
 
 #ifndef vtkStreamTracer_h
 #define vtkStreamTracer_h
@@ -101,8 +102,8 @@ class vtkPoints;
 class VTKFILTERSFLOWPATHS_EXPORT vtkStreamTracer : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkStreamTracer,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkStreamTracer, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object to start from position (0,0,0), with forward
@@ -111,7 +112,7 @@ public:
    * of steps 2000, using Runge-Kutta2, and maximum propagation 1.0
    * (in arc length unit).
    */
-  static vtkStreamTracer *New();
+  static vtkStreamTracer* New();
 
   //@{
   /**
@@ -130,8 +131,8 @@ public:
    * work on the input data as it is without updating the producer of the data.
    * See SetSourceConnection for connecting the pipeline.
    */
-  void SetSourceData(vtkDataSet *source);
-  vtkDataSet *GetSource();
+  void SetSourceData(vtkDataSet* source);
+  vtkDataSet* GetSource();
   //@}
 
   /**
@@ -167,7 +168,7 @@ public:
   enum ReasonForTermination
   {
     OUT_OF_DOMAIN = vtkInitialValueProblemSolver::OUT_OF_DOMAIN,
-    NOT_INITIALIZED = vtkInitialValueProblemSolver::NOT_INITIALIZED ,
+    NOT_INITIALIZED = vtkInitialValueProblemSolver::NOT_INITIALIZED,
     UNEXPECTED_VALUE = vtkInitialValueProblemSolver::UNEXPECTED_VALUE,
     OUT_OF_LENGTH = 4,
     OUT_OF_STEPS = 5,
@@ -186,16 +187,13 @@ public:
    * RUNGE_KUTTA4  = 1
    * RUNGE_KUTTA45 = 2
    */
-  void SetIntegrator(vtkInitialValueProblemSolver *);
-  vtkGetObjectMacro ( Integrator, vtkInitialValueProblemSolver );
+  void SetIntegrator(vtkInitialValueProblemSolver*);
+  vtkGetObjectMacro(Integrator, vtkInitialValueProblemSolver);
   void SetIntegratorType(int type);
   int GetIntegratorType();
-  void SetIntegratorTypeToRungeKutta2()
-    {this->SetIntegratorType(RUNGE_KUTTA2);};
-  void SetIntegratorTypeToRungeKutta4()
-    {this->SetIntegratorType(RUNGE_KUTTA4);};
-  void SetIntegratorTypeToRungeKutta45()
-    {this->SetIntegratorType(RUNGE_KUTTA45);};
+  void SetIntegratorTypeToRungeKutta2() { this->SetIntegratorType(RUNGE_KUTTA2); }
+  void SetIntegratorTypeToRungeKutta4() { this->SetIntegratorType(RUNGE_KUTTA4); }
+  void SetIntegratorTypeToRungeKutta45() { this->SetIntegratorType(RUNGE_KUTTA45); }
   //@}
 
   /**
@@ -224,8 +222,8 @@ public:
    * unit is now limited to only LENGTH_UNIT (1) and CELL_LENGTH_UNIT (2),
    * EXCLUDING the previously-supported TIME_UNIT.
    */
-  void SetIntegrationStepUnit( int unit );
-  int  GetIntegrationStepUnit() { return this->IntegrationStepUnit; }
+  void SetIntegrationStepUnit(int unit);
+  int GetIntegrationStepUnit() { return this->IntegrationStepUnit; }
 
   //@{
   /**
@@ -314,12 +312,9 @@ public:
    */
   vtkSetClampMacro(IntegrationDirection, int, FORWARD, BOTH);
   vtkGetMacro(IntegrationDirection, int);
-  void SetIntegrationDirectionToForward()
-    {this->SetIntegrationDirection(FORWARD);};
-  void SetIntegrationDirectionToBackward()
-    {this->SetIntegrationDirection(BACKWARD);};
-  void SetIntegrationDirectionToBoth()
-    {this->SetIntegrationDirection(BOTH);};
+  void SetIntegrationDirectionToForward() { this->SetIntegrationDirection(FORWARD); }
+  void SetIntegrationDirectionToBackward() { this->SetIntegrationDirection(BACKWARD); }
+  void SetIntegrationDirectionToBoth() { this->SetIntegrationDirection(BOTH); }
   //@}
 
   //@{
@@ -345,7 +340,7 @@ public:
    * The object used to interpolate the velocity field during
    * integration is of the same class as this prototype.
    */
-  void SetInterpolatorPrototype( vtkAbstractInterpolatedVelocityField * ivf );
+  void SetInterpolatorPrototype(vtkAbstractInterpolatedVelocityField* ivf);
 
   /**
    * Set the type of the velocity field interpolator to determine whether
@@ -356,7 +351,7 @@ public:
    * vtkModifiedBSPTree) is more robust then the former (through vtkDataSet /
    * vtkPointSet::FindCell() coupled with vtkPointLocator).
    */
-  void SetInterpolatorType( int interpType );
+  void SetInterpolatorType(int interpType);
 
   /**
    * Asks the user if the current streamline should be terminated.
@@ -367,13 +362,11 @@ public:
    * The function returns true if the streamline should be terminated
    * and false otherwise.
    */
-  typedef bool (*CustomTerminationCallbackType)(void * clientdata,
-                                                vtkPoints* points,
-                                                vtkDataArray* velocity,
-                                                int integrationDirection);
+  typedef bool (*CustomTerminationCallbackType)(
+    void* clientdata, vtkPoints* points, vtkDataArray* velocity, int integrationDirection);
   /**
    * Adds a custom termination callback.
-   * calback is a function provided by the user that says if the streamline
+   * callback is a function provided by the user that says if the streamline
    *         should be terminated.
    * clientdata user specific data passed to the callback
    * reasonForTermination this value will be set in the ReasonForTermination cell
@@ -383,42 +376,31 @@ public:
     CustomTerminationCallbackType callback, void* clientdata, int reasonForTermination);
 
 protected:
-
   vtkStreamTracer();
-  ~vtkStreamTracer() VTK_OVERRIDE;
+  ~vtkStreamTracer() override;
 
   // Create a default executive.
-  vtkExecutive* CreateDefaultExecutive() VTK_OVERRIDE;
+  vtkExecutive* CreateDefaultExecutive() override;
 
   // hide the superclass' AddInput() from the user and the compiler
-  void AddInput(vtkDataObject *)
-    { vtkErrorMacro( << "AddInput() must be called with a vtkDataSet not a vtkDataObject."); };
+  void AddInput(vtkDataObject*)
+  {
+    vtkErrorMacro(<< "AddInput() must be called with a vtkDataSet not a vtkDataObject.");
+  }
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
-  void CalculateVorticity( vtkGenericCell* cell, double pcoords[3],
-                           vtkDoubleArray* cellVectors, double vorticity[3] );
-  void Integrate(vtkPointData *inputData,
-                 vtkPolyData* output,
-                 vtkDataArray* seedSource,
-                 vtkIdList* seedIds,
-                 vtkIntArray* integrationDirections,
-                 double lastPoint[3],
-                 vtkAbstractInterpolatedVelocityField* func,
-                 int maxCellSize,
-                 int vecType,
-                 const char *vecFieldName,
-                 double& propagation,
-                 vtkIdType& numSteps,
-                 double& integrationTime);
-  double SimpleIntegrate(double seed[3],
-                         double lastPoint[3],
-                         double stepSize,
-                         vtkAbstractInterpolatedVelocityField* func);
-  int CheckInputs(vtkAbstractInterpolatedVelocityField*& func,
-                  int* maxCellSize);
-  void GenerateNormals(vtkPolyData* output, double* firstNormal, const char *vecName);
+  void CalculateVorticity(
+    vtkGenericCell* cell, double pcoords[3], vtkDoubleArray* cellVectors, double vorticity[3]);
+  void Integrate(vtkPointData* inputData, vtkPolyData* output, vtkDataArray* seedSource,
+    vtkIdList* seedIds, vtkIntArray* integrationDirections, double lastPoint[3],
+    vtkAbstractInterpolatedVelocityField* func, int maxCellSize, int vecType,
+    const char* vecFieldName, double& propagation, vtkIdType& numSteps, double& integrationTime);
+  double SimpleIntegrate(double seed[3], double lastPoint[3], double stepSize,
+    vtkAbstractInterpolatedVelocityField* func);
+  int CheckInputs(vtkAbstractInterpolatedVelocityField*& func, int* maxCellSize);
+  void GenerateNormals(vtkPolyData* output, double* firstNormal, const char* vecName);
 
   bool GenerateNormalsInIntegrate;
 
@@ -441,17 +423,14 @@ protected:
   double MaximumIntegrationStep;
   double InitialIntegrationStep;
 
-  void ConvertIntervals( double& step, double& minStep, double& maxStep,
-                        int direction, double cellLength );
-  static double ConvertToLength( double interval, int unit, double cellLength );
-  static double ConvertToLength( IntervalInformation& interval, double cellLength );
+  void ConvertIntervals(
+    double& step, double& minStep, double& maxStep, int direction, double cellLength);
+  static double ConvertToLength(double interval, int unit, double cellLength);
+  static double ConvertToLength(IntervalInformation& interval, double cellLength);
 
-  int SetupOutput(vtkInformation* inInfo,
-                  vtkInformation* outInfo);
-  void InitializeSeeds(vtkDataArray*& seeds,
-                       vtkIdList*& seedIds,
-                       vtkIntArray*& integrationDirections,
-                       vtkDataSet *source);
+  int SetupOutput(vtkInformation* inInfo, vtkInformation* outInfo);
+  void InitializeSeeds(vtkDataArray*& seeds, vtkIdList*& seedIds,
+    vtkIntArray*& integrationDirections, vtkDataSet* source);
 
   int IntegrationStepUnit;
   int IntegrationDirection;
@@ -468,10 +447,11 @@ protected:
   // Compute streamlines only on surface.
   bool SurfaceStreamlines;
 
-  vtkAbstractInterpolatedVelocityField * InterpolatorPrototype;
+  vtkAbstractInterpolatedVelocityField* InterpolatorPrototype;
 
   vtkCompositeDataSet* InputData;
-  bool HasMatchingPointAttributes; //does the point data in the multiblocks have the same attributes?
+  bool
+    HasMatchingPointAttributes; // does the point data in the multiblocks have the same attributes?
   std::vector<CustomTerminationCallbackType> CustomTerminationCallback;
   std::vector<void*> CustomTerminationClientData;
   std::vector<int> CustomReasonForTermination;
@@ -479,10 +459,9 @@ protected:
   friend class PStreamTracerUtils;
 
 private:
-  vtkStreamTracer(const vtkStreamTracer&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkStreamTracer&) VTK_DELETE_FUNCTION;
+  vtkStreamTracer(const vtkStreamTracer&) = delete;
+  void operator=(const vtkStreamTracer&) = delete;
 };
-
 
 #endif
 // VTK-HeaderTest-Exclude: vtkStreamTracer.h

@@ -1,5 +1,5 @@
-#include "vtkIntArray.h"
 #include "vtkDoubleArray.h"
+#include "vtkIntArray.h"
 #include "vtkMathUtilities.h"
 
 // Define this to run benchmarking tests on some vtkDataArray methods:
@@ -7,25 +7,26 @@
 // #define BENCHMARK
 
 #ifdef BENCHMARK
-#include "vtkTimerLog.h"
 #include "vtkIdList.h"
 #include "vtkNew.h"
+#include "vtkTimerLog.h"
 
 #include <iostream>
 #include <map>
 #include <string>
 
-namespace TestDataArrayPrivate {
+namespace TestDataArrayPrivate
+{
 typedef std::map<std::string, double> LogType;
 LogType log;
 const int numBenchmarks = 50;
-void insertTimeLog(const std::string &str, double time);
+void insertTimeLog(const std::string& str, double time);
 void printTimeLog();
 void benchmark();
 } // End TestDataArrayPrivate namespace
 #endif // BENCHMARK
 
-int TestDataArray(int,char *[])
+int TestDataArray(int, char*[])
 {
 #ifdef BENCHMARK
   for (int i = 0; i < TestDataArrayPrivate::numBenchmarks; ++i)
@@ -38,45 +39,41 @@ int TestDataArray(int,char *[])
 
   double range[2];
   vtkIntArray* array = vtkIntArray::New();
-  array->GetRange( range, 0 );
-  if ( range[0] != VTK_DOUBLE_MAX || range[1] != VTK_DOUBLE_MIN )
+  array->GetRange(range, 0);
+  if (range[0] != VTK_DOUBLE_MAX || range[1] != VTK_DOUBLE_MIN)
   {
-    cerr
-      << "Getting range of empty array failed, min: "
-      << range[0] << " max: " << range[1] << "\n";
+    cerr << "Getting range of empty array failed, min: " << range[0] << " max: " << range[1]
+         << "\n";
     array->Delete();
     return 1;
   }
-  array->GetFiniteRange( range, 0 );
-  if ( range[0] != VTK_DOUBLE_MAX || range[1] != VTK_DOUBLE_MIN )
+  array->GetFiniteRange(range, 0);
+  if (range[0] != VTK_DOUBLE_MAX || range[1] != VTK_DOUBLE_MIN)
   {
-    cerr
-    << "Getting finite range of empty array failed, min: "
-    << range[0] << " max: " << range[1] << "\n";
+    cerr << "Getting finite range of empty array failed, min: " << range[0] << " max: " << range[1]
+         << "\n";
     array->Delete();
     return 1;
   }
 
   int cc;
-  for ( cc = 0; cc < 10; cc ++ )
+  for (cc = 0; cc < 10; cc++)
   {
     array->InsertNextTuple1(cc);
   }
-  array->GetRange( range, 0 ); // Range is now 0-9. Used to check MTimes.
-  if ( range[0] != 0 || range[1] != 9 )
+  array->GetRange(range, 0); // Range is now 0-9. Used to check MTimes.
+  if (range[0] != 0 || range[1] != 9)
   {
-    cerr
-      << "Getting range (" << range[0] << "-" << range[1]
-      << ") of array marked for modified didn't cause recomputation of range!";
+    cerr << "Getting range (" << range[0] << "-" << range[1]
+         << ") of array marked for modified didn't cause recomputation of range!";
     array->Delete();
     return 1;
   }
-  array->GetFiniteRange( range, 0 ); // Range is now 0-9. Used to check MTimes.
-  if ( range[0] != 0 || range[1] != 9 )
+  array->GetFiniteRange(range, 0); // Range is now 0-9. Used to check MTimes.
+  if (range[0] != 0 || range[1] != 9)
   {
-    cerr
-    << "Getting finite range (" << range[0] << "-" << range[1]
-    << ") of array marked for modified didn't cause recomputation of range!";
+    cerr << "Getting finite range (" << range[0] << "-" << range[1]
+         << ") of array marked for modified didn't cause recomputation of range!";
     array->Delete();
     return 1;
   }
@@ -85,73 +82,65 @@ int TestDataArray(int,char *[])
   array->RemoveFirstTuple();
   array->RemoveTuple(3);
   array->RemoveTuple(4);
-  array->GetRange( range, 0 );
-  if ( range[0] != 0 || range[1] != 9 )
+  array->GetRange(range, 0);
+  if (range[0] != 0 || range[1] != 9)
   {
-    cerr
-      << "Getting range (" << range[0] << "-" << range[1]
-      << ") of array not marked as modified caused recomputation of range!";
+    cerr << "Getting range (" << range[0] << "-" << range[1]
+         << ") of array not marked as modified caused recomputation of range!";
     array->Delete();
     return 1;
   }
-  array->GetFiniteRange( range, 0 );
-  if ( range[0] != 0 || range[1] != 9 )
+  array->GetFiniteRange(range, 0);
+  if (range[0] != 0 || range[1] != 9)
   {
-    cerr
-    << "Getting finite range (" << range[0] << "-" << range[1]
-    << ") of array not marked as modified caused recomputation of range!";
+    cerr << "Getting finite range (" << range[0] << "-" << range[1]
+         << ") of array not marked as modified caused recomputation of range!";
     array->Delete();
     return 1;
   }
   array->Modified(); // Now mark array so range gets recomputed
-  array->GetRange( range, 0 );
-  if ( range[0] != 1. || range[1] != 9. )
+  array->GetRange(range, 0);
+  if (range[0] != 1. || range[1] != 9.)
   {
-    cerr
-      << "Getting range of array {1,2,3,5,7,8,9} failed, min: "
-      << range[0] << " max: " << range[1] << "\n";
+    cerr << "Getting range of array {1,2,3,5,7,8,9} failed, min: " << range[0]
+         << " max: " << range[1] << "\n";
     array->Delete();
     return 1;
   }
-  array->GetFiniteRange( range, 0 );
-  if ( range[0] != 1. || range[1] != 9. )
+  array->GetFiniteRange(range, 0);
+  if (range[0] != 1. || range[1] != 9.)
   {
-    cerr
-    << "Getting finite range of array {1,2,3,5,7,8,9} failed, min: "
-    << range[0] << " max: " << range[1] << "\n";
+    cerr << "Getting finite range of array {1,2,3,5,7,8,9} failed, min: " << range[0]
+         << " max: " << range[1] << "\n";
     array->Delete();
     return 1;
   }
 
   array->RemoveLastTuple();
   array->Modified();
-  array->GetRange( range, 0 );
-  if ( range[0] != 1. || range[1] != 8. )
+  array->GetRange(range, 0);
+  if (range[0] != 1. || range[1] != 8.)
   {
-    cerr
-      << "Getting range of array {1,2,3,5,7,8} failed, min: "
-      << range[0] << " max: " << range[1] << "\n";
+    cerr << "Getting range of array {1,2,3,5,7,8} failed, min: " << range[0] << " max: " << range[1]
+         << "\n";
     array->Delete();
     return 1;
   }
-  array->GetFiniteRange( range, 0 );
-  if ( range[0] != 1. || range[1] != 8. )
+  array->GetFiniteRange(range, 0);
+  if (range[0] != 1. || range[1] != 8.)
   {
-    cerr
-    << "Getting finite range of array {1,2,3,5,7,8} failed, min: "
-    << range[0] << " max: " << range[1] << "\n";
+    cerr << "Getting finite range of array {1,2,3,5,7,8} failed, min: " << range[0]
+         << " max: " << range[1] << "\n";
     array->Delete();
     return 1;
   }
   int ca[] = { 1, 2, 3, 5, 7, 8 };
   cout << "Array:";
-  for ( cc = 0; cc < array->GetNumberOfTuples(); ++cc )
+  for (cc = 0; cc < array->GetNumberOfTuples(); ++cc)
   {
-    if ( array->GetTuple1(cc) != ca[cc] )
+    if (array->GetTuple1(cc) != ca[cc])
     {
-      cerr
-        << "Problem with array: " << array->GetTuple1(cc)
-        << " <> " << ca[cc] << endl;
+      cerr << "Problem with array: " << array->GetTuple1(cc) << " <> " << ca[cc] << endl;
       array->Delete();
       return 1;
     }
@@ -160,30 +149,29 @@ int TestDataArray(int,char *[])
   cout << endl;
   array->Delete();
 
-  //Ensure GetFiniteRange ignores Inf and Nan.
+  // Ensure GetFiniteRange ignores Inf and Nan.
   vtkDoubleArray* farray = vtkDoubleArray::New();
-  for ( cc = 0; cc < 10; cc ++ )
+  for (cc = 0; cc < 10; cc++)
   {
     farray->InsertNextTuple1(cc);
   }
   farray->InsertNextTuple1(vtkMath::Inf());
   farray->InsertNextTuple1(vtkMath::NegInf());
   farray->InsertNextTuple1(vtkMath::Nan());
-  farray->GetRange( range, 0 );
+  farray->GetRange(range, 0);
   if (range[0] != vtkMath::NegInf() || range[1] != vtkMath::Inf())
   {
-    cerr
-      << "Getting range (" << range[0] << "-" << range[1]
-      << ") of array containing infinity and NaN" << std::endl;
+    cerr << "Getting range (" << range[0] << "-" << range[1]
+         << ") of array containing infinity and NaN" << std::endl;
     farray->Delete();
     return 1;
   }
-  farray->GetFiniteRange( range, 0 ); // Range is now 0-9. Used to check MTimes.
-  if ( !vtkMathUtilities::FuzzyCompare( range[0], 0.0 ) || !vtkMathUtilities::FuzzyCompare( range[1], 9.0 ) )
+  farray->GetFiniteRange(range, 0); // Range is now 0-9. Used to check MTimes.
+  if (!vtkMathUtilities::FuzzyCompare(range[0], 0.0) ||
+    !vtkMathUtilities::FuzzyCompare(range[1], 9.0))
   {
-    cerr
-      << "Getting finite range (" << range[0] << "-" << range[1]
-      << ") of array containing infinity and NaN" << std::endl;
+    cerr << "Getting finite range (" << range[0] << "-" << range[1]
+         << ") of array containing infinity and NaN" << std::endl;
     farray->Delete();
     return 1;
   }
@@ -191,16 +179,16 @@ int TestDataArray(int,char *[])
 
   farray = vtkDoubleArray::New();
   farray->SetNumberOfComponents(3);
-  for ( cc = 0; cc < 10; cc ++ )
+  for (cc = 0; cc < 10; cc++)
   {
-    farray->InsertNextTuple3( cc + 0.125, cc + 0.250, cc + 0.375);
+    farray->InsertNextTuple3(cc + 0.125, cc + 0.250, cc + 0.375);
   }
   farray->RemoveFirstTuple();
   farray->RemoveTuple(3);
   farray->RemoveTuple(4);
   farray->RemoveLastTuple();
   cout << "Array:";
-  for ( cc = 0; cc < farray->GetNumberOfTuples(); ++cc )
+  for (cc = 0; cc < farray->GetNumberOfTuples(); ++cc)
   {
     double* fa = farray->GetTuple3(cc);
     double fc[3];
@@ -224,8 +212,9 @@ int TestDataArray(int,char *[])
 }
 
 #ifdef BENCHMARK
-namespace TestDataArrayPrivate {
-void insertTimeLog(const std::string &str, double time)
+namespace TestDataArrayPrivate
+{
+void insertTimeLog(const std::string& str, double time)
 {
   if (log.find(str) == log.end())
   {
@@ -236,11 +225,9 @@ void insertTimeLog(const std::string &str, double time)
 
 void printTimeLog()
 {
-  for (LogType::const_iterator it = log.begin(), itEnd = log.end(); it != itEnd;
-       ++it)
+  for (LogType::const_iterator it = log.begin(), itEnd = log.end(); it != itEnd; ++it)
   {
-    std::cout << std::setw(35) << std::left << it->first + ": "
-              << std::setw(0) << std::right
+    std::cout << std::setw(35) << std::left << it->first + ": " << std::setw(0) << std::right
               << it->second / static_cast<double>(numBenchmarks) << std::endl;
   }
 }
@@ -267,28 +254,28 @@ void benchmark()
   // Deep copy, with/without conversions
   int1->Initialize();
   timer->StartTimer();
-  int1->DeepCopy(double1.GetPointer());
+  int1->DeepCopy(double1);
   timer->StopTimer();
   time = timer->GetElapsedTime();
   insertTimeLog("deep copy 10M double --> int", time);
 
   double1->Initialize();
   timer->StartTimer();
-  double1->DeepCopy(int1.GetPointer());
+  double1->DeepCopy(int1);
   timer->StopTimer();
   time = timer->GetElapsedTime();
   insertTimeLog("deep copy 10M int --> double", time);
 
   double2->Initialize();
   timer->StartTimer();
-  double2->DeepCopy(double1.GetPointer());
+  double2->DeepCopy(double1);
   timer->StopTimer();
   time = timer->GetElapsedTime();
   insertTimeLog("deep copy 10M double --> double", time);
 
   int2->Initialize();
   timer->StartTimer();
-  int2->DeepCopy(int1.GetPointer());
+  int2->DeepCopy(int1);
   timer->StopTimer();
   time = timer->GetElapsedTime();
   insertTimeLog("deep copy 10M int --> int", time);
@@ -298,7 +285,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < double1->GetNumberOfTuples(); ++i)
   {
-    double2->InsertTuple(i, i, double1.GetPointer());
+    double2->InsertTuple(i, i, double1);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -308,7 +295,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < int1->GetNumberOfTuples(); ++i)
   {
-    int2->InsertTuple(i, i, int1.GetPointer());
+    int2->InsertTuple(i, i, int1);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -319,7 +306,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < double1->GetNumberOfTuples(); ++i)
   {
-    double2->InsertNextTuple(i, double1.GetPointer());
+    double2->InsertNextTuple(i, double1);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -329,12 +316,11 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < int1->GetNumberOfTuples(); ++i)
   {
-    int2->InsertNextTuple(i, int1.GetPointer());
+    int2->InsertNextTuple(i, int1);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
   insertTimeLog("insert next tuple (int)", time);
-
 
   // interpolation
   vtkNew<vtkIdList> ids;
@@ -352,8 +338,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < numInterps; ++i)
   {
-    double3->InterpolateTuple(i, ids.GetPointer(), double1.GetPointer(),
-                              weights);
+    double3->InterpolateTuple(i, ids, double1, weights);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -363,7 +348,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < numInterps; ++i)
   {
-    int3->InterpolateTuple(i, ids.GetPointer(), int1.GetPointer(), weights);
+    int3->InterpolateTuple(i, ids, int1, weights);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -373,9 +358,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < numInterps; ++i)
   {
-    double3->InterpolateTuple(i,
-                              500, double1.GetPointer(),
-                              700, double2.GetPointer(), 0.25);
+    double3->InterpolateTuple(i, 500, double1, 700, double2, 0.25);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -385,9 +368,7 @@ void benchmark()
   timer->StartTimer();
   for (int i = 0; i < numInterps; ++i)
   {
-    int3->InterpolateTuple(i,
-                           500, int1.GetPointer(),
-                           700, int2.GetPointer(), 0.25);
+    int3->InterpolateTuple(i, 500, int1, 700, int2, 0.25);
   }
   timer->StopTimer();
   time = timer->GetElapsedTime();
@@ -403,7 +384,7 @@ void benchmark()
     double3->SetNumberOfComponents(double1->GetNumberOfComponents());
     double3->SetNumberOfTuples(ids->GetNumberOfIds());
     timer->StartTimer();
-    double1->GetTuples(ids.GetPointer(), double3.GetPointer());
+    double1->GetTuples(ids, double3);
     timer->StopTimer();
     time += timer->GetElapsedTime();
   }
@@ -416,7 +397,7 @@ void benchmark()
     int3->SetNumberOfComponents(int1->GetNumberOfComponents());
     int3->SetNumberOfTuples(ids->GetNumberOfIds());
     timer->StartTimer();
-    int1->GetTuples(ids.GetPointer(), int3.GetPointer());
+    int1->GetTuples(ids, int3);
     timer->StopTimer();
     time += timer->GetElapsedTime();
   }

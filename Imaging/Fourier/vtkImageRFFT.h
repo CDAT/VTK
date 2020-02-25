@@ -20,7 +20,7 @@
  * can have real or complex data in any components and data types, but
  * the output is always complex doubles with real values in component0, and
  * imaginary values in component1.  The filter is fastest for images that
- * have power of two sizes.  The filter uses a butterfly fitlers for each
+ * have power of two sizes.  The filter uses butterfly filters for each
  * prime factor of the dimension.  This makes images with prime number dimensions
  * (i.e. 17x17) much slower to compute.  Multi dimensional (i.e volumes)
  * FFT's are decomposed so that each axis executes in series.
@@ -30,52 +30,36 @@
  *
  * @sa
  * vtkImageExtractComponenents
-*/
+ */
 
 #ifndef vtkImageRFFT_h
 #define vtkImageRFFT_h
 
-
-#include "vtkImagingFourierModule.h" // For export macro
 #include "vtkImageFourierFilter.h"
+#include "vtkImagingFourierModule.h" // For export macro
 
 class VTKIMAGINGFOURIER_EXPORT vtkImageRFFT : public vtkImageFourierFilter
 {
 public:
-  static vtkImageRFFT *New();
-  vtkTypeMacro(vtkImageRFFT,vtkImageFourierFilter);
+  static vtkImageRFFT* New();
+  vtkTypeMacro(vtkImageRFFT, vtkImageFourierFilter);
 
 protected:
   vtkImageRFFT() {}
-  ~vtkImageRFFT()VTK_OVERRIDE {}
+  ~vtkImageRFFT() override {}
 
-  int IterativeRequestInformation(vtkInformation* in,
-                                          vtkInformation* out) VTK_OVERRIDE;
-  int IterativeRequestUpdateExtent(vtkInformation* in,
-                                           vtkInformation* out) VTK_OVERRIDE;
+  int IterativeRequestInformation(vtkInformation* in, vtkInformation* out) override;
+  int IterativeRequestUpdateExtent(vtkInformation* in, vtkInformation* out) override;
 
-  void ThreadedRequestData(
-    vtkInformation* vtkNotUsed( request ),
-    vtkInformationVector** inputVector,
-    vtkInformationVector* vtkNotUsed( outputVector ),
-    vtkImageData ***inDataVec,
-    vtkImageData **outDataVec,
-    int outExt[6],
-    int threadId) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector** inputVector,
+    vtkInformationVector* vtkNotUsed(outputVector), vtkImageData*** inDataVec,
+    vtkImageData** outDataVec, int outExt[6], int threadId) override;
+
 private:
-  vtkImageRFFT(const vtkImageRFFT&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageRFFT&) VTK_DELETE_FUNCTION;
+  vtkImageRFFT(const vtkImageRFFT&) = delete;
+  void operator=(const vtkImageRFFT&) = delete;
 };
 
 #endif
-
-
-
-
-
-
-
-
-
 
 // VTK-HeaderTest-Exclude: vtkImageRFFT.h

@@ -27,7 +27,7 @@
  *
  * @sa
  * vtkPointPlacer vtkPolyDataNormals
-*/
+ */
 
 #ifndef vtkPolygonalSurfacePointPlacer_h
 #define vtkPolygonalSurfacePointPlacer_h
@@ -35,46 +35,45 @@
 #include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkPolyDataPointPlacer.h"
 
-class  vtkPolyDataCollection;
-class  vtkCellPicker;
-class  vtkPolygonalSurfacePointPlacerInternals;
-class  vtkPolyData;
+class vtkPolyDataCollection;
+class vtkCellPicker;
+class vtkPolygonalSurfacePointPlacerInternals;
+class vtkPolyData;
 
 // The Node stores information about the point. This information is used by
 // the interpolator. Reusing this information avoids the need for a second
 // pick operation to regenerate it. (Cellpickers are slow).
 struct vtkPolygonalSurfacePointPlacerNode
 {
-  double       WorldPosition[3];
-  double       SurfaceWorldPosition[3];
-  vtkIdType    CellId;
-  vtkIdType    PointId;
-  double       ParametricCoords[3]; // parametric coords within cell
-  vtkPolyData  *PolyData;
+  double WorldPosition[3];
+  double SurfaceWorldPosition[3];
+  vtkIdType CellId;
+  vtkIdType PointId;
+  double ParametricCoords[3]; // parametric coords within cell
+  vtkPolyData* PolyData;
 };
 
-class VTKINTERACTIONWIDGETS_EXPORT vtkPolygonalSurfacePointPlacer
-                                  : public vtkPolyDataPointPlacer
+class VTKINTERACTIONWIDGETS_EXPORT vtkPolygonalSurfacePointPlacer : public vtkPolyDataPointPlacer
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkPolygonalSurfacePointPlacer *New();
+  static vtkPolygonalSurfacePointPlacer* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkPolygonalSurfacePointPlacer,vtkPolyDataPointPlacer);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPolygonalSurfacePointPlacer, vtkPolyDataPointPlacer);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   // Descuription:
   // Add /remove a prop, to place points on
-  void AddProp( vtkProp * ) VTK_OVERRIDE;
-  void RemoveViewProp(vtkProp *prop) VTK_OVERRIDE;
-  void RemoveAllProps() VTK_OVERRIDE;
+  void AddProp(vtkProp*) override;
+  void RemoveViewProp(vtkProp* prop) override;
+  void RemoveAllProps() override;
 
   /**
    * Given a renderer and a display position in pixel coordinates,
@@ -84,10 +83,8 @@ public:
    * For the Terrain point placer this computes world points that
    * lie at the specified height above the terrain.
    */
-  int ComputeWorldPosition( vtkRenderer *ren,
-                                    double displayPos[2],
-                                    double worldPos[3],
-                                    double worldOrient[9] ) VTK_OVERRIDE;
+  int ComputeWorldPosition(
+    vtkRenderer* ren, double displayPos[2], double worldPos[3], double worldOrient[9]) override;
 
   /**
    * Given a renderer, a display position, and a reference world
@@ -95,41 +92,36 @@ public:
    * of this point. This method is typically used by the
    * representation to move the point.
    */
-  int ComputeWorldPosition( vtkRenderer *ren,
-                                    double displayPos[2],
-                                    double refWorldPos[3],
-                                    double worldPos[3],
-                                    double worldOrient[9] ) VTK_OVERRIDE;
+  int ComputeWorldPosition(vtkRenderer* ren, double displayPos[2], double refWorldPos[3],
+    double worldPos[3], double worldOrient[9]) override;
 
   /**
    * Given a world position check the validity of this
    * position according to the constraints of the placer
    */
-  int ValidateWorldPosition( double worldPos[3] ) VTK_OVERRIDE;
+  int ValidateWorldPosition(double worldPos[3]) override;
 
   /**
    * Give the node a chance to update its auxiliary point id.
    */
-  int UpdateNodeWorldPosition( double worldPos[3],
-                                       vtkIdType nodePointId ) VTK_OVERRIDE;
+  int UpdateNodeWorldPosition(double worldPos[3], vtkIdType nodePointId) override;
 
   /**
    * Given a display position, check the validity of this position.
    */
-  int ValidateDisplayPosition( vtkRenderer *, double displayPos[2] ) VTK_OVERRIDE;
+  int ValidateDisplayPosition(vtkRenderer*, double displayPos[2]) override;
 
   /**
    * Given a world position and a world orientation,
    * validate it according to the constraints of the placer.
    */
-  int ValidateWorldPosition( double worldPos[3],
-                                     double worldOrient[9] ) VTK_OVERRIDE;
+  int ValidateWorldPosition(double worldPos[3], double worldOrient[9]) override;
 
   //@{
   /**
    * Get the Prop picker.
    */
-  vtkGetObjectMacro( CellPicker, vtkCellPicker );
+  vtkGetObjectMacro(CellPicker, vtkCellPicker);
   //@}
 
   //@{
@@ -137,7 +129,7 @@ public:
    * Be sure to add polydata on which you wish to place points to this list
    * or they will not be considered for placement.
    */
-  vtkGetObjectMacro( Polys, vtkPolyDataCollection );
+  vtkGetObjectMacro(Polys, vtkPolyDataCollection);
   //@}
 
   //@{
@@ -146,8 +138,8 @@ public:
    * If you specify a non-zero value here, be sure to compute cell normals
    * on your input polygonal data (easily done with vtkPolyDataNormals).
    */
-  vtkSetMacro( DistanceOffset, double );
-  vtkGetMacro( DistanceOffset, double );
+  vtkSetMacro(DistanceOffset, double);
+  vtkGetMacro(DistanceOffset, double);
   //@}
 
   //@{
@@ -157,9 +149,9 @@ public:
    * drawing contours along the edges of a surface mesh.
    * OFF by default.
    */
-  vtkSetMacro( SnapToClosestPoint, int );
-  vtkGetMacro( SnapToClosestPoint, int );
-  vtkBooleanMacro( SnapToClosestPoint, int );
+  vtkSetMacro(SnapToClosestPoint, vtkTypeBool);
+  vtkGetMacro(SnapToClosestPoint, vtkTypeBool);
+  vtkBooleanMacro(SnapToClosestPoint, vtkTypeBool);
   //@}
 
   //@{
@@ -167,24 +159,24 @@ public:
    * Internally used by the interpolator.
    */
   typedef vtkPolygonalSurfacePointPlacerNode Node;
-  Node *GetNodeAtWorldPosition( double worldPos[3] );
+  Node* GetNodeAtWorldPosition(double worldPos[3]);
   //@}
 
 protected:
   vtkPolygonalSurfacePointPlacer();
-  ~vtkPolygonalSurfacePointPlacer() VTK_OVERRIDE;
+  ~vtkPolygonalSurfacePointPlacer() override;
 
   // The props that represents the terrain data (one or more) in a rendered
   // scene
-  vtkCellPicker                           *CellPicker;
-  vtkPolyDataCollection                   *Polys;
-  vtkPolygonalSurfacePointPlacerInternals *Internals;
-  double                                   DistanceOffset;
-  int                                      SnapToClosestPoint;
+  vtkCellPicker* CellPicker;
+  vtkPolyDataCollection* Polys;
+  vtkPolygonalSurfacePointPlacerInternals* Internals;
+  double DistanceOffset;
+  vtkTypeBool SnapToClosestPoint;
 
 private:
-  vtkPolygonalSurfacePointPlacer(const vtkPolygonalSurfacePointPlacer&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolygonalSurfacePointPlacer&) VTK_DELETE_FUNCTION;
+  vtkPolygonalSurfacePointPlacer(const vtkPolygonalSurfacePointPlacer&) = delete;
+  void operator=(const vtkPolygonalSurfacePointPlacer&) = delete;
 };
 
 #endif

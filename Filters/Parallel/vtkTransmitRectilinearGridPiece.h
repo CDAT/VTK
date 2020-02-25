@@ -24,7 +24,7 @@
  *
  * Note that this class is legacy. The superclass does all the work and
  * can be used directly instead.
-*/
+ */
 
 #ifndef vtkTransmitRectilinearGridPiece_h
 #define vtkTransmitRectilinearGridPiece_h
@@ -34,20 +34,21 @@
 
 class vtkMultiProcessController;
 
-class VTKFILTERSPARALLEL_EXPORT vtkTransmitRectilinearGridPiece : public vtkTransmitStructuredDataPiece
+class VTKFILTERSPARALLEL_EXPORT vtkTransmitRectilinearGridPiece
+  : public vtkTransmitStructuredDataPiece
 {
 public:
-  static vtkTransmitRectilinearGridPiece *New();
+  static vtkTransmitRectilinearGridPiece* New();
   vtkTypeMacro(vtkTransmitRectilinearGridPiece, vtkTransmitStructuredDataPiece);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkTransmitRectilinearGridPiece();
-  ~vtkTransmitRectilinearGridPiece() VTK_OVERRIDE;
+  ~vtkTransmitRectilinearGridPiece() override;
 
 private:
-  vtkTransmitRectilinearGridPiece(const vtkTransmitRectilinearGridPiece&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTransmitRectilinearGridPiece&) VTK_DELETE_FUNCTION;
+  vtkTransmitRectilinearGridPiece(const vtkTransmitRectilinearGridPiece&) = delete;
+  void operator=(const vtkTransmitRectilinearGridPiece&) = delete;
 };
 
 #endif

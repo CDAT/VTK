@@ -15,18 +15,16 @@
 
 #include "vtkMPI4PyCommunicator.h"
 
-#include "vtkObjectFactory.h"
-#include "vtkMPICommunicator.h"
 #include "vtkMPI.h"
+#include "vtkMPICommunicator.h"
+#include "vtkObjectFactory.h"
 
 #include <mpi4py/mpi4py.h>
 
 vtkStandardNewMacro(vtkMPI4PyCommunicator);
 
 //----------------------------------------------------------------------------
-vtkMPI4PyCommunicator::vtkMPI4PyCommunicator()
-{
-}
+vtkMPI4PyCommunicator::vtkMPI4PyCommunicator() {}
 
 //----------------------------------------------------------------------------
 PyObject* vtkMPI4PyCommunicator::ConvertToPython(vtkMPICommunicator* comm)
@@ -56,22 +54,22 @@ vtkMPICommunicator* vtkMPI4PyCommunicator::ConvertToVTK(PyObject* comm)
   {
     if (import_mpi4py() < 0)
     {
-      return NULL;
+      return nullptr;
     }
   }
 
   if (!comm || !PyObject_TypeCheck(comm, &PyMPIComm_Type))
   {
-    return NULL;
+    return nullptr;
   }
 
-  MPI_Comm *mpiComm = PyMPIComm_Get(comm);
+  MPI_Comm* mpiComm = PyMPIComm_Get(comm);
   vtkMPICommunicator* vtkComm = vtkMPICommunicator::New();
   vtkMPICommunicatorOpaqueComm opaqueComm(mpiComm);
   if (!vtkComm->InitializeExternal(&opaqueComm))
   {
     vtkComm->Delete();
-    return NULL;
+    return nullptr;
   }
 
   return vtkComm;
@@ -80,5 +78,5 @@ vtkMPICommunicator* vtkMPI4PyCommunicator::ConvertToVTK(PyObject* comm)
 //----------------------------------------------------------------------------
 void vtkMPI4PyCommunicator::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

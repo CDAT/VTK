@@ -19,8 +19,8 @@
 #include "vtkInformationIntegerKey.h"
 #include "vtkObjectFactory.h"
 #include "vtkProp.h"
-#include "vtkRenderer.h"
 #include "vtkRenderState.h"
+#include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 
 #include <cassert>
@@ -37,26 +37,29 @@ vtkLightingMapPass::vtkLightingMapPass()
 }
 
 // ----------------------------------------------------------------------------
-vtkLightingMapPass::~vtkLightingMapPass()
-{
-}
+vtkLightingMapPass::~vtkLightingMapPass() = default;
 
 // ----------------------------------------------------------------------------
 void vtkLightingMapPass::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
 // ----------------------------------------------------------------------------
 // Description:
 // Perform rendering according to a render state \p s.
 // \pre s_exists: s!=0
-void vtkLightingMapPass::Render(const vtkRenderState *s)
+void vtkLightingMapPass::Render(const vtkRenderState* s)
 {
   assert("pre: s_exists" && s != nullptr);
 
   // Render filtered geometry according to our keys
   this->NumberOfRenderedProps = 0;
+
+  this->ClearLights(s->GetRenderer());
+  this->UpdateLightGeometry(s->GetRenderer());
+  this->UpdateLights(s->GetRenderer());
+
   this->RenderOpaqueGeometry(s);
 }
 
@@ -64,20 +67,19 @@ void vtkLightingMapPass::Render(const vtkRenderState *s)
 // Description:
 // Opaque pass with key checking.
 // \pre s_exists: s!=0
-void vtkLightingMapPass::RenderOpaqueGeometry(const vtkRenderState *s)
+void vtkLightingMapPass::RenderOpaqueGeometry(const vtkRenderState* s)
 {
-  assert("pre: s_exists" && s!=nullptr);
+  assert("pre: s_exists" && s != nullptr);
 
   // Clear the RGB buffer first
-  vtkSmartPointer<vtkClearRGBPass> clear =
-    vtkSmartPointer<vtkClearRGBPass>::New();
+  vtkSmartPointer<vtkClearRGBPass> clear = vtkSmartPointer<vtkClearRGBPass>::New();
   clear->Render(s);
 
   int c = s->GetPropArrayCount();
   int i = 0;
   while (i < c)
   {
-    vtkProp *p = s->GetPropArray()[i];
+    vtkProp* p = s->GetPropArray()[i];
     vtkSmartPointer<vtkInformation> keys = p->GetPropertyKeys();
     if (!keys)
     {
@@ -93,8 +95,7 @@ void vtkLightingMapPass::RenderOpaqueGeometry(const vtkRenderState *s)
         break;
     }
     p->SetPropertyKeys(keys);
-    int rendered =
-      p->RenderOpaqueGeometry(s->GetRenderer());
+    int rendered = p->RenderOpaqueGeometry(s->GetRenderer());
     this->NumberOfRenderedProps += rendered;
     ++i;
   }
@@ -103,8 +104,8 @@ void vtkLightingMapPass::RenderOpaqueGeometry(const vtkRenderState *s)
   i = 0;
   while (i < c)
   {
-    vtkProp *p = s->GetPropArray()[i];
-    vtkInformation *keys = p->GetPropertyKeys();
+    vtkProp* p = s->GetPropArray()[i];
+    vtkInformation* keys = p->GetPropertyKeys();
     switch (this->GetRenderType())
     {
       case LUMINANCE:

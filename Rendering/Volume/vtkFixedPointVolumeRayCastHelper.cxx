@@ -19,17 +19,11 @@
 
 vtkStandardNewMacro(vtkFixedPointVolumeRayCastHelper);
 
-vtkFixedPointVolumeRayCastHelper::vtkFixedPointVolumeRayCastHelper()
-{
-}
+vtkFixedPointVolumeRayCastHelper::vtkFixedPointVolumeRayCastHelper() = default;
 
-vtkFixedPointVolumeRayCastHelper::~vtkFixedPointVolumeRayCastHelper()
-{
-}
+vtkFixedPointVolumeRayCastHelper::~vtkFixedPointVolumeRayCastHelper() = default;
 
 void vtkFixedPointVolumeRayCastHelper::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
-
-

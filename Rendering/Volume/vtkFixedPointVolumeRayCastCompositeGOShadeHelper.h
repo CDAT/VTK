@@ -25,38 +25,36 @@
  *
  * @sa
  * vtkFixedPointVolumeRayCastMapper
-*/
+ */
 
 #ifndef vtkFixedPointVolumeRayCastCompositeGOShadeHelper_h
 #define vtkFixedPointVolumeRayCastCompositeGOShadeHelper_h
 
-#include "vtkRenderingVolumeModule.h" // For export macro
 #include "vtkFixedPointVolumeRayCastHelper.h"
+#include "vtkRenderingVolumeModule.h" // For export macro
 
 class vtkFixedPointVolumeRayCastMapper;
 class vtkVolume;
 
-class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeGOShadeHelper : public vtkFixedPointVolumeRayCastHelper
+class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeGOShadeHelper
+  : public vtkFixedPointVolumeRayCastHelper
 {
 public:
-  static vtkFixedPointVolumeRayCastCompositeGOShadeHelper *New();
-  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeGOShadeHelper,vtkFixedPointVolumeRayCastHelper);
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  static vtkFixedPointVolumeRayCastCompositeGOShadeHelper* New();
+  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeGOShadeHelper, vtkFixedPointVolumeRayCastHelper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void  GenerateImage( int threadID,
-                               int threadCount,
-                               vtkVolume *vol,
-                               vtkFixedPointVolumeRayCastMapper *mapper) VTK_OVERRIDE;
+  void GenerateImage(int threadID, int threadCount, vtkVolume* vol,
+    vtkFixedPointVolumeRayCastMapper* mapper) override;
 
 protected:
   vtkFixedPointVolumeRayCastCompositeGOShadeHelper();
-  ~vtkFixedPointVolumeRayCastCompositeGOShadeHelper() VTK_OVERRIDE;
+  ~vtkFixedPointVolumeRayCastCompositeGOShadeHelper() override;
 
 private:
-  vtkFixedPointVolumeRayCastCompositeGOShadeHelper(const vtkFixedPointVolumeRayCastCompositeGOShadeHelper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFixedPointVolumeRayCastCompositeGOShadeHelper&) VTK_DELETE_FUNCTION;
+  vtkFixedPointVolumeRayCastCompositeGOShadeHelper(
+    const vtkFixedPointVolumeRayCastCompositeGOShadeHelper&) = delete;
+  void operator=(const vtkFixedPointVolumeRayCastCompositeGOShadeHelper&) = delete;
 };
 
 #endif
-
-

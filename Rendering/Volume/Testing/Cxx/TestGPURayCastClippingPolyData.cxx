@@ -23,9 +23,12 @@
 #include <vtkImageData.h>
 #include <vtkImageReader.h>
 #include <vtkImageShiftScale.h>
+#include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkNew.h>
 #include <vtkOutlineFilter.h>
 #include <vtkPiecewiseFunction.h>
+#include <vtkPlane.h>
+#include <vtkPlaneCollection.h>
 #include <vtkPointData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRegressionTestImage.h>
@@ -38,13 +41,9 @@
 #include <vtkTimerLog.h>
 #include <vtkVolumeProperty.h>
 #include <vtkXMLImageDataReader.h>
-#include <vtkPlane.h>
-#include <vtkPlaneCollection.h>
-#include <vtkInteractorStyleTrackballCamera.h>
-
 
 /// Tests volume clipping when intermixed with geometry.
-int TestGPURayCastClippingPolyData(int argc, char *argv[])
+int TestGPURayCastClippingPolyData(int argc, char* argv[])
 {
   double scalarRange[2];
 
@@ -53,16 +52,17 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
   vtkNew<vtkGPUVolumeRayCastMapper> volumeMapper;
 
   vtkNew<vtkXMLImageDataReader> reader;
-  const char* volumeFile = vtkTestUtilities::ExpandDataFileName(
-                            argc, argv, "Data/vase_1comp.vti");
+  const char* volumeFile = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/vase_1comp.vti");
   reader->SetFileName(volumeFile);
   volumeMapper->SetInputConnection(reader->GetOutputPort());
+
+  delete[] volumeFile;
 
   /// Outline filter
   vtkNew<vtkOutlineFilter> outlineFilter;
   outlineFilter->SetInputConnection(reader->GetOutputPort());
   outlineMapper->SetInputConnection(outlineFilter->GetOutputPort());
-  outlineActor->SetMapper(outlineMapper.GetPointer());
+  outlineActor->SetMapper(outlineMapper);
 
   volumeMapper->GetInput()->GetScalarRange(scalarRange);
   volumeMapper->SetSampleDistance(0.1);
@@ -72,14 +72,14 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetMultiSamples(0);
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
   renWin->SetSize(400, 400);
   ren->SetBackground(0.2, 0.2, 0.5);
 
   vtkNew<vtkRenderWindowInteractor> iren;
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetInteractorStyle(style);
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkPiecewiseFunction> scalarOpacity;
   scalarOpacity->AddPoint(50, 0.0);
@@ -88,7 +88,7 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
   vtkNew<vtkVolumeProperty> volumeProperty;
   volumeProperty->ShadeOn();
   volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
-  volumeProperty->SetScalarOpacity(scalarOpacity.GetPointer());
+  volumeProperty->SetScalarOpacity(scalarOpacity);
 
   vtkSmartPointer<vtkColorTransferFunction> colorTransferFunction =
     volumeProperty->GetRGBTransferFunction(0);
@@ -96,8 +96,8 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
   colorTransferFunction->AddRGBPoint(scalarRange[0], 0.6, 0.4, 0.1);
 
   vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
-  volume->SetMapper(volumeMapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
+  volume->SetMapper(volumeMapper);
+  volume->SetProperty(volumeProperty);
 
   /// Sphere
   int dims[3];
@@ -108,23 +108,23 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
   im->GetOrigin(origin);
   im->GetSpacing(spacing);
 
-  sphereCenter[0] = origin[0] + spacing[0]*dims[0]/2.5;
-  sphereCenter[1] = origin[1] + spacing[1]*dims[1]/2.5;
-  sphereCenter[2] = origin[2] + spacing[2]*dims[2]/2.775;
+  sphereCenter[0] = origin[0] + spacing[0] * dims[0] / 2.5;
+  sphereCenter[1] = origin[1] + spacing[1] * dims[1] / 2.5;
+  sphereCenter[2] = origin[2] + spacing[2] * dims[2] / 2.775;
 
   vtkNew<vtkSphereSource> sphereSource;
   sphereSource->SetCenter(sphereCenter);
-  sphereSource->SetRadius(dims[1]/4.0);
+  sphereSource->SetRadius(dims[1] / 4.0);
   sphereSource->SetPhiResolution(40);
   sphereSource->SetThetaResolution(40);
   vtkNew<vtkPolyDataMapper> sphereMapper;
   vtkNew<vtkActor> sphereActor;
   sphereMapper->SetInputConnection(sphereSource->GetOutputPort());
-  sphereActor->SetMapper(sphereMapper.GetPointer());
+  sphereActor->SetMapper(sphereMapper);
 
-  ren->AddViewProp(volume.GetPointer());
-  ren->AddActor(outlineActor.GetPointer());
-  ren->AddActor(sphereActor.GetPointer());
+  ren->AddViewProp(volume);
+  ren->AddActor(outlineActor);
+  ren->AddActor(sphereActor);
 
   /// Clipping planes
   vtkNew<vtkPlane> clipPlane1;
@@ -135,9 +135,9 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
   clipPlane2->SetNormal(0.2, -0.2, 0.0);
 
   vtkNew<vtkPlaneCollection> clipPlaneCollection;
-  clipPlaneCollection->AddItem(clipPlane1.GetPointer());
-  clipPlaneCollection->AddItem(clipPlane2.GetPointer());
-  volumeMapper->SetClippingPlanes(clipPlaneCollection.GetPointer());
+  clipPlaneCollection->AddItem(clipPlane1);
+  clipPlaneCollection->AddItem(clipPlane2);
+  volumeMapper->SetClippingPlanes(clipPlaneCollection);
 
   ren->ResetCamera();
   ren->GetActiveCamera()->Azimuth(-30);
@@ -147,8 +147,8 @@ int TestGPURayCastClippingPolyData(int argc, char *argv[])
 
   iren->Initialize();
 
-  int retVal = vtkRegressionTestImage( renWin.GetPointer() );
-  if( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

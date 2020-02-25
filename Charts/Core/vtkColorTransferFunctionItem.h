@@ -25,34 +25,36 @@ class vtkImageData;
 // Description:
 // vtkPlot::Color, vtkPlot::Brush, vtkScalarsToColors::DrawPolyLine,
 // vtkScalarsToColors::MaskAboveCurve have no effect here.
-class VTKCHARTSCORE_EXPORT vtkColorTransferFunctionItem: public vtkScalarsToColorsItem
+class VTKCHARTSCORE_EXPORT vtkColorTransferFunctionItem : public vtkScalarsToColorsItem
 {
 public:
   static vtkColorTransferFunctionItem* New();
   vtkTypeMacro(vtkColorTransferFunctionItem, vtkScalarsToColorsItem);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void SetColorTransferFunction(vtkColorTransferFunction* t);
   vtkGetObjectMacro(ColorTransferFunction, vtkColorTransferFunction);
 
 protected:
   vtkColorTransferFunctionItem();
-  ~vtkColorTransferFunctionItem() VTK_OVERRIDE;
-
-  // Description:
-  // Returns true if we are rendering in log space.
-  virtual bool UsingLogScale();
-
+  ~vtkColorTransferFunctionItem() override;
 
   // Description:
   // Reimplemented to return the range of the lookup table
-  void ComputeBounds(double bounds[4]) VTK_OVERRIDE;
+  void ComputeBounds(double bounds[4]) override;
 
-  void ComputeTexture() VTK_OVERRIDE;
+  void ComputeTexture() override;
   vtkColorTransferFunction* ColorTransferFunction;
+
+  /**
+   * Override the histogram plotbar configuration
+   * in order to set the color transfer function on it
+   */
+  bool ConfigurePlotBar() override;
+
 private:
-  vtkColorTransferFunctionItem(const vtkColorTransferFunctionItem&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkColorTransferFunctionItem&) VTK_DELETE_FUNCTION;
+  vtkColorTransferFunctionItem(const vtkColorTransferFunctionItem&) = delete;
+  void operator=(const vtkColorTransferFunctionItem&) = delete;
 };
 
 #endif

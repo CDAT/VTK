@@ -18,11 +18,11 @@
 #include "vtkDataSetSurfaceFilter.h"
 #include "vtkNew.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkRTAnalyticSource.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRTAnalyticSource.h"
+#include "vtkRenderer.h"
 #include "vtkSphereSource.h"
 #include "vtkTriangleFilter.h"
 
@@ -35,10 +35,9 @@ int TestVTKMExtractVOI(int argc, char* argv[])
 
   vtkNew<vtkPolyDataMapper> sphereMapper;
   sphereMapper->SetInputConnection(sphere->GetOutputPort());
-  sphereMapper->ImmediateModeRenderingOn();
 
   vtkNew<vtkActor> sphereActor;
-  sphereActor->SetMapper(sphereMapper.GetPointer());
+  sphereActor->SetMapper(sphereMapper);
 
   vtkNew<vtkRTAnalyticSource> rt;
   rt->SetWholeExtent(-50, 50, -50, 50, 0, 0);
@@ -57,26 +56,25 @@ int TestVTKMExtractVOI(int argc, char* argv[])
 
   vtkNew<vtkPolyDataMapper> mapper;
   mapper->SetInputConnection(tris->GetOutputPort());
-  mapper->ImmediateModeRenderingOn();
   mapper->SetScalarRange(130, 280);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.GetPointer());
-  renderer->AddActor(sphereActor.GetPointer());
+  renderer->AddActor(actor);
+  renderer->AddActor(sphereActor);
   renderer->ResetCamera();
 
   vtkNew<vtkRenderWindow> renWin;
-  renWin->AddRenderer(renderer.GetPointer());
+  renWin->AddRenderer(renderer);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
   iren->Initialize();
 
   renWin->Render();
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
+  int retVal = vtkRegressionTestImage(renWin);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

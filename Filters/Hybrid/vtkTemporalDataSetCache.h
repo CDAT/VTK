@@ -26,7 +26,7 @@
  * John Biddiscombe, Berk Geveci, Ken Martin, Kenneth Moreland, David Thompson,
  * "Time Dependent Processing in a Parallel Pipeline Architecture",
  * IEEE Visualization 2007.
-*/
+ */
 
 #ifndef vtkTemporalDataSetCache_h
 #define vtkTemporalDataSetCache_h
@@ -39,9 +39,9 @@
 class VTKFILTERSHYBRID_EXPORT vtkTemporalDataSetCache : public vtkAlgorithm
 {
 public:
-  static vtkTemporalDataSetCache *New();
+  static vtkTemporalDataSetCache* New();
   vtkTypeMacro(vtkTemporalDataSetCache, vtkAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -49,48 +49,36 @@ public:
    * it defaults to 10.
    */
   void SetCacheSize(int size);
-  vtkGetMacro(CacheSize,int);
+  vtkGetMacro(CacheSize, int);
   //@}
 
 protected:
   vtkTemporalDataSetCache();
-  ~vtkTemporalDataSetCache() VTK_OVERRIDE;
+  ~vtkTemporalDataSetCache() override;
 
   int CacheSize;
 
-  typedef std::map<double,std::pair<unsigned long,vtkDataObject *> >
-  CacheType;
+  typedef std::map<double, std::pair<unsigned long, vtkDataObject*> > CacheType;
   CacheType Cache;
 
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation* request,
-                             vtkInformationVector** inputVector,
-                             vtkInformationVector* outputVector) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int FillOutputPortInformation(int vtkNotUsed(port), vtkInformation* info) VTK_OVERRIDE;
-  virtual int RequestDataObject( vtkInformation*,
-                                 vtkInformationVector** inputVector ,
-                                 vtkInformationVector* outputVector);
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int vtkNotUsed(port), vtkInformation* info) override;
+  virtual int RequestDataObject(
+    vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector);
 
-  virtual int RequestUpdateExtent (vtkInformation *,
-                                   vtkInformationVector **,
-                                   vtkInformationVector *);
+  virtual int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
-  virtual int RequestData(vtkInformation *,
-                          vtkInformationVector **,
-                          vtkInformationVector *);
+  virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
 private:
-  vtkTemporalDataSetCache(const vtkTemporalDataSetCache&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTemporalDataSetCache&) VTK_DELETE_FUNCTION;
+  vtkTemporalDataSetCache(const vtkTemporalDataSetCache&) = delete;
+  void operator=(const vtkTemporalDataSetCache&) = delete;
 };
 
-
-
 #endif
-
-
-

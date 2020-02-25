@@ -30,13 +30,13 @@
  *
  * @sa
  * vtkSampleFunction vtkImplicitModeller
-*/
+ */
 
 #ifndef vtkSampleImplicitFunctionFilter_h
 #define vtkSampleImplicitFunctionFilter_h
 
-#include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersGeneralModule.h" // For export macro
 
 class vtkImplicitFunction;
 class vtkDataArray;
@@ -48,9 +48,9 @@ public:
   /**
    * Standard instantiation, type information, and print methods.
    */
-  static vtkSampleImplicitFunctionFilter *New();
-  vtkTypeMacro(vtkSampleImplicitFunctionFilter,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkSampleImplicitFunctionFilter* New();
+  vtkTypeMacro(vtkSampleImplicitFunctionFilter, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -58,16 +58,16 @@ public:
    * Specify the implicit function to use to generate data.
    */
   virtual void SetImplicitFunction(vtkImplicitFunction*);
-  vtkGetObjectMacro(ImplicitFunction,vtkImplicitFunction);
+  vtkGetObjectMacro(ImplicitFunction, vtkImplicitFunction);
   //@}
 
   //@{
   /**
    * Turn on/off the computation of gradients.
    */
-  vtkSetMacro(ComputeGradients,int);
-  vtkGetMacro(ComputeGradients,int);
-  vtkBooleanMacro(ComputeGradients,int);
+  vtkSetMacro(ComputeGradients, vtkTypeBool);
+  vtkGetMacro(ComputeGradients, vtkTypeBool);
+  vtkBooleanMacro(ComputeGradients, vtkTypeBool);
   //@}
 
   //@{
@@ -91,27 +91,25 @@ public:
   /**
    * Return the MTime also taking into account the implicit function.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkSampleImplicitFunctionFilter();
-  ~vtkSampleImplicitFunctionFilter() VTK_OVERRIDE;
+  ~vtkSampleImplicitFunctionFilter() override;
 
-  vtkImplicitFunction *ImplicitFunction;
-  int ComputeGradients;
-  char *ScalarArrayName;
-  char *GradientArrayName;
+  vtkImplicitFunction* ImplicitFunction;
+  vtkTypeBool ComputeGradients;
+  char* ScalarArrayName;
+  char* GradientArrayName;
 
-  void ReportReferences(vtkGarbageCollector*) VTK_OVERRIDE;
+  void ReportReferences(vtkGarbageCollector*) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkSampleImplicitFunctionFilter(const vtkSampleImplicitFunctionFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSampleImplicitFunctionFilter&) VTK_DELETE_FUNCTION;
+  vtkSampleImplicitFunctionFilter(const vtkSampleImplicitFunctionFilter&) = delete;
+  void operator=(const vtkSampleImplicitFunctionFilter&) = delete;
 };
 
 #endif

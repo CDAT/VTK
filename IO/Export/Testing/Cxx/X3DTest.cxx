@@ -25,17 +25,16 @@
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
-#include "vtkRenderer.h"
 #include "vtkSphereSource.h"
 #include "vtkX3DExporter.h"
 
-int X3DTest( int argc, char *argv[] )
+int X3DTest(int argc, char* argv[])
 {
   vtkNew<vtkRenderer> renderer;
   vtkNew<vtkRenderWindow> renWin;
-  renWin->AddRenderer(renderer.Get());
+  renWin->AddRenderer(renderer);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.Get());
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkSphereSource> sphere;
   sphere->SetThetaResolution(8);
@@ -44,7 +43,7 @@ int X3DTest( int argc, char *argv[] )
   vtkNew<vtkPolyDataMapper> sphereMapper;
   sphereMapper->SetInputConnection(sphere->GetOutputPort());
   vtkNew<vtkActor> sphereActor;
-  sphereActor->SetMapper(sphereMapper.Get());
+  sphereActor->SetMapper(sphereMapper);
 
   vtkNew<vtkConeSource> cone;
   cone->SetResolution(6);
@@ -60,24 +59,24 @@ int X3DTest( int argc, char *argv[] )
   spikeMapper->SetInputConnection(glyph->GetOutputPort());
 
   vtkNew<vtkActor> spikeActor;
-  spikeActor->SetMapper(spikeMapper.Get());
+  spikeActor->SetMapper(spikeMapper);
 
-  renderer->AddActor(sphereActor.Get());
-  renderer->AddActor(spikeActor.Get());
-  renderer->SetBackground(1,1,1);
-  renWin->SetSize(300,300);
+  renderer->AddActor(sphereActor);
+  renderer->AddActor(spikeActor);
+  renderer->SetBackground(1, 1, 1);
+  renWin->SetSize(300, 300);
 
   renWin->Render();
 
   vtkNew<vtkX3DExporter> exporter;
-  exporter->SetInput(renWin.Get());
+  exporter->SetInput(renWin);
   exporter->SetFileName("testX3DExporter.x3d");
   exporter->Update();
   exporter->Write();
   exporter->Print(std::cout);
 
-  renderer->RemoveActor(sphereActor.Get());
-  renderer->RemoveActor(spikeActor.Get());
+  renderer->RemoveActor(sphereActor);
+  renderer->RemoveActor(spikeActor);
 
   // now try the same with a composite dataset.
   vtkNew<vtkMultiBlockDataSet> mb;
@@ -87,19 +86,19 @@ int X3DTest( int argc, char *argv[] )
   mb->GetMetaData(1u)->Set(vtkMultiBlockDataSet::NAME(), "Sphere");
 
   vtkNew<vtkPolyDataMapper> mbMapper;
-  mbMapper->SetInputDataObject(mb.Get());
+  mbMapper->SetInputDataObject(mb);
 
   vtkNew<vtkActor> mbActor;
-  mbActor->SetMapper(mbMapper.Get());
-  renderer->AddActor(mbActor.Get());
+  mbActor->SetMapper(mbMapper);
+  renderer->AddActor(mbActor);
 
   renWin->Render();
   exporter->SetFileName("testX3DExporter-composite.x3d");
   exporter->Update();
   exporter->Write();
 
-  int retVal = vtkRegressionTestImage(renWin.Get());
-  if ( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

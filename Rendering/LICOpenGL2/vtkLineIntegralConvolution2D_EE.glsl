@@ -26,7 +26,7 @@ uniform sampler2D texLIC; // most recent lic pass
 uniform float     uDx;    // fragment size
 uniform float     uDy;    // fragment size
 
-varying vec2 tcoordVC;
+in vec2 tcoordVC;
 
 // kernel for simple laplace edge enhancement.
 // p=Laplace(p)+p
@@ -52,7 +52,7 @@ void main(void)
 
   // compute the convolution but don't use convovled values if
   // any masked fragments on the stencil. Fragments outside
-  // the valid domain are masked during initializaiton, and
+  // the valid domain are masked during initialization, and
   // texture wrap parameters are clamp to border with border
   // color that contains masked flag
   float conv = 0.0;

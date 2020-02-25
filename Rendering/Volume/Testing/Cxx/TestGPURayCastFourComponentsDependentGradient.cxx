@@ -32,26 +32,25 @@
 #include "vtkVolumeProperty.h"
 #include "vtkXMLImageDataReader.h"
 
-int TestGPURayCastFourComponentsDependentGradient(int argc, char *argv[])
+int TestGPURayCastFourComponentsDependentGradient(int argc, char* argv[])
 {
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
-  char *cfname=
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/vase_4comp.vti");
+  char* cfname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/vase_4comp.vti");
 
   vtkNew<vtkXMLImageDataReader> reader;
   reader->SetFileName(cfname);
-  delete [] cfname;
+  delete[] cfname;
 
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetSize(301, 300); // Intentional NPOT size
   renWin->SetMultiSamples(0);
 
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   renWin->Render();
 
@@ -74,21 +73,21 @@ int TestGPURayCastFourComponentsDependentGradient(int argc, char *argv[])
   // Volume property with independent components OFF
   vtkNew<vtkVolumeProperty> property;
   property->IndependentComponentsOff();
-  property->SetScalarOpacity(pf.GetPointer());
-  property->SetGradientOpacity(pf1.GetPointer());
+  property->SetScalarOpacity(pf);
+  property->SetGradientOpacity(pf1);
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(property.GetPointer());
-  ren->AddVolume(volume.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(property);
+  ren->AddVolume(volume);
 
   ren->ResetCamera();
   renWin->Render();
 
   iren->Initialize();
 
-  int retVal = vtkRegressionTestImage( renWin.GetPointer() );
-  if( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

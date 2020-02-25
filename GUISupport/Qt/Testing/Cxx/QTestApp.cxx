@@ -22,29 +22,25 @@
 
 #include <stdio.h>
 
-#include <QTimer>
-#include <QWidget>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QTimer>
+#include <QWidget>
 
 int QTestApp::Error = 0;
 
 QTestApp::QTestApp(int _argc, char* _argv[])
 {
-#if QT_VERSION >= 0x050000
   qInstallMessageHandler(QTestApp::messageHandler);
-#else
-  qInstallMsgHandler(QTestApp::messageHandler);
-#endif
 
   // CMake generated driver removes argv[0],
   // so let's put a dummy back in
   this->Argv.append("qTestApp");
-  for(int i=0; i<_argc; i++)
+  for (int i = 0; i < _argc; i++)
   {
     this->Argv.append(_argv[i]);
   }
-  for(int j=0; j<this->Argv.size(); j++)
+  for (int j = 0; j < this->Argv.size(); j++)
   {
     this->Argvp.append(this->Argv[j].data());
   }
@@ -55,16 +51,12 @@ QTestApp::QTestApp(int _argc, char* _argv[])
 QTestApp::~QTestApp()
 {
   delete App;
-#if QT_VERSION >= 0x050000
-  qInstallMessageHandler(0);
-#else
-  qInstallMsgHandler(0);
-#endif
+  qInstallMessageHandler(nullptr);
 }
 
 int QTestApp::exec()
 {
-  if(!QCoreApplication::arguments().contains("--no_exit"))
+  if (!QCoreApplication::arguments().contains("--no_exit"))
   {
     QTimer::singleShot(1000, QCoreApplication::instance(), SLOT(quit()));
   }
@@ -73,45 +65,36 @@ int QTestApp::exec()
   return Error + ret;
 }
 
-#if QT_VERSION >= 0x050000
-void QTestApp::messageHandler(QtMsgType type,
-  const QMessageLogContext & context,
-  const QString & message)
-#else
-void QTestApp::messageHandler(QtMsgType type, const char *msg)
-#endif
+void QTestApp::messageHandler(
+  QtMsgType type, const QMessageLogContext& context, const QString& message)
 {
-#if QT_VERSION >= 0x050000
   Q_UNUSED(context)
-  const char * msg = qPrintable(message);
-#endif
-  switch(type)
+  const char* msg = qPrintable(message);
+  switch (type)
   {
-  case QtDebugMsg:
-    fprintf(stderr, "Debug: %s\n", msg);
-    break;
-#if QT_VERSION >= 0x050500
-  case QtInfoMsg:
-    fprintf(stderr, "Info: %s\n", msg);
-    break;
-#endif
-  case QtWarningMsg:
-    fprintf(stderr, "Warning: %s\n", msg);
-    Error++;
-    break;
-  case QtCriticalMsg:
-    fprintf(stderr, "Critical: %s\n", msg);
-    Error++;
-    break;
-  case QtFatalMsg:
-    fprintf(stderr, "Fatal: %s\n", msg);
-    abort();
+    case QtDebugMsg:
+      fprintf(stderr, "Debug: %s\n", msg);
+      break;
+    case QtInfoMsg:
+      fprintf(stderr, "Info: %s\n", msg);
+      break;
+    case QtWarningMsg:
+      fprintf(stderr, "Warning: %s\n", msg);
+      Error++;
+      break;
+    case QtCriticalMsg:
+      fprintf(stderr, "Critical: %s\n", msg);
+      Error++;
+      break;
+    case QtFatalMsg:
+      fprintf(stderr, "Fatal: %s\n", msg);
+      abort();
   }
 }
 
 void QTestApp::delay(int ms)
 {
-  if(ms > 0)
+  if (ms > 0)
   {
     QTimer::singleShot(ms, QApplication::instance(), SLOT(quit()));
     QApplication::exec();
@@ -121,7 +104,7 @@ void QTestApp::delay(int ms)
 void QTestApp::simulateEvent(QWidget* w, QEvent* e)
 {
   bool status = QApplication::sendEvent(w, e);
-  if(!status)
+  if (!status)
   {
     qWarning("event not handled\n");
   }
@@ -149,36 +132,34 @@ void QTestApp::keyClick(QWidget* w, Qt::Key key, Qt::KeyboardModifiers mod, int 
   keyUp(w, key, mod, 0);
 }
 
-void QTestApp::mouseDown(QWidget* w, QPoint pos, Qt::MouseButton btn,
-                        Qt::KeyboardModifiers mod, int ms)
+void QTestApp::mouseDown(
+  QWidget* w, QPoint pos, Qt::MouseButton btn, Qt::KeyboardModifiers mod, int ms)
 {
   delay(ms);
   QMouseEvent e(QEvent::MouseButtonPress, pos, btn, btn, mod);
   simulateEvent(w, &e);
 }
 
-void QTestApp::mouseUp(QWidget* w, QPoint pos, Qt::MouseButton btn,
-                      Qt::KeyboardModifiers mod, int ms)
+void QTestApp::mouseUp(
+  QWidget* w, QPoint pos, Qt::MouseButton btn, Qt::KeyboardModifiers mod, int ms)
 {
   delay(ms);
   QMouseEvent e(QEvent::MouseButtonRelease, pos, btn, btn, mod);
   simulateEvent(w, &e);
 }
 
-void QTestApp::mouseMove(QWidget* w, QPoint pos, Qt::MouseButton btn,
-                        Qt::KeyboardModifiers mod, int ms)
+void QTestApp::mouseMove(
+  QWidget* w, QPoint pos, Qt::MouseButton btn, Qt::KeyboardModifiers mod, int ms)
 {
   delay(ms);
   QMouseEvent e(QEvent::MouseMove, pos, btn, btn, mod);
   simulateEvent(w, &e);
 }
 
-void QTestApp::mouseClick(QWidget* w, QPoint pos, Qt::MouseButton btn,
-                         Qt::KeyboardModifiers mod, int ms)
+void QTestApp::mouseClick(
+  QWidget* w, QPoint pos, Qt::MouseButton btn, Qt::KeyboardModifiers mod, int ms)
 {
   delay(ms);
   mouseDown(w, pos, btn, mod, 0);
   mouseUp(w, pos, btn, mod, 0);
 }
-
-

@@ -20,7 +20,7 @@
  * but it looks for data
  * partitions in other processes.  It assumes the filter is operated
  * in a data parallel pipeline.
-*/
+ */
 
 #ifndef vtkPOutlineCornerFilter_h
 #define vtkPOutlineCornerFilter_h
@@ -35,13 +35,13 @@ class vtkPOutlineFilterInternals;
 class VTKFILTERSPARALLEL_EXPORT vtkPOutlineCornerFilter : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkPOutlineCornerFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPOutlineCornerFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct outline corner filter with default corner factor = 0.2
    */
-  static vtkPOutlineCornerFilter *New();
+  static vtkPOutlineCornerFilter* New();
 
   /**
    * Set/Get the factor that controls the relative size of the corners
@@ -51,7 +51,7 @@ public:
    * the code in the macro
    */
   virtual void SetCornerFactor(double cornerFactor);
-  virtual double GetCornerFactorMinValue()  { return 0.001;}
+  virtual double GetCornerFactorMinValue() { return 0.001; }
   virtual double GetCornerFactorMaxValue() { return 0.5; }
 
   vtkGetMacro(CornerFactor, double);
@@ -66,17 +66,18 @@ public:
 
 protected:
   vtkPOutlineCornerFilter();
-  ~vtkPOutlineCornerFilter() VTK_OVERRIDE;
+  ~vtkPOutlineCornerFilter() override;
 
   vtkMultiProcessController* Controller;
-  vtkOutlineCornerSource *OutlineCornerSource;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  vtkOutlineCornerSource* OutlineCornerSource;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   double CornerFactor;
+
 private:
-  vtkPOutlineCornerFilter(const vtkPOutlineCornerFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPOutlineCornerFilter&) VTK_DELETE_FUNCTION;
+  vtkPOutlineCornerFilter(const vtkPOutlineCornerFilter&) = delete;
+  void operator=(const vtkPOutlineCornerFilter&) = delete;
 
   vtkPOutlineFilterInternals* Internals;
 };

@@ -30,7 +30,7 @@
  *
  * This source only generate geometry, no DataArrays like normals or texture
  * coordinates.
-*/
+ */
 
 #ifndef vtkTessellatedBoxSource_h
 #define vtkTessellatedBoxSource_h
@@ -41,9 +41,9 @@
 class VTKFILTERSSOURCES_EXPORT vtkTessellatedBoxSource : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkTessellatedBoxSource *New();
-  vtkTypeMacro(vtkTessellatedBoxSource,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTessellatedBoxSource* New();
+  vtkTypeMacro(vtkTessellatedBoxSource, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -69,7 +69,7 @@ public:
    * Set the level of subdivision of the faces.
    * \pre positive_level: level>=0
    */
-  vtkSetMacro(Level,int);
+  vtkSetMacro(Level, int);
   //@}
 
   //@{
@@ -77,7 +77,7 @@ public:
    * Level of subdivision of the faces. Initial value is 0.
    * \post positive_level: level>=0
    */
-  vtkGetMacro(Level,int);
+  vtkGetMacro(Level, int);
   //@}
 
   //@{
@@ -87,9 +87,9 @@ public:
    * Implementation note: duplicating points is an easier method to implement
    * than a minimal number of points.
    */
-  vtkSetMacro(DuplicateSharedPoints, int);
-  vtkGetMacro(DuplicateSharedPoints, int);
-  vtkBooleanMacro(DuplicateSharedPoints, int);
+  vtkSetMacro(DuplicateSharedPoints, vtkTypeBool);
+  vtkGetMacro(DuplicateSharedPoints, vtkTypeBool);
+  vtkBooleanMacro(DuplicateSharedPoints, vtkTypeBool);
   //@}
 
   //@{
@@ -97,9 +97,9 @@ public:
    * Flag to tell the source to generate either a quad or two triangle for a
    * set of four points. Initial value is false (generate triangles).
    */
-  vtkSetMacro(Quads, int);
-  vtkGetMacro(Quads, int);
-  vtkBooleanMacro(Quads, int);
+  vtkSetMacro(Quads, vtkTypeBool);
+  vtkGetMacro(Quads, vtkTypeBool);
+  vtkBooleanMacro(Quads, vtkTypeBool);
   //@}
 
   //@{
@@ -108,30 +108,24 @@ public:
    * vtkAlgorithm::SINGLE_PRECISION - Output single-precision floating point.
    * vtkAlgorithm::DOUBLE_PRECISION - Output double-precision floating point.
    */
-  vtkSetMacro(OutputPointsPrecision,int);
-  vtkGetMacro(OutputPointsPrecision,int);
+  vtkSetMacro(OutputPointsPrecision, int);
+  vtkGetMacro(OutputPointsPrecision, int);
   //@}
 
 protected:
-   vtkTessellatedBoxSource();
-  ~vtkTessellatedBoxSource() VTK_OVERRIDE;
+  vtkTessellatedBoxSource();
+  ~vtkTessellatedBoxSource() override;
 
   /**
    * Called by the superclass. Actual creation of the points and cells
    * happens here.
    */
-  int RequestData(vtkInformation *request,
-                          vtkInformationVector **inputVector,
-                          vtkInformationVector *outpuVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outpuVector) override;
 
+  void DuplicateSharedPointsMethod(double* bounds, vtkPoints* points, vtkCellArray* polys);
 
-  void DuplicateSharedPointsMethod(double *bounds,
-                                   vtkPoints *points,
-                                   vtkCellArray *polys);
-
-  void MinimalPointsMethod(double *bounds,
-                           vtkPoints *points,
-                           vtkCellArray *polys);
+  void MinimalPointsMethod(double* bounds, vtkPoints* points, vtkCellArray* polys);
 
   /**
    * Compute the pointId of point (i,j) of face f.
@@ -140,9 +134,7 @@ protected:
    * \pre valid_i: i>=0 && i<=(this->Level+1)
    * \pre valid_j: j>=0 && j<=(this->Level+1)
    */
-  vtkIdType LocalFacePointCoordinatesToPointId(int f,
-                                               int i,
-                                               int j);
+  vtkIdType LocalFacePointCoordinatesToPointId(int f, int i, int j);
 
   /**
    * Build one of the face of the box with some level of tessellation.
@@ -153,21 +145,18 @@ protected:
    * \pre points_exists: points!=0
    * \pre polys_exists: polys!=0
    */
-  void BuildFace(vtkPoints *points,
-                 vtkCellArray *polys,
-                 vtkIdType firstPointId,
-                 double facePoints[3][3],
-                 int changed);
+  void BuildFace(vtkPoints* points, vtkCellArray* polys, vtkIdType firstPointId,
+    double facePoints[3][3], int changed);
 
   double Bounds[6];
   int Level;
-  int DuplicateSharedPoints;
-  int Quads;
+  vtkTypeBool DuplicateSharedPoints;
+  vtkTypeBool Quads;
   int OutputPointsPrecision;
 
 private:
-  vtkTessellatedBoxSource(const vtkTessellatedBoxSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTessellatedBoxSource&) VTK_DELETE_FUNCTION;
+  vtkTessellatedBoxSource(const vtkTessellatedBoxSource&) = delete;
+  void operator=(const vtkTessellatedBoxSource&) = delete;
 };
 
 #endif

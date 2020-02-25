@@ -48,7 +48,7 @@
  *
  * @sa
  * vtkContourFilter vtkMarchingCubes vtkSliceCubes vtkLocator
-*/
+ */
 
 #ifndef vtkMCubesReader_h
 #define vtkMCubesReader_h
@@ -64,13 +64,13 @@ class vtkIncrementalPointLocator;
 class VTKIOGEOMETRY_EXPORT vtkMCubesReader : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkMCubesReader,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMCubesReader, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object with FlipNormals turned off and Normals set to true.
    */
-  static vtkMCubesReader *New();
+  static vtkMCubesReader* New();
 
   //@{
   /**
@@ -92,8 +92,8 @@ public:
   /**
    * Specify a header size if one exists. The header is skipped and not used at this time.
    */
-  vtkSetClampMacro(HeaderSize,int,0,VTK_INT_MAX);
-  vtkGetMacro(HeaderSize,int);
+  vtkSetClampMacro(HeaderSize, int, 0, VTK_INT_MAX);
+  vtkGetMacro(HeaderSize, int);
   //@}
 
   //@{
@@ -103,18 +103,18 @@ public:
    * in vtkPolyDataNormals which flips both the normal and the cell point
    * order.
    */
-  vtkSetMacro(FlipNormals,int);
-  vtkGetMacro(FlipNormals,int);
-  vtkBooleanMacro(FlipNormals,int);
+  vtkSetMacro(FlipNormals, vtkTypeBool);
+  vtkGetMacro(FlipNormals, vtkTypeBool);
+  vtkBooleanMacro(FlipNormals, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Specify whether to read normals.
    */
-  vtkSetMacro(Normals,int);
-  vtkGetMacro(Normals,int);
-  vtkBooleanMacro(Normals,int);
+  vtkSetMacro(Normals, vtkTypeBool);
+  vtkGetMacro(Normals, vtkTypeBool);
+  vtkBooleanMacro(Normals, vtkTypeBool);
   //@}
 
   //@{
@@ -135,16 +135,16 @@ public:
   void SetDataByteOrderToLittleEndian();
   int GetDataByteOrder();
   void SetDataByteOrder(int);
-  const char *GetDataByteOrderAsString();
+  const char* GetDataByteOrderAsString();
   //@}
 
   //@{
   /**
    * Turn on/off byte swapping.
    */
-  vtkSetMacro(SwapBytes,int);
-  vtkGetMacro(SwapBytes,int);
-  vtkBooleanMacro(SwapBytes,int);
+  vtkSetMacro(SwapBytes, vtkTypeBool);
+  vtkGetMacro(SwapBytes, vtkTypeBool);
+  vtkBooleanMacro(SwapBytes, vtkTypeBool);
   //@}
 
   //@{
@@ -152,8 +152,8 @@ public:
    * Set / get a spatial locator for merging points. By default,
    * an instance of vtkMergePoints is used.
    */
-  void SetLocator(vtkIncrementalPointLocator *locator);
-  vtkGetObjectMacro(Locator,vtkIncrementalPointLocator);
+  void SetLocator(vtkIncrementalPointLocator* locator);
+  vtkGetObjectMacro(Locator, vtkIncrementalPointLocator);
   //@}
 
   /**
@@ -164,25 +164,25 @@ public:
   /**
    * Return the mtime also considering the locator.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkMCubesReader();
-  ~vtkMCubesReader() VTK_OVERRIDE;
+  ~vtkMCubesReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  char *FileName;
-  char *LimitsFileName;
-  vtkIncrementalPointLocator *Locator;
-  int SwapBytes;
+  char* FileName;
+  char* LimitsFileName;
+  vtkIncrementalPointLocator* Locator;
+  vtkTypeBool SwapBytes;
   int HeaderSize;
-  int FlipNormals;
-  int Normals;
+  vtkTypeBool FlipNormals;
+  vtkTypeBool Normals;
 
 private:
-  vtkMCubesReader(const vtkMCubesReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMCubesReader&) VTK_DELETE_FUNCTION;
+  vtkMCubesReader(const vtkMCubesReader&) = delete;
+  void operator=(const vtkMCubesReader&) = delete;
 };
 
 #endif

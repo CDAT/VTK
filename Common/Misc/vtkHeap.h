@@ -40,7 +40,7 @@
  *
  * @sa
  * vtkVRMLImporter vtkPLY vtkOrderedTriangulator
-*/
+ */
 
 #ifndef vtkHeap_h
 #define vtkHeap_h
@@ -48,14 +48,14 @@
 #include "vtkCommonMiscModule.h" // For export macro
 #include "vtkObject.h"
 
-class vtkHeapBlock; //forward declaration
+class vtkHeapBlock; // forward declaration
 
 class VTKCOMMONMISC_EXPORT vtkHeap : public vtkObject
 {
 public:
-  static vtkHeap *New();
-  vtkTypeMacro(vtkHeap,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkHeap* New();
+  vtkTypeMacro(vtkHeap, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Allocate the memory requested.
@@ -69,15 +69,15 @@ public:
    * will be allocated.
    */
   virtual void SetBlockSize(size_t);
-  virtual size_t GetBlockSize() { return this->BlockSize;};
+  virtual size_t GetBlockSize() { return this->BlockSize; }
   //@}
 
   //@{
   /**
    * Get the number of allocations thus far.
    */
-  vtkGetMacro(NumberOfBlocks,int);
-  vtkGetMacro(NumberOfAllocations,int);
+  vtkGetMacro(NumberOfBlocks, int);
+  vtkGetMacro(NumberOfAllocations, int);
   //@}
 
   /**
@@ -95,15 +95,15 @@ public:
 
 protected:
   vtkHeap();
-  ~vtkHeap() VTK_OVERRIDE;
+  ~vtkHeap() override;
 
   void Add(size_t blockSize);
   void CleanAll();
   vtkHeapBlock* DeleteAndNext();
 
   size_t BlockSize;
-  int    NumberOfAllocations;
-  int    NumberOfBlocks;
+  int NumberOfAllocations;
+  int NumberOfBlocks;
   size_t Alignment;
 
   // Manage the blocks
@@ -111,11 +111,11 @@ protected:
   vtkHeapBlock* Last;
   vtkHeapBlock* Current;
   // Manage the memory in the block
-  size_t Position; //the position in the Current block
+  size_t Position; // the position in the Current block
 
 private:
-  vtkHeap(const vtkHeap&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHeap&) VTK_DELETE_FUNCTION;
+  vtkHeap(const vtkHeap&) = delete;
+  void operator=(const vtkHeap&) = delete;
 };
 
 #endif

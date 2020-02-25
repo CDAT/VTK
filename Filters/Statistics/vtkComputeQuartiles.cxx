@@ -37,26 +37,22 @@ vtkStandardNewMacro(vtkComputeQuartiles);
 //-----------------------------------------------------------------------------
 vtkComputeQuartiles::vtkComputeQuartiles()
 {
-  this->SetInputArrayToProcess(0, 0, 0,
-    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
-    vtkDataSetAttributes::SCALARS);
+  this->SetInputArrayToProcess(
+    0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS, vtkDataSetAttributes::SCALARS);
   this->FieldAssociation = -1;
 }
 
 //-----------------------------------------------------------------------------
-vtkComputeQuartiles::~vtkComputeQuartiles()
-{
-}
+vtkComputeQuartiles::~vtkComputeQuartiles() = default;
 
 //-----------------------------------------------------------------------------
 void vtkComputeQuartiles::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
 //-----------------------------------------------------------------------------
-int vtkComputeQuartiles::FillInputPortInformation (int port,
-                                                 vtkInformation *info)
+int vtkComputeQuartiles::FillInputPortInformation(int port, vtkInformation* info)
 {
   this->Superclass::FillInputPortInformation(port, info);
 
@@ -67,9 +63,8 @@ int vtkComputeQuartiles::FillInputPortInformation (int port,
 //-----------------------------------------------------------------------------
 int vtkComputeQuartiles::GetInputFieldAssociation()
 {
-  vtkInformationVector *inArrayVec =
-    this->Information->Get(INPUT_ARRAYS_TO_PROCESS());
-  vtkInformation *inArrayInfo = inArrayVec->GetInformationObject(0);
+  vtkInformationVector* inArrayVec = this->Information->Get(INPUT_ARRAYS_TO_PROCESS());
+  vtkInformation* inArrayInfo = inArrayVec->GetInformationObject(0);
   return inArrayInfo->Get(vtkDataObject::FIELD_ASSOCIATION());
 }
 
@@ -78,7 +73,7 @@ vtkFieldData* vtkComputeQuartiles::GetInputFieldData(vtkDataObject* input)
 {
   if (!input)
   {
-    vtkErrorMacro(<<"Cannot extract fields from null input");
+    vtkErrorMacro(<< "Cannot extract fields from null input");
     return nullptr;
   }
 
@@ -118,28 +113,27 @@ vtkFieldData* vtkComputeQuartiles::GetInputFieldData(vtkDataObject* input)
 
 //-----------------------------------------------------------------------------
 int vtkComputeQuartiles::RequestData(vtkInformation* /*request*/,
-                                   vtkInformationVector** inputVector,
-                                   vtkInformationVector* outputVector)
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
 
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
-  vtkDataObject *input = inInfo->Get(vtkDataObject::DATA_OBJECT());
+  vtkDataObject* input = inInfo->Get(vtkDataObject::DATA_OBJECT());
   vtkTable* outputTable = vtkTable::GetData(outputVector, 0);
 
-  vtkCompositeDataSet *cdin = vtkCompositeDataSet::SafeDownCast(input);
+  vtkCompositeDataSet* cdin = vtkCompositeDataSet::SafeDownCast(input);
   if (cdin)
   {
     vtkCompositeDataIterator* iter = cdin->NewIterator();
     for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
     {
-      vtkDataSet *o = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
+      vtkDataSet* o = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
       if (o)
       {
         ComputeTable(o, outputTable, iter->GetCurrentFlatIndex());
       }
     }
   }
-  else if (vtkDataObject *o = vtkDataObject::SafeDownCast(input))
+  else if (vtkDataObject* o = vtkDataObject::SafeDownCast(input))
   {
     ComputeTable(o, outputTable, -1);
   }
@@ -148,10 +142,10 @@ int vtkComputeQuartiles::RequestData(vtkInformation* /*request*/,
 }
 
 //-----------------------------------------------------------------------------
-void vtkComputeQuartiles::ComputeTable(vtkDataObject* input,
-                                       vtkTable* outputTable, vtkIdType blockId)
+void vtkComputeQuartiles::ComputeTable(
+  vtkDataObject* input, vtkTable* outputTable, vtkIdType blockId)
 {
-  vtkFieldData *field = this->GetInputFieldData(input);
+  vtkFieldData* field = this->GetInputFieldData(input);
 
   if (!field || field->GetNumberOfArrays() == 0)
   {
@@ -162,11 +156,11 @@ void vtkComputeQuartiles::ComputeTable(vtkDataObject* input,
   // Fill table for descriptive statistics input.
   vtkNew<vtkTable> inDescStats;
   vtkNew<vtkOrderStatistics> os;
-  os->SetInputData(vtkStatisticsAlgorithm::INPUT_DATA, inDescStats.GetPointer());
+  os->SetInputData(vtkStatisticsAlgorithm::INPUT_DATA, inDescStats);
 
   for (int i = 0; i < field->GetNumberOfArrays(); i++)
   {
-    vtkDataArray *dataArray = field->GetArray(i);
+    vtkDataArray* dataArray = field->GetArray(i);
     if (!dataArray || dataArray->GetNumberOfComponents() != 1)
     {
       vtkDebugMacro(<< "Field " << i << " empty or not scalar");
@@ -195,14 +189,12 @@ void vtkComputeQuartiles::ComputeTable(vtkDataObject* input,
   os->SetAssessOption(false);
   os->Update();
 
-  // Get the ouput table of the descriptive statistics that contains quantiles
+  // Get the output table of the descriptive statistics that contains quantiles
   // of the input data series.
-  vtkMultiBlockDataSet *outputModelDS =
-    vtkMultiBlockDataSet::SafeDownCast(
+  vtkMultiBlockDataSet* outputModelDS = vtkMultiBlockDataSet::SafeDownCast(
     os->GetOutputDataObject(vtkStatisticsAlgorithm::OUTPUT_MODEL));
   unsigned nbq = outputModelDS->GetNumberOfBlocks() - 1;
-  vtkTable* outputQuartiles =
-    vtkTable::SafeDownCast(outputModelDS->GetBlock(nbq));
+  vtkTable* outputQuartiles = vtkTable::SafeDownCast(outputModelDS->GetBlock(nbq));
   if (!outputQuartiles || outputQuartiles->GetNumberOfColumns() < 2)
   {
     return;
@@ -217,7 +209,7 @@ void vtkComputeQuartiles::ComputeTable(vtkDataObject* input,
     vtkNew<vtkDoubleArray> ncol;
     ncol->SetNumberOfComponents(1);
     ncol->SetNumberOfValues(5);
-    outputTable->AddColumn(ncol.GetPointer());
+    outputTable->AddColumn(ncol);
     if (blockId >= 0)
     {
       std::stringstream ss;
@@ -229,7 +221,7 @@ void vtkComputeQuartiles::ComputeTable(vtkDataObject* input,
       ncol->SetName(inDescStats->GetColumnName(j));
     }
 
-    vtkAbstractArray *col = outputQuartiles->GetColumnByName(inDescStats->GetColumnName(j));
+    vtkAbstractArray* col = outputQuartiles->GetColumnByName(inDescStats->GetColumnName(j));
     for (int k = 0; k < 5; k++)
     {
       outputTable->SetValue(k, currLen + j, col ? col->GetVariantValue(k).ToDouble() : 0.0);

@@ -31,18 +31,17 @@
 #include <vtkVolumeProperty.h>
 #include <vtkXMLImageDataReader.h>
 
-int TestGPURayCastCropping1(int argc, char *argv[])
+int TestGPURayCastCropping1(int argc, char* argv[])
 {
   double scalarRange[2];
 
   vtkNew<vtkActor> outlineActor;
-   vtkNew<vtkGPUVolumeRayCastMapper> volumeMapper;
+  vtkNew<vtkGPUVolumeRayCastMapper> volumeMapper;
   volumeMapper->AutoAdjustSampleDistancesOff();
   volumeMapper->SetSampleDistance(0.05);
 
   vtkNew<vtkXMLImageDataReader> reader;
-  const char* volumeFile = vtkTestUtilities::ExpandDataFileName(
-                            argc, argv, "Data/vase_1comp.vti");
+  const char* volumeFile = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/vase_1comp.vti");
   reader->SetFileName(volumeFile);
   volumeMapper->SetInputConnection(reader->GetOutputPort());
   volumeMapper->GetInput()->GetScalarRange(scalarRange);
@@ -55,10 +54,10 @@ int TestGPURayCastCropping1(int argc, char *argv[])
 
   // Intentional odd and NPOT  width/height
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   // Make sure we have an OpenGL context.
   renWin->Render();
@@ -70,7 +69,7 @@ int TestGPURayCastCropping1(int argc, char *argv[])
   vtkNew<vtkVolumeProperty> volumeProperty;
   volumeProperty->ShadeOff();
   volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
-  volumeProperty->SetScalarOpacity(scalarOpacity.GetPointer());
+  volumeProperty->SetScalarOpacity(scalarOpacity);
 
   vtkSmartPointer<vtkColorTransferFunction> colorTransferFunction =
     volumeProperty->GetRGBTransferFunction(0);
@@ -85,18 +84,18 @@ int TestGPURayCastCropping1(int argc, char *argv[])
 
   // Setup volume actor
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(volumeMapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
+  volume->SetMapper(volumeMapper);
+  volume->SetProperty(volumeProperty);
 
-  ren->AddViewProp(volume.GetPointer());
+  ren->AddViewProp(volume);
   ren->ResetCamera();
   ren->GetActiveCamera()->Zoom(2);
 
   renWin->Render();
   iren->Initialize();
 
-  int retVal = vtkRegressionTestImage( renWin.GetPointer() );
-  if( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

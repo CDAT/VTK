@@ -25,7 +25,7 @@
  *
  * @sa
  * vtkArcSource
-*/
+ */
 
 #ifndef vtkEllipseArcSource_h
 #define vtkEllipseArcSource_h
@@ -36,9 +36,9 @@
 class VTKFILTERSSOURCES_EXPORT vtkEllipseArcSource : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkEllipseArcSource *New();
+  static vtkEllipseArcSource* New();
   vtkTypeMacro(vtkEllipseArcSource, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -98,6 +98,16 @@ public:
 
   //@{
   /**
+   * Set/get whether to close the arc with a final line segment connecting the first
+   * and last points in the arc. Off by default
+   */
+  vtkSetMacro(Close, bool);
+  vtkGetMacro(Close, bool);
+  vtkBooleanMacro(Close, bool);
+  //@}
+
+  //@{
+  /**
    * Set/get the desired precision for the output points.
    * vtkAlgorithm::SINGLE_PRECISION - Output single-precision floating point,
    * This is the default.
@@ -119,10 +129,9 @@ public:
 
 protected:
   vtkEllipseArcSource();
-  ~vtkEllipseArcSource() VTK_OVERRIDE {}
+  ~vtkEllipseArcSource() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   double Center[3];
   double Normal[3];
@@ -131,11 +140,12 @@ protected:
   double SegmentAngle;
   int Resolution;
   double Ratio;
+  bool Close;
   int OutputPointsPrecision;
 
 private:
-  vtkEllipseArcSource(const vtkEllipseArcSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkEllipseArcSource&) VTK_DELETE_FUNCTION;
+  vtkEllipseArcSource(const vtkEllipseArcSource&) = delete;
+  void operator=(const vtkEllipseArcSource&) = delete;
 };
 
 #endif

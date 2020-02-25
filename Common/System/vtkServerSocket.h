@@ -17,7 +17,7 @@
  * @brief   Encapsulate a socket that accepts connections.
  *
  *
-*/
+ */
 
 #ifndef vtkServerSocket_h
 #define vtkServerSocket_h
@@ -31,7 +31,7 @@ class VTKCOMMONSYSTEM_EXPORT vtkServerSocket : public vtkSocket
 public:
   static vtkServerSocket* New();
   vtkTypeMacro(vtkServerSocket, vtkSocket);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates a server socket at a given port and binds to it.
@@ -44,7 +44,7 @@ public:
    * a new vtkClientSocket object is created and returned.
    * Returns nullptr on timeout.
    */
-  vtkClientSocket* WaitForConnection(unsigned long msec=0);
+  vtkClientSocket* WaitForConnection(unsigned long msec = 0);
 
   /**
    * Returns the port on which the server is running.
@@ -53,13 +53,11 @@ public:
 
 protected:
   vtkServerSocket();
-  ~vtkServerSocket() VTK_OVERRIDE;
+  ~vtkServerSocket() override;
 
 private:
-  vtkServerSocket(const vtkServerSocket&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkServerSocket&) VTK_DELETE_FUNCTION;
+  vtkServerSocket(const vtkServerSocket&) = delete;
+  void operator=(const vtkServerSocket&) = delete;
 };
 
-
 #endif
-

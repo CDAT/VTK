@@ -22,13 +22,14 @@
  * GL2PS context. Link to vtkRenderingGL2PSOpenGL2 to bring in the
  * vtkOpenGLGL2PSHelperImpl class, the object factory override that implements
  * this interface.
-*/
+ */
 
 #ifndef vtkOpenGLGL2PSHelper_h
 #define vtkOpenGLGL2PSHelper_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
+#include <string>                      // For string usage
 
 class vtkActor;
 class vtkImageData;
@@ -39,33 +40,33 @@ class vtkRenderWindow;
 class vtkTextProperty;
 class vtkTransformFeedback;
 
-class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLGL2PSHelper: public vtkObject
+class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLGL2PSHelper : public vtkObject
 {
 public:
   static vtkOpenGLGL2PSHelper* New();
-  vtkAbstractTypeMacro(vtkOpenGLGL2PSHelper, vtkObject)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkAbstractTypeMacro(vtkOpenGLGL2PSHelper, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * The global instance. Only set during export.
    */
   static vtkOpenGLGL2PSHelper* GetInstance();
-  static void SetInstance(vtkOpenGLGL2PSHelper *);
+  static void SetInstance(vtkOpenGLGL2PSHelper*);
   //@}
 
   //@{
   /**
    * Get the renderwindow that's being exported.
    */
-  vtkGetMacro(RenderWindow, vtkRenderWindow*)
+  vtkGetMacro(RenderWindow, vtkRenderWindow*);
   //@}
 
   enum State
   {
     Inactive = 0, //! No export active
-    Background, //! Rendering rasterized props for the background.
-    Capture //! Capturing vectorized objects.
+    Background,   //! Rendering rasterized props for the background.
+    Capture       //! Capturing vectorized objects.
   };
 
   //@{
@@ -79,23 +80,23 @@ public:
    * and use the vtkOpenGLGL2PSHelper API to draw themselves during the capture
    * pass.
    */
-  vtkGetMacro(ActiveState, State)
+  vtkGetMacro(ActiveState, State);
   //@}
 
   //@{
   /**
    * Set/Get the current point size.
    */
-  vtkSetMacro(PointSize, float)
-  vtkGetMacro(PointSize, float)
+  vtkSetMacro(PointSize, float);
+  vtkGetMacro(PointSize, float);
   //@}
 
   //@{
   /**
    * Set/Get the current line width.
    */
-  vtkSetMacro(LineWidth, float)
-  vtkGetMacro(LineWidth, float)
+  vtkSetMacro(LineWidth, float);
+  vtkGetMacro(LineWidth, float);
   //@}
 
   //@{
@@ -103,25 +104,23 @@ public:
    * Set/Get the current line stipple pattern per OpenGL convention. Default is
    * 0xffff.
    */
-  vtkSetMacro(LineStipple, unsigned short)
-  vtkGetMacro(LineStipple, unsigned short)
+  vtkSetMacro(LineStipple, unsigned short);
+  vtkGetMacro(LineStipple, unsigned short);
   //@}
 
   //@{
   /**
    * Parse the vertex information in tfc and inject primitives into GL2PS.
    * ren is used to obtain viewport information to complete the vertex
-   * tranformation into pixel coordinates, and act/col are used to color the
+   * transformation into pixel coordinates, and act/col are used to color the
    * vertices when tfc does not contain color information.
    */
-  virtual void ProcessTransformFeedback(vtkTransformFeedback *tfc,
-                                        vtkRenderer *ren, vtkActor *act) = 0;
-  virtual void ProcessTransformFeedback(vtkTransformFeedback *tfc,
-                                        vtkRenderer *ren,
-                                        unsigned char col[4]) = 0;
-  virtual void ProcessTransformFeedback(vtkTransformFeedback *tfc,
-                                        vtkRenderer *ren,
-                                        float col[4]) = 0;
+  virtual void ProcessTransformFeedback(
+    vtkTransformFeedback* tfc, vtkRenderer* ren, vtkActor* act) = 0;
+  virtual void ProcessTransformFeedback(
+    vtkTransformFeedback* tfc, vtkRenderer* ren, unsigned char col[4]) = 0;
+  virtual void ProcessTransformFeedback(
+    vtkTransformFeedback* tfc, vtkRenderer* ren, float col[4]) = 0;
   //@}
 
   /**
@@ -131,9 +130,8 @@ public:
    * The drawing is always done in the overlay plane.
    * @sa TextAsPath
    */
-  virtual void DrawString(const std::string &str, vtkTextProperty *tprop,
-                          double pos[3], double backgroundDepth,
-                          vtkRenderer *ren) = 0;
+  virtual void DrawString(const std::string& str, vtkTextProperty* tprop, double pos[3],
+    double backgroundDepth, vtkRenderer* ren) = 0;
 
   /**
    * Generate PS, EPS, or SVG markup from a vtkPath object, and then inject it
@@ -146,41 +144,39 @@ public:
    * The label string is inserted into the GL2PS output at the beginning of the
    * path specification as a comment on supported backends.
    */
-  virtual void DrawPath(vtkPath *path, double rasterPos[3], double windowPos[2],
-                        unsigned char rgba[4], double scale[2] = nullptr,
-                        double rotateAngle = 0.0, float strokeWidth = -1,
-                        const char *label = nullptr) = 0;
+  virtual void DrawPath(vtkPath* path, double rasterPos[3], double windowPos[2],
+    unsigned char rgba[4], double scale[2] = nullptr, double rotateAngle = 0.0,
+    float strokeWidth = -1, const char* label = nullptr) = 0;
 
   /**
    * Transform the path using the actor's matrix and current GL state, then
    * draw it to GL2PS. The label string is inserted into the GL2PS output at the
    * beginning of the path specification as a comment on supported backends.
    */
-  virtual void Draw3DPath(vtkPath *path, vtkMatrix4x4 *actorMatrix,
-                          double rasterPos[3], unsigned char actorColor[4],
-                          vtkRenderer *ren, const char *label = nullptr) = 0;
+  virtual void Draw3DPath(vtkPath* path, vtkMatrix4x4* actorMatrix, double rasterPos[3],
+    unsigned char actorColor[4], vtkRenderer* ren, const char* label = nullptr) = 0;
 
   /**
    * Draw the image at pos.
    * Image must be RGB or RGBA with float scalars.
    */
-  virtual void DrawImage(vtkImageData *image, double pos[3]) = 0;
+  virtual void DrawImage(vtkImageData* image, double pos[3]) = 0;
 
 protected:
   friend class vtkOpenGLGL2PSExporter;
 
   vtkOpenGLGL2PSHelper();
-  ~vtkOpenGLGL2PSHelper() VTK_OVERRIDE;
+  ~vtkOpenGLGL2PSHelper() override;
 
-  vtkSetMacro(ActiveState, State)
-  vtkSetMacro(TextAsPath, bool)
-  vtkSetMacro(RenderWindow, vtkRenderWindow*) // Doesn't ref count, not needed.
-  vtkSetMacro(PointSizeFactor, float)
-  vtkSetMacro(LineWidthFactor, float)
+  vtkSetMacro(ActiveState, State);
+  vtkSetMacro(TextAsPath, bool);
+  vtkSetMacro(RenderWindow, vtkRenderWindow*); // Doesn't ref count, not needed.
+  vtkSetMacro(PointSizeFactor, float);
+  vtkSetMacro(LineWidthFactor, float);
 
-  static vtkOpenGLGL2PSHelper *Instance;
+  static vtkOpenGLGL2PSHelper* Instance;
 
-  vtkRenderWindow *RenderWindow;
+  vtkRenderWindow* RenderWindow;
   State ActiveState;
   bool TextAsPath;
   float PointSize;
@@ -190,8 +186,8 @@ protected:
   unsigned short LineStipple;
 
 private:
-  vtkOpenGLGL2PSHelper(const vtkOpenGLGL2PSHelper &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLGL2PSHelper &) VTK_DELETE_FUNCTION;
+  vtkOpenGLGL2PSHelper(const vtkOpenGLGL2PSHelper&) = delete;
+  void operator=(const vtkOpenGLGL2PSHelper&) = delete;
 };
 
 #endif // vtkOpenGLGL2PSHelper_h

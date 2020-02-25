@@ -28,7 +28,7 @@
  *   spec=it->GetCell();
  *   }
  * </pre>
-*/
+ */
 
 #ifndef vtkGenericCellIterator_h
 #define vtkGenericCellIterator_h
@@ -45,8 +45,8 @@ public:
   /**
    * Standard VTK construction and type macros.
    */
-  vtkTypeMacro(vtkGenericCellIterator,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkGenericCellIterator, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -57,13 +57,13 @@ public:
   /**
    * Is the iterator at the end of traversal?
    */
-  virtual int IsAtEnd() = 0;
+  virtual vtkTypeBool IsAtEnd() = 0;
 
   /**
    * Create an empty cell. The user is responsible for deleting it.
    * \post result_exists: result!=0
    */
-  virtual vtkGenericAdaptorCell *NewCell() = 0;
+  virtual vtkGenericAdaptorCell* NewCell() = 0;
 
   /**
    * Get the cell at current position. The cell should be instantiated
@@ -72,7 +72,7 @@ public:
    * \pre c_exists: c!=0
    * THREAD SAFE
    */
-  virtual void GetCell(vtkGenericAdaptorCell *c) = 0;
+  virtual void GetCell(vtkGenericAdaptorCell* c) = 0;
 
   /**
    * Get the cell at the current traversal position.
@@ -80,7 +80,7 @@ public:
    * \pre not_at_end: !IsAtEnd()
    * \post result_exits: result!=0
    */
-  virtual vtkGenericAdaptorCell *GetCell() = 0;
+  virtual vtkGenericAdaptorCell* GetCell() = 0;
 
   /**
    * Move the iterator to the next position in the list.
@@ -90,11 +90,11 @@ public:
 
 protected:
   vtkGenericCellIterator();
-  ~vtkGenericCellIterator() VTK_OVERRIDE;
+  ~vtkGenericCellIterator() override;
 
 private:
-  vtkGenericCellIterator(const vtkGenericCellIterator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericCellIterator&) VTK_DELETE_FUNCTION;
+  vtkGenericCellIterator(const vtkGenericCellIterator&) = delete;
+  void operator=(const vtkGenericCellIterator&) = delete;
 };
 
 #endif

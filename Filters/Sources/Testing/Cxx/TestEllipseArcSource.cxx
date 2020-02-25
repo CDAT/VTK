@@ -12,16 +12,16 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include <vtkEllipseArcSource.h>
-#include <vtkPolyData.h>
-#include <vtkNew.h>
-#include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkEllipseArcSource.h>
+#include <vtkNew.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
 #include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 
-int TestEllipseArcSource(int vtkNotUsed(argc), char * vtkNotUsed(argv)[])
+int TestEllipseArcSource(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
 {
   vtkNew<vtkEllipseArcSource> source;
   source->SetCenter(0.0, 0.0, 0.0);
@@ -36,15 +36,15 @@ int TestEllipseArcSource(int vtkNotUsed(argc), char * vtkNotUsed(argv)[])
   mapper->SetInputConnection(source->GetOutputPort());
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.Get());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
   vtkNew<vtkRenderWindow> renderWindow;
-  renderWindow->AddRenderer(renderer.Get());
+  renderWindow->AddRenderer(renderer);
   vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
-  renderWindowInteractor->SetRenderWindow(renderWindow.Get());
+  renderWindowInteractor->SetRenderWindow(renderWindow);
 
-  renderer->AddActor(actor.Get());
+  renderer->AddActor(actor);
   renderer->SetBackground(.3, .6, .3);
 
   renderWindow->SetMultiSamples(0);

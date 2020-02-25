@@ -28,32 +28,31 @@
  * vtkImageThreshold
  * @par Thanks:
  * Thanks to David Gobbi for contributing this class to VTK.
-*/
+ */
 
 #ifndef vtkImageThresholdConnectivity_h
 #define vtkImageThresholdConnectivity_h
 
-#include "vtkImagingMorphologicalModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
+#include "vtkImagingMorphologicalModule.h" // For export macro
 
 class vtkPoints;
 class vtkImageData;
 class vtkImageStencilData;
 
-class VTKIMAGINGMORPHOLOGICAL_EXPORT vtkImageThresholdConnectivity :
-  public vtkImageAlgorithm
+class VTKIMAGINGMORPHOLOGICAL_EXPORT vtkImageThresholdConnectivity : public vtkImageAlgorithm
 {
 public:
-  static vtkImageThresholdConnectivity *New();
+  static vtkImageThresholdConnectivity* New();
   vtkTypeMacro(vtkImageThresholdConnectivity, vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set the seeds.  The seeds are in real data coordinates, not in
    * voxel index locations.
    */
-  void SetSeedPoints(vtkPoints *points);
+  void SetSeedPoints(vtkPoints* points);
   vtkGetObjectMacro(SeedPoints, vtkPoints);
   //@}
 
@@ -68,7 +67,7 @@ public:
   void ThresholdByLower(double thresh);
 
   /**
-   * Values within this range will be filled, where the range inludes
+   * Values within this range will be filled, where the range includes
    * values that are exactly equal to the lower and upper thresholds.
    */
   void ThresholdBetween(double lower, double upper);
@@ -77,9 +76,9 @@ public:
   /**
    * Replace the filled region by the value set by SetInValue().
    */
-  vtkSetMacro(ReplaceIn, int);
-  vtkGetMacro(ReplaceIn, int);
-  vtkBooleanMacro(ReplaceIn, int);
+  vtkSetMacro(ReplaceIn, vtkTypeBool);
+  vtkGetMacro(ReplaceIn, vtkTypeBool);
+  vtkBooleanMacro(ReplaceIn, vtkTypeBool);
   //@}
 
   //@{
@@ -94,9 +93,9 @@ public:
   /**
    * Replace the filled region by the value set by SetInValue().
    */
-  vtkSetMacro(ReplaceOut, int);
-  vtkGetMacro(ReplaceOut, int);
-  vtkBooleanMacro(ReplaceOut, int);
+  vtkSetMacro(ReplaceOut, vtkTypeBool);
+  vtkGetMacro(ReplaceOut, vtkTypeBool);
+  vtkBooleanMacro(ReplaceOut, vtkTypeBool);
   //@}
 
   //@{
@@ -132,8 +131,8 @@ public:
    * Specify a stencil that will be used to limit the flood fill to
    * an arbitrarily-shaped region of the image.
    */
-  virtual void SetStencilData(vtkImageStencilData *stencil);
-  vtkImageStencilData *GetStencil();
+  virtual void SetStencilData(vtkImageStencilData* stencil);
+  vtkImageStencilData* GetStencil();
   //@}
 
   //@{
@@ -141,8 +140,8 @@ public:
    * For multi-component images, you can set which component will be
    * used for the threshold checks.
    */
-  vtkSetMacro(ActiveComponent,int);
-  vtkGetMacro(ActiveComponent,int);
+  vtkSetMacro(ActiveComponent, int);
+  vtkGetMacro(ActiveComponent, int);
   //@}
 
   //@{
@@ -168,7 +167,7 @@ public:
   /**
    * Override the MTime to account for the seed points.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -180,19 +179,19 @@ public:
 
 protected:
   vtkImageThresholdConnectivity();
-  ~vtkImageThresholdConnectivity() VTK_OVERRIDE;
+  ~vtkImageThresholdConnectivity() override;
 
   double UpperThreshold;
   double LowerThreshold;
   double InValue;
   double OutValue;
-  int ReplaceIn;
-  int ReplaceOut;
+  vtkTypeBool ReplaceIn;
+  vtkTypeBool ReplaceOut;
 
   double NeighborhoodRadius[3];
   double NeighborhoodFraction;
 
-  vtkPoints *SeedPoints;
+  vtkPoints* SeedPoints;
 
   int SliceRangeX[2];
   int SliceRangeY[2];
@@ -202,19 +201,17 @@ protected:
 
   int ActiveComponent;
 
-  vtkImageData *ImageMask;
+  vtkImageData* ImageMask;
 
   void ComputeInputUpdateExtent(int inExt[6], int outExt[6]);
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkImageThresholdConnectivity(const vtkImageThresholdConnectivity&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageThresholdConnectivity&) VTK_DELETE_FUNCTION;
+  vtkImageThresholdConnectivity(const vtkImageThresholdConnectivity&) = delete;
+  void operator=(const vtkImageThresholdConnectivity&) = delete;
 };
 
 #endif

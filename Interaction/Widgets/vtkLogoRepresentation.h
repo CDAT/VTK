@@ -24,13 +24,13 @@
  *
  * @sa
  * vtkLogoWidget
-*/
+ */
 
 #ifndef vtkLogoRepresentation_h
 #define vtkLogoRepresentation_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkBorderRepresentation.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkImageData;
 class vtkImageProperty;
@@ -41,75 +41,74 @@ class vtkPolyDataMapper2D;
 class vtkTexturedActor2D;
 class vtkProperty2D;
 
-
 class VTKINTERACTIONWIDGETS_EXPORT vtkLogoRepresentation : public vtkBorderRepresentation
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkLogoRepresentation *New();
+  static vtkLogoRepresentation* New();
 
   //@{
   /**
    * Standard VTK class methods.
    */
-  vtkTypeMacro(vtkLogoRepresentation,vtkBorderRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkLogoRepresentation, vtkBorderRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
   /**
    * Specify/retrieve the image to display in the balloon.
    */
-  virtual void SetImage(vtkImageData *img);
-  vtkGetObjectMacro(Image,vtkImageData);
+  virtual void SetImage(vtkImageData* img);
+  vtkGetObjectMacro(Image, vtkImageData);
   //@}
 
   //@{
   /**
    * Set/get the image property (relevant only if an image is shown).
    */
-  virtual void SetImageProperty(vtkProperty2D *p);
-  vtkGetObjectMacro(ImageProperty,vtkProperty2D);
+  virtual void SetImageProperty(vtkProperty2D* p);
+  vtkGetObjectMacro(ImageProperty, vtkProperty2D);
   //@}
 
   /**
    * Satisfy the superclasses' API.
    */
-  void BuildRepresentation() VTK_OVERRIDE;
+  void BuildRepresentation() override;
 
   //@{
   /**
    * These methods are necessary to make this representation behave as
    * a vtkProp.
    */
-  void GetActors2D(vtkPropCollection *pc) VTK_OVERRIDE;
-  void ReleaseGraphicsResources(vtkWindow*) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport*) VTK_OVERRIDE;
+  void GetActors2D(vtkPropCollection* pc) override;
+  void ReleaseGraphicsResources(vtkWindow*) override;
+  int RenderOverlay(vtkViewport*) override;
   //@}
 
 protected:
   vtkLogoRepresentation();
-  ~vtkLogoRepresentation() VTK_OVERRIDE;
+  ~vtkLogoRepresentation() override;
 
   // data members
-  vtkImageData  *Image;
-  vtkProperty2D *ImageProperty;
+  vtkImageData* Image;
+  vtkProperty2D* ImageProperty;
 
   // Represent the image
-  vtkTexture          *Texture;
-  vtkPoints           *TexturePoints;
-  vtkPolyData         *TexturePolyData;
-  vtkPolyDataMapper2D *TextureMapper;
-  vtkTexturedActor2D          *TextureActor;
+  vtkTexture* Texture;
+  vtkPoints* TexturePoints;
+  vtkPolyData* TexturePolyData;
+  vtkPolyDataMapper2D* TextureMapper;
+  vtkTexturedActor2D* TextureActor;
 
   // Helper methods
   virtual void AdjustImageSize(double o[2], double borderSize[2], double imageSize[2]);
 
 private:
-  vtkLogoRepresentation(const vtkLogoRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLogoRepresentation&) VTK_DELETE_FUNCTION;
+  vtkLogoRepresentation(const vtkLogoRepresentation&) = delete;
+  void operator=(const vtkLogoRepresentation&) = delete;
 };
 
 #endif

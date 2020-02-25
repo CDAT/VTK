@@ -1,36 +1,8 @@
-set(Module_SRCS
-  vtkCompassRepresentation.cxx
-  vtkCompassWidget.cxx
-  vtkGeoAdaptiveArcs.cxx
-  vtkGeoAlignedImageSource.cxx
-  vtkGeoArcs.cxx
-  vtkGeoAssignCoordinates.cxx
-  vtkGeoCamera.cxx
-  vtkGeoFileImageSource.cxx
-  vtkGeoFileTerrainSource.cxx
-  vtkGeoGlobeSource.cxx
-  vtkGeoGraticule.cxx
-  vtkGeoImageNode.cxx
-  vtkGeoInteractorStyle.cxx
-  vtkGeoProjection.cxx
-  vtkGeoProjectionSource.cxx
-  vtkGeoRandomGraphSource.cxx
-  vtkGeoSampleArcs.cxx
-  vtkGeoSource.cxx
-  vtkGeoSphereTransform.cxx
-  vtkGeoTerrain.cxx
-  vtkGeoTerrain2D.cxx
-  vtkGeoTerrainNode.cxx
-  vtkGeoTransform.cxx
-  vtkGeoTreeNode.cxx
-  vtkGeoTreeNodeCache.cxx
-  vtkGlobeSource.cxx
-  vtkGeoAlignedImageRepresentation.cxx
-  )
+set(classes
+  vtkCompassRepresentation
+  vtkCompassWidget
+  vtkGeoProjection
+  vtkGeoTransform)
 
-set_source_files_properties(
-  vtkGeoSource
-  ABSTRACT
-  )
-
-vtk_module_library(vtkGeovisCore ${Module_SRCS})
+vtk_module_add_module(VTK::GeovisCore
+  CLASSES ${classes})

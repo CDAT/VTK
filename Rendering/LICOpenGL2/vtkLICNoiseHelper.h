@@ -15,10 +15,11 @@
  * @class   vtkLICNoiseHelper
  *
  * A small collection of noise routines for LIC
-*/
+ */
 
 #ifndef vtkLICNoiseHelper_h
 #define vtkLICNoiseHelper_h
+#ifndef __VTK_WRAP__
 
 #include "vtkRenderingLICOpenGL2Module.h" // for export
 
@@ -35,23 +36,14 @@ would prevent consistent output during regression tests.
 class vtkLICRandomNumberGeneratorInterface
 {
 public:
-  vtkLICRandomNumberGeneratorInterface()
-  {
-    this->RNG = vtkMinimalStandardRandomSequence::New();
-  }
+  vtkLICRandomNumberGeneratorInterface() { this->RNG = vtkMinimalStandardRandomSequence::New(); }
 
-  ~vtkLICRandomNumberGeneratorInterface()
-  {
-    this->RNG->Delete();
-  }
+  ~vtkLICRandomNumberGeneratorInterface() { this->RNG->Delete(); }
 
   /**
   Seed the random number generator
   */
-  void SetSeed(int seedVal)
-  {
-    this->RNG->SetSeed(seedVal);
-  }
+  void SetSeed(int seedVal) { this->RNG->SetSeed(seedVal); }
 
   /**
   Get a random number in the range of 0 to 1.
@@ -64,11 +56,11 @@ public:
   }
 
 private:
-  void operator=(const vtkLICRandomNumberGeneratorInterface &) VTK_DELETE_FUNCTION;
-  vtkLICRandomNumberGeneratorInterface(const vtkLICRandomNumberGeneratorInterface &) VTK_DELETE_FUNCTION;
+  void operator=(const vtkLICRandomNumberGeneratorInterface&) = delete;
+  vtkLICRandomNumberGeneratorInterface(const vtkLICRandomNumberGeneratorInterface&) = delete;
 
 private:
-  vtkMinimalStandardRandomSequence *RNG;
+  vtkMinimalStandardRandomSequence* RNG;
 };
 
 /**
@@ -80,7 +72,7 @@ desired frequency (f < 1 is impulse noise).
 class vtkLICRandomNoise2D
 {
 public:
-  vtkLICRandomNoise2D(){}
+  vtkLICRandomNoise2D() {}
 
   //@{
   /**
@@ -93,76 +85,48 @@ public:
    * type              - UNIFORM=0, GAUSSIAN=1, PERLIN=2
    * sideLen           - side length of square patch in pixels (in/out)
    * grainSize         - grain size of noise values in pixels (in/out)
-   * nLevels           - number of noise intesity levels
+   * nLevels           - number of noise intensity levels
    * minNoiseVal       - set the min for noise pixels (position distribution)
    * maxNoiseVal       - set the max for noise pixels (position distribution)
    * impulseProb       - probability of impulse noise,1 touches every pixel
    * impulseBgNoiseVal - set the background color for impulse noise
    * seed              - seed for random number generator
    */
-  enum {
+  enum
+  {
     UNIFORM = 0,
     GAUSSIAN = 1,
     PERLIN = 2
   };
-  float *Generate(
-        int type,
-        int &sideLen,
-        int &grainLize,
-        float minNoiseVal,
-        float maxNoiseVal,
-        int nLevels,
-        double impulseProb,
-        float impulseBgNoiseVal,
-        int seed);
+  float* Generate(int type, int& sideLen, int& grainLize, float minNoiseVal, float maxNoiseVal,
+    int nLevels, double impulseProb, float impulseBgNoiseVal, int seed);
   //@}
 
   /**
    * Delete the passed in array of values.
    */
-  void DeleteValues(unsigned char *vals){ free(vals); }
+  void DeleteValues(unsigned char* vals) { free(vals); }
 
-  static vtkImageData *GetNoiseResource();
+  static vtkImageData* GetNoiseResource();
 
 private:
   /**
    * Generate noise with a uniform distribution.
    */
-  float *GenerateUniform(
-        int sideLen,
-        int grainLize,
-        float minNoiseVal,
-        float maxNoiseVal,
-        int nLevels,
-        double impulseProb,
-        float impulseBgNoiseVal,
-        int seed);
+  float* GenerateUniform(int sideLen, int grainLize, float minNoiseVal, float maxNoiseVal,
+    int nLevels, double impulseProb, float impulseBgNoiseVal, int seed);
 
   /**
    * Generate noise with a Gaussian distribution.
    */
-  float *GenerateGaussian(
-        int sideLen,
-        int grainLize,
-        float minNoiseVal,
-        float maxNoiseVal,
-        int nLevels,
-        double impulseProb,
-        float impulseBgNoiseVal,
-        int seed);
+  float* GenerateGaussian(int sideLen, int grainLize, float minNoiseVal, float maxNoiseVal,
+    int nLevels, double impulseProb, float impulseBgNoiseVal, int seed);
 
   /**
    * Generate Perlin noise with a Gaussian distribution.
    */
-  float *GeneratePerlin(
-        int sideLen,
-        int grainLize,
-        float minNoiseVal,
-        float maxNoiseVal,
-        int nLevels,
-        double impulseProb,
-        float impulseBgNoiseVal,
-        int seed);
+  float* GeneratePerlin(int sideLen, int grainLize, float minNoiseVal, float maxNoiseVal,
+    int nLevels, double impulseProb, float impulseBgNoiseVal, int seed);
 
   /**
    * A way of controlling the probability (from 0.0 to 1.0) that you
@@ -177,12 +141,13 @@ private:
    * given a desired patch side length and a grain size. This ensures that all
    * grains are the same size.
    */
-  void GetValidDimensionAndGrainSize(int type, int &dim, int &grainSize);
+  void GetValidDimensionAndGrainSize(int type, int& dim, int& grainSize);
 
 private:
   vtkLICRandomNumberGeneratorInterface ValueGen;
   vtkLICRandomNumberGeneratorInterface ProbGen;
 };
 
+#endif
 #endif
 // VTK-HeaderTest-Exclude: vtkLICNoiseHelper.h

@@ -21,13 +21,12 @@
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkRTAnalyticSource.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRTAnalyticSource.h"
+#include "vtkRenderer.h"
 #include "vtkSphere.h"
-
 
 int TestVTKMClipWithImplicitFunction(int argc, char* argv[])
 {
@@ -40,7 +39,7 @@ int TestVTKMClipWithImplicitFunction(int argc, char* argv[])
   sphere->SetRadius(10);
   vtkNew<vtkmClip> clip;
   clip->SetInputConnection(wavelet->GetOutputPort());
-  clip->SetClipFunction(sphere.GetPointer());
+  clip->SetClipFunction(sphere);
 
   vtkNew<vtkDataSetSurfaceFilter> surface;
   surface->SetInputConnection(clip->GetOutputPort());
@@ -50,21 +49,21 @@ int TestVTKMClipWithImplicitFunction(int argc, char* argv[])
   mapper->SetScalarRange(37, 150);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.GetPointer());
+  renderer->AddActor(actor);
   renderer->ResetCamera();
 
   vtkNew<vtkRenderWindow> renWin;
-  renWin->AddRenderer(renderer.GetPointer());
+  renWin->AddRenderer(renderer);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
   iren->Initialize();
 
   renWin->Render();
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
+  int retVal = vtkRegressionTestImage(renWin);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

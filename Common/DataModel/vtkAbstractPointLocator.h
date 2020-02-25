@@ -25,7 +25,7 @@
  *
  * @sa
  * vtkPointLocator vtkStaticPointLocator vtkMergePoints
-*/
+ */
 
 #ifndef vtkAbstractPointLocator_h
 #define vtkAbstractPointLocator_h
@@ -42,8 +42,8 @@ public:
   /**
    * Standard type and print methods.
    */
-  vtkTypeMacro(vtkAbstractPointLocator,vtkLocator);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAbstractPointLocator, vtkLocator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -74,10 +74,8 @@ public:
    * These methods are thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  virtual void FindClosestNPoints(
-    int N, const double x[3], vtkIdList *result) = 0;
-  void FindClosestNPoints(int N, double x, double y, double z,
-                          vtkIdList *result);
+  virtual void FindClosestNPoints(int N, const double x[3], vtkIdList* result) = 0;
+  void FindClosestNPoints(int N, double x, double y, double z, vtkIdList* result);
   //@}
 
   //@{
@@ -87,36 +85,36 @@ public:
    * These methods are thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  virtual void FindPointsWithinRadius(double R, const double x[3],
-                                      vtkIdList *result) = 0;
-  void FindPointsWithinRadius(double R, double x, double y, double z,
-                                      vtkIdList *result);
+  virtual void FindPointsWithinRadius(double R, const double x[3], vtkIdList* result) = 0;
+  void FindPointsWithinRadius(double R, double x, double y, double z, vtkIdList* result);
   //@}
 
+  //@{
   /**
-   * Provide an accessor to the bounds.
+   * Provide an accessor to the bounds. Valid after the locator is built.
    */
-  virtual double *GetBounds() { return this->Bounds; }
+  virtual double* GetBounds() { return this->Bounds; }
   virtual void GetBounds(double*);
+  //@}
 
   //@{
   /**
    * Return the total number of buckets in the locator. This has meaning only
    * after the locator is constructed.
    */
-  vtkGetMacro(NumberOfBuckets,vtkIdType);
+  vtkGetMacro(NumberOfBuckets, vtkIdType);
   //@}
 
 protected:
   vtkAbstractPointLocator();
-  ~vtkAbstractPointLocator() VTK_OVERRIDE;
+  ~vtkAbstractPointLocator() override;
 
-  double Bounds[6]; // bounds of points
+  double Bounds[6];          // bounds of points
   vtkIdType NumberOfBuckets; // total size of locator
 
 private:
-  vtkAbstractPointLocator(const vtkAbstractPointLocator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAbstractPointLocator&) VTK_DELETE_FUNCTION;
+  vtkAbstractPointLocator(const vtkAbstractPointLocator&) = delete;
+  void operator=(const vtkAbstractPointLocator&) = delete;
 };
 
 #endif

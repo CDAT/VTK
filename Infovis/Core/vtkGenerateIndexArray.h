@@ -40,21 +40,21 @@
  * useful when generating tensors, since it allows us to "map"
  * from an array with arbitrary contents to an index that can
  * be used as tensor coordinates.
-*/
+ */
 
 #ifndef vtkGenerateIndexArray_h
 #define vtkGenerateIndexArray_h
 
-#include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkDataObjectAlgorithm.h"
+#include "vtkInfovisCoreModule.h" // For export macro
 
 class VTKINFOVISCORE_EXPORT vtkGenerateIndexArray : public vtkDataObjectAlgorithm
 {
 public:
-  static vtkGenerateIndexArray *New();
+  static vtkGenerateIndexArray* New();
 
   vtkTypeMacro(vtkGenerateIndexArray, vtkDataObjectAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -100,22 +100,15 @@ public:
 
 protected:
   vtkGenerateIndexArray();
-  ~vtkGenerateIndexArray() VTK_OVERRIDE;
+  ~vtkGenerateIndexArray() override;
 
-  int ProcessRequest(
-    vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestDataObject(
-    vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   char* ArrayName;
   int FieldType;
@@ -123,9 +116,8 @@ protected:
   int PedigreeID;
 
 private:
-  vtkGenerateIndexArray(const vtkGenerateIndexArray&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenerateIndexArray&) VTK_DELETE_FUNCTION;
+  vtkGenerateIndexArray(const vtkGenerateIndexArray&) = delete;
+  void operator=(const vtkGenerateIndexArray&) = delete;
 };
 
 #endif
-

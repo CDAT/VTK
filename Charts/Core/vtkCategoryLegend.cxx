@@ -13,8 +13,8 @@
 
 =========================================================================*/
 
-#include "vtkBrush.h"
 #include "vtkCategoryLegend.h"
+#include "vtkBrush.h"
 #include "vtkContext2D.h"
 #include "vtkObjectFactory.h"
 #include "vtkScalarsToColors.h"
@@ -47,9 +47,7 @@ vtkCategoryLegend::vtkCategoryLegend()
 }
 
 //-----------------------------------------------------------------------------
-vtkCategoryLegend::~vtkCategoryLegend()
-{
-}
+vtkCategoryLegend::~vtkCategoryLegend() = default;
 
 //-----------------------------------------------------------------------------
 bool vtkCategoryLegend::Paint(vtkContext2D* painter)
@@ -60,18 +58,18 @@ bool vtkCategoryLegend::Paint(vtkContext2D* painter)
   }
 
   // Draw a box around the legend.
-  painter->ApplyPen(this->Pen.GetPointer());
-  painter->ApplyBrush(this->Brush.GetPointer());
+  painter->ApplyPen(this->Pen);
+  painter->ApplyBrush(this->Brush);
   this->GetBoundingRect(painter);
-  painter->DrawRect(this->Rect.GetX(), this->Rect.GetY(),
-                    this->Rect.GetWidth(), this->Rect.GetHeight());
+  painter->DrawRect(
+    this->Rect.GetX(), this->Rect.GetY(), this->Rect.GetWidth(), this->Rect.GetHeight());
 
   // Draw the title (if any)
   vtkVector2f stringBounds[2];
   float titleHeight = 0.0;
   if (!this->Title.empty())
   {
-    painter->ApplyTextProp(this->TitleProperties.GetPointer());
+    painter->ApplyTextProp(this->TitleProperties);
     painter->ComputeStringBounds(this->Title, stringBounds->GetData());
     titleHeight = stringBounds[1].GetY() + this->Padding;
 
@@ -80,7 +78,7 @@ bool vtkCategoryLegend::Paint(vtkContext2D* painter)
     painter->DrawString(x, y, this->Title);
   }
 
-  painter->ApplyTextProp(this->LabelProperties.GetPointer());
+  painter->ApplyTextProp(this->LabelProperties);
 
   // compute the height of a sample string.
   // The height of this string will also be used as the size of
@@ -93,8 +91,8 @@ bool vtkCategoryLegend::Paint(vtkContext2D* painter)
   float labelX = markX + stringHeight + this->Padding;
 
   // the Y value of the row that we're currently drawing
-  float y = this->Rect.GetY() + this->Rect.GetHeight() -
-                  this->Padding - floor(stringHeight) - titleHeight;
+  float y =
+    this->Rect.GetY() + this->Rect.GetHeight() - this->Padding - floor(stringHeight) - titleHeight;
 
   // draw all of the marks & labels
   for (vtkIdType l = 0; l < this->Values->GetNumberOfTuples(); ++l)
@@ -105,8 +103,7 @@ bool vtkCategoryLegend::Paint(vtkContext2D* painter)
       continue;
     }
 
-    if (this->ScalarsToColors->GetAnnotatedValueIndex(
-      this->Values->GetValue(l)) == -1)
+    if (this->ScalarsToColors->GetAnnotatedValueIndex(this->Values->GetValue(l)) == -1)
     {
       continue;
     }
@@ -128,8 +125,7 @@ bool vtkCategoryLegend::Paint(vtkContext2D* painter)
   {
     // paint the outlier color mark
     double color[4];
-    this->ScalarsToColors->GetAnnotationColor(
-      this->ScalarsToColors->GetAnnotatedValue(-1), color);
+    this->ScalarsToColors->GetAnnotationColor(this->ScalarsToColors->GetAnnotatedValue(-1), color);
     painter->GetBrush()->SetColorF(color[0], color[1], color[2]);
     painter->DrawRect(markX, y, stringHeight, stringHeight);
 
@@ -147,23 +143,21 @@ void vtkCategoryLegend::SetScalarsToColors(vtkScalarsToColors* stc)
 }
 
 //-----------------------------------------------------------------------------
-vtkScalarsToColors * vtkCategoryLegend::GetScalarsToColors()
+vtkScalarsToColors* vtkCategoryLegend::GetScalarsToColors()
 {
   return this->ScalarsToColors;
 }
 
 //-----------------------------------------------------------------------------
-vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D *painter)
+vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D* painter)
 {
-  if (this->CacheBounds && this->RectTime > this->GetMTime() &&
-      this->RectTime > this->PlotTime &&
-      this->RectTime > this->ScalarsToColors->GetMTime() &&
-      this->RectTime > this->Values->GetMTime())
+  if (this->CacheBounds && this->RectTime > this->GetMTime() && this->RectTime > this->PlotTime &&
+    this->RectTime > this->ScalarsToColors->GetMTime() && this->RectTime > this->Values->GetMTime())
   {
     return this->Rect;
   }
 
-  painter->ApplyTextProp(this->LabelProperties.GetPointer());
+  painter->ApplyTextProp(this->LabelProperties);
 
   vtkVector2f stringBounds[2];
   painter->ComputeStringBounds("Tgyf", stringBounds->GetData());
@@ -182,13 +176,13 @@ vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D *painter)
   float titleWidth = 0.0f;
   if (!this->Title.empty())
   {
-    painter->ApplyTextProp(this->TitleProperties.GetPointer());
+    painter->ApplyTextProp(this->TitleProperties);
 
     painter->ComputeStringBounds(this->Title, stringBounds->GetData());
     titleWidth = stringBounds[1].GetX();
     titleHeight = stringBounds[1].GetY() + this->Padding;
 
-    painter->ApplyTextProp(this->LabelProperties.GetPointer());
+    painter->ApplyTextProp(this->LabelProperties);
   }
 
   // Calculate the widest legend label
@@ -204,15 +198,13 @@ vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D *painter)
       ++numSkippedValues;
       continue;
     }
-    if (this->ScalarsToColors->GetAnnotatedValueIndex(
-      this->Values->GetValue(l)) == -1)
+    if (this->ScalarsToColors->GetAnnotatedValueIndex(this->Values->GetValue(l)) == -1)
     {
       ++numSkippedValues;
       this->HasOutliers = true;
       continue;
     }
-    painter->ComputeStringBounds(this->Values->GetValue(l).ToString(),
-                                 stringBounds->GetData());
+    painter->ComputeStringBounds(this->Values->GetValue(l).ToString(), stringBounds->GetData());
     if (stringBounds[1].GetX() > maxWidth)
     {
       maxWidth = stringBounds[1].GetX();
@@ -222,8 +214,7 @@ vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D *painter)
   // Calculate size of outlier label (if necessary)
   if (this->HasOutliers)
   {
-    painter->ComputeStringBounds(this->OutlierLabel,
-                                 stringBounds->GetData());
+    painter->ComputeStringBounds(this->OutlierLabel, stringBounds->GetData());
     if (stringBounds[1].GetX() > maxWidth)
     {
       maxWidth = stringBounds[1].GetX();
@@ -246,8 +237,7 @@ vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D *painter)
   // color mark and its label.
   float w = ceil(maxWidth + 3 * this->Padding + height);
 
-  float h = ceil((numLabels * (height + this->Padding)) + this->Padding
-            + titleHeight);
+  float h = ceil((numLabels * (height + this->Padding)) + this->Padding + titleHeight);
 
   float x = floor(this->Point[0]);
   float y = floor(this->Point[1]);
@@ -276,7 +266,7 @@ vtkRectf vtkCategoryLegend::GetBoundingRect(vtkContext2D *painter)
 }
 
 //-----------------------------------------------------------------------------
-void vtkCategoryLegend::SetTitle(const vtkStdString &title)
+void vtkCategoryLegend::SetTitle(const vtkStdString& title)
 {
   this->Title = title;
 }

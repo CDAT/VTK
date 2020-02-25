@@ -19,11 +19,11 @@
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
-#include "vtkUnstructuredGrid.h"
-#include "vtkMath.h"
 #include "vtkTransform.h"
+#include "vtkUnstructuredGrid.h"
 
 vtkStandardNewMacro(vtkRotationFilter);
 
@@ -38,44 +38,38 @@ vtkRotationFilter::vtkRotationFilter()
 }
 
 //---------------------------------------------------------------------------
-vtkRotationFilter::~vtkRotationFilter()
-{
-}
+vtkRotationFilter::~vtkRotationFilter() = default;
 
 //---------------------------------------------------------------------------
-void vtkRotationFilter::PrintSelf(ostream &os, vtkIndent indent)
+void vtkRotationFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 
   os << indent << "Axis: " << this->Axis << endl;
   os << indent << "CopyInput: " << this->CopyInput << endl;
-  os << indent << "Center: (" << this->Center[0] << "," << this->Center[1]
-               << "," << this->Center[2] << ")" << endl;
+  os << indent << "Center: (" << this->Center[0] << "," << this->Center[1] << "," << this->Center[2]
+     << ")" << endl;
   os << indent << "NumberOfCopies: " << this->NumberOfCopies << endl;
   os << indent << "Angle: " << this->Angle << endl;
 }
 
 //---------------------------------------------------------------------------
-int vtkRotationFilter::RequestData(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector,
-  vtkInformationVector *outputVector)
+int vtkRotationFilter::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // get the info objects
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
   // get the input and output
-  vtkDataSet *input = vtkDataSet::SafeDownCast(
-    inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet* input = vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkUnstructuredGrid* output =
+    vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  vtkIdType i;
-  vtkPointData *inPD = input->GetPointData();
-  vtkPointData *outPD = output->GetPointData();
-  vtkCellData *inCD = input->GetCellData();
-  vtkCellData *outCD = output->GetCellData();
+  vtkPointData* inPD = input->GetPointData();
+  vtkPointData* outPD = output->GetPointData();
+  vtkCellData* inCD = input->GetCellData();
+  vtkCellData* outCD = output->GetCellData();
 
   if (!this->GetNumberOfCopies())
   {
@@ -84,11 +78,11 @@ int vtkRotationFilter::RequestData(
   }
 
   double tuple[3];
-  vtkPoints *outPoints;
+  vtkPoints* outPoints;
   double point[3], center[3], negativCenter[3];
-  int ptId, cellId, j, k;
-  vtkGenericCell *cell = vtkGenericCell::New();
-  vtkIdList *ptIds = vtkIdList::New();
+  vtkIdType ptId, cellId;
+  vtkGenericCell* cell = vtkGenericCell::New();
+  vtkIdList* ptIds = vtkIdList::New();
 
   outPoints = vtkPoints::New();
 
@@ -102,8 +96,8 @@ int vtkRotationFilter::RequestData(
   }
   else
   {
-    outPoints->Allocate( this->GetNumberOfCopies() * numPts);
-    output->Allocate( this->GetNumberOfCopies() * numPts);
+    outPoints->Allocate(this->GetNumberOfCopies() * numPts);
+    output->Allocate(this->GetNumberOfCopies() * numPts);
   }
 
   outPD->CopyAllocate(inPD);
@@ -122,14 +116,14 @@ int vtkRotationFilter::RequestData(
   // Copy first points.
   if (this->CopyInput)
   {
-    for (i = 0; i < numPts; i++)
+    for (vtkIdType i = 0; i < numPts; ++i)
     {
       input->GetPoint(i, point);
       ptId = outPoints->InsertNextPoint(point);
       outPD->CopyData(inPD, i, ptId);
     }
   }
-  vtkTransform *localTransform = vtkTransform::New();
+  vtkTransform* localTransform = vtkTransform::New();
   // Rotate points.
   // double angle = vtkMath::RadiansFromDegrees( this->GetAngle() );
   this->GetCenter(center);
@@ -137,54 +131,53 @@ int vtkRotationFilter::RequestData(
   negativCenter[1] = -center[1];
   negativCenter[2] = -center[2];
 
-  for (k = 0; k < this->GetNumberOfCopies(); k++)
+  for (int k = 0; k < this->GetNumberOfCopies(); ++k)
   {
-   localTransform->Identity();
-   localTransform->Translate(center);
-   switch (this->Axis)
-   {
-     case USE_X:
-        localTransform->RotateX((k+1)*this->GetAngle());
-     break;
-
-     case USE_Y:
-        localTransform->RotateY((k+1)*this->GetAngle());
-     break;
-
-     case USE_Z:
-        localTransform->RotateZ((k+1)*this->GetAngle());
-     break;
-   }
-   localTransform->Translate(negativCenter);
-   for (i = 0; i < numPts; i++)
-   {
-    input->GetPoint(i, point);
-    localTransform->TransformPoint(point, point);
-    ptId = outPoints->InsertNextPoint(point);
-    outPD->CopyData(inPD, i, ptId);
-    if (inPtVectors)
+    localTransform->Identity();
+    localTransform->Translate(center);
+    switch (this->Axis)
     {
-      inPtVectors->GetTuple(i, tuple);
-      outPtVectors->SetTuple(ptId, tuple);
+      case USE_X:
+        localTransform->RotateX((k + 1) * this->GetAngle());
+        break;
+
+      case USE_Y:
+        localTransform->RotateY((k + 1) * this->GetAngle());
+        break;
+
+      case USE_Z:
+        localTransform->RotateZ((k + 1) * this->GetAngle());
+        break;
     }
-    if (inPtNormals)
+    localTransform->Translate(negativCenter);
+    for (vtkIdType i = 0; i < numPts; ++i)
     {
-      //inPtNormals->GetTuple(i, tuple);
-      //outPtNormals->SetTuple(ptId, tuple);
+      input->GetPoint(i, point);
+      localTransform->TransformPoint(point, point);
+      ptId = outPoints->InsertNextPoint(point);
+      outPD->CopyData(inPD, i, ptId);
+      if (inPtVectors)
+      {
+        inPtVectors->GetTuple(i, tuple);
+        outPtVectors->SetTuple(ptId, tuple);
+      }
+      if (inPtNormals)
+      {
+        // inPtNormals->GetTuple(i, tuple);
+        // outPtNormals->SetTuple(ptId, tuple);
+      }
     }
-   }
   }
 
   localTransform->Delete();
 
-  int numCellPts,  cellType;
-  vtkIdType *newCellPts;
-  vtkIdList *cellPts;
+  vtkIdType* newCellPts;
+  vtkIdList* cellPts;
 
   // Copy original cells.
   if (this->CopyInput)
   {
-    for (i = 0; i < numCells; i++)
+    for (vtkIdType i = 0; i < numCells; ++i)
     {
       input->GetCellPoints(i, ptIds);
       output->InsertNextCell(input->GetCellType(i), ptIds);
@@ -193,15 +186,15 @@ int vtkRotationFilter::RequestData(
   }
 
   // Generate rotated cells.
-  for (k = 0; k < this->GetNumberOfCopies(); k++)
+  for (int k = 0; k < this->GetNumberOfCopies(); ++k)
   {
-    for (i = 0; i < numCells; i++)
+    for (vtkIdType i = 0; i < numCells; ++i)
     {
-       input->GetCellPoints(i, ptIds);
-       input->GetCell(i, cell);
-       numCellPts = cell->GetNumberOfPoints();
-       cellType = cell->GetCellType();
-       cellPts = cell->GetPointIds();
+      input->GetCellPoints(i, ptIds);
+      input->GetCell(i, cell);
+      vtkIdType numCellPts = cell->GetNumberOfPoints();
+      int cellType = cell->GetCellType();
+      cellPts = cell->GetPointIds();
       // Triangle strips with even number of triangles have
       // to be handled specially. A degenerate triangle is
       // introduce to flip all the triangles properly.
@@ -214,20 +207,20 @@ int vtkRotationFilter::RequestData(
       {
         vtkDebugMacro(<< "celltype " << cellType << " numCellPts " << numCellPts);
         newCellPts = new vtkIdType[numCellPts];
-        //for (j = numCellPts-1; j >= 0; j--)
-        for (j = 0; j < numCellPts; j++)
+        // for (j = numCellPts-1; j >= 0; j--)
+        for (vtkIdType j = 0; j < numCellPts; ++j)
         {
-          //newCellPts[numCellPts-1-j] = cellPts->GetId(j) + numPts*k;
-          newCellPts[j] = cellPts->GetId(j) + numPts*k;
-           if (this->CopyInput)
-           {
-             //newCellPts[numCellPts-1-j] += numPts;
-             newCellPts[j] += numPts;
-           }
+          // newCellPts[numCellPts-1-j] = cellPts->GetId(j) + numPts*k;
+          newCellPts[j] = cellPts->GetId(j) + numPts * k;
+          if (this->CopyInput)
+          {
+            // newCellPts[numCellPts-1-j] += numPts;
+            newCellPts[j] += numPts;
+          }
         }
       }
       cellId = output->InsertNextCell(cellType, numCellPts, newCellPts);
-      delete [] newCellPts;
+      delete[] newCellPts;
       outCD->CopyData(inCD, i, cellId);
       if (inCellVectors)
       {
@@ -236,8 +229,8 @@ int vtkRotationFilter::RequestData(
       }
       if (inCellNormals)
       {
-        //inCellNormals->GetTuple(i, tuple);
-        //outCellNormals->SetTuple(cellId, tuple);
+        // inCellNormals->GetTuple(i, tuple);
+        // outCellNormals->SetTuple(cellId, tuple);
       }
     }
   }
@@ -251,7 +244,7 @@ int vtkRotationFilter::RequestData(
   return 1;
 }
 
-int vtkRotationFilter::FillInputPortInformation(int, vtkInformation *info)
+int vtkRotationFilter::FillInputPortInformation(int, vtkInformation* info)
 {
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkDataSet");
   return 1;

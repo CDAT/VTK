@@ -25,7 +25,7 @@
  * resolution number of sides) is created. It also is possible to control
  * whether the bottom of the cone is capped with a (resolution-sided)
  * polygon, and to specify the height and radius of the cone.
-*/
+ */
 
 #ifndef vtkConeSource_h
 #define vtkConeSource_h
@@ -38,39 +38,39 @@
 class VTKFILTERSSOURCES_EXPORT vtkConeSource : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkConeSource,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkConeSource, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct with default resolution 6, height 1.0, radius 0.5, and
    * capping on. The cone is centered at the origin and points down
    * the x-axis.
    */
-  static vtkConeSource *New();
+  static vtkConeSource* New();
 
   //@{
   /**
    * Set the height of the cone. This is the height along the cone in
    * its specified direction.
    */
-  vtkSetClampMacro(Height,double,0.0,VTK_DOUBLE_MAX)
-  vtkGetMacro(Height,double);
+  vtkSetClampMacro(Height, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(Height, double);
   //@}
 
   //@{
   /**
    * Set the base radius of the cone.
    */
-  vtkSetClampMacro(Radius,double,0.0,VTK_DOUBLE_MAX)
-  vtkGetMacro(Radius,double);
+  vtkSetClampMacro(Radius, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(Radius, double);
   //@}
 
   //@{
   /**
    * Set the number of facets used to represent the cone.
    */
-  vtkSetClampMacro(Resolution,int,0,VTK_CELL_SIZE)
-  vtkGetMacro(Resolution,int);
+  vtkSetClampMacro(Resolution, int, 0, VTK_CELL_SIZE);
+  vtkGetMacro(Resolution, int);
   //@}
 
   //@{
@@ -79,8 +79,8 @@ public:
    * the cone. Warning: this is not the center of the base of the cone!
    * The default is 0,0,0.
    */
-  vtkSetVector3Macro(Center,double);
-  vtkGetVectorMacro(Center,double,3);
+  vtkSetVector3Macro(Center, double);
+  vtkGetVectorMacro(Center, double, 3);
   //@}
 
   //@{
@@ -89,8 +89,8 @@ public:
    * to be normalized. The direction goes from the center of the base toward
    * the apex. The default is (1,0,0).
    */
-  vtkSetVector3Macro(Direction,double);
-  vtkGetVectorMacro(Direction,double,3);
+  vtkSetVector3Macro(Direction, double);
+  vtkGetVectorMacro(Direction, double, 3);
   //@}
 
   //@{
@@ -101,17 +101,17 @@ public:
    * As a side effect, the angle plus height sets the base radius of the cone.
    * Angle is expressed in degrees.
    */
-  void SetAngle (double angle);
-  double GetAngle ();
+  void SetAngle(double angle);
+  double GetAngle();
   //@}
 
   //@{
   /**
    * Turn on/off whether to cap the base of the cone with a polygon.
    */
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, vtkTypeBool);
+  vtkGetMacro(Capping, vtkTypeBool);
+  vtkBooleanMacro(Capping, vtkTypeBool);
   //@}
 
   //@{
@@ -120,30 +120,28 @@ public:
    * vtkAlgorithm::SINGLE_PRECISION - Output single-precision floating point.
    * vtkAlgorithm::DOUBLE_PRECISION - Output double-precision floating point.
    */
-  vtkSetMacro(OutputPointsPrecision,int);
-  vtkGetMacro(OutputPointsPrecision,int);
+  vtkSetMacro(OutputPointsPrecision, int);
+  vtkGetMacro(OutputPointsPrecision, int);
   //@}
 
 protected:
-  vtkConeSource(int res=6);
-  ~vtkConeSource() VTK_OVERRIDE {}
+  vtkConeSource(int res = 6);
+  ~vtkConeSource() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   double Height;
   double Radius;
   int Resolution;
-  int Capping;
+  vtkTypeBool Capping;
   double Center[3];
   double Direction[3];
   int OutputPointsPrecision;
 
 private:
-  vtkConeSource(const vtkConeSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkConeSource&) VTK_DELETE_FUNCTION;
+  vtkConeSource(const vtkConeSource&) = delete;
+  void operator=(const vtkConeSource&) = delete;
 };
 
 #endif
-
-

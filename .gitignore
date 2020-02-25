@@ -12,3 +12,10 @@ __pycache__/
 # Exclude some Xcode stuff.
 xcuserdata
 project.xcworkspace
+
+# Exclude VSCode settings and configuration folder
+*.vscode*
+
+# Exclude Visual Studio stuff
+.vs*
+CMakeSettings.json

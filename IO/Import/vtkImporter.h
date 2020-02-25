@@ -40,7 +40,7 @@
  *
  * @sa
  * vtk3DSImporter vtkExporter
-*/
+ */
 
 #ifndef vtkImporter_h
 #define vtkImporter_h
@@ -48,22 +48,26 @@
 #include "vtkIOImportModule.h" // For export macro
 #include "vtkObject.h"
 
+#include <string>
+
+class vtkDataArray;
+class vtkDataSet;
+class vtkDoubleArray;
 class vtkRenderWindow;
 class vtkRenderer;
 
 class VTKIOIMPORT_EXPORT vtkImporter : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkImporter,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-
+  vtkTypeMacro(vtkImporter, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the renderer that contains the imported actors, cameras and
    * lights.
    */
-  vtkGetObjectMacro(Renderer,vtkRenderer);
+  vtkGetObjectMacro(Renderer, vtkRenderer);
   //@}
 
   //@{
@@ -76,42 +80,80 @@ public:
    * can be accessed using GetRenderer.
    */
   virtual void SetRenderWindow(vtkRenderWindow*);
-  vtkGetObjectMacro(RenderWindow,vtkRenderWindow);
+  vtkGetObjectMacro(RenderWindow, vtkRenderWindow);
   //@}
-
 
   //@{
   /**
    * Import the actors, cameras, lights and properties into a vtkRenderWindow.
    */
   void Read();
-  void Update() {this->Read();};
+  void Update() { this->Read(); }
   //@}
 
+  /**
+   * Recover a printable string that let importer implementation
+   * Describe their outputs.
+   */
+  virtual std::string GetOutputsDescription() { return ""; };
+
+  /**
+   * Get the number of available animations.
+   * Return -1 if not provided by implementation.
+   */
+  virtual vtkIdType GetNumberOfAnimations();
+
+  /**
+   * Get the name of an animation.
+   * Return an empty if not provided by implementation.
+   */
+  virtual std::string GetAnimationName(vtkIdType vtkNotUsed(animationIndex)) { return ""; };
+
+  //@{
+  /**
+   * Enable/Disable/Get the status of specific animations
+   */
+  virtual void EnableAnimation(vtkIdType vtkNotUsed(animationIndex)){};
+  virtual void DisableAnimation(vtkIdType vtkNotUsed(animationIndex)){};
+  virtual bool IsAnimationEnabled(vtkIdType vtkNotUsed(animationIndex)) { return false; };
+  //@}
+
+  /**
+   * Get temporal informations for the currently enabled animations.
+   * the three return arguments can be defined or not.
+   * Return true in case of success, false otherwise.
+   */
+  virtual bool GetTemporalInformation(
+    vtkIdType animationIndex, int& nbTimeSteps, double timeRange[2], vtkDoubleArray* timeSteps);
+
+  /**
+   * Import the actors, camera, lights and properties at a specific timestep.
+   * If not reimplemented, only call Update().
+   */
+  virtual void UpdateTimeStep(double timeStep);
 
 protected:
   vtkImporter();
-  ~vtkImporter() VTK_OVERRIDE;
+  ~vtkImporter() override;
 
-  virtual int ImportBegin () {return 1;};
-  virtual void ImportEnd () {}
-  virtual void ImportActors (vtkRenderer*) {}
-  virtual void ImportCameras (vtkRenderer*) {}
-  virtual void ImportLights (vtkRenderer*) {}
-  virtual void ImportProperties (vtkRenderer*) {}
+  virtual int ImportBegin() { return 1; }
+  virtual void ImportEnd() {}
+  virtual void ImportActors(vtkRenderer*) {}
+  virtual void ImportCameras(vtkRenderer*) {}
+  virtual void ImportLights(vtkRenderer*) {}
+  virtual void ImportProperties(vtkRenderer*) {}
 
-  vtkRenderer *Renderer;
-  vtkRenderWindow *RenderWindow;
+  static std::string GetDataSetDescription(vtkDataSet* ds, vtkIndent indent);
+  static std::string GetArrayDescription(vtkDataArray* array, vtkIndent indent);
+
+  vtkRenderer* Renderer;
+  vtkRenderWindow* RenderWindow;
 
   virtual void ReadData();
 
 private:
-  vtkImporter(const vtkImporter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImporter&) VTK_DELETE_FUNCTION;
+  vtkImporter(const vtkImporter&) = delete;
+  void operator=(const vtkImporter&) = delete;
 };
 
 #endif
-
-
-
-

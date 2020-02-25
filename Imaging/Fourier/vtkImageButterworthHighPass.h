@@ -19,18 +19,17 @@
  * This filter only works on an image after it has been converted to
  * frequency domain by a vtkImageFFT filter.  A vtkImageRFFT filter
  * can be used to convert the output back into the spatial domain.
- * vtkImageButterworthHighPass  the frequency components around 0 are
+ * vtkImageButterworthHighPass the frequency components around 0 are
  * attenuated.  Input and output are in doubles, with two components
  * (complex numbers).
  * out(i, j) = 1 / (1 + pow(CutOff/Freq(i,j), 2*Order));
  *
  * @sa
  * vtkImageButterworthLowPass
-*/
+ */
 
 #ifndef vtkImageButterworthHighPass_h
 #define vtkImageButterworthHighPass_h
-
 
 #include "vtkImagingFourierModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -38,9 +37,9 @@
 class VTKIMAGINGFOURIER_EXPORT vtkImageButterworthHighPass : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageButterworthHighPass *New();
-  vtkTypeMacro(vtkImageButterworthHighPass,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageButterworthHighPass* New();
+  vtkTypeMacro(vtkImageButterworthHighPass, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -48,15 +47,15 @@ public:
    * The values are specified in the order X, Y, Z, Time.
    * Units: Cycles per world unit (as defined by the data spacing).
    */
-  vtkSetVector3Macro(CutOff,double);
-  void SetCutOff(double v) {this->SetCutOff(v, v, v);}
+  vtkSetVector3Macro(CutOff, double);
+  void SetCutOff(double v) { this->SetCutOff(v, v, v); }
   void SetXCutOff(double v);
   void SetYCutOff(double v);
   void SetZCutOff(double v);
-  vtkGetVector3Macro(CutOff,double);
-  double GetXCutOff() {return this->CutOff[0];}
-  double GetYCutOff() {return this->CutOff[1];}
-  double GetZCutOff() {return this->CutOff[2];}
+  vtkGetVector3Macro(CutOff, double);
+  double GetXCutOff() { return this->CutOff[0]; }
+  double GetYCutOff() { return this->CutOff[1]; }
+  double GetZCutOff() { return this->CutOff[2]; }
   //@}
 
   //@{
@@ -69,19 +68,18 @@ public:
 
 protected:
   vtkImageButterworthHighPass();
-  ~vtkImageButterworthHighPass()VTK_OVERRIDE {}
+  ~vtkImageButterworthHighPass() override {}
 
   int Order;
   double CutOff[3];
 
-  void ThreadedRequestData(vtkInformation *request,
-                           vtkInformationVector **inputVector,
-                           vtkInformationVector *outputVector,
-                           vtkImageData ***inData, vtkImageData **outData,
-                           int outExt[6], int id) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData,
+    int outExt[6], int id) override;
+
 private:
-  vtkImageButterworthHighPass(const vtkImageButterworthHighPass&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageButterworthHighPass&) VTK_DELETE_FUNCTION;
+  vtkImageButterworthHighPass(const vtkImageButterworthHighPass&) = delete;
+  void operator=(const vtkImageButterworthHighPass&) = delete;
 };
 
 #endif

@@ -17,7 +17,7 @@
  * @brief   vtkViewNode specialized for vtkRenderWindows
  *
  * State storage and graph traversal for vtkRenderWindow
-*/
+ */
 
 #ifndef vtkWindowNode_h
 #define vtkWindowNode_h
@@ -28,57 +28,53 @@
 class vtkUnsignedCharArray;
 class vtkFloatArray;
 
-class VTKRENDERINGSCENEGRAPH_EXPORT vtkWindowNode :
-  public vtkViewNode
+class VTKRENDERINGSCENEGRAPH_EXPORT vtkWindowNode : public vtkViewNode
 {
 public:
   static vtkWindowNode* New();
   vtkTypeMacro(vtkWindowNode, vtkViewNode);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Build containers for our child nodes.
    */
-  virtual void Build(bool prepass) VTK_OVERRIDE;
+  virtual void Build(bool prepass) override;
 
   /**
    * Get state of my renderable.
    */
-  virtual void Synchronize(bool prepass) VTK_OVERRIDE;
+  virtual void Synchronize(bool prepass) override;
 
   /**
    * Return the size of the last rendered image
    */
-  virtual int *GetSize() {
-    return this->Size; }
+  virtual int* GetSize() { return this->Size; }
 
   /**
    * Get the most recent color buffer RGBA
    */
-  virtual vtkUnsignedCharArray *GetColorBuffer()
-    { return this->ColorBuffer; }
+  virtual vtkUnsignedCharArray* GetColorBuffer() { return this->ColorBuffer; }
 
   /**
-   * Get the most recent zbufer buffer
+   * Get the most recent zbuffer buffer
    */
-  virtual vtkFloatArray *GetZBuffer()
-    { return this->ZBuffer; }
+  virtual vtkFloatArray* GetZBuffer() { return this->ZBuffer; }
 
 protected:
   vtkWindowNode();
-  ~vtkWindowNode();
+  ~vtkWindowNode() override;
 
-  //TODO: use a map with string keys being renderable's member name
-  //state
+  // TODO: use a map with string keys being renderable's member name
+  // state
   int Size[2];
 
   // stores the results of a render
-  vtkUnsignedCharArray*ColorBuffer;
-  vtkFloatArray *ZBuffer;
+  vtkUnsignedCharArray* ColorBuffer;
+  vtkFloatArray* ZBuffer;
 
 private:
-  vtkWindowNode(const vtkWindowNode&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWindowNode&) VTK_DELETE_FUNCTION;
+  vtkWindowNode(const vtkWindowNode&) = delete;
+  void operator=(const vtkWindowNode&) = delete;
 };
 
 #endif

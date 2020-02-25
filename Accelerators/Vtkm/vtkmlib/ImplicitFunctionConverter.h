@@ -17,33 +17,27 @@
 #define vtkmlib_ImplicitFunctionConverter_h
 
 #include "vtkAcceleratorsVTKmModule.h"
-#include "vtkType.h" // For vtkMTimeType
+#include "vtkType.h"    // For vtkMTimeType
+#include "vtkmConfig.h" //required for general vtkm setup
 
-#include <memory> // For std::shared_ptr
-
+#include "vtkm/cont/ImplicitFunctionHandle.h"
 
 class vtkImplicitFunction;
 
-namespace vtkm {
-namespace cont {
-
-class ImplicitFunction;
-
-}} // vtkm::cont
-
-namespace tovtkm {
+namespace tovtkm
+{
 
 class VTKACCELERATORSVTKM_EXPORT ImplicitFunctionConverter
 {
 public:
   ImplicitFunctionConverter();
 
-  void Set(vtkImplicitFunction *);
-  const std::shared_ptr<vtkm::cont::ImplicitFunction>& Get() const;
+  void Set(vtkImplicitFunction*);
+  const vtkm::cont::ImplicitFunctionHandle& Get() const;
 
 private:
-  vtkImplicitFunction *InFunction;
-  std::shared_ptr<vtkm::cont::ImplicitFunction> OutFunction;
+  vtkImplicitFunction* InFunction;
+  vtkm::cont::ImplicitFunctionHandle OutFunction;
   mutable vtkMTimeType MTime;
 };
 

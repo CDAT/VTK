@@ -14,32 +14,25 @@
 =========================================================================*/
 #include "vtkOpenGLVertexBufferObjectCache.h"
 
-#include "vtkObjectFactory.h"
 #include "vtkDataArray.h"
+#include "vtkObjectFactory.h"
 #include "vtkOpenGLVertexBufferObject.h"
-
 
 // ----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkOpenGLVertexBufferObjectCache);
 
 // ----------------------------------------------------------------------------
-vtkOpenGLVertexBufferObjectCache::vtkOpenGLVertexBufferObjectCache()
-{
-}
+vtkOpenGLVertexBufferObjectCache::vtkOpenGLVertexBufferObjectCache() = default;
 
 // ----------------------------------------------------------------------------
-vtkOpenGLVertexBufferObjectCache::~vtkOpenGLVertexBufferObjectCache()
-{
-}
+vtkOpenGLVertexBufferObjectCache::~vtkOpenGLVertexBufferObjectCache() = default;
 
-void vtkOpenGLVertexBufferObjectCache::RemoveVBO(
-  vtkOpenGLVertexBufferObject *vbo)
+void vtkOpenGLVertexBufferObjectCache::RemoveVBO(vtkOpenGLVertexBufferObject* vbo)
 {
-  vtkOpenGLVertexBufferObjectCache::VBOMap::iterator iter =
-    this->MappedVBOs.begin();
-  while(iter != this->MappedVBOs.end())
+  vtkOpenGLVertexBufferObjectCache::VBOMap::iterator iter = this->MappedVBOs.begin();
+  while (iter != this->MappedVBOs.end())
   {
-    if(iter->second == vbo)
+    if (iter->second == vbo)
     {
       iter->first->UnRegister(this);
       this->MappedVBOs.erase(iter++);
@@ -53,12 +46,12 @@ void vtkOpenGLVertexBufferObjectCache::RemoveVBO(
 
 // ----------------------------------------------------------------------------
 vtkOpenGLVertexBufferObject* vtkOpenGLVertexBufferObjectCache::GetVBO(
-  vtkDataArray *array, int destType)
+  vtkDataArray* array, int destType)
 {
   // Check array is valid
   if (array == nullptr || array->GetNumberOfTuples() == 0)
   {
-    vtkErrorMacro( << "Cannot get VBO for empty array.");
+    vtkErrorMacro(<< "Cannot get VBO for empty array.");
     return nullptr;
   }
 
@@ -67,13 +60,7 @@ vtkOpenGLVertexBufferObject* vtkOpenGLVertexBufferObjectCache::GetVBO(
   if (iter != this->MappedVBOs.end())
   {
     vtkOpenGLVertexBufferObject* vbo = iter->second;
-
-    // Update VBO if array changed
-    if (array->GetMTime() > vbo->GetUploadTime())
-    {
-      vbo->InitVBO(array, destType);
-    }
-
+    vbo->SetDataType(destType);
     vbo->Register(this);
     return vbo;
   }
@@ -82,8 +69,8 @@ vtkOpenGLVertexBufferObject* vtkOpenGLVertexBufferObjectCache::GetVBO(
   // Initialize new vbo
   vtkOpenGLVertexBufferObject* vbo = vtkOpenGLVertexBufferObject::New();
   vbo->SetCache(this);
+  vbo->SetDataType(destType);
   array->Register(this);
-  vbo->InitVBO(array, destType);
 
   // Add vbo to map
   this->MappedVBOs[array] = vbo;
@@ -93,5 +80,5 @@ vtkOpenGLVertexBufferObject* vtkOpenGLVertexBufferObjectCache::GetVBO(
 // ----------------------------------------------------------------------------
 void vtkOpenGLVertexBufferObjectCache::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

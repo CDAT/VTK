@@ -28,7 +28,7 @@ uniform float uStepSize;        // step size in parametric space
 
 uniform vec2  uNoiseBoundsPt1;  // tc of upper right pt of noise texture
 
-varying vec2 tcoordVC;
+in vec2 tcoordVC;
 
 //VTK::LICVectorLookup::Impl
 
@@ -64,7 +64,7 @@ float getNoise(vec2 vectc)
 }
 
 // fourth-order Runge-Kutta streamline integration
-// no bounds checks are made, therefor it's essential
+// no bounds checks are made, therefore it's essential
 // to have the entire texture initialized to 0
 // and set clamp to border and have border color 0
 // an integer is set if the step was taken, keeping

@@ -19,18 +19,18 @@
  * This object provides the entry point for the vtkContextScene to be rendered
  * in a vtkRenderer. Uses the RenderOverlay pass to render the 2D
  * vtkContextScene.
-*/
+ */
 
 #ifndef vtkOpenGLContextActor_h
 #define vtkOpenGLContextActor_h
 
-#include "vtkRenderingContextOpenGL2Module.h" // For export macro
 #include "vtkContextActor.h"
+#include "vtkRenderingContextOpenGL2Module.h" // For export macro
 
 class VTKRENDERINGCONTEXTOPENGL2_EXPORT vtkOpenGLContextActor : public vtkContextActor
 {
 public:
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   vtkTypeMacro(vtkOpenGLContextActor, vtkContextActor);
 
   static vtkOpenGLContextActor* New();
@@ -40,25 +40,25 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *window) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* window) override;
 
   /**
    * We only render in the overlay for the context scene.
    */
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
+  int RenderOverlay(vtkViewport* viewport) override;
 
 protected:
   vtkOpenGLContextActor();
-  ~vtkOpenGLContextActor() VTK_OVERRIDE;
+  ~vtkOpenGLContextActor() override;
 
   /**
    * Initialize the actor - right now we just decide which device to initialize.
    */
-  void Initialize(vtkViewport* viewport) VTK_OVERRIDE;
+  void Initialize(vtkViewport* viewport) override;
 
 private:
-  vtkOpenGLContextActor(const vtkOpenGLContextActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLContextActor&) VTK_DELETE_FUNCTION;
+  vtkOpenGLContextActor(const vtkOpenGLContextActor&) = delete;
+  void operator=(const vtkOpenGLContextActor&) = delete;
 };
 
 #endif

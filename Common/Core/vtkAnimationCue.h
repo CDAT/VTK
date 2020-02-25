@@ -33,7 +33,7 @@
  * fired, which must be handled to perform the actual animation.
  * @sa
  * vtkAnimationScene
-*/
+ */
 
 #ifndef vtkAnimationCue_h
 #define vtkAnimationCue_h
@@ -41,11 +41,11 @@
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkObject.h"
 
-class VTKCOMMONCORE_EXPORT vtkAnimationCue: public vtkObject
+class VTKCOMMONCORE_EXPORT vtkAnimationCue : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkAnimationCue,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAnimationCue, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkAnimationCue* New();
 
@@ -60,9 +60,9 @@ public:
   public:
     double StartTime;
     double EndTime;
-    double AnimationTime;// valid only in AnimationCueTickEvent handler
-    double DeltaTime;   // valid only in AnimationCueTickEvent handler
-    double ClockTime;   // valid only in AnimationCueTickEvent handler
+    double AnimationTime; // valid only in AnimationCueTickEvent handler
+    double DeltaTime;     // valid only in AnimationCueTickEvent handler
+    double ClockTime;     // valid only in AnimationCueTickEvent handler
   };
 
   //@{
@@ -75,10 +75,8 @@ public:
    */
   virtual void SetTimeMode(int mode);
   vtkGetMacro(TimeMode, int);
-  void SetTimeModeToRelative()
-    { this->SetTimeMode(TIMEMODE_RELATIVE); }
-  void SetTimeModeToNormalized()
-    { this->SetTimeMode(TIMEMODE_NORMALIZED); }
+  void SetTimeModeToRelative() { this->SetTimeMode(TIMEMODE_RELATIVE); }
+  void SetTimeModeToNormalized() { this->SetTimeMode(TIMEMODE_NORMALIZED); }
   //@}
 
   //@{
@@ -115,7 +113,7 @@ public:
    * Triggers a Tick event if currenttime >= StartTime and
    * currenttime <= EndTime.
    * Whenever the state of the cue changes,
-   * either StartEvent or EndEvent is triggerred depending upon
+   * either StartEvent or EndEvent is triggered depending upon
    * whether the cue entered Active state or quit active state respectively.
    * The current time is relative to the start of the container Scene
    * (when in Relative time mode) or is normalized
@@ -173,16 +171,17 @@ public:
 
   enum TimeCodes
   {
-    TIMEMODE_NORMALIZED=0,
-    TIMEMODE_RELATIVE=1
+    TIMEMODE_NORMALIZED = 0,
+    TIMEMODE_RELATIVE = 1
   };
 
 protected:
   vtkAnimationCue();
-  ~vtkAnimationCue() VTK_OVERRIDE;
+  ~vtkAnimationCue() override;
 
-  enum {
-    UNINITIALIZED=0,
+  enum
+  {
+    UNINITIALIZED = 0,
     INACTIVE,
     ACTIVE
   };
@@ -210,17 +209,13 @@ protected:
    * do extra processing at start/end or on tick.
    */
   virtual void StartCueInternal();
-  virtual void TickInternal(double currenttime, double deltatime,
-    double clocktime);
+  virtual void TickInternal(double currenttime, double deltatime, double clocktime);
   virtual void EndCueInternal();
   //@}
 
 private:
-  vtkAnimationCue(const vtkAnimationCue&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAnimationCue&) VTK_DELETE_FUNCTION;
+  vtkAnimationCue(const vtkAnimationCue&) = delete;
+  void operator=(const vtkAnimationCue&) = delete;
 };
 
 #endif
-
-
-

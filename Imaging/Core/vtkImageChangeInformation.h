@@ -19,22 +19,22 @@
  * vtkImageChangeInformation  modify the spacing, origin, or extent of
  * the data without changing the data itself.  The data is not resampled
  * by this filter, only the information accompanying the data is modified.
-*/
+ */
 
 #ifndef vtkImageChangeInformation_h
 #define vtkImageChangeInformation_h
 
-#include "vtkImagingCoreModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
+#include "vtkImagingCoreModule.h" // For export macro
 
 class vtkImageData;
 
 class VTKIMAGINGCORE_EXPORT vtkImageChangeInformation : public vtkImageAlgorithm
 {
 public:
-  static vtkImageChangeInformation *New();
+  static vtkImageChangeInformation* New();
   vtkTypeMacro(vtkImageChangeInformation, vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -42,7 +42,7 @@ public:
    * the information is copied from the input.
    */
   virtual void SetInformationInputData(vtkImageData*);
-  virtual vtkImageData *GetInformationInput();
+  virtual vtkImageData* GetInformationInput();
   //@}
 
   //@{
@@ -84,9 +84,9 @@ public:
    * SetOutputOrigin.  This is often a useful operation to apply
    * before using vtkImageReslice to apply a transformation to an image.
    */
-  vtkSetMacro(CenterImage, int);
-  vtkBooleanMacro(CenterImage, int);
-  vtkGetMacro(CenterImage, int);
+  vtkSetMacro(CenterImage, vtkTypeBool);
+  vtkBooleanMacro(CenterImage, vtkTypeBool);
+  vtkGetMacro(CenterImage, vtkTypeBool);
   //@}
 
   //@{
@@ -124,9 +124,9 @@ public:
 
 protected:
   vtkImageChangeInformation();
-  ~vtkImageChangeInformation() VTK_OVERRIDE;
+  ~vtkImageChangeInformation() override;
 
-  int CenterImage;
+  vtkTypeBool CenterImage;
 
   int OutputExtentStart[3];
   int ExtentTranslation[3];
@@ -139,27 +139,16 @@ protected:
   double OriginScale[3];
   double OriginTranslation[3];
 
-  int RequestUpdateExtent (vtkInformation *,
-                                   vtkInformationVector **,
-                                   vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation (vtkInformation *,
-                                  vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int RequestData(vtkInformation *,
-                          vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkImageChangeInformation(const vtkImageChangeInformation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageChangeInformation&) VTK_DELETE_FUNCTION;
+  vtkImageChangeInformation(const vtkImageChangeInformation&) = delete;
+  void operator=(const vtkImageChangeInformation&) = delete;
 };
 
-
-
 #endif
-
-
-

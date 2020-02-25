@@ -18,21 +18,19 @@
 
 vtkStandardNewMacro(vtkWebInteractionEvent);
 //----------------------------------------------------------------------------
-vtkWebInteractionEvent::vtkWebInteractionEvent() :
-  Buttons(0),
-  Modifiers(0),
-  KeyCode(0),
-  X(0.0),
-  Y(0.0),
-  Scroll(0.0),
-  RepeatCount(0)
+vtkWebInteractionEvent::vtkWebInteractionEvent()
+  : Buttons(0)
+  , Modifiers(0)
+  , KeyCode(0)
+  , X(0.0)
+  , Y(0.0)
+  , Scroll(0.0)
+  , RepeatCount(0)
 {
 }
 
 //----------------------------------------------------------------------------
-vtkWebInteractionEvent::~vtkWebInteractionEvent()
-{
-}
+vtkWebInteractionEvent::~vtkWebInteractionEvent() = default;
 
 //----------------------------------------------------------------------------
 void vtkWebInteractionEvent::PrintSelf(ostream& os, vtkIndent indent)

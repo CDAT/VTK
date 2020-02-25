@@ -20,7 +20,7 @@
  * operates directly on the input region.  The data is copied
  * if the requested region has different extent than the input region
  * or some other object is referencing the input region.
-*/
+ */
 
 #ifndef vtkImageInPlaceFilter_h
 #define vtkImageInPlaceFilter_h
@@ -31,29 +31,21 @@
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkImageInPlaceFilter : public vtkImageAlgorithm
 {
 public:
-  vtkTypeMacro(vtkImageInPlaceFilter,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImageInPlaceFilter, vtkImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkImageInPlaceFilter();
-  ~vtkImageInPlaceFilter() VTK_OVERRIDE;
+  ~vtkImageInPlaceFilter() override;
 
-  int RequestData(vtkInformation *request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  void CopyData(vtkImageData *in, vtkImageData *out, int* outExt);
+  void CopyData(vtkImageData* in, vtkImageData* out, int* outExt);
 
 private:
-  vtkImageInPlaceFilter(const vtkImageInPlaceFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageInPlaceFilter&) VTK_DELETE_FUNCTION;
+  vtkImageInPlaceFilter(const vtkImageInPlaceFilter&) = delete;
+  void operator=(const vtkImageInPlaceFilter&) = delete;
 };
 
 #endif
-
-
-
-
-
-
-

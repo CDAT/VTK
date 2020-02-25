@@ -62,13 +62,13 @@ class METAIO_EXPORT MetaTransform : public MetaObject
 
     MetaTransform(unsigned int dim);
 
-    ~MetaTransform(void);
+    ~MetaTransform(void) override;
 
-    void PrintInfo(void) const;
+    void PrintInfo(void) const override;
 
-    void CopyInfo(const MetaObject * _object);
+    void CopyInfo(const MetaObject * _object) override;
 
-    void  Clear(void);
+    void  Clear(void) override;
 
     // Set/Get the parameters of the transforms
     const double * Parameters(void) const;
@@ -102,14 +102,14 @@ class METAIO_EXPORT MetaTransform : public MetaObject
   ////
   protected:
 
-    void  M_Destroy(void);
+    void  M_Destroy(void) override;
 
-    void  M_SetupReadFields(void);
+    void  M_SetupReadFields(void) override;
 
-    void  M_SetupWriteFields(void);
+    void  M_SetupWriteFields(void) override;
 
-    bool  M_Read(void);
-    bool  M_Write(void);
+    bool  M_Read(void) override;
+    bool  M_Write(void) override;
 
     double* parameters;
     unsigned int parametersDimension;

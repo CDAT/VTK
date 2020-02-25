@@ -35,7 +35,7 @@ PURPOSE.  See the above copyright notice for more information.
  *
  * @par Thanks:
  * This class was written by Philippe Pebay, Kitware SAS 2012
-*/
+ */
 
 #ifndef vtkAutoCorrelativeStatistics_h
 #define vtkAutoCorrelativeStatistics_h
@@ -53,7 +53,7 @@ class VTKFILTERSSTATISTICS_EXPORT vtkAutoCorrelativeStatistics : public vtkStati
 {
 public:
   vtkTypeMacro(vtkAutoCorrelativeStatistics, vtkStatisticsAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkAutoCorrelativeStatistics* New();
 
   //@{
@@ -65,47 +65,42 @@ public:
    * The default is 0, meaning that the user must specify a value
    * that is consistent with the input data set.
    */
-  vtkSetClampMacro(SliceCardinality,vtkIdType,0,VTK_ID_MAX);
-  vtkGetMacro(SliceCardinality,vtkIdType);
+  vtkSetClampMacro(SliceCardinality, vtkIdType, 0, VTK_ID_MAX);
+  vtkGetMacro(SliceCardinality, vtkIdType);
   //@}
 
   /**
    * Given a collection of models, calculate aggregate model
    */
-  void Aggregate( vtkDataObjectCollection*,
-                  vtkMultiBlockDataSet* ) VTK_OVERRIDE;
+  void Aggregate(vtkDataObjectCollection*, vtkMultiBlockDataSet*) override;
 
 protected:
   vtkAutoCorrelativeStatistics();
-  ~vtkAutoCorrelativeStatistics() VTK_OVERRIDE;
+  ~vtkAutoCorrelativeStatistics() override;
 
   /**
    * Execute the calculations required by the Learn option, given some input Data
    * NB: input parameters are unused.
    */
-  void Learn( vtkTable*,
-              vtkTable*,
-              vtkMultiBlockDataSet* ) VTK_OVERRIDE;
+  void Learn(vtkTable*, vtkTable*, vtkMultiBlockDataSet*) override;
 
   /**
    * Execute the calculations required by the Derive option.
    */
-  void Derive( vtkMultiBlockDataSet* ) VTK_OVERRIDE;
+  void Derive(vtkMultiBlockDataSet*) override;
 
   /**
    * Execute the calculations required by the Test option.
    */
-  void Test( vtkTable*,
-                     vtkMultiBlockDataSet*,
-                     vtkTable* ) VTK_OVERRIDE { return; };
+  void Test(vtkTable*, vtkMultiBlockDataSet*, vtkTable*) override { return; }
 
   /**
    * Execute the calculations required by the Assess option.
    */
-  void Assess( vtkTable* inData,
-               vtkMultiBlockDataSet* inMeta,
-               vtkTable* outData ) VTK_OVERRIDE
-  { this->Superclass::Assess( inData, inMeta, outData, 1 ); }
+  void Assess(vtkTable* inData, vtkMultiBlockDataSet* inMeta, vtkTable* outData) override
+  {
+    this->Superclass::Assess(inData, inMeta, outData, 1);
+  }
 
   /**
    * Calculate p-value. This will be overridden using the object factory with an
@@ -116,16 +111,14 @@ protected:
   /**
    * Provide the appropriate assessment functor.
    */
-  void SelectAssessFunctor( vtkTable* outData,
-                            vtkDataObject* inMeta,
-                            vtkStringArray* rowNames,
-                            AssessFunctor*& dfunc ) VTK_OVERRIDE;
+  void SelectAssessFunctor(vtkTable* outData, vtkDataObject* inMeta, vtkStringArray* rowNames,
+    AssessFunctor*& dfunc) override;
 
   vtkIdType SliceCardinality;
 
 private:
-  vtkAutoCorrelativeStatistics( const vtkAutoCorrelativeStatistics& ) VTK_DELETE_FUNCTION;
-  void operator = ( const vtkAutoCorrelativeStatistics& ) VTK_DELETE_FUNCTION;
+  vtkAutoCorrelativeStatistics(const vtkAutoCorrelativeStatistics&) = delete;
+  void operator=(const vtkAutoCorrelativeStatistics&) = delete;
 };
 
 #endif

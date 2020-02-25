@@ -73,7 +73,7 @@
  *       include stdint.h.  The hope is that one or the other can be
  *       used with no real difference.
  *
- *    5) In the current verison, if your platform can't represent
+ *    5) In the current version, if your platform can't represent
  *       int32_t, int16_t and int8_t, it just dumps out with a compiler
  *       error.
  *
@@ -674,7 +674,7 @@ typedef uint_least32_t uint_fast32_t;
 #  else
 #    define stdint_intptr_bits 32
 #  endif
-# elif defined (__i386__) || defined (_WIN32) || defined (WIN32)
+# elif defined (__i386__) || defined (_WIN32)
 #  define stdint_intptr_bits 32
 # elif defined (__INTEL_COMPILER)
 /* TODO -- what will Intel do about x86-64? */

@@ -53,7 +53,7 @@
  *
  * @par Thanks:
  * Developed by Timothy M. Shead (tshead@sandia.gov) at Sandia National Laboratories.
-*/
+ */
 
 #ifndef vtkDotProductSimilarity_h
 #define vtkDotProductSimilarity_h
@@ -66,7 +66,7 @@ class VTKINFOVISCORE_EXPORT vtkDotProductSimilarity : public vtkTableAlgorithm
 public:
   static vtkDotProductSimilarity* New();
   vtkTypeMacro(vtkDotProductSimilarity, vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -149,18 +149,15 @@ public:
 
 protected:
   vtkDotProductSimilarity();
-  ~vtkDotProductSimilarity() VTK_OVERRIDE;
+  ~vtkDotProductSimilarity() override;
 
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkDotProductSimilarity(const vtkDotProductSimilarity&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDotProductSimilarity&) VTK_DELETE_FUNCTION;
+  vtkDotProductSimilarity(const vtkDotProductSimilarity&) = delete;
+  void operator=(const vtkDotProductSimilarity&) = delete;
 
   vtkIdType VectorDimension;
   double MinimumThreshold;
@@ -175,4 +172,3 @@ private:
 };
 
 #endif
-

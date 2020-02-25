@@ -21,7 +21,7 @@
  * profiles or mechanical deformation.
  *
  * The filter passes both its point data and cell data to its output.
-*/
+ */
 
 #ifndef vtkWarpVector_h
 #define vtkWarpVector_h
@@ -32,35 +32,32 @@
 class VTKFILTERSGENERAL_EXPORT vtkWarpVector : public vtkPointSetAlgorithm
 {
 public:
-  static vtkWarpVector *New();
-  vtkTypeMacro(vtkWarpVector,vtkPointSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkWarpVector* New();
+  vtkTypeMacro(vtkWarpVector, vtkPointSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Specify value to scale displacement.
    */
-  vtkSetMacro(ScaleFactor,double);
-  vtkGetMacro(ScaleFactor,double);
+  vtkSetMacro(ScaleFactor, double);
+  vtkGetMacro(ScaleFactor, double);
   //@}
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 protected:
   vtkWarpVector();
-  ~vtkWarpVector() VTK_OVERRIDE;
+  ~vtkWarpVector() override;
 
-  int RequestDataObject(vtkInformation *request,
-                        vtkInformationVector **inputVector,
-                        vtkInformationVector *outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   double ScaleFactor;
 
 private:
-  vtkWarpVector(const vtkWarpVector&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWarpVector&) VTK_DELETE_FUNCTION;
+  vtkWarpVector(const vtkWarpVector&) = delete;
+  void operator=(const vtkWarpVector&) = delete;
 };
 
 #endif

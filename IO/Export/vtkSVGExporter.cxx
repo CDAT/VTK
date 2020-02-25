@@ -25,9 +25,9 @@
 #include "vtkProp.h"
 #include "vtkPropCollection.h"
 #include "vtkRect.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderer.h"
 #include "vtkRendererCollection.h"
-#include "vtkRenderWindow.h"
 #include "vtkSVGContextDevice2D.h"
 #include "vtkTexture.h"
 #include "vtkXMLDataElement.h"
@@ -41,7 +41,7 @@
 namespace
 {
 
-std::string ColorToString(const unsigned char *rgb)
+std::string ColorToString(const unsigned char* rgb)
 {
   std::ostringstream out;
   out << "#";
@@ -56,26 +56,26 @@ std::string ColorToString(const unsigned char *rgb)
 } // end anon namespace
 
 //------------------------------------------------------------------------------
-vtkStandardNewMacro(vtkSVGExporter)
+vtkStandardNewMacro(vtkSVGExporter);
 
 //------------------------------------------------------------------------------
-void vtkSVGExporter::PrintSelf(std::ostream &os, vtkIndent indent)
+void vtkSVGExporter::PrintSelf(std::ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //------------------------------------------------------------------------------
 vtkSVGExporter::vtkSVGExporter()
-  : Title(nullptr),
-    Description(nullptr),
-    FileName(nullptr),
-    Device(nullptr),
-    RootNode(nullptr),
-    PageNode(nullptr),
-    DefinitionNode(nullptr),
-    SubdivisionThreshold(1.f),
-    DrawBackground(true),
-    TextAsPath(true)
+  : Title(nullptr)
+  , Description(nullptr)
+  , FileName(nullptr)
+  , Device(nullptr)
+  , RootNode(nullptr)
+  , PageNode(nullptr)
+  , DefinitionNode(nullptr)
+  , SubdivisionThreshold(1.f)
+  , DrawBackground(true)
+  , TextAsPath(true)
 {
   this->SetTitle("VTK Exported Scene");
   this->SetDescription("VTK Exported Scene");
@@ -146,7 +146,7 @@ void vtkSVGExporter::WriteSVG()
 //------------------------------------------------------------------------------
 void vtkSVGExporter::PrepareDocument()
 {
-  int *size = this->RenderWindow->GetSize();
+  int* size = this->RenderWindow->GetSize();
 
   this->RootNode = vtkXMLDataElement::New();
   this->RootNode->SetName("svg");
@@ -164,18 +164,16 @@ void vtkSVGExporter::PrepareDocument()
   {
     vtkNew<vtkXMLDataElement> title;
     title->SetName("title");
-    title->SetCharacterData(this->Title,
-                            static_cast<int>(std::strlen(this->Title)));
-    this->RootNode->AddNestedElement(title.Get());
+    title->SetCharacterData(this->Title, static_cast<int>(std::strlen(this->Title)));
+    this->RootNode->AddNestedElement(title);
   }
 
   if (this->Description && this->Description[0])
   {
     vtkNew<vtkXMLDataElement> desc;
     desc->SetName("desc");
-    desc->SetCharacterData(this->Description,
-                           static_cast<int>(std::strlen(this->Description)));
-    this->RootNode->AddNestedElement(desc.Get());
+    desc->SetCharacterData(this->Description, static_cast<int>(std::strlen(this->Description)));
+    this->RootNode->AddNestedElement(desc);
   }
 
   this->DefinitionNode = vtkXMLDataElement::New();
@@ -203,15 +201,20 @@ void vtkSVGExporter::PrepareDocument()
 //------------------------------------------------------------------------------
 void vtkSVGExporter::RenderContextActors()
 {
-  vtkRendererCollection *renCol = this->RenderWindow->GetRenderers();
+  vtkRendererCollection* renCol = this->RenderWindow->GetRenderers();
   int numLayers = this->RenderWindow->GetNumberOfLayers();
 
   for (int i = 0; i < numLayers; ++i)
   {
     vtkCollectionSimpleIterator renIt;
-    vtkRenderer *ren;
+    vtkRenderer* ren;
     for (renCol->InitTraversal(renIt); (ren = renCol->GetNextRenderer(renIt));)
     {
+      if (this->ActiveRenderer && ren != this->ActiveRenderer)
+      {
+        // If ActiveRenderer is specified then ignore all other renderers
+        continue;
+      }
       if (ren->GetLayer() == i)
       {
         if (this->DrawBackground)
@@ -219,12 +222,12 @@ void vtkSVGExporter::RenderContextActors()
           this->RenderBackground(ren);
         }
 
-        vtkPropCollection *props = ren->GetViewProps();
+        vtkPropCollection* props = ren->GetViewProps();
         vtkCollectionSimpleIterator propIt;
-        vtkProp *prop;
+        vtkProp* prop;
         for (props->InitTraversal(propIt); (prop = props->GetNextProp(propIt));)
         {
-          vtkContextActor *actor = vtkContextActor::SafeDownCast(prop);
+          vtkContextActor* actor = vtkContextActor::SafeDownCast(prop);
           if (actor)
           {
             this->RenderContextActor(actor, ren);
@@ -236,15 +239,15 @@ void vtkSVGExporter::RenderContextActors()
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGExporter::RenderBackground(vtkRenderer *ren)
+void vtkSVGExporter::RenderBackground(vtkRenderer* ren)
 {
   if (ren->Transparent())
   {
     return;
   }
 
-  int *renOrigin = ren->GetOrigin();
-  int *renSize = ren->GetSize();
+  int* renOrigin = ren->GetOrigin();
+  int* renSize = ren->GetSize();
   vtkRectf renRect(renOrigin[0], renOrigin[1], renSize[0], renSize[1]);
 
   vtkNew<vtkContext2D> ctx;
@@ -253,8 +256,8 @@ void vtkSVGExporter::RenderBackground(vtkRenderer *ren)
 
   if (ren->GetTexturedBackground())
   {
-    vtkTexture *tex = ren->GetBackgroundTexture();
-    vtkImageData *image = tex->GetInput();
+    vtkTexture* tex = ren->GetBackgroundTexture();
+    vtkImageData* image = tex->GetInput();
 
     ctx->DrawImage(renRect, image);
   }
@@ -281,7 +284,7 @@ void vtkSVGExporter::RenderBackground(vtkRenderer *ren)
     const float canvasHeight = ren->GetVTKWindow()->GetSize()[1];
 
     vtkNew<vtkXMLDataElement> gradient;
-    this->DefinitionNode->AddNestedElement(gradient.Get());
+    this->DefinitionNode->AddNestedElement(gradient);
     gradient->SetName("linearGradient");
     gradient->SetAttribute("id", gradId.c_str());
     gradient->SetAttribute("gradientUnits", "objectBoundingBox");
@@ -291,19 +294,19 @@ void vtkSVGExporter::RenderBackground(vtkRenderer *ren)
     gradient->SetIntAttribute("y2", 0);
 
     vtkNew<vtkXMLDataElement> stop1;
-    gradient->AddNestedElement(stop1.Get());
+    gradient->AddNestedElement(stop1);
     stop1->SetName("stop");
     stop1->SetAttribute("offset", "0%");
     stop1->SetAttribute("stop-color", ColorToString(rgb1.data()).c_str());
 
     vtkNew<vtkXMLDataElement> stop2;
-    gradient->AddNestedElement(stop2.Get());
+    gradient->AddNestedElement(stop2);
     stop2->SetName("stop");
     stop2->SetAttribute("offset", "100%");
     stop2->SetAttribute("stop-color", ColorToString(rgb2.data()).c_str());
 
     vtkNew<vtkXMLDataElement> rect;
-    this->PageNode->AddNestedElement(rect.Get());
+    this->PageNode->AddNestedElement(rect);
     rect->SetName("rect");
     rect->SetAttribute("fill", (std::string("url(#") + gradId + ")").c_str());
     rect->SetFloatAttribute("fill-opacity", static_cast<float>(a));
@@ -318,18 +321,14 @@ void vtkSVGExporter::RenderBackground(vtkRenderer *ren)
     ren->GetBackground(rgb.data());
     double a = ren->GetBackgroundAlpha();
     ctx->GetBrush()->SetColor(static_cast<unsigned char>(rgb[0] * 255),
-                              static_cast<unsigned char>(rgb[1] * 255),
-                              static_cast<unsigned char>(rgb[2] * 255),
-                              static_cast<unsigned char>(a * 255));
+      static_cast<unsigned char>(rgb[1] * 255), static_cast<unsigned char>(rgb[2] * 255),
+      static_cast<unsigned char>(a * 255));
 
     // Draw the rect directly on the device. Context2D::DrawRect also strokes
     // the path...
-    std::array<float, 8> poly = { {
-      renRect.GetLeft(),  renRect.GetBottom(),
-      renRect.GetRight(), renRect.GetBottom(),
-      renRect.GetRight(), renRect.GetTop(),
-      renRect.GetLeft(),  renRect.GetTop()
-    } };
+    std::array<float, 8> poly = { { renRect.GetLeft(), renRect.GetBottom(), renRect.GetRight(),
+      renRect.GetBottom(), renRect.GetRight(), renRect.GetTop(), renRect.GetLeft(),
+      renRect.GetTop() } };
     this->Device->DrawPolygon(poly.data(), 4);
   }
 
@@ -337,10 +336,9 @@ void vtkSVGExporter::RenderBackground(vtkRenderer *ren)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGExporter::RenderContextActor(vtkContextActor *actor,
-                                        vtkRenderer *ren)
+void vtkSVGExporter::RenderContextActor(vtkContextActor* actor, vtkRenderer* ren)
 {
-  vtkContextDevice2D *oldForceDevice = actor->GetForceDevice();
+  vtkContextDevice2D* oldForceDevice = actor->GetForceDevice();
   actor->SetForceDevice(this->Device);
   actor->RenderOverlay(ren);
   actor->SetForceDevice(oldForceDevice);

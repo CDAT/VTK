@@ -20,7 +20,7 @@
  * window using the left mouse button.  When the mouse button is released,
  * the current camera zooms by an amount determined from the shorter side of
  * the drawn rectangle.
-*/
+ */
 
 #ifndef vtkInteractorStyleRubberBandZoom_h
 #define vtkInteractorStyleRubberBandZoom_h
@@ -34,9 +34,9 @@ class vtkUnsignedCharArray;
 class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleRubberBandZoom : public vtkInteractorStyle
 {
 public:
-  static vtkInteractorStyleRubberBandZoom *New();
+  static vtkInteractorStyleRubberBandZoom* New();
   vtkTypeMacro(vtkInteractorStyleRubberBandZoom, vtkInteractorStyle);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -53,6 +53,11 @@ public:
    * When set to true (default, false), the position where the user starts the
    * interaction is treated as the center of the box rather that one of the
    * corners of the box.
+   *
+   * During interaction, modifier keys `Shift` or `Control` can be used to toggle
+   * this flag temporarily. In other words, if `Shift` or `Control` key is pressed,
+   * this class will act as if CenterAtStartPosition was opposite of what it is
+   * set to.
    */
   vtkSetMacro(CenterAtStartPosition, bool);
   vtkGetMacro(CenterAtStartPosition, bool);
@@ -78,16 +83,16 @@ public:
   /**
    * Event bindings
    */
-  void OnMouseMove() VTK_OVERRIDE;
-  void OnLeftButtonDown() VTK_OVERRIDE;
-  void OnLeftButtonUp() VTK_OVERRIDE;
+  void OnMouseMove() override;
+  void OnLeftButtonDown() override;
+  void OnLeftButtonUp() override;
   //@}
 
 protected:
   vtkInteractorStyleRubberBandZoom();
-  ~vtkInteractorStyleRubberBandZoom() VTK_OVERRIDE;
+  ~vtkInteractorStyleRubberBandZoom() override;
 
-  void Zoom() VTK_OVERRIDE;
+  void Zoom() override;
 
   int StartPosition[2];
   int EndPosition[2];
@@ -95,10 +100,11 @@ protected:
   bool LockAspectToViewport;
   bool CenterAtStartPosition;
   bool UseDollyForPerspectiveProjection;
-  vtkUnsignedCharArray *PixelArray;
+  vtkUnsignedCharArray* PixelArray;
+
 private:
-  vtkInteractorStyleRubberBandZoom(const vtkInteractorStyleRubberBandZoom&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorStyleRubberBandZoom&) VTK_DELETE_FUNCTION;
+  vtkInteractorStyleRubberBandZoom(const vtkInteractorStyleRubberBandZoom&) = delete;
+  void operator=(const vtkInteractorStyleRubberBandZoom&) = delete;
 
   /**
    * Adjust the box based on this->LockAspectToViewport and

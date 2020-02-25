@@ -22,32 +22,32 @@
  * styles.
  * @sa
  * vtkTextMapper vtkTextActor vtkLegendBoxActor vtkCaptionActor2D
-*/
+ */
 
 #ifndef vtkTextProperty_h
 #define vtkTextProperty_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class VTKRENDERINGCORE_EXPORT vtkTextProperty : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkTextProperty,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkTextProperty, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates a new text property with font size 12, bold off, italic off,
    * and Arial font.
    */
-  static vtkTextProperty *New();
+  static vtkTextProperty* New();
 
   //@{
   /**
    * Set the color of the text.
    */
-  vtkSetVector3Macro(Color,double);
-  vtkGetVector3Macro(Color,double);
+  vtkSetVector3Macro(Color, double);
+  vtkGetVector3Macro(Color, double);
   //@}
 
   //@{
@@ -56,7 +56,7 @@ public:
    * transparent.
    */
   vtkSetClampMacro(Opacity, double, 0., 1.);
-  vtkGetMacro(Opacity,double);
+  vtkGetMacro(Opacity, double);
   //@}
 
   //@{
@@ -88,9 +88,9 @@ public:
   /**
    * Enable/disable text frame.
    */
-  vtkSetMacro(Frame, int);
-  vtkGetMacro(Frame, int);
-  vtkBooleanMacro(Frame, int);
+  vtkSetMacro(Frame, vtkTypeBool);
+  vtkGetMacro(Frame, vtkTypeBool);
+  vtkBooleanMacro(Frame, vtkTypeBool);
   //@}
 
   //@{
@@ -113,12 +113,12 @@ public:
   vtkSetStringMacro(FontFamilyAsString);
   void SetFontFamily(int t);
   int GetFontFamily();
-  int GetFontFamilyMinValue() { return VTK_ARIAL; };
+  int GetFontFamilyMinValue() { return VTK_ARIAL; }
   void SetFontFamilyToArial();
   void SetFontFamilyToCourier();
   void SetFontFamilyToTimes();
-  static int GetFontFamilyFromString( const char *f );
-  static const char *GetFontFamilyAsString( int f );
+  static int GetFontFamilyFromString(const char* f);
+  static const char* GetFontFamilyAsString(int f);
   //@}
 
   //@{
@@ -127,15 +127,15 @@ public:
    * if GetFontFamily() return VTK_FONT_FILE. The result is undefined for other
    * values of GetFontFamily().
    */
-  vtkGetStringMacro(FontFile)
-  vtkSetStringMacro(FontFile)
+  vtkGetStringMacro(FontFile);
+  vtkSetStringMacro(FontFile);
   //@}
 
   //@{
   /**
    * Set/Get the font size (in points).
    */
-  vtkSetClampMacro(FontSize,int,0,VTK_INT_MAX);
+  vtkSetClampMacro(FontSize, int, 0, VTK_INT_MAX);
   vtkGetMacro(FontSize, int);
   //@}
 
@@ -143,27 +143,27 @@ public:
   /**
    * Enable/disable text bolding.
    */
-  vtkSetMacro(Bold, int);
-  vtkGetMacro(Bold, int);
-  vtkBooleanMacro(Bold, int);
+  vtkSetMacro(Bold, vtkTypeBool);
+  vtkGetMacro(Bold, vtkTypeBool);
+  vtkBooleanMacro(Bold, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Enable/disable text italic.
    */
-  vtkSetMacro(Italic, int);
-  vtkGetMacro(Italic, int);
-  vtkBooleanMacro(Italic, int);
+  vtkSetMacro(Italic, vtkTypeBool);
+  vtkGetMacro(Italic, vtkTypeBool);
+  vtkBooleanMacro(Italic, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Enable/disable text shadow.
    */
-  vtkSetMacro(Shadow, int);
-  vtkGetMacro(Shadow, int);
-  vtkBooleanMacro(Shadow, int);
+  vtkSetMacro(Shadow, vtkTypeBool);
+  vtkGetMacro(Shadow, vtkTypeBool);
+  vtkBooleanMacro(Shadow, vtkTypeBool);
   //@}
 
   //@{
@@ -171,8 +171,8 @@ public:
    * Set/Get the shadow offset, i.e. the distance from the text to
    * its shadow, in the same unit as FontSize.
    */
-  vtkSetVector2Macro(ShadowOffset,int);
-  vtkGetVectorMacro(ShadowOffset,int,2);
+  vtkSetVector2Macro(ShadowOffset, int);
+  vtkGetVectorMacro(ShadowOffset, int, 2);
   //@}
 
   /**
@@ -185,15 +185,12 @@ public:
    * Set/Get the horizontal justification to left (default), centered,
    * or right.
    */
-  vtkSetClampMacro(Justification,int,VTK_TEXT_LEFT,VTK_TEXT_RIGHT);
-  vtkGetMacro(Justification,int);
-  void SetJustificationToLeft()
-    { this->SetJustification(VTK_TEXT_LEFT);};
-  void SetJustificationToCentered()
-    { this->SetJustification(VTK_TEXT_CENTERED);};
-  void SetJustificationToRight()
-    { this->SetJustification(VTK_TEXT_RIGHT);};
-  const char *GetJustificationAsString();
+  vtkSetClampMacro(Justification, int, VTK_TEXT_LEFT, VTK_TEXT_RIGHT);
+  vtkGetMacro(Justification, int);
+  void SetJustificationToLeft() { this->SetJustification(VTK_TEXT_LEFT); }
+  void SetJustificationToCentered() { this->SetJustification(VTK_TEXT_CENTERED); }
+  void SetJustificationToRight() { this->SetJustification(VTK_TEXT_RIGHT); }
+  const char* GetJustificationAsString();
   //@}
 
   //@{
@@ -201,15 +198,12 @@ public:
    * Set/Get the vertical justification to bottom (default), middle,
    * or top.
    */
-  vtkSetClampMacro(VerticalJustification,int,VTK_TEXT_BOTTOM,VTK_TEXT_TOP);
-  vtkGetMacro(VerticalJustification,int);
-  void SetVerticalJustificationToBottom()
-    {this->SetVerticalJustification(VTK_TEXT_BOTTOM);};
-  void SetVerticalJustificationToCentered()
-    {this->SetVerticalJustification(VTK_TEXT_CENTERED);};
-  void SetVerticalJustificationToTop()
-    {this->SetVerticalJustification(VTK_TEXT_TOP);};
-  const char *GetVerticalJustificationAsString();
+  vtkSetClampMacro(VerticalJustification, int, VTK_TEXT_BOTTOM, VTK_TEXT_TOP);
+  vtkGetMacro(VerticalJustification, int);
+  void SetVerticalJustificationToBottom() { this->SetVerticalJustification(VTK_TEXT_BOTTOM); }
+  void SetVerticalJustificationToCentered() { this->SetVerticalJustification(VTK_TEXT_CENTERED); }
+  void SetVerticalJustificationToTop() { this->SetVerticalJustification(VTK_TEXT_TOP); }
+  const char* GetVerticalJustificationAsString();
   //@}
 
   //@{
@@ -219,17 +213,17 @@ public:
    * the baseline. This option can be used to get centered labels. It does not
    * work well if the string changes as the string position will move around.
    */
-  vtkSetMacro(UseTightBoundingBox, int);
-  vtkGetMacro(UseTightBoundingBox, int);
-  vtkBooleanMacro(UseTightBoundingBox, int);
+  vtkSetMacro(UseTightBoundingBox, vtkTypeBool);
+  vtkGetMacro(UseTightBoundingBox, vtkTypeBool);
+  vtkBooleanMacro(UseTightBoundingBox, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set/Get the text's orientation (in degrees).
    */
-  vtkSetMacro(Orientation,double);
-  vtkGetMacro(Orientation,double);
+  vtkSetMacro(Orientation, double);
+  vtkGetMacro(Orientation, double);
   //@}
 
   //@{
@@ -252,62 +246,62 @@ public:
   /**
    * Shallow copy of a text property.
    */
-  void ShallowCopy(vtkTextProperty *tprop);
+  void ShallowCopy(vtkTextProperty* tprop);
 
 protected:
   vtkTextProperty();
-  ~vtkTextProperty() VTK_OVERRIDE;
+  ~vtkTextProperty() override;
 
   double Color[3];
   double Opacity;
   double BackgroundColor[3];
   double BackgroundOpacity;
-  int    Frame;
+  vtkTypeBool Frame;
   double FrameColor[3];
-  int    FrameWidth;
+  int FrameWidth;
   char* FontFamilyAsString;
   char* FontFile;
-  int   FontSize;
-  int   Bold;
-  int   Italic;
-  int   Shadow;
-  int   ShadowOffset[2];
-  int   Justification;
-  int   VerticalJustification;
-  int   UseTightBoundingBox;
+  int FontSize;
+  vtkTypeBool Bold;
+  vtkTypeBool Italic;
+  vtkTypeBool Shadow;
+  int ShadowOffset[2];
+  int Justification;
+  int VerticalJustification;
+  vtkTypeBool UseTightBoundingBox;
   double Orientation;
   double LineOffset;
   double LineSpacing;
 
 private:
-  vtkTextProperty(const vtkTextProperty&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTextProperty&) VTK_DELETE_FUNCTION;
+  vtkTextProperty(const vtkTextProperty&) = delete;
+  void operator=(const vtkTextProperty&) = delete;
 };
 
-inline const char *vtkTextProperty::GetFontFamilyAsString( int f )
+inline const char* vtkTextProperty::GetFontFamilyAsString(int f)
 {
-  if ( f == VTK_ARIAL )
+  if (f == VTK_ARIAL)
   {
     return "Arial";
   }
-  else if ( f == VTK_COURIER )
+  else if (f == VTK_COURIER)
   {
     return "Courier";
   }
-  else if ( f == VTK_TIMES )
+  else if (f == VTK_TIMES)
   {
     return "Times";
   }
-  else if ( f == VTK_FONT_FILE )
+  else if (f == VTK_FONT_FILE)
   {
     return "File";
   }
   return "Unknown";
 }
 
-inline void vtkTextProperty::SetFontFamily( int t )
+inline void vtkTextProperty::SetFontFamily(int t)
 {
-  this->SetFontFamilyAsString( this->GetFontFamilyAsString( t ) );
+  this->SetFontFamilyAsString(this->GetFontFamilyAsString(t));
 }
 
 inline void vtkTextProperty::SetFontFamilyToArial()
@@ -325,21 +319,21 @@ inline void vtkTextProperty::SetFontFamilyToTimes()
   this->SetFontFamily(VTK_TIMES);
 }
 
-inline int vtkTextProperty::GetFontFamilyFromString( const char *f )
+inline int vtkTextProperty::GetFontFamilyFromString(const char* f)
 {
-  if ( strcmp( f, GetFontFamilyAsString( VTK_ARIAL ) ) == 0 )
+  if (strcmp(f, GetFontFamilyAsString(VTK_ARIAL)) == 0)
   {
     return VTK_ARIAL;
   }
-  else if ( strcmp( f, GetFontFamilyAsString( VTK_COURIER ) ) == 0 )
+  else if (strcmp(f, GetFontFamilyAsString(VTK_COURIER)) == 0)
   {
     return VTK_COURIER;
   }
-  else if ( strcmp( f, GetFontFamilyAsString( VTK_TIMES ) ) == 0 )
+  else if (strcmp(f, GetFontFamilyAsString(VTK_TIMES)) == 0)
   {
     return VTK_TIMES;
   }
-  else if ( strcmp( f, GetFontFamilyAsString( VTK_FONT_FILE) ) == 0 )
+  else if (strcmp(f, GetFontFamilyAsString(VTK_FONT_FILE)) == 0)
   {
     return VTK_FONT_FILE;
   }
@@ -348,10 +342,10 @@ inline int vtkTextProperty::GetFontFamilyFromString( const char *f )
 
 inline int vtkTextProperty::GetFontFamily()
 {
-  return GetFontFamilyFromString( this->FontFamilyAsString );
+  return GetFontFamilyFromString(this->FontFamilyAsString);
 }
 
-inline const char *vtkTextProperty::GetJustificationAsString(void)
+inline const char* vtkTextProperty::GetJustificationAsString(void)
 {
   if (this->Justification == VTK_TEXT_LEFT)
   {
@@ -368,7 +362,7 @@ inline const char *vtkTextProperty::GetJustificationAsString(void)
   return "Unknown";
 }
 
-inline const char *vtkTextProperty::GetVerticalJustificationAsString(void)
+inline const char* vtkTextProperty::GetVerticalJustificationAsString(void)
 {
   if (this->VerticalJustification == VTK_TEXT_BOTTOM)
   {

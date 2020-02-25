@@ -14,11 +14,13 @@
 =========================================================================*/
 #include "vtkExtractCTHPart.h"
 
+#include "vtkAppendFilter.h"
 #include "vtkAppendPolyData.h"
 #include "vtkBoundingBox.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkCharArray.h"
+#include "vtkClipDataSet.h"
 #include "vtkClipPolyData.h"
 #include "vtkCompositeDataIterator.h"
 #include "vtkCompositeDataPipeline.h"
@@ -37,8 +39,8 @@
 #include "vtkMultiProcessController.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
-#include "vtkPlaneCollection.h"
 #include "vtkPlane.h"
+#include "vtkPlaneCollection.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkRectilinearGrid.h"
@@ -46,6 +48,8 @@
 #include "vtkTimerLog.h"
 #include "vtkToolkits.h"
 #include "vtkUniformGrid.h"
+#include "vtkUnsignedCharArray.h"
+#include "vtkUnstructuredGrid.h"
 
 #include <algorithm>
 #include <cassert>
@@ -54,12 +58,12 @@
 #include <vector>
 
 vtkStandardNewMacro(vtkExtractCTHPart);
-vtkCxxSetObjectMacro(vtkExtractCTHPart,ClipPlane,vtkPlane);
-vtkCxxSetObjectMacro(vtkExtractCTHPart,Controller,vtkMultiProcessController);
+vtkCxxSetObjectMacro(vtkExtractCTHPart, ClipPlane, vtkPlane);
+vtkCxxSetObjectMacro(vtkExtractCTHPart, Controller, vtkMultiProcessController);
 
-const double CTH_AMR_SURFACE_VALUE=0.499;
-const double CTH_AMR_SURFACE_VALUE_FLOAT=1;
-const double CTH_AMR_SURFACE_VALUE_UNSIGNED_CHAR=255;
+const double CTH_AMR_SURFACE_VALUE = 0.499;
+const double CTH_AMR_SURFACE_VALUE_FLOAT = 1;
+const double CTH_AMR_SURFACE_VALUE_UNSIGNED_CHAR = 255;
 
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -74,8 +78,11 @@ public:
   int TotalNumberOfDatasets;
 };
 
-class vtkExtractCTHPart::VectorOfFragments :
-  public std::vector<vtkSmartPointer<vtkPolyData> >
+class vtkExtractCTHPart::VectorOfFragments : public std::vector<vtkSmartPointer<vtkPolyData> >
+{
+};
+
+class vtkExtractCTHPart::VectorOfSolids : public std::vector<vtkSmartPointer<vtkUnstructuredGrid> >
 {
 };
 
@@ -84,12 +91,12 @@ class vtkExtractCTHPart::ScaledProgress
   vtkExtractCTHPart* Self;
   double Shift;
   double Scale;
+
 public:
   ScaledProgress(double shift, double scale, vtkExtractCTHPart* self)
   {
-    assert((self != nullptr) &&
-      (shift >= 0.0) && (shift <= 1.0) &&
-      (scale >= 0.0) && (scale <= 1.0));
+    assert(
+      (self != nullptr) && (shift >= 0.0) && (shift <= 1.0) && (scale >= 0.0) && (scale <= 1.0));
 
     this->Self = self;
     this->Shift = self->ProgressShift;
@@ -97,14 +104,11 @@ public:
 
     self->ProgressShift += shift * self->ProgressScale;
     self->ProgressScale *= scale;
-    //cout << "Shift-Scale Push: " << self->ProgressShift << ", " <<
+    // cout << "Shift-Scale Push: " << self->ProgressShift << ", " <<
     //  self->ProgressScale << endl;
   }
 
-  ~ScaledProgress()
-  {
-    this->WorkDone();
-  }
+  ~ScaledProgress() { this->WorkDone(); }
 
   void WorkDone()
   {
@@ -112,13 +116,12 @@ public:
     {
       this->Self->ProgressScale = this->Scale;
       this->Self->ProgressShift = this->Shift;
-      //cout << "Shift-Scale Pop: " << this->Self->ProgressShift << ", " <<
+      // cout << "Shift-Scale Pop: " << this->Self->ProgressShift << ", " <<
       //  this->Self->ProgressScale << endl;
       this->Self = nullptr;
     }
   }
 };
-
 
 //=============================================================================
 //-----------------------------------------------------------------------------
@@ -129,6 +132,7 @@ vtkExtractCTHPart::vtkExtractCTHPart()
   this->Internals = new vtkExtractCTHPartInternal();
   this->ClipPlane = nullptr;
   this->GenerateTriangles = true;
+  this->GenerateSolidGeometry = false;
   this->Capping = true;
   this->RemoveGhostCells = true;
   this->VolumeFractionSurfaceValueInternal = CTH_AMR_SURFACE_VALUE;
@@ -155,11 +159,11 @@ vtkExtractCTHPart::~vtkExtractCTHPart()
 // then this object is modified as well.
 vtkMTimeType vtkExtractCTHPart::GetMTime()
 {
-  vtkMTimeType mTime= this->Superclass::GetMTime();
+  vtkMTimeType mTime = this->Superclass::GetMTime();
   if (this->ClipPlane)
   {
     vtkMTimeType time = this->ClipPlane->GetMTime();
-    return time > mTime? time : mTime;
+    return time > mTime ? time : mTime;
   }
 
   return mTime;
@@ -175,18 +179,15 @@ void vtkExtractCTHPart::RemoveVolumeArrayNames()
 //-----------------------------------------------------------------------------
 void vtkExtractCTHPart::AddVolumeArrayName(const char* arrayName)
 {
-  if (arrayName !=nullptr &&
-    arrayName[0] != 0 &&
-    std::find(this->Internals->VolumeArrayNames.begin(),
-      this->Internals->VolumeArrayNames.end(), std::string(arrayName))==
-    this->Internals->VolumeArrayNames.end())
+  if (arrayName != nullptr && arrayName[0] != 0 &&
+    std::find(this->Internals->VolumeArrayNames.begin(), this->Internals->VolumeArrayNames.end(),
+      std::string(arrayName)) == this->Internals->VolumeArrayNames.end())
   {
     this->Internals->VolumeArrayNames.push_back(arrayName);
 
     // ensure that the volume arrays are in determinate order. I should just
     // change the code to use a std::set.
-    std::sort(this->Internals->VolumeArrayNames.begin(),
-      this->Internals->VolumeArrayNames.end());
+    std::sort(this->Internals->VolumeArrayNames.begin(), this->Internals->VolumeArrayNames.end());
     this->Modified();
   }
 }
@@ -200,8 +201,7 @@ int vtkExtractCTHPart::GetNumberOfVolumeArrayNames()
 //-----------------------------------------------------------------------------
 const char* vtkExtractCTHPart::GetVolumeArrayName(int idx)
 {
-  if ( idx < 0 ||
-       idx > static_cast<int>(this->Internals->VolumeArrayNames.size()) )
+  if (idx < 0 || idx > static_cast<int>(this->Internals->VolumeArrayNames.size()))
   {
     return nullptr;
   }
@@ -210,10 +210,9 @@ const char* vtkExtractCTHPart::GetVolumeArrayName(int idx)
 }
 
 //----------------------------------------------------------------------------
-int vtkExtractCTHPart::FillInputPortInformation(
-  int port, vtkInformation *info)
+int vtkExtractCTHPart::FillInputPortInformation(int port, vtkInformation* info)
 {
-  if (!this->Superclass::FillInputPortInformation(port,info))
+  if (!this->Superclass::FillInputPortInformation(port, info))
   {
     return 0;
   }
@@ -225,8 +224,8 @@ int vtkExtractCTHPart::FillInputPortInformation(
 }
 
 //-----------------------------------------------------------------------------
-int vtkExtractCTHPart::RequestData(vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkExtractCTHPart::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   const int number_of_volume_arrays = static_cast<int>(this->Internals->VolumeArrayNames.size());
   if (number_of_volume_arrays == 0)
@@ -244,7 +243,7 @@ int vtkExtractCTHPart::RequestData(vtkInformation *vtkNotUsed(request),
   {
     vtkNew<vtkMultiBlockDataSet> mb;
     mb->SetBlock(0, inputRG);
-    inputCD = mb.GetPointer();
+    inputCD = mb;
   }
 
   vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::GetData(outputVector, 0);
@@ -269,34 +268,41 @@ int vtkExtractCTHPart::RequestData(vtkInformation *vtkNotUsed(request),
 
   unsigned int array_index = 0;
   for (vtkExtractCTHPartInternal::VolumeArrayNamesType::iterator iter =
-    this->Internals->VolumeArrayNames.begin();
-    iter != this->Internals->VolumeArrayNames.end(); ++iter, ++array_index)
+         this->Internals->VolumeArrayNames.begin();
+       iter != this->Internals->VolumeArrayNames.end(); ++iter, ++array_index)
   {
     // this loop is doing the 1/(num-arrays)'th work for the entire task.
-    ScaledProgress sp(
-      array_index * 1.0 / this->Internals->VolumeArrayNames.size(),
-      1.0/this->Internals->VolumeArrayNames.size(),
-      this);
+    ScaledProgress sp(array_index * 1.0 / this->Internals->VolumeArrayNames.size(),
+      1.0 / this->Internals->VolumeArrayNames.size(), this);
 
     output->GetMetaData(array_index)->Set(vtkCompositeDataSet::NAME(), iter->c_str());
 
-    vtkNew<vtkPolyData> contour;
+    vtkSmartPointer<vtkDataSet> part = nullptr;
     vtkGarbageCollector::DeferredCollectionPush();
-    if (this->ExtractContour(contour.GetPointer(), inputCD, iter->c_str()) &&
-      (contour->GetNumberOfPoints() > 0))
+
+    if (this->GenerateSolidGeometry)
+    {
+      part = this->ExtractSolid(inputCD, iter->c_str());
+    }
+    else
+    {
+      part = this->ExtractContour(inputCD, iter->c_str());
+    }
+
+    if (part != nullptr && part->GetNumberOfPoints() > 0)
     {
       // Add extra arrays.
       vtkNew<vtkIntArray> partArray;
       partArray->SetName("Part Index");
       partArray->SetNumberOfComponents(1);
-      partArray->SetNumberOfTuples(contour->GetNumberOfPoints());
+      partArray->SetNumberOfTuples(part->GetNumberOfPoints());
       partArray->FillComponent(0, static_cast<double>(array_index));
-      contour->GetPointData()->AddArray(partArray.GetPointer());
+      part->GetPointData()->AddArray(partArray);
 
       // I'm not adding the "Name" array that was added in previous
       // implementation. Don't think that's much of use.
 
-      output->SetBlock(array_index, contour.GetPointer());
+      output->SetBlock(array_index, part);
     }
     vtkGarbageCollector::DeferredCollectionPop();
   }
@@ -304,9 +310,9 @@ int vtkExtractCTHPart::RequestData(vtkInformation *vtkNotUsed(request),
 }
 
 //-----------------------------------------------------------------------------
-bool vtkExtractCTHPart::ComputeGlobalBounds(vtkCompositeDataSet *input)
+bool vtkExtractCTHPart::ComputeGlobalBounds(vtkCompositeDataSet* input)
 {
-  assert("pre: input_exists" && input!=nullptr);
+  assert("pre: input_exists" && input != nullptr);
   this->Internals->GlobalInputBounds.Reset();
 
   this->Internals->TotalNumberOfDatasets = 0;
@@ -314,8 +320,8 @@ bool vtkExtractCTHPart::ComputeGlobalBounds(vtkCompositeDataSet *input)
   vtkCompositeDataIterator* iter = input->NewIterator();
   for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
   {
-    vtkDataSet *ds = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
-    if (!ds)// can be null if on another processor
+    vtkDataSet* ds = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
+    if (!ds) // can be null if on another processor
     {
       continue;
     }
@@ -335,34 +341,31 @@ bool vtkExtractCTHPart::ComputeGlobalBounds(vtkCompositeDataSet *input)
     return true;
   }
 
-  const double *min_point = this->Internals->GlobalInputBounds.GetMinPoint();
-  const double *max_point = this->Internals->GlobalInputBounds.GetMaxPoint();
+  const double* min_point = this->Internals->GlobalInputBounds.GetMinPoint();
+  const double* max_point = this->Internals->GlobalInputBounds.GetMaxPoint();
   double min_result[3], max_result[3];
 
-  if (!this->Controller->AllReduce(
-      min_point, min_result, 3, vtkCommunicator::MIN_OP))
+  if (!this->Controller->AllReduce(min_point, min_result, 3, vtkCommunicator::MIN_OP))
   {
     return false;
   }
-  if (!this->Controller->AllReduce(
-      max_point, max_result, 3, vtkCommunicator::MAX_OP))
+  if (!this->Controller->AllReduce(max_point, max_result, 3, vtkCommunicator::MAX_OP))
   {
     return false;
   }
 
   this->Internals->GlobalInputBounds.SetBounds(
-    min_result[0], max_result[0], min_result[1], max_result[1],
-    min_result[2], max_result[2]);
+    min_result[0], max_result[0], min_result[1], max_result[1], min_result[2], max_result[2]);
   // At this point, the global bounds is set in each processor.
   return true;
 }
 
 //-----------------------------------------------------------------------------
-// return false on error.
-bool vtkExtractCTHPart::ExtractContour(
-  vtkPolyData* output, vtkCompositeDataSet* input, const char*arrayName)
+// return nullptr on error.
+vtkSmartPointer<vtkDataSet> vtkExtractCTHPart::ExtractContour(
+  vtkCompositeDataSet* input, const char* arrayName)
 {
-  assert(output!=nullptr && input!=nullptr && arrayName!=nullptr && arrayName[0]!=0);
+  assert(input != nullptr && arrayName != nullptr && arrayName[0] != 0);
 
   bool warn_once = true;
   vtkSmartPointer<vtkCompositeDataIterator> iter;
@@ -376,16 +379,15 @@ bool vtkExtractCTHPart::ExtractContour(
   for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem(), ++counter)
   {
     // each iteration is 1/(total num of datasets)'th for the work.
-    ScaledProgress sp(
-      counter * 1.0/this->Internals->TotalNumberOfDatasets,
-      1.0/this->Internals->TotalNumberOfDatasets, this);
+    ScaledProgress sp(counter * 1.0 / this->Internals->TotalNumberOfDatasets,
+      1.0 / this->Internals->TotalNumberOfDatasets, this);
 
     if (counter % 1000 == 0)
     {
       this->TriggerProgressEvent(0.0);
     }
 
-    vtkDataObject *dataObj = iter->GetCurrentDataObject();
+    vtkDataObject* dataObj = iter->GetCurrentDataObject();
     vtkRectilinearGrid* rg = vtkRectilinearGrid::SafeDownCast(dataObj);
     vtkUniformGrid* ug = vtkUniformGrid::SafeDownCast(dataObj);
 
@@ -393,14 +395,14 @@ bool vtkExtractCTHPart::ExtractContour(
     {
       if (!this->ExtractClippedContourOnBlock<vtkUniformGrid>(fragments, ug, arrayName))
       {
-        return false;
+        return nullptr;
       }
     }
     else if (rg)
     {
       if (!this->ExtractClippedContourOnBlock<vtkRectilinearGrid>(fragments, rg, arrayName))
       {
-        return false;
+        return nullptr;
       }
     }
     else if (warn_once && dataObj)
@@ -414,10 +416,11 @@ bool vtkExtractCTHPart::ExtractContour(
     }
   }
 
+  vtkSmartPointer<vtkDataSet> output = vtkSmartPointer<vtkPolyData>::New();
   if (fragments.empty())
   {
-    // empty contour. Not an error though, hence we don't return false.
-    return true;
+    // empty contour. Not an error though, hence we don't return nullptr.
+    return output;
   }
   sp1.WorkDone();
 
@@ -425,14 +428,110 @@ bool vtkExtractCTHPart::ExtractContour(
   ScaledProgress sp2(0.95, 0.05, this);
   this->TriggerProgressEvent(0.0);
   vtkNew<vtkAppendPolyData> appender;
-  for (size_t cc=0; cc < fragments.size(); cc++)
+  for (size_t cc = 0; cc < fragments.size(); cc++)
   {
-    appender->AddInputData(fragments[cc].GetPointer());
+    appender->AddInputData(fragments[cc]);
   }
   appender->Update();
+
   output->ShallowCopy(appender->GetOutputDataObject(0));
   this->TriggerProgressEvent(1.0);
-  return true;
+  return output;
+}
+
+//-----------------------------------------------------------------------------
+// return nullptr on error.
+vtkSmartPointer<vtkDataSet> vtkExtractCTHPart::ExtractSolid(
+  vtkCompositeDataSet* input, const char* arrayName)
+{
+  assert(input != nullptr && arrayName != nullptr && arrayName[0] != 0);
+
+  bool warn_once = true;
+  vtkSmartPointer<vtkCompositeDataIterator> iter;
+  iter.TakeReference(input->NewIterator());
+
+  // this loop is first 95% of the work.
+  ScaledProgress sp1(0.0, 0.95, this);
+
+  int counter = 0;
+  vtkExtractCTHPart::VectorOfSolids solids;
+  for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem(), ++counter)
+  {
+    // each iteration is 1/(total num of datasets)'th for the work.
+    ScaledProgress sp(counter * 1.0 / this->Internals->TotalNumberOfDatasets,
+      1.0 / this->Internals->TotalNumberOfDatasets, this);
+
+    if (counter % 1000 == 0)
+    {
+      this->TriggerProgressEvent(0.0);
+    }
+
+    vtkDataObject* dataObj = iter->GetCurrentDataObject();
+    vtkRectilinearGrid* rg = vtkRectilinearGrid::SafeDownCast(dataObj);
+    vtkUniformGrid* ug = vtkUniformGrid::SafeDownCast(dataObj);
+
+    if (ug)
+    {
+      if (!this->ExtractClippedVolumeOnBlock<vtkUniformGrid>(solids, ug, arrayName))
+      {
+        return nullptr;
+      }
+    }
+    else if (rg)
+    {
+      if (!this->ExtractClippedVolumeOnBlock<vtkRectilinearGrid>(solids, rg, arrayName))
+      {
+        return nullptr;
+      }
+    }
+    else if (warn_once && dataObj)
+    {
+      warn_once = false;
+      vtkWarningMacro(<< dataObj->GetClassName() << " will be ignored.");
+    }
+    if ((counter % 1000) == 0)
+    {
+      this->TriggerProgressEvent(1.0);
+    }
+  }
+
+  vtkSmartPointer<vtkDataSet> output = vtkSmartPointer<vtkUnstructuredGrid>::New();
+  if (solids.empty())
+  {
+    // empty fragments. Not an error though, hence we don't return nullptr.
+    return output;
+  }
+  sp1.WorkDone();
+
+  // Now, the last .05 % of the work.
+  ScaledProgress sp2(0.95, 0.05, this);
+  this->TriggerProgressEvent(0.0);
+  vtkNew<vtkAppendFilter> appender;
+  for (size_t cc = 0; cc < solids.size(); cc++)
+  {
+    appender->AddInputData(solids[cc]);
+  }
+  appender->Update();
+
+  output->ShallowCopy(appender->GetOutputDataObject(0));
+  this->TriggerProgressEvent(1.0);
+  return output;
+}
+
+void vtkExtractCTHPart::DetermineSurfaceValue(int dataType)
+{
+  // determine the true value to use for the contour based on the data-type.
+  switch (dataType)
+  {
+    case VTK_UNSIGNED_CHAR:
+      this->VolumeFractionSurfaceValueInternal =
+        CTH_AMR_SURFACE_VALUE_UNSIGNED_CHAR * this->VolumeFractionSurfaceValue;
+      break;
+
+    default:
+      this->VolumeFractionSurfaceValueInternal =
+        CTH_AMR_SURFACE_VALUE_FLOAT * this->VolumeFractionSurfaceValue;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -440,7 +539,7 @@ template <class T>
 bool vtkExtractCTHPart::ExtractClippedContourOnBlock(
   vtkExtractCTHPart::VectorOfFragments& fragments, T* dataset, const char* arrayName)
 {
-  assert(arrayName!=nullptr && arrayName[0]!=0 && dataset != nullptr);
+  assert(arrayName != nullptr && arrayName[0] != 0 && dataset != nullptr);
 
   vtkDataArray* volumeFractionArray = dataset->GetCellData()->GetArray(arrayName);
   if (!volumeFractionArray)
@@ -450,17 +549,7 @@ bool vtkExtractCTHPart::ExtractClippedContourOnBlock(
   }
 
   // determine the true value to use for the contour based on the data-type.
-  switch (volumeFractionArray->GetDataType())
-  {
-  case VTK_UNSIGNED_CHAR:
-    this->VolumeFractionSurfaceValueInternal =
-      CTH_AMR_SURFACE_VALUE_UNSIGNED_CHAR * this->VolumeFractionSurfaceValue;
-    break;
-
-  default:
-    this->VolumeFractionSurfaceValueInternal =
-      CTH_AMR_SURFACE_VALUE_FLOAT * this->VolumeFractionSurfaceValue;
-  }
+  this->DetermineSurfaceValue(volumeFractionArray->GetDataType());
 
   // We create a clone so we can modify the dataset (i.e. add new arrays to it).
   vtkNew<T> inputClone;
@@ -468,27 +557,26 @@ bool vtkExtractCTHPart::ExtractClippedContourOnBlock(
 
   // Convert cell-data-2-point-data so we can contour.
   vtkNew<vtkDoubleArray> pointVolumeFractionArray;
-  this->ExecuteCellDataToPointData(volumeFractionArray,
-    pointVolumeFractionArray.GetPointer(), inputClone->GetDimensions());
-  inputClone->GetPointData()->SetScalars(pointVolumeFractionArray.GetPointer());
+  this->ExecuteCellDataToPointData(
+    volumeFractionArray, pointVolumeFractionArray, inputClone->GetDimensions());
+  inputClone->GetPointData()->SetScalars(pointVolumeFractionArray);
 
   VectorOfFragments blockFragments;
-  if (!this->ExtractContourOnBlock<T>(blockFragments, inputClone.GetPointer(), arrayName))
+  if (!this->ExtractContourOnBlock<T>(blockFragments, inputClone, arrayName))
   {
     return false;
   }
 
   if (!this->ClipPlane)
   {
-    fragments.insert(fragments.end(),
-      blockFragments.begin(), blockFragments.end());
+    fragments.insert(fragments.end(), blockFragments.begin(), blockFragments.end());
     return true;
   }
 
   // Clip-n-cap the fragments using the clip plane.
 
   // for the clip.
-  for (size_t cc=0; cc < blockFragments.size(); cc++)
+  for (size_t cc = 0; cc < blockFragments.size(); cc++)
   {
     vtkNew<vtkClipPolyData> clipper;
     clipper->SetClipFunction(this->ClipPlane);
@@ -502,8 +590,8 @@ bool vtkExtractCTHPart::ExtractClippedContourOnBlock(
   {
     vtkNew<vtkCutter> cutter;
     cutter->SetCutFunction(this->ClipPlane);
-    cutter->SetGenerateTriangles(this->GenerateTriangles? 1 : 0);
-    cutter->SetInputDataObject(inputClone.GetPointer());
+    cutter->SetGenerateTriangles(this->GenerateTriangles ? 1 : 0);
+    cutter->SetInputDataObject(inputClone);
 
     vtkNew<vtkClipPolyData> scalarClipper;
     scalarClipper->SetInputConnection(cutter->GetOutputPort());
@@ -519,11 +607,11 @@ template <class T>
 bool vtkExtractCTHPart::ExtractContourOnBlock(
   vtkExtractCTHPart::VectorOfFragments& fragments, T* dataset, const char* arrayName)
 {
-  assert(arrayName!=nullptr && arrayName[0]!=0 && dataset != nullptr);
+  assert(arrayName != nullptr && arrayName[0] != 0 && dataset != nullptr);
 
   vtkDataArray* volumeFractionArray = dataset->GetPointData()->GetArray(arrayName);
-  assert(volumeFractionArray !=nullptr);
-  assert(dataset->GetPointData()->GetArray(arrayName) !=nullptr);
+  assert(volumeFractionArray != nullptr);
+  assert(dataset->GetPointData()->GetArray(arrayName) != nullptr);
 
   // Contour only if necessary.
   double range[2];
@@ -551,14 +639,12 @@ bool vtkExtractCTHPart::ExtractContourOnBlock(
   contourer->SetInputData(dataset);
   contourer->SetValue(0, this->VolumeFractionSurfaceValueInternal);
   contourer->SetComputeScalars(0);
-  contourer->SetGenerateTriangles(this->GenerateTriangles? 1: 0);
-  contourer->SetInputArrayToProcess(0, 0, 0,
-    vtkDataObject::FIELD_ASSOCIATION_POINTS, arrayName);
+  contourer->SetGenerateTriangles(this->GenerateTriangles ? 1 : 0);
+  contourer->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, arrayName);
   contourer->Update();
 
-  vtkPolyData* output =
-    vtkPolyData::SafeDownCast(contourer->GetOutputDataObject(0));
-  if (!output || output->GetNumberOfPoints()== 0)
+  vtkPolyData* output = vtkPolyData::SafeDownCast(contourer->GetOutputDataObject(0));
+  if (!output || output->GetNumberOfPoints() == 0)
   {
     return true;
   }
@@ -581,9 +667,9 @@ template <class T>
 void vtkExtractCTHPart::ExtractExteriorSurface(
   vtkExtractCTHPart::VectorOfFragments& fragments, T* input)
 {
-  assert("pre: valid_input" && input!=nullptr && input->CheckAttributes()==0);
+  assert("pre: valid_input" && input != nullptr && input->CheckAttributes() == 0);
 
-  int result=0;
+  int result = 0;
 #if 1
   int dims[3];
   input->GetDimensions(dims);
@@ -592,7 +678,8 @@ void vtkExtractCTHPart::ExtractExteriorSurface(
   input->GetExtent(ext);
   input->GetExtent(originalExtents);
 
-//  vtkUnsignedCharArray *ghostArray=static_cast<vtkUnsignedCharArray *>(input->GetCellData()->GetArray(vtkDataSetAttributes::GhostArrayName()));
+  //  vtkUnsignedCharArray *ghostArray=static_cast<vtkUnsignedCharArray
+  //  *>(input->GetCellData()->GetArray(vtkDataSetAttributes::GhostArrayName()));
 
   // bounds without taking ghost cells into account
   double bounds[6];
@@ -640,8 +727,8 @@ void vtkExtractCTHPart::ExtractExteriorSurface(
 #endif
   // here, bounds are real block bounds without ghostcells.
 
-  const double *minP = this->Internals->GlobalInputBounds.GetMinPoint();
-  const double *maxP = this->Internals->GlobalInputBounds.GetMaxPoint();
+  const double* minP = this->Internals->GlobalInputBounds.GetMinPoint();
+  const double* maxP = this->Internals->GlobalInputBounds.GetMaxPoint();
 #if 0
   const double epsilon=0.001;
   int doFaceMinX=fabs(bounds[0]- minP[0])<epsilon;
@@ -653,12 +740,12 @@ void vtkExtractCTHPart::ExtractExteriorSurface(
 #endif
 
 #if 1
-  int doFaceMinX=bounds[0]<= minP[0];
-  int doFaceMaxX=bounds[1]>= maxP[0];
-  int doFaceMinY=bounds[2]<= minP[1];
-  int doFaceMaxY=bounds[3]>= maxP[1];
-  int doFaceMinZ=bounds[4]<= minP[2];
-  int doFaceMaxZ=bounds[5]>= maxP[2];
+  int doFaceMinX = bounds[0] <= minP[0];
+  int doFaceMaxX = bounds[1] >= maxP[0];
+  int doFaceMinY = bounds[2] <= minP[1];
+  int doFaceMaxY = bounds[3] >= maxP[1];
+  int doFaceMinZ = bounds[4] <= minP[2];
+  int doFaceMaxZ = bounds[5] >= maxP[2];
 #endif
 #if 0
   int doFaceMinX=1;
@@ -682,62 +769,61 @@ void vtkExtractCTHPart::ExtractExteriorSurface(
   doFaceMaxZ=0;
 #endif
 
-  result=doFaceMinX||doFaceMaxX||doFaceMinY||doFaceMaxY||doFaceMinZ
-    ||doFaceMaxZ;
+  result = doFaceMinX || doFaceMaxX || doFaceMinY || doFaceMaxY || doFaceMinZ || doFaceMaxZ;
 
-  if(result)
+  if (result)
   {
     vtkSmartPointer<vtkPolyData> output = vtkSmartPointer<vtkPolyData>::New();
 
-    vtkIdType numPoints=0;
-    vtkIdType cellArraySize=0;
+    vtkIdType numPoints = 0;
+    vtkIdType cellArraySize = 0;
 
-//  input->GetExtent(ext);
+    //  input->GetExtent(ext);
 
     // Compute an upper bound for the number of points and cells.
     // xMin face
     if (doFaceMinX && ext[2] != ext[3] && ext[4] != ext[5] && ext[0] != ext[1])
     {
-      cellArraySize += 2*(ext[3]-ext[2]+1)*(ext[5]-ext[4]+1);
-      numPoints += (ext[3]-ext[2]+1)*(ext[5]-ext[4]+1);
+      cellArraySize += 2 * (ext[3] - ext[2] + 1) * (ext[5] - ext[4] + 1);
+      numPoints += (ext[3] - ext[2] + 1) * (ext[5] - ext[4] + 1);
     }
     // xMax face
     if (doFaceMaxX && ext[2] != ext[3] && ext[4] != ext[5])
     {
-      cellArraySize += 2*(ext[3]-ext[2]+1)*(ext[5]-ext[4]+1);
-      numPoints += (ext[3]-ext[2]+1)*(ext[5]-ext[4]+1);
+      cellArraySize += 2 * (ext[3] - ext[2] + 1) * (ext[5] - ext[4] + 1);
+      numPoints += (ext[3] - ext[2] + 1) * (ext[5] - ext[4] + 1);
     }
     // yMin face
     if (doFaceMinY && ext[0] != ext[1] && ext[4] != ext[5] && ext[2] != ext[3])
     {
-      cellArraySize += 2*(ext[1]-ext[0]+1)*(ext[5]-ext[4]+1);
-      numPoints += (ext[1]-ext[0]+1)*(ext[5]-ext[4]+1);
+      cellArraySize += 2 * (ext[1] - ext[0] + 1) * (ext[5] - ext[4] + 1);
+      numPoints += (ext[1] - ext[0] + 1) * (ext[5] - ext[4] + 1);
     }
     // yMax face
     if (doFaceMaxY && ext[0] != ext[1] && ext[4] != ext[5])
     {
-      cellArraySize += 2*(ext[1]-ext[0]+1)*(ext[5]-ext[4]+1);
-      numPoints += (ext[1]-ext[0]+1)*(ext[5]-ext[4]+1);
+      cellArraySize += 2 * (ext[1] - ext[0] + 1) * (ext[5] - ext[4] + 1);
+      numPoints += (ext[1] - ext[0] + 1) * (ext[5] - ext[4] + 1);
     }
     // zMin face
     if (doFaceMinZ && ext[0] != ext[1] && ext[2] != ext[3] && ext[4] != ext[5])
     {
-      cellArraySize += 2*(ext[1]-ext[0]+1)*(ext[3]-ext[2]+1);
-      numPoints += (ext[1]-ext[0]+1)*(ext[3]-ext[2]+1);
+      cellArraySize += 2 * (ext[1] - ext[0] + 1) * (ext[3] - ext[2] + 1);
+      numPoints += (ext[1] - ext[0] + 1) * (ext[3] - ext[2] + 1);
     }
     // zMax face
     if (doFaceMaxZ && ext[0] != ext[1] && ext[2] != ext[3])
     {
-      cellArraySize += 2*(ext[1]-ext[0]+1)*(ext[3]-ext[2]+1);
-      numPoints += (ext[1]-ext[0]+1)*(ext[3]-ext[2]+1);
+      cellArraySize += 2 * (ext[1] - ext[0] + 1) * (ext[3] - ext[2] + 1);
+      numPoints += (ext[1] - ext[0] + 1) * (ext[3] - ext[2] + 1);
     }
 
-    vtkCellArray *outPolys = vtkCellArray::New();
-    outPolys->Allocate(cellArraySize);
+    vtkCellArray* outPolys = vtkCellArray::New();
+    outPolys->AllocateEstimate(cellArraySize, 1);
     output->SetPolys(outPolys);
     outPolys->Delete();
 
-    vtkPoints *outPoints = vtkPoints::New();
+    vtkPoints* outPoints = vtkPoints::New();
     outPoints->Allocate(numPoints);
     output->SetPoints(outPoints);
     outPoints->Delete();
@@ -749,29 +835,29 @@ void vtkExtractCTHPart::ExtractExteriorSurface(
     // Extents are already corrected for ghostcells.
 
     // make each face that is actually on the ds boundary
-    if(doFaceMinX)
+    if (doFaceMinX)
     {
-      this->ExecuteFaceQuads(input,output,0,originalExtents,ext,0,1,2);
+      this->ExecuteFaceQuads(input, output, 0, originalExtents, ext, 0, 1, 2);
     }
-    if(doFaceMaxX)
+    if (doFaceMaxX)
     {
-      this->ExecuteFaceQuads(input,output,1,originalExtents,ext,0,2,1);
+      this->ExecuteFaceQuads(input, output, 1, originalExtents, ext, 0, 2, 1);
     }
-    if(doFaceMinY)
+    if (doFaceMinY)
     {
-      this->ExecuteFaceQuads(input,output,0,originalExtents,ext,1,2,0);
+      this->ExecuteFaceQuads(input, output, 0, originalExtents, ext, 1, 2, 0);
     }
-    if(doFaceMaxY)
+    if (doFaceMaxY)
     {
-      this->ExecuteFaceQuads(input,output,1,originalExtents,ext,1,0,2);
+      this->ExecuteFaceQuads(input, output, 1, originalExtents, ext, 1, 0, 2);
     }
-    if(doFaceMinZ)
+    if (doFaceMinZ)
     {
-      this->ExecuteFaceQuads(input,output,0,originalExtents,ext,2,0,1);
+      this->ExecuteFaceQuads(input, output, 0, originalExtents, ext, 2, 0, 1);
     }
-    if(doFaceMaxZ)
+    if (doFaceMaxZ)
     {
-      this->ExecuteFaceQuads(input,output,1,originalExtents,ext,2,1,0);
+      this->ExecuteFaceQuads(input, output, 1, originalExtents, ext, 2, 1, 0);
     }
     output->Squeeze();
     assert(output->CheckAttributes() == 0);
@@ -783,111 +869,158 @@ void vtkExtractCTHPart::ExtractExteriorSurface(
     fragments.push_back(clipper->GetOutput());
   }
 #endif
-// result=>valid_surface: A=>B !A||B
+  // result=>valid_surface: A=>B !A||B
+}
+
+template <class T>
+bool vtkExtractCTHPart::ExtractClippedVolumeOnBlock(
+  VectorOfSolids& solids, T* dataset, const char* arrayName)
+{
+  assert(arrayName != nullptr && arrayName[0] != 0 && dataset != nullptr);
+
+  vtkDataArray* volumeFractionArray = dataset->GetCellData()->GetArray(arrayName);
+  if (!volumeFractionArray)
+  {
+    // skip this block.
+    return true;
+  }
+
+  // determine the true value to use for clipping based on the data-type.
+  this->DetermineSurfaceValue(volumeFractionArray->GetDataType());
+
+  // We create a clone so we can modify the dataset (i.e. add new arrays to it).
+  vtkNew<T> inputClone;
+  inputClone->ShallowCopy(dataset);
+
+  // Convert cell-data-2-point-data so we can clip the cells.
+  vtkNew<vtkDoubleArray> pointVolumeFractionArray;
+  this->ExecuteCellDataToPointData(
+    volumeFractionArray, pointVolumeFractionArray, inputClone->GetDimensions());
+  inputClone->GetPointData()->SetScalars(pointVolumeFractionArray);
+
+  // clip volume only if necessary.
+  double range[2];
+  volumeFractionArray->GetRange(range);
+  if (range[0] > this->VolumeFractionSurfaceValueInternal ||
+    range[1] < this->VolumeFractionSurfaceValueInternal)
+  {
+    // this block doesn't have the material of interest.
+    return true;
+  }
+
+  // Clip the volume.
+  vtkNew<vtkClipDataSet> blockClipper;
+  blockClipper->SetInputData(inputClone);
+  blockClipper->SetValue(this->VolumeFractionSurfaceValueInternal);
+  blockClipper->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, arrayName);
+  blockClipper->Update();
+  vtkSmartPointer<vtkUnstructuredGrid> solidFragment = blockClipper->GetOutput();
+
+  solidFragment->GetPointData()->RemoveArray(arrayName);
+
+  if (!this->ClipPlane)
+  {
+    solids.push_back(solidFragment);
+    return true;
+  }
+
+  // Clip the solid fragment using the user-specified clip plane.
+  vtkNew<vtkClipDataSet> fragClipper;
+  fragClipper->SetClipFunction(this->ClipPlane);
+  fragClipper->SetInputData(solidFragment);
+  fragClipper->Update();
+  solids.push_back(fragClipper->GetOutput());
+
+  return true;
 }
 
 //----------------------------------------------------------------------------
 // Description:
 // Is block face on axis0 (either min or max depending on the maxFlag)
 // composed of only ghost cells?
-int vtkExtractCTHPart::IsGhostFace(int axis0,
-                                   int maxFlag,
-                                   int dims[3],
-                                   vtkUnsignedCharArray *ghostArray)
+int vtkExtractCTHPart::IsGhostFace(
+  int axis0, int maxFlag, int dims[3], vtkUnsignedCharArray* ghostArray)
 {
-  assert("pre: valid_axis0" && axis0>=0 && axis0<=2);
+  assert("pre: valid_axis0" && axis0 >= 0 && axis0 <= 2);
 
-  int axis1=axis0+1;
-  if(axis1>2)
+  int axis1 = axis0 + 1;
+  if (axis1 > 2)
   {
-    axis1=0;
+    axis1 = 0;
   }
-  int axis2=axis0+2;
-  if(axis2>2)
+  int axis2 = axis0 + 2;
+  if (axis2 > 2)
   {
-    axis2=0;
+    axis2 = 0;
   }
 
   int ijk[3]; // index of the cell.
 
-  if(maxFlag)
+  if (maxFlag)
   {
-    ijk[axis0]=dims[axis0]-2;
+    ijk[axis0] = dims[axis0] - 2;
   }
   else
   {
-    ijk[axis0]=0;
+    ijk[axis0] = 0;
   }
 
   // We test the center cell of the block face.
   // in the worst case (2x2 cells), we need to know if at least
   // three cells are ghost to say that the face is a ghost face.
 
-  ijk[axis1]=dims[axis1]/2-1; // (dims[axis1]-2)/2
-  ijk[axis2]=dims[axis2]/2-1; // (dims[axis2]-2)/2
-  int result=ghostArray->GetValue(vtkStructuredData::ComputeCellId(dims,ijk));
+  ijk[axis1] = dims[axis1] / 2 - 1; // (dims[axis1]-2)/2
+  ijk[axis2] = dims[axis2] / 2 - 1; // (dims[axis2]-2)/2
+  int result = ghostArray->GetValue(vtkStructuredData::ComputeCellId(dims, ijk));
 
-  if(dims[axis1]==3)
+  if (dims[axis1] == 3)
   {
     // axis1 requires 2 cells to be tested.
     // if so, axis1index=0 and axis1index+1=1
-    ijk[axis1]=1;
-    result=result &&
-      ghostArray->GetValue(vtkStructuredData::ComputeCellId(dims,ijk));
+    ijk[axis1] = 1;
+    result = result && ghostArray->GetValue(vtkStructuredData::ComputeCellId(dims, ijk));
   }
 
-  if(dims[axis2]==3)
+  if (dims[axis2] == 3)
   {
     // herem axis1 may have moved from the previous test.
     // axis2 requires 2 cells to be tested.
     // if so, axis2index=0 and axis2index+1=1
-    ijk[axis2]=1;
-    result=result &&
-      ghostArray->GetValue(vtkStructuredData::ComputeCellId(dims,ijk));
+    ijk[axis2] = 1;
+    result = result && ghostArray->GetValue(vtkStructuredData::ComputeCellId(dims, ijk));
   }
   return result;
 }
 
 //----------------------------------------------------------------------------
 // Description:
-// Merly the same implementation than in vtkDataSetSurfaceFilter, without
+// Merely the same implementation than in vtkDataSetSurfaceFilter, without
 // dealing with the whole extents.
-void vtkExtractCTHPart::ExecuteFaceQuads(vtkDataSet *input,
-                                         vtkPolyData *output,
-                                         int maxFlag,
-                                         int originalExtents[6],
-                                         int ext[6],
-                                         int aAxis,
-                                         int bAxis,
-                                         int cAxis)
+void vtkExtractCTHPart::ExecuteFaceQuads(vtkDataSet* input, vtkPolyData* output, int maxFlag,
+  int originalExtents[6], int ext[6], int aAxis, int bAxis, int cAxis)
 {
-  assert("pre: input_exists" && input!=nullptr);
-  assert("pre: output_exists" && output!=nullptr);
-  assert("pre: originalExtents_exists" && originalExtents!=nullptr);
-  assert("pre: ext_exists" && ext!=nullptr);
-  assert("pre: valid_axes"
-         && aAxis>=0 && aAxis<=2
-         && bAxis>=0 && bAxis<=2
-         && cAxis>=0 && cAxis<=2
-         && aAxis!=bAxis
-         && aAxis!=cAxis
-         && bAxis!=cAxis);
+  assert("pre: input_exists" && input != nullptr);
+  assert("pre: output_exists" && output != nullptr);
+  assert("pre: originalExtents_exists" && originalExtents != nullptr);
+  assert("pre: ext_exists" && ext != nullptr);
+  assert("pre: valid_axes" && aAxis >= 0 && aAxis <= 2 && bAxis >= 0 && bAxis <= 2 && cAxis >= 0 &&
+    cAxis <= 2 && aAxis != bAxis && aAxis != cAxis && bAxis != cAxis);
 
-  vtkPoints    *outPts;
-  vtkCellArray *outPolys;
+  vtkPoints* outPts;
+  vtkCellArray* outPolys;
   vtkPointData *inPD, *outPD;
-  vtkCellData  *inCD, *outCD;
-  int          pInc[3];
-  int          qInc[3];
-  int          cOutInc;
-  double        pt[3];
-  vtkIdType    inStartPtId;
-  vtkIdType    inStartCellId;
-  vtkIdType    outStartPtId;
-  vtkIdType    outPtId;
-  vtkIdType    inId, outId;
-  int          ib, ic;
-  int          aA2, bA2, cA2;
+  vtkCellData *inCD, *outCD;
+  int pInc[3];
+  int qInc[3];
+  int cOutInc;
+  double pt[3];
+  vtkIdType inStartPtId;
+  vtkIdType inStartCellId;
+  vtkIdType outStartPtId;
+  vtkIdType outPtId;
+  vtkIdType inId, outId;
+  int ib, ic;
+  int aA2, bA2, cA2;
 
   outPts = output->GetPoints();
   outPD = output->GetPointData();
@@ -896,29 +1029,29 @@ void vtkExtractCTHPart::ExecuteFaceQuads(vtkDataSet *input,
   inCD = input->GetCellData();
 
   pInc[0] = 1;
-  pInc[1] = (originalExtents[1]-originalExtents[0]+1);
-  pInc[2] = (originalExtents[3]-originalExtents[2]+1) * pInc[1];
+  pInc[1] = (originalExtents[1] - originalExtents[0] + 1);
+  pInc[2] = (originalExtents[3] - originalExtents[2] + 1) * pInc[1];
   // quad increments (cell incraments, but cInc could be confused with c axis).
   qInc[0] = 1;
-  qInc[1] = originalExtents[1]-originalExtents[0];
+  qInc[1] = originalExtents[1] - originalExtents[0];
   // The conditions are for when we have one or more degenerate axes (2d or 1d cells).
   if (qInc[1] == 0)
   {
     qInc[1] = 1;
   }
-  qInc[2] = (originalExtents[3]-originalExtents[2]) * qInc[1];
+  qInc[2] = (originalExtents[3] - originalExtents[2]) * qInc[1];
   if (qInc[2] == 0)
   {
     qInc[2] = qInc[1];
   }
 
   // Temporary variables to avoid many multiplications.
-  aA2 = aAxis<<1; // * 2;
-  bA2 = bAxis<<1; // * 2;
-  cA2 = cAxis<<1; //  * 2;
+  aA2 = aAxis << 1; // * 2;
+  bA2 = bAxis << 1; // * 2;
+  cA2 = cAxis << 1; //  * 2;
 
   // We might as well put the test for this face here.
-  if (ext[bA2] == ext[bA2+1] || ext[cA2] == ext[cA2+1])
+  if (ext[bA2] == ext[bA2 + 1] || ext[cA2] == ext[cA2 + 1])
   {
     return;
   }
@@ -939,103 +1072,104 @@ void vtkExtractCTHPart::ExecuteFaceQuads(vtkDataSet *input,
   }
 #endif
 
-  if(!maxFlag)
+  if (!maxFlag)
   {
-    if (ext[aA2] == ext[aA2+1])
+    if (ext[aA2] == ext[aA2 + 1])
     {
       return;
     }
   }
 
   // Assuming no ghost cells ...
-//  inStartPtId = inStartCellId = 0;
-  inStartPtId=0; //ext[aA2];
-  inStartCellId=0; //ext[aA2];
-
+  //  inStartPtId = inStartCellId = 0;
+  inStartPtId = 0;   // ext[aA2];
+  inStartCellId = 0; // ext[aA2];
 
   // I put this confusing conditional to fix a regression test.
   // If we are creating a maximum face, then we indeed have to offset the input cell Ids.
   // However, vtkGeometryFilter created a 2d image as a max face, but the cells are copied
   // as a min face (no offset).  Hence maxFlag = 1 and there should be no offset.
-  if (maxFlag && ext[aA2] < ext[1+aA2])
+  if (maxFlag && ext[aA2] < ext[1 + aA2])
   {
-    inStartPtId = pInc[aAxis]*(ext[aA2+1]-originalExtents[aA2]); // -ext[aA2]
-    inStartCellId = qInc[aAxis]*(ext[aA2+1]-originalExtents[aA2]-1); // -ext[aA2]
+    inStartPtId = pInc[aAxis] * (ext[aA2 + 1] - originalExtents[aA2]);       // -ext[aA2]
+    inStartCellId = qInc[aAxis] * (ext[aA2 + 1] - originalExtents[aA2] - 1); // -ext[aA2]
   }
 
   outStartPtId = outPts->GetNumberOfPoints();
   // Make the points for this face.
-  for (ic = ext[cA2]; ic <= ext[cA2+1]; ++ic)
+  for (ic = ext[cA2]; ic <= ext[cA2 + 1]; ++ic)
   {
-    for (ib = ext[bA2]; ib <= ext[bA2+1]; ++ib)
+    for (ib = ext[bA2]; ib <= ext[bA2 + 1]; ++ib)
     {
-//      inId = inStartPtId + (ib-ext[bA2]+originExtents[bAxis])*pInc[bAxis]
-//                         + (ic-ext[cA2]+originExtents[cAxis])*pInc[cAxis];
+      //      inId = inStartPtId + (ib-ext[bA2]+originExtents[bAxis])*pInc[bAxis]
+      //                         + (ic-ext[cA2]+originExtents[cAxis])*pInc[cAxis];
 
-      inId = inStartPtId + (ib-originalExtents[bA2])*pInc[bAxis]
-        + (ic-originalExtents[cA2])*pInc[cAxis];
+      inId = inStartPtId + (ib - originalExtents[bA2]) * pInc[bAxis] +
+        (ic - originalExtents[cA2]) * pInc[cAxis];
 
       input->GetPoint(inId, pt);
       outId = outPts->InsertNextPoint(pt);
       // Copy point data.
-      outPD->CopyData(inPD,inId,outId);
+      outPD->CopyData(inPD, inId, outId);
     }
   }
 
   // Do the cells.
-  cOutInc = ext[bA2+1] - ext[bA2] + 1;
+  cOutInc = ext[bA2 + 1] - ext[bA2] + 1;
 
   outPolys = output->GetPolys();
 
   // Old method for creating quads (needed for cell data.).
-  for (ic = ext[cA2]; ic < ext[cA2+1]; ++ic)
+  for (ic = ext[cA2]; ic < ext[cA2 + 1]; ++ic)
   {
-    for (ib = ext[bA2]; ib < ext[bA2+1]; ++ib)
+    for (ib = ext[bA2]; ib < ext[bA2 + 1]; ++ib)
     {
-      outPtId = outStartPtId + (ib-ext[bA2]) + (ic-ext[cA2])*cOutInc;
-//      inId = inStartCellId + (ib-ext[bA2]+originExtents[bAxis])*qInc[bAxis] + (ic-ext[cA2]+originExtents[cAxis])*qInc[cAxis];
+      outPtId = outStartPtId + (ib - ext[bA2]) + (ic - ext[cA2]) * cOutInc;
+      //      inId = inStartCellId + (ib-ext[bA2]+originExtents[bAxis])*qInc[bAxis] +
+      //      (ic-ext[cA2]+originExtents[cAxis])*qInc[cAxis];
 
-      inId = inStartCellId + (ib-originalExtents[bA2])*qInc[bAxis] + (ic-originalExtents[cA2])*qInc[cAxis];
+      inId = inStartCellId + (ib - originalExtents[bA2]) * qInc[bAxis] +
+        (ic - originalExtents[cA2]) * qInc[cAxis];
 
       outId = outPolys->InsertNextCell(4);
       outPolys->InsertCellPoint(outPtId);
-      outPolys->InsertCellPoint(outPtId+cOutInc);
-      outPolys->InsertCellPoint(outPtId+cOutInc+1);
-      outPolys->InsertCellPoint(outPtId+1);
+      outPolys->InsertCellPoint(outPtId + cOutInc);
+      outPolys->InsertCellPoint(outPtId + cOutInc + 1);
+      outPolys->InsertCellPoint(outPtId + 1);
 
       // Copy cell data.
-      outCD->CopyData(inCD,inId,outId);
+      outCD->CopyData(inCD, inId, outId);
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 void vtkExtractCTHPart::ExecuteCellDataToPointData(
-  vtkDataArray *cellVolumeFraction, vtkDoubleArray *pointVolumeFraction, const int *dims)
+  vtkDataArray* cellVolumeFraction, vtkDoubleArray* pointVolumeFraction, const int* dims)
 {
   int count;
   int i, j, k;
   int iEnd, jEnd, kEnd;
   int jInc, kInc;
-  double *pPoint;
+  double* pPoint;
 
   pointVolumeFraction->SetName(cellVolumeFraction->GetName());
-  pointVolumeFraction->SetNumberOfTuples(dims[0]*dims[1]*dims[2]);
+  pointVolumeFraction->SetNumberOfTuples(dims[0] * dims[1] * dims[2]);
 
-  iEnd = dims[0]-1;
-  jEnd = dims[1]-1;
-  kEnd = dims[2]-1;
+  iEnd = dims[0] - 1;
+  jEnd = dims[1] - 1;
+  kEnd = dims[2] - 1;
 
   // Deals with none 3D images, otherwise it will never enter into the loop.
   // And then the data will be not initialized and the output of the contour
   // will be empty.
 
-  int dimensionality=3;
+  int dimensionality = 3;
 
-  if(kEnd==0)
+  if (kEnd == 0)
   {
     --dimensionality;
-    kEnd=1;
+    kEnd = 1;
   }
 
   // Increments are for the point array.
@@ -1043,56 +1177,56 @@ void vtkExtractCTHPart::ExecuteCellDataToPointData(
   kInc = (dims[1]) * jInc;
 
   pPoint = pointVolumeFraction->GetPointer(0);
-//  pCell = static_cast<double*>(cellVolumeFraction->GetVoidPointer(0));
+  //  pCell = static_cast<double*>(cellVolumeFraction->GetVoidPointer(0));
 
   // Initialize the point data to 0.
-  memset(pPoint, 0,  dims[0]*dims[1]*dims[2]*sizeof(double));
+  memset(pPoint, 0, dims[0] * dims[1] * dims[2] * sizeof(double));
 
 #ifndef NDEBUG
   // for debugging and check out of range.
-  double *endPtr=pPoint+dims[0]*dims[1]*dims[2];
+  double* endPtr = pPoint + dims[0] * dims[1] * dims[2];
 #endif
 
-//  float delProgress = (maxProgress - minProgress) / (kEnd*jEnd*iEnd) / 2;
-//  vtkIdType counter = 0;
+  //  float delProgress = (maxProgress - minProgress) / (kEnd*jEnd*iEnd) / 2;
+  //  vtkIdType counter = 0;
 
-  int index=0;
-  // Loop thorugh the cells.
+  int index = 0;
+  // Loop through the cells.
   for (k = 0; k < kEnd; ++k)
   {
     for (j = 0; j < jEnd; ++j)
     {
       for (i = 0; i < iEnd; ++i)
       {
-        //if (counter % 1000 == 0 && reportProgress)
+        // if (counter % 1000 == 0 && reportProgress)
         //  {
         //  this->UpdateProgress(minProgress + delProgress*(i+j*iEnd+k*iEnd*jEnd));
         //  }
-        //counter++;
+        // counter++;
         // Add cell value to all points of cell.
-        double value=cellVolumeFraction->GetTuple1(index);
+        double value = cellVolumeFraction->GetTuple1(index);
 
-        assert("check: valid_range" && pPoint<endPtr);
-        assert("check: valid_range" && pPoint+1<endPtr);
-        assert("check: valid_range" && pPoint+jInc<endPtr);
-        assert("check: valid_range" && pPoint+jInc+1<endPtr);
+        assert("check: valid_range" && pPoint < endPtr);
+        assert("check: valid_range" && pPoint + 1 < endPtr);
+        assert("check: valid_range" && pPoint + jInc < endPtr);
+        assert("check: valid_range" && pPoint + jInc + 1 < endPtr);
 
         *pPoint += value;
         pPoint[1] += value;
         pPoint[jInc] += value;
-        pPoint[1+jInc] += value;
+        pPoint[1 + jInc] += value;
 
-        if(dimensionality==3)
+        if (dimensionality == 3)
         {
-          assert("check: valid_range" && pPoint+kInc<endPtr);
-          assert("check: valid_range" && pPoint+kInc+1<endPtr);
-          assert("check: valid_range" && pPoint+kInc+jInc<endPtr);
-          assert("check: valid_range" && pPoint+kInc+jInc+1<endPtr);
+          assert("check: valid_range" && pPoint + kInc < endPtr);
+          assert("check: valid_range" && pPoint + kInc + 1 < endPtr);
+          assert("check: valid_range" && pPoint + kInc + jInc < endPtr);
+          assert("check: valid_range" && pPoint + kInc + jInc + 1 < endPtr);
 
           pPoint[kInc] += value;
-          pPoint[kInc+1] += value;
-          pPoint[kInc+jInc] += value;
-          pPoint[kInc+jInc+1] += value;
+          pPoint[kInc + 1] += value;
+          pPoint[kInc + jInc] += value;
+          pPoint[kInc + jInc + 1] += value;
         }
 
         // Increment pointers
@@ -1113,9 +1247,9 @@ void vtkExtractCTHPart::ExecuteCellDataToPointData(
 
   // because we eventually modified iEnd, jEnd, kEnd to handle the
   // 2D image case, we have to recompute them.
-  iEnd = dims[0]-1;
-  jEnd = dims[1]-1;
-  kEnd = dims[2]-1;
+  iEnd = dims[0] - 1;
+  jEnd = dims[1] - 1;
+  kEnd = dims[2] - 1;
 
   // counter = 0;
   for (k = 0; k <= kEnd; ++k)
@@ -1126,7 +1260,7 @@ void vtkExtractCTHPart::ExecuteCellDataToPointData(
     {
       count = count << 1;
     }
-    if (k == kEnd && kEnd>0)
+    if (k == kEnd && kEnd > 0)
     {
       // only in 3D case, otherwise count may become zero
       // and be involved in a division by zero later on
@@ -1146,11 +1280,11 @@ void vtkExtractCTHPart::ExecuteCellDataToPointData(
       }
       for (i = 0; i <= iEnd; ++i)
       {
-        //if (counter % 1000 == 0 && reportProgress)
+        // if (counter % 1000 == 0 && reportProgress)
         //  {
         //  this->UpdateProgress(minProgress + delProgress/2 + delProgress*(i+j*iEnd+k*iEnd*jEnd));
         //  }
-        //counter++;
+        // counter++;
         // Just a fancy fast way to compute the number of cell neighbors of a
         // point.
         if (i == 1)
@@ -1161,8 +1295,8 @@ void vtkExtractCTHPart::ExecuteCellDataToPointData(
         {
           count = count >> 1;
         }
-        assert("check: valid_range" && pPoint<endPtr);
-        assert("check: strictly_positive_count" && count>0);
+        assert("check: valid_range" && pPoint < endPtr);
+        assert("check: strictly_positive_count" && count > 0);
         *pPoint = *pPoint / static_cast<double>(count);
         ++pPoint;
       }
@@ -1173,27 +1307,25 @@ void vtkExtractCTHPart::ExecuteCellDataToPointData(
 //-----------------------------------------------------------------------------
 void vtkExtractCTHPart::TriggerProgressEvent(double val)
 {
-  double progress = this->ProgressShift + val*this->ProgressScale;
-  //cout << "Progress: " << progress << endl;
+  double progress = this->ProgressShift + val * this->ProgressScale;
+  // cout << "Progress: " << progress << endl;
   this->UpdateProgress(progress);
 }
 
 //-----------------------------------------------------------------------------
 void vtkExtractCTHPart::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "VolumeArrayNames: \n";
   vtkIndent i2 = indent.GetNextIndent();
   std::vector<std::string>::iterator it;
-  for ( it = this->Internals->VolumeArrayNames.begin();
-    it != this->Internals->VolumeArrayNames.end();
-    ++ it )
+  for (it = this->Internals->VolumeArrayNames.begin();
+       it != this->Internals->VolumeArrayNames.end(); ++it)
   {
     os << i2 << it->c_str() << endl;
   }
-  os << indent << "VolumeFractionSurfaceValue: "
-    << this->VolumeFractionSurfaceValue << endl;
+  os << indent << "VolumeFractionSurfaceValue: " << this->VolumeFractionSurfaceValue << endl;
   os << indent << "Capping: " << this->Capping << endl;
   os << indent << "GenerateTriangles: " << this->GenerateTriangles << endl;
   os << indent << "RemoveGhostCells: " << this->RemoveGhostCells << endl;
@@ -1208,7 +1340,7 @@ void vtkExtractCTHPart::PrintSelf(ostream& os, vtkIndent indent)
     os << indent << "ClipPlane: nullptr\n";
   }
 
-  if ( this->Controller!=nullptr)
+  if (this->Controller != nullptr)
   {
     os << "Controller:" << endl;
     this->Controller->PrintSelf(os, indent.GetNextIndent());

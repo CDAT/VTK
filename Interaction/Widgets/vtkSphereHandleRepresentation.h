@@ -22,14 +22,14 @@
  *
  * @sa
  * vtkHandleRepresentation vtkHandleWidget vtkSphereSource
-*/
+ */
 
 #ifndef vtkSphereHandleRepresentation_h
 #define vtkSphereHandleRepresentation_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkHandleRepresentation.h"
-#include "vtkSphereSource.h" // Needed for delegation to sphere
+#include "vtkInteractionWidgetsModule.h" // For export macro
+#include "vtkSphereSource.h"             // Needed for delegation to sphere
 
 class vtkSphereSource;
 class vtkProperty;
@@ -37,22 +37,23 @@ class vtkActor;
 class vtkPolyDataMapper;
 class vtkCellPicker;
 
-class VTKINTERACTIONWIDGETS_EXPORT vtkSphereHandleRepresentation
-                        : public vtkHandleRepresentation
+class VTKINTERACTIONWIDGETS_EXPORT vtkSphereHandleRepresentation : public vtkHandleRepresentation
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkSphereHandleRepresentation *New();
+  static vtkSphereHandleRepresentation* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkSphereHandleRepresentation,vtkHandleRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSphereHandleRepresentation, vtkHandleRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
+
+  using vtkHandleRepresentation::Translate;
 
   //@{
   /**
@@ -62,8 +63,8 @@ public:
    * the superclasses' SetWorldPosition() and SetDisplayPosition() in
    * order to set the focal point of the cursor properly.
    */
-  void SetWorldPosition(double p[3]) VTK_OVERRIDE;
-  void SetDisplayPosition(double p[3]) VTK_OVERRIDE;
+  void SetWorldPosition(double p[3]) override;
+  void SetDisplayPosition(double p[3]) override;
   //@}
 
   //@{
@@ -75,9 +76,9 @@ public:
    * point representation. (Note that the bounds can be scaled up using the
    * right mouse button.)
    */
-  vtkSetMacro(TranslationMode,int);
-  vtkGetMacro(TranslationMode,int);
-  vtkBooleanMacro(TranslationMode,int);
+  vtkSetMacro(TranslationMode, vtkTypeBool);
+  vtkGetMacro(TranslationMode, vtkTypeBool);
+  vtkBooleanMacro(TranslationMode, vtkTypeBool);
   //@}
 
   void SetSphereRadius(double);
@@ -89,8 +90,8 @@ public:
    */
   void SetProperty(vtkProperty*);
   void SetSelectedProperty(vtkProperty*);
-  vtkGetObjectMacro(Property,vtkProperty);
-  vtkGetObjectMacro(SelectedProperty,vtkProperty);
+  vtkGetObjectMacro(Property, vtkProperty);
+  vtkGetObjectMacro(SelectedProperty, vtkProperty);
   //@}
 
   //@{
@@ -100,88 +101,98 @@ public:
    * size is specified as a fraction of the length of the diagonal of the
    * point widget's bounding box.
    */
-  vtkSetClampMacro(HotSpotSize,double,0.0,1.0);
-  vtkGetMacro(HotSpotSize,double);
+  vtkSetClampMacro(HotSpotSize, double, 0.0, 1.0);
+  vtkGetMacro(HotSpotSize, double);
   //@}
 
   /**
    * Overload the superclasses SetHandleSize() method to update internal
    * variables.
    */
-  void SetHandleSize(double size) VTK_OVERRIDE;
+  void SetHandleSize(double size) override;
 
   //@{
   /**
    * Methods to make this class properly act like a vtkWidgetRepresentation.
    */
-  double *GetBounds() VTK_OVERRIDE;
-  void BuildRepresentation() VTK_OVERRIDE;
-  void StartWidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  void WidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  int ComputeInteractionState(int X, int Y, int modify=0) VTK_OVERRIDE;
-  void PlaceWidget(double bounds[6]) VTK_OVERRIDE;
+  double* GetBounds() VTK_SIZEHINT(6) override;
+  void BuildRepresentation() override;
+  void StartWidgetInteraction(double eventPos[2]) override;
+  void WidgetInteraction(double eventPos[2]) override;
+  int ComputeInteractionState(int X, int Y, int modify = 0) override;
+  void PlaceWidget(double bounds[6]) override;
   //@}
 
   //@{
   /**
    * Methods to make this class behave as a vtkProp.
    */
-  void ShallowCopy(vtkProp *prop) VTK_OVERRIDE;
-  void DeepCopy(vtkProp *prop) VTK_OVERRIDE;
-  void GetActors(vtkPropCollection *) VTK_OVERRIDE;
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
-  int RenderOpaqueGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderTranslucentPolygonalGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  void ShallowCopy(vtkProp* prop) override;
+  void DeepCopy(vtkProp* prop) override;
+  void GetActors(vtkPropCollection*) override;
+  void ReleaseGraphicsResources(vtkWindow*) override;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) override;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
   //@}
 
-  void Highlight(int highlight) VTK_OVERRIDE;
+  void Highlight(int highlight) override;
+
+  /*
+   * Register internal Pickers within PickingManager
+   */
+  void RegisterPickers() override;
+
+  /**
+   * Override to ensure that the internal actor's visibility is consistent with
+   * this representation's visibility. Inconsistency between the two would cause
+   * issues in picking logic which relies on individual view prop visibility to
+   * determine whether the prop is pickable.
+   */
+  void SetVisibility(vtkTypeBool visible) override;
+
 protected:
   vtkSphereHandleRepresentation();
-  ~vtkSphereHandleRepresentation() VTK_OVERRIDE;
+  ~vtkSphereHandleRepresentation() override;
 
   // the cursor3D
-  vtkActor          *Actor;
-  vtkPolyDataMapper *Mapper;
-  vtkSphereSource   *Sphere;
+  vtkActor* Actor;
+  vtkPolyDataMapper* Mapper;
+  vtkSphereSource* Sphere;
   // void Highlight(int highlight);
 
   // Do the picking
-  vtkCellPicker *CursorPicker;
+  vtkCellPicker* CursorPicker;
   double LastPickPosition[3];
   double LastEventPosition[2];
 
-  // Register internal Pickers within PickingManager
-  void RegisterPickers() VTK_OVERRIDE;
-
   // Methods to manipulate the cursor
-  int  ConstraintAxis;
-  void Translate(double *p1, double *p2);
-  void Scale(double *p1, double *p2, double eventPos[2]);
-  void MoveFocus(double *p1, double *p2);
+  int ConstraintAxis;
+  void Translate(const double* p1, const double* p2) override;
+  void Scale(const double* p1, const double* p2, const double eventPos[2]);
+  void MoveFocus(const double* p1, const double* p2);
   void SizeBounds();
 
   // Properties used to control the appearance of selected objects and
   // the manipulator in general.
-  vtkProperty *Property;
-  vtkProperty *SelectedProperty;
-  void         CreateDefaultProperties();
+  vtkProperty* Property;
+  vtkProperty* SelectedProperty;
+  void CreateDefaultProperties();
 
   // The size of the hot spot.
   double HotSpotSize;
-  int    DetermineConstraintAxis(int constraint, double *x);
-  int    WaitingForMotion;
-  int    WaitCount;
+  int WaitingForMotion;
+  int WaitCount;
 
   // Current handle sized (may reflect scaling)
   double CurrentHandleSize;
 
   // Control how translation works
-  int TranslationMode;
+  vtkTypeBool TranslationMode;
 
 private:
-  vtkSphereHandleRepresentation(const vtkSphereHandleRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSphereHandleRepresentation&) VTK_DELETE_FUNCTION;
+  vtkSphereHandleRepresentation(const vtkSphereHandleRepresentation&) = delete;
+  void operator=(const vtkSphereHandleRepresentation&) = delete;
 };
 
 #endif

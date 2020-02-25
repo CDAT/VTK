@@ -17,8 +17,11 @@
  * @brief   transform points and associated normals and vectors
  *
  * vtkTransformFilter is a filter to transform point coordinates, and
- * associated point normals and vectors. Other point data is passed
- * through the filter.
+ * associated point normals and vectors, as well as cell normals and vectors.
+ * Transformed data array will be stored in a float array or a double array.
+ * Other point and cel data are passed through the filter, unless TransformAllInputVectors
+ * is set to true, in this case all other 3 components arrays from point and cell data
+ * will be transformed as well.
  *
  * An alternative method of transformation is to use vtkActor's methods
  * to scale, rotate, and translate objects. The difference between the
@@ -30,7 +33,7 @@
  *
  * @sa
  * vtkAbstractTransform vtkTransformPolyDataFilter vtkActor
-*/
+ */
 
 #ifndef vtkTransformFilter_h
 #define vtkTransformFilter_h
@@ -43,24 +46,24 @@ class vtkAbstractTransform;
 class VTKFILTERSGENERAL_EXPORT vtkTransformFilter : public vtkPointSetAlgorithm
 {
 public:
-  static vtkTransformFilter *New();
-  vtkTypeMacro(vtkTransformFilter,vtkPointSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTransformFilter* New();
+  vtkTypeMacro(vtkTransformFilter, vtkPointSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Return the MTime also considering the transform.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
    * Specify the transform object used to transform points.
    */
   virtual void SetTransform(vtkAbstractTransform*);
-  vtkGetObjectMacro(Transform,vtkAbstractTransform);
+  vtkGetObjectMacro(Transform, vtkAbstractTransform);
   //@}
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   //@{
   /**
@@ -68,26 +71,38 @@ public:
    * for the vtkAlgorithm::DesiredOutputPrecision enum for an explanation of
    * the available precision settings.
    */
-  vtkSetMacro(OutputPointsPrecision,int);
-  vtkGetMacro(OutputPointsPrecision,int);
+  vtkSetMacro(OutputPointsPrecision, int);
+  vtkGetMacro(OutputPointsPrecision, int);
+  //@}
+
+  //@{
+  /**
+   * If off (the default), only Vectors and Normals will be transformed.
+   * If on, all 3-component data arrays ( considered as 3D vectors) will be transformed
+   * All other won't be flipped and will only be copied.
+   */
+  vtkSetMacro(TransformAllInputVectors, bool);
+  vtkGetMacro(TransformAllInputVectors, bool);
+  vtkBooleanMacro(TransformAllInputVectors, bool);
   //@}
 
 protected:
   vtkTransformFilter();
-  ~vtkTransformFilter() VTK_OVERRIDE;
+  ~vtkTransformFilter() override;
 
-  int RequestDataObject(vtkInformation *request,
-                        vtkInformationVector **inputVector,
-                        vtkInformationVector *outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  vtkAbstractTransform *Transform;
+  vtkDataArray* CreateNewDataArray(vtkDataArray* input = nullptr);
+
+  vtkAbstractTransform* Transform;
   int OutputPointsPrecision;
+  bool TransformAllInputVectors;
+
 private:
-  vtkTransformFilter(const vtkTransformFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTransformFilter&) VTK_DELETE_FUNCTION;
+  vtkTransformFilter(const vtkTransformFilter&) = delete;
+  void operator=(const vtkTransformFilter&) = delete;
 };
 
 #endif

@@ -64,13 +64,13 @@
  * </pre>
  * @sa
  * vtkFinitePlaneRepresentation
-*/
+ */
 
 #ifndef vtkFinitePlaneWidget_h
 #define vtkFinitePlaneWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkFinitePlaneRepresentation;
 class vtkHandleWidget;
@@ -81,14 +81,14 @@ public:
   /**
    * Instantiate the object.
    */
-  static vtkFinitePlaneWidget *New();
+  static vtkFinitePlaneWidget* New();
 
   //@{
   /**
    * Standard vtkObject methods
    */
-  vtkTypeMacro(vtkFinitePlaneWidget,vtkAbstractWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkFinitePlaneWidget, vtkAbstractWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -96,20 +96,24 @@ public:
    * widget in the scene. Note that the representation is a subclass of vtkProp
    * so it can be added to the renderer independent of the widget.
    */
-  void SetRepresentation(vtkFinitePlaneRepresentation *r);
+  void SetRepresentation(vtkFinitePlaneRepresentation* r);
 
   /**
    * Create the default widget representation if one is not set. By default,
    * this is an instance of the vtkFinitePlaneRepresentation class.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
+  void CreateDefaultRepresentation() override;
 
 protected:
   vtkFinitePlaneWidget();
-  ~vtkFinitePlaneWidget() VTK_OVERRIDE;
+  ~vtkFinitePlaneWidget() override;
 
   int WidgetState;
-  enum _WidgetState {Start = 0, Active};
+  enum _WidgetState
+  {
+    Start = 0,
+    Active
+  };
 
   // These methods handle events
   static void SelectAction(vtkAbstractWidget*);
@@ -120,11 +124,11 @@ protected:
    * Update the cursor shape based on the interaction state. Returns 1
    * if the cursor shape requested is different from the existing one.
    */
-  int UpdateCursorShape( int interactionState );
+  int UpdateCursorShape(int interactionState);
 
 private:
-  vtkFinitePlaneWidget(const vtkFinitePlaneWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFinitePlaneWidget&) VTK_DELETE_FUNCTION;
+  vtkFinitePlaneWidget(const vtkFinitePlaneWidget&) = delete;
+  void operator=(const vtkFinitePlaneWidget&) = delete;
 };
 
 #endif

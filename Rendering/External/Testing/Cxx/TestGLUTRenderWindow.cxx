@@ -24,12 +24,16 @@
 #include <vtk_glew.h>
 // GLUT includes
 #if defined(__APPLE__)
-# include <GLUT/glut.h> // Include GLUT API.
+#include <AvailabilityMacros.h>
+#if MAC_OS_X_VERSION_MIN_REQUIRED > 1090
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+#include <GLUT/glut.h> // Include GLUT API.
 #else
-# if defined(_WIN32)
-# include "vtkWindows.h" // Needed to include OpenGL header on Windows.
-# endif // _WIN32
-# include <GL/glut.h> // Include GLUT API.
+#if defined(_WIN32)
+#include "vtkWindows.h" // Needed to include OpenGL header on Windows.
+#endif                  // _WIN32
+#include <GL/glut.h>    // Include GLUT API.
 #endif
 
 // STD includes
@@ -43,11 +47,13 @@
 #include <vtkCubeSource.h>
 #include <vtkExternalOpenGLRenderWindow.h>
 #include <vtkLight.h>
+#include <vtkLogger.h>
 #include <vtkNew.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkTesting.h>
 
-namespace {
+namespace
+{
 
 // Global variables used by the glutDisplayFunc and glutIdleFunc
 vtkNew<ExternalVTKWidget> externalVTKWidget;
@@ -61,10 +67,9 @@ static int windowH = 301;
 static int windowW = 300;
 
 static void MakeCurrentCallback(vtkObject* vtkNotUsed(caller),
-                                long unsigned int vtkNotUsed(eventId),
-                                void * vtkNotUsed(clientData),
-                                void * vtkNotUsed(callData))
+  long unsigned int vtkNotUsed(eventId), void* vtkNotUsed(clientData), void* vtkNotUsed(callData))
 {
+  vtkLogScopeFunction(1);
   if (initialized)
   {
     glutSetWindow(windowId);
@@ -75,19 +80,29 @@ static void MakeCurrentCallback(vtkObject* vtkNotUsed(caller),
    whenever the window needs to be re-painted. */
 void display()
 {
+  vtkLogScopeFunction(INFO);
   if (!initialized)
   {
-    vtkNew<vtkExternalOpenGLRenderWindow> renWin;
-    externalVTKWidget->SetRenderWindow(renWin.GetPointer());
+    vtkLogScopeF(INFO, "do-initialize");
+    // since `handleResize` may get called before display, we may have already
+    // created and resized the vtkExternalOpenGLRenderWindow, hence we don't
+    // recreate it here.
+    auto renWin = externalVTKWidget->GetRenderWindow();
+
+    // since our example here is not setting up the `glViewport`, we don't want
+    // the vtkExternalOpenGLRenderWindow to update its size based on the
+    // glViewport hence we must disable automatic position and size.
+    renWin->AutomaticWindowPositionAndResizeOff();
+
+    assert(renWin != nullptr);
     vtkNew<vtkCallbackCommand> callback;
     callback->SetCallback(MakeCurrentCallback);
-    renWin->AddObserver(vtkCommand::WindowMakeCurrentEvent,
-                        callback.GetPointer());
+    renWin->AddObserver(vtkCommand::WindowMakeCurrentEvent, callback);
     vtkNew<vtkPolyDataMapper> mapper;
     vtkNew<vtkActor> actor;
-    actor->SetMapper(mapper.GetPointer());
+    actor->SetMapper(mapper);
     vtkRenderer* ren = externalVTKWidget->AddRenderer();
-    ren->AddActor(actor.GetPointer());
+    ren->AddActor(actor);
     vtkNew<vtkCubeSource> cs;
     mapper->SetInputConnection(cs->GetOutputPort());
     actor->RotateX(45.0);
@@ -106,33 +121,35 @@ void display()
   glClearDepth(1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer
 
-  glFlush();  // Render now
+  glFlush(); // Render now
   glBegin(GL_TRIANGLES);
-    glVertex3f(-1.5,-1.5,0.0);
-    glVertex3f(1.5,0.0,0.0);
-    glVertex3f(0.0,1.5,1.0);
+  glVertex3f(-1.5, -1.5, 0.0);
+  glVertex3f(1.5, 0.0, 0.0);
+  glVertex3f(0.0, 1.5, 1.0);
   glEnd();
 
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  GLfloat lightpos[] = {-0.5f, 1.0f, 1.0f, 1.0f};
+  GLfloat lightpos[] = { -0.5f, 1.0f, 1.0f, 1.0f };
   glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-  GLfloat diffuse[] = {0.0f, 0.8f, 0.8f, 1.0f};
+  GLfloat diffuse[] = { 0.0f, 0.8f, 0.8f, 1.0f };
   glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-  GLfloat specular[] = {0.5f, 0.0f, 0.0f, 1.0f};
+  GLfloat specular[] = { 0.5f, 0.0f, 0.0f, 1.0f };
   glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-  GLfloat ambient[] = {1.0f, 1.0f, 0.2f,  1.0f};
+  GLfloat ambient[] = { 1.0f, 1.0f, 0.2f, 1.0f };
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
+  vtkLogScopeF(INFO, "do-vtk-render");
   externalVTKWidget->GetRenderWindow()->Render();
   glutSwapBuffers();
 }
 
 void test()
 {
+  vtkLogScopeFunction(INFO);
   bool interactiveMode = false;
   vtkTesting* t = vtkTesting::New();
-  for(int cc = 1; cc < NumArgs; cc++)
+  for (int cc = 1; cc < NumArgs; cc++)
   {
     t->AddArgument(ArgV[cc]);
     if (strcmp(ArgV[cc], "-I") == 0)
@@ -156,6 +173,7 @@ void test()
 
 void handleResize(int w, int h)
 {
+  vtkLogScopeF(INFO, "handleResize: %d, %d", w, h);
   externalVTKWidget->GetRenderWindow()->SetSize(w, h);
   glutPostRedisplay();
 }
@@ -172,16 +190,17 @@ int TestGLUTRenderWindow(int argc, char* argv[])
 {
   NumArgs = argc;
   ArgV = argv;
-  glutInit(&argc, argv);                 // Initialize GLUT
+  glutInit(&argc, argv); // Initialize GLUT
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
-  glutInitWindowSize(windowW, windowH);   // Set the window's initial width & height
-  glutInitWindowPosition(101, 201); // Position the window's initial top-left corner
+  vtkLog(INFO, "glutInitWindowSize: " << windowW << ", " << windowH);
+  glutInitWindowSize(windowW, windowH); // Set the window's initial width & height
+  glutInitWindowPosition(101, 201);     // Position the window's initial top-left corner
   windowId = glutCreateWindow("VTK External Window Test"); // Create a window with the given title
-  glutDisplayFunc(display); // Register display callback handler for window re-paint
-  glutIdleFunc(test); // Register test callback handler for vtkTesting
+  glutDisplayFunc(display);      // Register display callback handler for window re-paint
+  glutIdleFunc(test);            // Register test callback handler for vtkTesting
   glutReshapeFunc(handleResize); // Register resize callback handler for window resize
-  atexit(onexit);  // Register callback to uninitialize on exit
+  atexit(onexit);                // Register callback to uninitialize on exit
   glewInit();
-  glutMainLoop();  // Enter the infinitely event-processing loop
+  glutMainLoop(); // Enter the infinitely event-processing loop
   return 0;
 }

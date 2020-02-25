@@ -31,38 +31,42 @@
  *
  * @sa
  * vtkLogLookupTable
-*/
+ */
 
 #ifndef vtkWindowLevelLookupTable_h
 #define vtkWindowLevelLookupTable_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkLookupTable.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class VTKRENDERINGCORE_EXPORT vtkWindowLevelLookupTable : public vtkLookupTable
 {
 public:
-  static vtkWindowLevelLookupTable *New();
-  vtkTypeMacro(vtkWindowLevelLookupTable,vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkWindowLevelLookupTable* New();
+  vtkTypeMacro(vtkWindowLevelLookupTable, vtkLookupTable);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Generate lookup table as a linear ramp between MinimumTableValue
    * and MaximumTableValue.
    */
-  void Build() VTK_OVERRIDE;
+  void Build() override;
 
   //@{
   /**
    * Set the window for the lookup table.  The window is the difference
    * between TableRange[0] and TableRange[1].
    */
-  void SetWindow(double window) {
-    if (window < 1e-5) { window = 1e-5; }
+  void SetWindow(double window)
+  {
+    if (window < 1e-5)
+    {
+      window = 1e-5;
+    }
     this->Window = window;
-    this->SetTableRange(this->Level - this->Window/2.0,
-                        this->Level + this->Window/2.0); };
-  vtkGetMacro(Window,double);
+    this->SetTableRange(this->Level - this->Window / 2.0, this->Level + this->Window / 2.0);
+  }
+  vtkGetMacro(Window, double);
   //@}
 
   //@{
@@ -70,11 +74,12 @@ public:
    * Set the Level for the lookup table.  The level is the average of
    * TableRange[0] and TableRange[1].
    */
-  void SetLevel(double level) {
+  void SetLevel(double level)
+  {
     this->Level = level;
-    this->SetTableRange(this->Level - this->Window/2.0,
-                        this->Level + this->Window/2.0); };
-  vtkGetMacro(Level,double);
+    this->SetTableRange(this->Level - this->Window / 2.0, this->Level + this->Window / 2.0);
+  }
+  vtkGetMacro(Level, double);
   //@}
 
   //@{
@@ -82,9 +87,9 @@ public:
    * Set inverse video on or off.  You can achieve the same effect by
    * switching the MinimumTableValue and the MaximumTableValue.
    */
-  void SetInverseVideo(int iv);
-  vtkGetMacro(InverseVideo,int);
-  vtkBooleanMacro(InverseVideo,int);
+  void SetInverseVideo(vtkTypeBool iv);
+  vtkGetMacro(InverseVideo, vtkTypeBool);
+  vtkBooleanMacro(InverseVideo, vtkTypeBool);
   //@}
 
   //@{
@@ -93,8 +98,8 @@ public:
    * start of the ramp will be set to this color.  After you change
    * this value, you must re-build the lookup table.
    */
-  vtkSetVector4Macro(MinimumTableValue,double);
-  vtkGetVector4Macro(MinimumTableValue,double);
+  vtkSetVector4Macro(MinimumTableValue, double);
+  vtkGetVector4Macro(MinimumTableValue, double);
   //@}
 
   //@{
@@ -103,22 +108,23 @@ public:
    * end of the ramp will be set to this color.  After you change
    * this value, you must re-build the lookup table.
    */
-  vtkSetVector4Macro(MaximumTableValue,double);
-  vtkGetVector4Macro(MaximumTableValue,double);
+  vtkSetVector4Macro(MaximumTableValue, double);
+  vtkGetVector4Macro(MaximumTableValue, double);
   //@}
 
 protected:
-  vtkWindowLevelLookupTable(int sze=256, int ext=256);
-  ~vtkWindowLevelLookupTable() VTK_OVERRIDE {}
+  vtkWindowLevelLookupTable(int sze = 256, int ext = 256);
+  ~vtkWindowLevelLookupTable() override {}
 
   double Window;
   double Level;
-  int InverseVideo;
+  vtkTypeBool InverseVideo;
   double MaximumTableValue[4];
   double MinimumTableValue[4];
+
 private:
-  vtkWindowLevelLookupTable(const vtkWindowLevelLookupTable&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWindowLevelLookupTable&) VTK_DELETE_FUNCTION;
+  vtkWindowLevelLookupTable(const vtkWindowLevelLookupTable&) = delete;
+  void operator=(const vtkWindowLevelLookupTable&) = delete;
 };
 
 #endif

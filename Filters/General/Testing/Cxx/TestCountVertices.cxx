@@ -34,7 +34,7 @@ int TestCountVertices(int, char*[])
   {
     points->InsertNextPoint(0., 0., 0.);
   }
-  data->SetPoints(points.Get());
+  data->SetPoints(points);
 
   // Insert the following cell types and verify the number of verts computed
   // by the filter:
@@ -50,51 +50,48 @@ int TestCountVertices(int, char*[])
   // VTK_HEXAGONAL_PRISM = 12
 
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_VERTEX, cell.Get());
+  data->InsertNextCell(VTK_VERTEX, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_LINE, cell.Get());
+  data->InsertNextCell(VTK_LINE, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_TRIANGLE, cell.Get());
+  data->InsertNextCell(VTK_TRIANGLE, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_TETRA, cell.Get());
+  data->InsertNextCell(VTK_TETRA, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_PYRAMID, cell.Get());
+  data->InsertNextCell(VTK_PYRAMID, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_WEDGE, cell.Get());
-
-  cell->InsertNextId(cell->GetNumberOfIds());
-  cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_VOXEL, cell.Get());
-  data->InsertNextCell(VTK_HEXAHEDRON, cell.Get());
+  data->InsertNextCell(VTK_WEDGE, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_PENTAGONAL_PRISM, cell.Get());
+  data->InsertNextCell(VTK_VOXEL, cell);
+  data->InsertNextCell(VTK_HEXAHEDRON, cell);
 
   cell->InsertNextId(cell->GetNumberOfIds());
   cell->InsertNextId(cell->GetNumberOfIds());
-  data->InsertNextCell(VTK_HEXAGONAL_PRISM, cell.Get());
+  data->InsertNextCell(VTK_PENTAGONAL_PRISM, cell);
 
-  filter->SetInputData(data.Get());
+  cell->InsertNextId(cell->GetNumberOfIds());
+  cell->InsertNextId(cell->GetNumberOfIds());
+  data->InsertNextCell(VTK_HEXAGONAL_PRISM, cell);
+
+  filter->SetInputData(data);
   filter->Update();
 
-  vtkUnstructuredGrid *output =
-      vtkUnstructuredGrid::SafeDownCast(filter->GetOutput());
+  vtkUnstructuredGrid* output = vtkUnstructuredGrid::SafeDownCast(filter->GetOutput());
   if (!output)
   {
     std::cerr << "No output data!\n";
     return EXIT_FAILURE;
   }
 
-  vtkIdTypeArray *verts =
-      vtkIdTypeArray::SafeDownCast(
-        output->GetCellData()->GetArray(
-          filter->GetOutputArrayName()));
+  vtkIdTypeArray* verts =
+    vtkIdTypeArray::SafeDownCast(output->GetCellData()->GetArray(filter->GetOutputArrayName()));
   if (!verts)
   {
     std::cerr << "No output array!\n";
@@ -103,27 +100,27 @@ int TestCountVertices(int, char*[])
 
   if (verts->GetNumberOfComponents() != 1)
   {
-    std::cerr << "Invalid number of components in output array: "
-              << verts->GetNumberOfComponents() << "\n";
+    std::cerr << "Invalid number of components in output array: " << verts->GetNumberOfComponents()
+              << "\n";
     return EXIT_FAILURE;
   }
 
   if (verts->GetNumberOfTuples() != 10)
   {
-    std::cerr << "Invalid number of components in output array: "
-              << verts->GetNumberOfTuples() << "\n";
+    std::cerr << "Invalid number of components in output array: " << verts->GetNumberOfTuples()
+              << "\n";
     return EXIT_FAILURE;
   }
 
-#define TEST_VERTICES(idx, expected) \
-  { \
-  vtkIdType numVerts = verts->GetTypedComponent(idx, 0); \
-  if (numVerts != expected) \
-  { \
-    std::cerr << "Expected cell @idx=" << idx << " to have " << expected \
-              << " vertices, but found " << numVerts<< "\n"; \
-    return EXIT_FAILURE; \
-  } \
+#define TEST_VERTICES(idx, expected)                                                               \
+  {                                                                                                \
+    vtkIdType numVerts = verts->GetTypedComponent(idx, 0);                                         \
+    if (numVerts != (expected))                                                                    \
+    {                                                                                              \
+      std::cerr << "Expected cell @idx=" << (idx) << " to have " << (expected)                     \
+                << " vertices, but found " << numVerts << "\n";                                    \
+      return EXIT_FAILURE;                                                                         \
+    }                                                                                              \
   }
 
   int idx = 0;

@@ -18,31 +18,31 @@
  *
  * vtkGenericDataObjectWriter is a concrete class that writes data objects
  * to disk. The input to this object is any subclass of vtkDataObject.
-*/
+ */
 
 #ifndef vtkGenericDataObjectWriter_h
 #define vtkGenericDataObjectWriter_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataWriter.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class VTKIOLEGACY_EXPORT vtkGenericDataObjectWriter : public vtkDataWriter
 {
 public:
-  static vtkGenericDataObjectWriter *New();
-  vtkTypeMacro(vtkGenericDataObjectWriter,vtkDataWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkGenericDataObjectWriter* New();
+  vtkTypeMacro(vtkGenericDataObjectWriter, vtkDataWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkGenericDataObjectWriter();
-  ~vtkGenericDataObjectWriter() VTK_OVERRIDE;
+  ~vtkGenericDataObjectWriter() override;
 
-  void WriteData() VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  void WriteData() override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkGenericDataObjectWriter(const vtkGenericDataObjectWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericDataObjectWriter&) VTK_DELETE_FUNCTION;
+  vtkGenericDataObjectWriter(const vtkGenericDataObjectWriter&) = delete;
+  void operator=(const vtkGenericDataObjectWriter&) = delete;
 };
 
 #endif

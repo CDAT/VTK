@@ -27,11 +27,11 @@
 #include "vtkMultiBlockDataSet.h"
 #include "vtkNew.h"
 #include "vtkPointData.h"
+#include "vtkRTAnalyticSource.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRTAnalyticSource.h"
+#include "vtkRenderer.h"
 #include "vtkSphere.h"
 #include "vtkTableBasedClipDataSet.h"
 #include "vtkThreshold.h"
@@ -41,11 +41,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace
+{
 
-namespace {
-
-void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int rank, int numberOfProcs,
-                        int blocksPerProc)
+void CreateSourceDataSet(
+  vtkMultiBlockDataSet* dataset, int rank, int numberOfProcs, int blocksPerProc)
 {
   int numPieces = blocksPerProc * numberOfProcs;
   dataset->SetNumberOfBlocks(numPieces);
@@ -64,7 +64,7 @@ void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int rank, int numberOfPr
   cylinder->SetRadius(15);
   cylinder->SetAxis(0, 1, 0);
   vtkNew<vtkTableBasedClipDataSet> clipCyl;
-  clipCyl->SetClipFunction(cylinder.GetPointer());
+  clipCyl->SetClipFunction(cylinder);
   clipCyl->InsideOutOn();
 
   vtkNew<vtkSphere> sphere;
@@ -72,13 +72,13 @@ void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int rank, int numberOfPr
   sphere->SetRadius(12);
   vtkNew<vtkTableBasedClipDataSet> clipSphr;
   clipSphr->SetInputConnection(clipCyl->GetOutputPort());
-  clipSphr->SetClipFunction(sphere.GetPointer());
+  clipSphr->SetClipFunction(sphere);
 
   vtkNew<vtkTransform> transform;
   transform->RotateZ(45);
   vtkNew<vtkTransformFilter> transFilter;
   transFilter->SetInputConnection(clipSphr->GetOutputPort());
-  transFilter->SetTransform(transform.GetPointer());
+  transFilter->SetTransform(transform);
 
   for (int i = 0; i < blocksPerProc; ++i)
   {
@@ -93,50 +93,49 @@ void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int rank, int numberOfPr
     clipCyl->SetInputData(wavelet->GetOutputDataObject(0));
     transFilter->Update();
 
-    vtkDataObject *block = transFilter->GetOutputDataObject(0)->NewInstance();
+    vtkDataObject* block = transFilter->GetOutputDataObject(0)->NewInstance();
     block->DeepCopy(transFilter->GetOutputDataObject(0));
     dataset->SetBlock(piece, block);
     block->Delete();
   }
 }
 
-void CreateInputDataSet(vtkMultiBlockDataSet* dataset, const double bounds[6],
-                        int rank, int numberOfProcs, int numberOfBlocks)
+void CreateInputDataSet(vtkMultiBlockDataSet* dataset, const double bounds[6], int rank,
+  int numberOfProcs, int numberOfBlocks)
 {
   static const int dims[] = { 96, 32, 64 };
   dataset->SetNumberOfBlocks(numberOfBlocks);
 
   double size[3] = { bounds[1] - bounds[0], bounds[3] - bounds[2],
-                     (bounds[5] - bounds[4])/static_cast<double>(numberOfBlocks) };
+    (bounds[5] - bounds[4]) / static_cast<double>(numberOfBlocks) };
   for (int i = 0; i < numberOfBlocks; ++i)
   {
-    double origin[3] = { bounds[0], bounds[2], bounds[4] + static_cast<double>(i)*size[2] };
-    double spacing = (*std::max_element(size, size+3))/static_cast<double>(dims[i%3]);
+    double origin[3] = { bounds[0], bounds[2], bounds[4] + static_cast<double>(i) * size[2] };
+    double spacing = (*std::max_element(size, size + 3)) / static_cast<double>(dims[i % 3]);
 
     int extent[6];
     extent[0] = 0;
-    extent[1] = static_cast<int>(size[0]/spacing) - 1;
-    extent[2] = rank * (static_cast<int>(size[1]/spacing)/numberOfProcs);
-    extent[3] = extent[2] + (static_cast<int>(size[1]/spacing)/numberOfProcs);
+    extent[1] = static_cast<int>(size[0] / spacing) - 1;
+    extent[2] = rank * (static_cast<int>(size[1] / spacing) / numberOfProcs);
+    extent[3] = extent[2] + (static_cast<int>(size[1] / spacing) / numberOfProcs);
     extent[4] = 0;
-    extent[5] = static_cast<int>(std::ceil(size[2]/spacing));
+    extent[5] = static_cast<int>(std::ceil(size[2] / spacing));
 
     vtkNew<vtkImageData> img;
     img->SetExtent(extent);
     img->SetOrigin(origin);
     img->SetSpacing(spacing, spacing, spacing);
-    dataset->SetBlock(i, img.GetPointer());
+    dataset->SetBlock(i, img);
   }
 }
 
-void ComputeGlobalBounds(vtkMultiBlockDataSet* dataset,
-                         vtkMultiProcessController *controller,
-                         double bounds[6])
+void ComputeGlobalBounds(
+  vtkMultiBlockDataSet* dataset, vtkMultiProcessController* controller, double bounds[6])
 {
   vtkBoundingBox bb;
   for (unsigned i = 0; i < dataset->GetNumberOfBlocks(); ++i)
   {
-    vtkDataSet *block = vtkDataSet::SafeDownCast(dataset->GetBlock(i));
+    vtkDataSet* block = vtkDataSet::SafeDownCast(dataset->GetBlock(i));
     if (block)
     {
       bb.AddBounds(block->GetBounds());
@@ -152,15 +151,14 @@ void ComputeGlobalBounds(vtkMultiBlockDataSet* dataset,
 
   for (int i = 0; i < 3; ++i)
   {
-    bounds[2*i] = gbmin[i];
-    bounds[2*i + 1] = gbmax[i];
+    bounds[2 * i] = gbmin[i];
+    bounds[2 * i + 1] = gbmax[i];
   }
 }
 
 } // anonymous namespace
 
-
-int TestPResampleWithDataSet2(int argc, char *argv[])
+int TestPResampleWithDataSet2(int argc, char* argv[])
 {
   vtkNew<vtkMPIController> controller;
   controller->Initialize(&argc, &argv);
@@ -170,27 +168,26 @@ int TestPResampleWithDataSet2(int argc, char *argv[])
 
   // create source and input datasets
   vtkNew<vtkMultiBlockDataSet> source;
-  CreateSourceDataSet(source.GetPointer(), rank, numProcs, 5);
+  CreateSourceDataSet(source, rank, numProcs, 5);
 
   // compute full bounds of source dataset
   double bounds[6];
-  ComputeGlobalBounds(source.GetPointer(), controller.GetPointer(), bounds);
+  ComputeGlobalBounds(source, controller, bounds);
 
   vtkNew<vtkMultiBlockDataSet> input;
-  CreateInputDataSet(input.GetPointer(), bounds, rank, numProcs, 3);
-
+  CreateInputDataSet(input, bounds, rank, numProcs, 3);
 
   vtkNew<vtkPResampleWithDataSet> resample;
-  resample->SetController(controller.GetPointer());
-  resample->SetInputData(input.GetPointer());
-  resample->SetSourceData(source.GetPointer());
+  resample->SetController(controller);
+  resample->SetInputData(input);
+  resample->SetSourceData(source);
   resample->Update();
 
   // Render
   vtkNew<vtkThreshold> threshold;
   threshold->SetInputConnection(resample->GetOutputPort());
-  threshold->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS,
-                                    "vtkValidPointMask");
+  threshold->SetInputArrayToProcess(
+    0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "vtkValidPointMask");
   threshold->ThresholdByUpper(1);
 
   vtkNew<vtkCompositeDataGeometryFilter> toPoly;
@@ -204,33 +201,31 @@ int TestPResampleWithDataSet2(int argc, char *argv[])
   mapper->SetInputConnection(toPoly->GetOutputPort());
   mapper->SetScalarRange(range);
 
-
   // Setup parallel rendering
   vtkNew<vtkCompositeRenderManager> prm;
-  vtkSmartPointer<vtkRenderer> renderer =
-    vtkSmartPointer<vtkRenderer>::Take(prm->MakeRenderer());
+  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::Take(prm->MakeRenderer());
   vtkSmartPointer<vtkRenderWindow> renWin =
     vtkSmartPointer<vtkRenderWindow>::Take(prm->MakeRenderWindow());
-  renWin->AddRenderer(renderer.GetPointer());
+  renWin->AddRenderer(renderer);
   renWin->DoubleBufferOn();
   renWin->SetMultiSamples(0);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
-  prm->SetRenderWindow(renWin.GetPointer());
-  prm->SetController(controller.GetPointer());
+  prm->SetRenderWindow(renWin);
+  prm->SetController(controller);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
-  renderer->AddActor(actor.GetPointer());
+  actor->SetMapper(mapper);
+  renderer->AddActor(actor);
 
   int retVal;
   if (rank == 0)
   {
     prm->ResetAllCameras();
     renWin->Render();
-    retVal = vtkRegressionTester::Test(argc, argv, renWin.GetPointer(), 20);
+    retVal = vtkRegressionTester::Test(argc, argv, renWin, 20);
     if (retVal == vtkRegressionTester::DO_INTERACTOR)
     {
       prm->StartInteractor();

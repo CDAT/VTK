@@ -35,14 +35,14 @@ PURPOSE.  See the above copyright notice for more information.
  * to rescale the X,Y axes to a particular range of values.  Distance
  * comparisons can be performed in the scaled space by setting the CustomRanges
  * ivar and enabling UseNormalizedDistance.
-*/
+ */
 
 #ifndef vtkBivariateLinearTableThreshold_h
 #define vtkBivariateLinearTableThreshold_h
 
 #include "vtkFiltersStatisticsModule.h" // For export macro
+#include "vtkSmartPointer.h"            //Required for smart pointer internal ivars
 #include "vtkTableAlgorithm.h"
-#include "vtkSmartPointer.h"  //Required for smart pointer internal ivars
 
 class vtkDataArrayCollection;
 class vtkDoubleArray;
@@ -54,15 +54,15 @@ class VTKFILTERSSTATISTICS_EXPORT vtkBivariateLinearTableThreshold : public vtkT
 public:
   static vtkBivariateLinearTableThreshold* New();
   vtkTypeMacro(vtkBivariateLinearTableThreshold, vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Include the line in the threshold.  Essentially whether the threshold operation
    * uses > versus >=.
    */
-  vtkSetMacro(Inclusive,int);
-  vtkGetMacro(Inclusive,int);
+  vtkSetMacro(Inclusive, int);
+  vtkGetMacro(Inclusive, int);
   //@}
 
   /**
@@ -88,16 +88,16 @@ public:
   /**
    * Get the output as a table of row ids.
    */
-  vtkIdTypeArray* GetSelectedRowIds(int selection=0);
+  vtkIdTypeArray* GetSelectedRowIds(int selection = 0);
 
   enum OutputPorts
   {
-    OUTPUT_ROW_IDS=0,
+    OUTPUT_ROW_IDS = 0,
     OUTPUT_ROW_DATA
   };
   enum LinearThresholdType
   {
-    BLT_ABOVE=0,
+    BLT_ABOVE = 0,
     BLT_BELOW,
     BLT_NEAR,
     BLT_BETWEEN
@@ -135,12 +135,24 @@ public:
    * find all rows that are near the specified lines.  Between: find all rows
    * that are between the specified lines.
    */
-  vtkGetMacro(LinearThresholdType,int);
-  vtkSetMacro(LinearThresholdType,int);
-  void SetLinearThresholdTypeToAbove() { this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_ABOVE); }
-  void SetLinearThresholdTypeToBelow() { this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_BELOW); }
-  void SetLinearThresholdTypeToNear() { this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_NEAR); }
-  void SetLinearThresholdTypeToBetween() { this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_BETWEEN); }
+  vtkGetMacro(LinearThresholdType, int);
+  vtkSetMacro(LinearThresholdType, int);
+  void SetLinearThresholdTypeToAbove()
+  {
+    this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_ABOVE);
+  }
+  void SetLinearThresholdTypeToBelow()
+  {
+    this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_BELOW);
+  }
+  void SetLinearThresholdTypeToNear()
+  {
+    this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_NEAR);
+  }
+  void SetLinearThresholdTypeToBetween()
+  {
+    this->SetLinearThresholdType(vtkBivariateLinearTableThreshold::BLT_BETWEEN);
+  }
   //@}
 
   //@{
@@ -149,16 +161,16 @@ public:
    * conjunction with UseNormalizedDistance when determining if a row
    * passes the threshold.
    */
-  vtkSetVector2Macro(ColumnRanges,double);
-  vtkGetVector2Macro(ColumnRanges,double);
+  vtkSetVector2Macro(ColumnRanges, double);
+  vtkGetVector2Macro(ColumnRanges, double);
   //@}
 
   //@{
   /**
    * The Cartesian distance within which a point will pass the near threshold.
    */
-  vtkSetMacro(DistanceThreshold,double);
-  vtkGetMacro(DistanceThreshold,double);
+  vtkSetMacro(DistanceThreshold, double);
+  vtkGetMacro(DistanceThreshold, double);
   //@}
 
   //@{
@@ -169,9 +181,9 @@ public:
    * ColumnRanges[3]-ColumnRanges[2] = 1.0.  Used for scatter plot distance
    * calculations.  Be sure to set DistanceThreshold accordingly, when used.
    */
-  vtkSetMacro(UseNormalizedDistance,int);
-  vtkGetMacro(UseNormalizedDistance,int);
-  vtkBooleanMacro(UseNormalizedDistance,int);
+  vtkSetMacro(UseNormalizedDistance, vtkTypeBool);
+  vtkGetMacro(UseNormalizedDistance, vtkTypeBool);
+  vtkBooleanMacro(UseNormalizedDistance, vtkTypeBool);
   //@}
 
   /**
@@ -186,26 +198,23 @@ public:
 
 protected:
   vtkBivariateLinearTableThreshold();
-  ~vtkBivariateLinearTableThreshold() VTK_OVERRIDE;
+  ~vtkBivariateLinearTableThreshold() override;
 
   double ColumnRanges[2];
   double DistanceThreshold;
   int Inclusive;
   int LinearThresholdType;
   int NumberOfLineEquations;
-  int UseNormalizedDistance;
+  vtkTypeBool UseNormalizedDistance;
 
   vtkSmartPointer<vtkDoubleArray> LineEquations;
   class Internals;
   Internals* Implementation;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillInputPortInformation( int port, vtkInformation* info ) VTK_OVERRIDE;
-  int FillOutputPortInformation( int port, vtkInformation* info ) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Apply the current threshold to a vtkTable.  Fills acceptedIds on success.
@@ -235,8 +244,8 @@ protected:
   //@}
 
 private:
-  vtkBivariateLinearTableThreshold(const vtkBivariateLinearTableThreshold&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBivariateLinearTableThreshold&) VTK_DELETE_FUNCTION;
+  vtkBivariateLinearTableThreshold(const vtkBivariateLinearTableThreshold&) = delete;
+  void operator=(const vtkBivariateLinearTableThreshold&) = delete;
 };
 
 #endif

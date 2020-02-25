@@ -34,7 +34,7 @@
  * You may set the FirstTablePrefix and SecondTablePrefix to define how
  * the columns named are modified.  One of these prefixes may be the empty
  * string, but they must be different.
-*/
+ */
 
 #ifndef vtkMergeTables_h
 #define vtkMergeTables_h
@@ -46,8 +46,8 @@ class VTKINFOVISCORE_EXPORT vtkMergeTables : public vtkTableAlgorithm
 {
 public:
   static vtkMergeTables* New();
-  vtkTypeMacro(vtkMergeTables,vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMergeTables, vtkTableAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -92,22 +92,18 @@ public:
 
 protected:
   vtkMergeTables();
-  ~vtkMergeTables() VTK_OVERRIDE;
+  ~vtkMergeTables() override;
 
   bool MergeColumnsByName;
   bool PrefixAllButMerged;
   char* FirstTablePrefix;
   char* SecondTablePrefix;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkMergeTables(const vtkMergeTables&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMergeTables&) VTK_DELETE_FUNCTION;
+  vtkMergeTables(const vtkMergeTables&) = delete;
+  void operator=(const vtkMergeTables&) = delete;
 };
 
 #endif
-

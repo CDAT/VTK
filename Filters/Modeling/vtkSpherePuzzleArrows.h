@@ -17,7 +17,7 @@
  * @brief   Visualize permutation of the sphere puzzle.
  *
  * vtkSpherePuzzleArrows creates
-*/
+ */
 
 #ifndef vtkSpherePuzzleArrows_h
 #define vtkSpherePuzzleArrows_h
@@ -32,10 +32,10 @@ class vtkSpherePuzzle;
 class VTKFILTERSMODELING_EXPORT vtkSpherePuzzleArrows : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkSpherePuzzleArrows,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSpherePuzzleArrows, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkSpherePuzzleArrows *New();
+  static vtkSpherePuzzleArrows* New();
 
   //@{
   /**
@@ -44,26 +44,26 @@ public:
    * Permutation[3] = 3 will produce no arrow.
    * Permutation[3] = 10 will draw an arrow from location 3 to 10.
    */
-  vtkSetVectorMacro(Permutation,int,32);
-  vtkGetVectorMacro(Permutation,int,32);
+  vtkSetVectorMacro(Permutation, int, 32);
+  vtkGetVectorMacro(Permutation, int, 32);
   void SetPermutationComponent(int comp, int val);
-  void SetPermutation(vtkSpherePuzzle *puz);
+  void SetPermutation(vtkSpherePuzzle* puz);
   //@}
 
 protected:
   vtkSpherePuzzleArrows();
-  ~vtkSpherePuzzleArrows() VTK_OVERRIDE;
+  ~vtkSpherePuzzleArrows() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  void AppendArrow(int id1, int id2, vtkPoints *pts, vtkCellArray *polys);
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  void AppendArrow(int id1, int id2, vtkPoints* pts, vtkCellArray* polys);
 
   int Permutation[32];
 
   double Radius;
 
 private:
-  vtkSpherePuzzleArrows(const vtkSpherePuzzleArrows&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSpherePuzzleArrows&) VTK_DELETE_FUNCTION;
+  vtkSpherePuzzleArrows(const vtkSpherePuzzleArrows&) = delete;
+  void operator=(const vtkSpherePuzzleArrows&) = delete;
 };
 
 #endif

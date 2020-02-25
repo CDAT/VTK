@@ -25,49 +25,45 @@
 #include "vtkPolyDataNormals.h"
 #include "vtkProperty.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkShaderProgram.h"
+#include "vtkShaderProperty.h"
 #include "vtkSkybox.h"
 #include "vtkSmartPointer.h"
 #include "vtkTestUtilities.h"
+#include "vtkTexture.h"
 
 #include "vtkLight.h"
 
 //----------------------------------------------------------------------------
-int TestCubeMap2(int argc, char *argv[])
+int TestCubeMap2(int argc, char* argv[])
 {
   vtkNew<vtkRenderer> renderer;
   renderer->SetBackground(0.0, 0.0, 0.0);
   vtkNew<vtkRenderWindow> renderWindow;
   renderWindow->SetSize(400, 400);
-  renderWindow->AddRenderer(renderer.Get());
+  renderWindow->AddRenderer(renderer);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renderWindow.Get());
+  iren->SetRenderWindow(renderWindow);
 
   vtkNew<vtkLight> light;
   light->SetLightTypeToSceneLight();
-  light->SetPosition(1.0,7.0,1.0);
-  renderer->AddLight(light.Get());
+  light->SetPosition(1.0, 7.0, 1.0);
+  renderer->AddLight(light);
 
-  const char* fileName =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/bunny.ply");
+  const char* fileName = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/bunny.ply");
   vtkNew<vtkPLYReader> reader;
   reader->SetFileName(fileName);
+
+  delete[] fileName;
 
   vtkNew<vtkPolyDataNormals> norms;
   norms->SetInputConnection(reader->GetOutputPort());
 
-  const char* fpath[] =
-    {
-    "Data/skybox/posx.jpg",
-    "Data/skybox/negx.jpg",
-    "Data/skybox/posy.jpg",
-    "Data/skybox/negy.jpg",
-    "Data/skybox/posz.jpg",
-    "Data/skybox/negz.jpg"
-    };
+  const char* fpath[] = { "Data/skybox/posx.jpg", "Data/skybox/negx.jpg", "Data/skybox/posy.jpg",
+    "Data/skybox/negy.jpg", "Data/skybox/posz.jpg", "Data/skybox/negz.jpg" };
 
   vtkNew<vtkTexture> texture;
   texture->CubeMapOn();
@@ -83,13 +79,14 @@ int TestCubeMap2(int argc, char *argv[])
 
   for (int i = 0; i < 6; i++)
   {
+    const char* fName = vtkTestUtilities::ExpandDataFileName(argc, argv, fpath[i]);
     vtkNew<vtkJPEGReader> imgReader;
-    imgReader->SetFileName(
-      vtkTestUtilities::ExpandDataFileName(argc, argv, fpath[i]));
+    imgReader->SetFileName(fName);
     vtkNew<vtkImageFlip> flip;
     flip->SetInputConnection(imgReader->GetOutputPort());
     flip->SetFilteredAxis(1); // flip y axis
     texture->SetInputConnection(i, flip->GetOutputPort(0));
+    delete[] fName;
   }
 
   vtkNew<vtkOpenGLPolyDataMapper> mapper;
@@ -102,51 +99,44 @@ int TestCubeMap2(int argc, char *argv[])
   actor->GetProperty()->SetSpecularPower(20);
   actor->GetProperty()->SetDiffuse(0.1);
   actor->GetProperty()->SetAmbient(0.1);
-  actor->GetProperty()->SetDiffuseColor(1.0,0.0,0.4);
-  actor->GetProperty()->SetAmbientColor(0.4,0.0,1.0);
-  renderer->AddActor(actor.Get());
-  actor->SetTexture(texture.Get());
-  actor->SetMapper(mapper.Get());
+  actor->GetProperty()->SetDiffuseColor(1.0, 0.0, 0.4);
+  actor->GetProperty()->SetAmbientColor(0.4, 0.0, 1.0);
+  renderer->AddActor(actor);
+  actor->SetTexture(texture);
+  actor->SetMapper(mapper);
 
-  mapper->AddShaderReplacement(
-    vtkShader::Vertex,
-    "//VTK::PositionVC::Dec", // replace
-    true, // before the standard replacements
-    "//VTK::PositionVC::Dec\n" // we still want the default
-    "varying vec3 TexCoords;\n",
+  vtkShaderProperty* sp = actor->GetShaderProperty();
+  sp->AddVertexShaderReplacement("//VTK::PositionVC::Dec", // replace
+    true,                                                  // before the standard replacements
+    "//VTK::PositionVC::Dec\n"                             // we still want the default
+    "out vec3 TexCoords;\n",
     false // only do it once
-    );
-  mapper->AddShaderReplacement(
-    vtkShader::Vertex,
-    "//VTK::PositionVC::Impl", // replace
-    true, // before the standard replacements
-    "//VTK::PositionVC::Impl\n" // we still want the default
+  );
+  sp->AddVertexShaderReplacement("//VTK::PositionVC::Impl", // replace
+    true,                                                   // before the standard replacements
+    "//VTK::PositionVC::Impl\n"                             // we still want the default
     "vec3 camPos = -MCVCMatrix[3].xyz * mat3(MCVCMatrix);\n"
     "TexCoords.xyz = reflect(vertexMC.xyz - camPos, normalize(normalMC));\n",
     false // only do it once
-    );
-  mapper->AddShaderReplacement(
-    vtkShader::Fragment,
-    "//VTK::Light::Dec", // replace
-    true, // before the standard replacements
-    "//VTK::Light::Dec\n" // we still want the default
-    "varying vec3 TexCoords;\n",
+  );
+  sp->AddFragmentShaderReplacement("//VTK::Light::Dec", // replace
+    true,                                               // before the standard replacements
+    "//VTK::Light::Dec\n"                               // we still want the default
+    "in vec3 TexCoords;\n",
     false // only do it once
-    );
-  mapper->AddShaderReplacement(
-    vtkShader::Fragment,
-    "//VTK::Light::Impl", // replace
-    true, // before the standard replacements
-    "  vec3 cubeColor = texture(texture_0, normalize(TexCoords)).xyz;\n"
+  );
+  sp->AddFragmentShaderReplacement("//VTK::Light::Impl", // replace
+    true,                                                // before the standard replacements
+    "  vec3 cubeColor = texture(actortexture, normalize(TexCoords)).xyz;\n"
     "//VTK::Light::Impl\n"
-    "  gl_FragData[0] = vec4(ambientColor + diffuse + specular + specularColor*cubeColor, opacity);\n"
-    , // we still want the default
-    false // only do it once
-    );
+    "  gl_FragData[0] = vec4(ambientColor + diffuse + specular + specularColor*cubeColor, "
+    "opacity);\n", // we still want the default
+    false          // only do it once
+  );
 
   vtkNew<vtkSkybox> world;
-  world->SetTexture(texture.Get());
-  renderer->AddActor(world.Get());
+  world->SetTexture(texture);
+  renderer->AddActor(world);
 
   renderer->GetActiveCamera()->SetPosition(0.0, 0.55, 2.0);
   renderer->GetActiveCamera()->SetFocalPoint(0.0, 0.55, 0.0);
@@ -160,10 +150,10 @@ int TestCubeMap2(int argc, char *argv[])
   renderWindow->Render();
 
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  renderWindow->GetInteractor()->SetInteractorStyle(style.Get());
+  renderWindow->GetInteractor()->SetInteractorStyle(style);
 
-  int retVal = vtkRegressionTestImage(renderWindow.Get());
-  if ( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renderWindow);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

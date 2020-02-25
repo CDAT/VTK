@@ -22,23 +22,24 @@
  *
  * @sa
  * vtkPolyDataMapper2D
-*/
+ */
 
 #ifndef vtkOpenGLPolyDataMapper2D_h
 #define vtkOpenGLPolyDataMapper2D_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
-#include "vtkPolyDataMapper2D.h"
-#include "vtkNew.h" // used for ivars
+#include "vtkNew.h"          // used for ivars
 #include "vtkOpenGLHelper.h" // used for ivars
-#include <string> // For API.
-#include <vector> //for ivars
-#include <map> //for used data arrays & vbos
+#include "vtkPolyDataMapper2D.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
+#include <map>                         //for used data arrays & vbos
+#include <string>                      // For API.
+#include <vector>                      //for ivars
 
 class vtkActor2D;
 class vtkGenericOpenGLResourceFreeCallback;
 class vtkMatrix4x4;
 class vtkOpenGLBufferObject;
+class vtkOpenGLCellToVTKCellMap;
 class vtkOpenGLHelper;
 class vtkOpenGLVertexBufferObjectGroup;
 class vtkPoints;
@@ -50,101 +51,87 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLPolyDataMapper2D : public vtkPolyDataM
 {
 public:
   vtkTypeMacro(vtkOpenGLPolyDataMapper2D, vtkPolyDataMapper2D);
-  static vtkOpenGLPolyDataMapper2D *New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkOpenGLPolyDataMapper2D* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Actually draw the poly data.
    */
-  void RenderOverlay(vtkViewport* viewport, vtkActor2D* actor) VTK_OVERRIDE;
+  void RenderOverlay(vtkViewport* viewport, vtkActor2D* actor) override;
 
   /**
    * Release any graphics resources that are being consumed by this mapper.
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
 protected:
   vtkOpenGLPolyDataMapper2D();
-  ~vtkOpenGLPolyDataMapper2D() VTK_OVERRIDE;
+  ~vtkOpenGLPolyDataMapper2D() override;
 
-  vtkGenericOpenGLResourceFreeCallback *ResourceCallback;
-
-  // the following is all extra stuff to work around the
-  // fact that gl_PrimitiveID does not work correctly on
-  // Apple devices with AMD graphics hardware. See apple
-  // bug ID 20747550
-  bool HaveAppleBug;
-  std::vector<float> AppleBugPrimIDs;
-  vtkOpenGLBufferObject *AppleBugPrimIDBuffer;
+  vtkGenericOpenGLResourceFreeCallback* ResourceCallback;
 
   /**
    * Does the shader source need to be recomputed
    */
-  virtual bool GetNeedToRebuildShaders(
-    vtkOpenGLHelper &cellBO, vtkViewport *ren, vtkActor2D *act);
+  virtual bool GetNeedToRebuildShaders(vtkOpenGLHelper& cellBO, vtkViewport* ren, vtkActor2D* act);
 
   /**
    * Build the shader source code
    */
-  virtual void BuildShaders(std::string &VertexCode,
-                           std::string &fragmentCode,
-                           std::string &geometryCode,
-                           vtkViewport *ren, vtkActor2D *act);
+  virtual void BuildShaders(std::string& VertexCode, std::string& fragmentCode,
+    std::string& geometryCode, vtkViewport* ren, vtkActor2D* act);
 
   /**
    * Determine what shader to use and compile/link it
    */
-  virtual void UpdateShaders(vtkOpenGLHelper &cellBO,
-    vtkViewport *viewport, vtkActor2D *act);
+  virtual void UpdateShaders(vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* act);
 
   /**
    * Set the shader parameteres related to the mapper/input data, called by UpdateShader
    */
-  virtual void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkViewport *ren, vtkActor2D *act);
+  virtual void SetMapperShaderParameters(
+    vtkOpenGLHelper& cellBO, vtkViewport* ren, vtkActor2D* act);
 
-
-    /**
-     * Set the shader parameteres related to the Camera
-     */
-  void SetCameraShaderParameters(vtkOpenGLHelper &cellBO, vtkViewport *viewport, vtkActor2D *act);
+  /**
+   * Set the shader parameteres related to the Camera
+   */
+  void SetCameraShaderParameters(vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* act);
 
   /**
    * Set the shader parameteres related to the property
    */
-  void SetPropertyShaderParameters(vtkOpenGLHelper &cellBO, vtkViewport *viewport, vtkActor2D *act);
+  void SetPropertyShaderParameters(vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* act);
 
   /**
-   * Perform string replacments on the shader templates, called from
+   * Perform string replacements on the shader templates, called from
    * ReplaceShaderValues
    */
-  virtual void ReplaceShaderPicking(
-    std::string & fssource,
-    vtkRenderer *ren, vtkActor2D *act);
+  virtual void ReplaceShaderPicking(std::string& fssource, vtkRenderer* ren, vtkActor2D* act);
 
   /**
    * Update the scene when necessary.
    */
-  void UpdateVBO(vtkActor2D *act, vtkViewport *viewport);
+  void UpdateVBO(vtkActor2D* act, vtkViewport* viewport);
 
   // The VBO and its layout.
-  vtkOpenGLVertexBufferObjectGroup *VBOs;
+  vtkOpenGLVertexBufferObjectGroup* VBOs;
 
   // Structures for the various cell types we render.
   vtkOpenGLHelper Points;
   vtkOpenGLHelper Lines;
   vtkOpenGLHelper Tris;
   vtkOpenGLHelper TriStrips;
-  vtkOpenGLHelper *LastBoundBO;
+  vtkOpenGLHelper* LastBoundBO;
 
-  vtkTextureObject *CellScalarTexture;
-  vtkOpenGLBufferObject *CellScalarBuffer;
+  vtkTextureObject* CellScalarTexture;
+  vtkOpenGLBufferObject* CellScalarBuffer;
   bool HaveCellScalars;
   int PrimitiveIDOffset;
 
   vtkTimeStamp VBOUpdateTime; // When was the VBO updated?
-  vtkPoints *TransformedPoints;
+  vtkPoints* TransformedPoints;
   vtkNew<vtkTransform> VBOTransformInverse;
   vtkNew<vtkMatrix4x4> VBOShiftScale;
 
@@ -152,11 +139,14 @@ protected:
   vtkTimeStamp PickStateChanged;
 
   // do we have wide lines that require special handling
-  virtual bool HaveWideLines(vtkViewport *, vtkActor2D *);
+  virtual bool HaveWideLines(vtkViewport*, vtkActor2D*);
+
+  // stores the mapping from vtk cells to gl_PrimitiveId
+  vtkNew<vtkOpenGLCellToVTKCellMap> CellCellMap;
 
 private:
-  vtkOpenGLPolyDataMapper2D(const vtkOpenGLPolyDataMapper2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLPolyDataMapper2D&) VTK_DELETE_FUNCTION;
+  vtkOpenGLPolyDataMapper2D(const vtkOpenGLPolyDataMapper2D&) = delete;
+  void operator=(const vtkOpenGLPolyDataMapper2D&) = delete;
 };
 
 #endif

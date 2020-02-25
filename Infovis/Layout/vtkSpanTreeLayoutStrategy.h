@@ -13,9 +13,9 @@
 
 =========================================================================*/
 //-------------------------------------------------------------------------
-//Copyright 2008 Sandia Corporation.
-//Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-//the U.S. Government retains certain rights in this software.
+// Copyright 2008 Sandia Corporation.
+// Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+// the U.S. Government retains certain rights in this software.
 //-------------------------------------------------------------------------
 
 /**
@@ -57,21 +57,21 @@
  * @par Thanks:
  * Thanks to David Duke from the University of Leeds for providing this
  * implementation.
-*/
+ */
 
 #ifndef vtkSpanTreeLayoutStrategy_h
 #define vtkSpanTreeLayoutStrategy_h
 
-#include "vtkInfovisLayoutModule.h" // For export macro
 #include "vtkGraphLayoutStrategy.h"
+#include "vtkInfovisLayoutModule.h" // For export macro
 
 class VTKINFOVISLAYOUT_EXPORT vtkSpanTreeLayoutStrategy : public vtkGraphLayoutStrategy
 {
 public:
-  static vtkSpanTreeLayoutStrategy *New();
+  static vtkSpanTreeLayoutStrategy* New();
 
   vtkTypeMacro(vtkSpanTreeLayoutStrategy, vtkGraphLayoutStrategy);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -89,19 +89,18 @@ public:
   /**
    * Perform the layout.
    */
-  void Layout() VTK_OVERRIDE;
+  void Layout() override;
 
 protected:
   vtkSpanTreeLayoutStrategy();
-  ~vtkSpanTreeLayoutStrategy() VTK_OVERRIDE;
+  ~vtkSpanTreeLayoutStrategy() override;
 
-  vtkGraphLayoutStrategy *TreeLayout;
+  vtkGraphLayoutStrategy* TreeLayout;
   bool DepthFirstSpanningTree;
 
 private:
-  vtkSpanTreeLayoutStrategy(const vtkSpanTreeLayoutStrategy&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSpanTreeLayoutStrategy&) VTK_DELETE_FUNCTION;
+  vtkSpanTreeLayoutStrategy(const vtkSpanTreeLayoutStrategy&) = delete;
+  void operator=(const vtkSpanTreeLayoutStrategy&) = delete;
 };
 
 #endif
-

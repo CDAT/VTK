@@ -34,7 +34,7 @@
  *
  * @sa
  * vtkCellPicker vtkPointPicker vtkStaticPointLocator
-*/
+ */
 
 #ifndef vtkPointLocator_h
 #define vtkPointLocator_h
@@ -54,30 +54,30 @@ public:
    * Construct with automatic computation of divisions, averaging
    * 25 points per bucket.
    */
-  static vtkPointLocator *New();
+  static vtkPointLocator* New();
 
   //@{
   /**
    * Standard methods for type management and printing.
    */
-  vtkTypeMacro(vtkPointLocator,vtkIncrementalPointLocator);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPointLocator, vtkIncrementalPointLocator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
   /**
    * Set the number of divisions in x-y-z directions.
    */
-  vtkSetVector3Macro(Divisions,int);
-  vtkGetVectorMacro(Divisions,int,3);
+  vtkSetVector3Macro(Divisions, int);
+  vtkGetVectorMacro(Divisions, int, 3);
   //@}
 
   //@{
   /**
    * Specify the average number of points in each bucket.
    */
-  vtkSetClampMacro(NumberOfPointsPerBucket,int,1,VTK_INT_MAX);
-  vtkGetMacro(NumberOfPointsPerBucket,int);
+  vtkSetClampMacro(NumberOfPointsPerBucket, int, 1, VTK_INT_MAX);
+  vtkGetMacro(NumberOfPointsPerBucket, int);
   //@}
 
   // Re-use any superclass signatures that we don't override.
@@ -89,7 +89,7 @@ public:
    * These methods are thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  vtkIdType FindClosestPoint(const double x[3]) VTK_OVERRIDE;
+  vtkIdType FindClosestPoint(const double x[3]) override;
 
   //@{
   /**
@@ -99,11 +99,9 @@ public:
    * indirectly called from a single thread first. dist2 returns the squared
    * distance to the point.
    */
-  vtkIdType FindClosestPointWithinRadius(
-    double radius, const double x[3], double& dist2) VTK_OVERRIDE;
+  vtkIdType FindClosestPointWithinRadius(double radius, const double x[3], double& dist2) override;
   virtual vtkIdType FindClosestPointWithinRadius(
-    double radius, const double x[3],
-    double inputDataLength, double& dist2);
+    double radius, const double x[3], double inputDataLength, double& dist2);
   //@}
 
   /**
@@ -112,8 +110,7 @@ public:
    * place their data. Bounds are the box that the points lie in.
    * Not thread safe.
    */
-  int InitPointInsertion(vtkPoints *newPts,
-                         const double bounds[6]) VTK_OVERRIDE;
+  int InitPointInsertion(vtkPoints* newPts, const double bounds[6]) override;
 
   /**
    * Initialize the point insertion process. The newPts is an object
@@ -121,8 +118,7 @@ public:
    * place their data. Bounds are the box that the points lie in.
    * Not thread safe.
    */
-  int InitPointInsertion(vtkPoints *newPts, const double bounds[6],
-                         vtkIdType estSize) VTK_OVERRIDE;
+  int InitPointInsertion(vtkPoints* newPts, const double bounds[6], vtkIdType estSize) override;
 
   /**
    * Incrementally insert a point into search structure with a particular
@@ -133,7 +129,7 @@ public:
    * divs are properly set. (See InitPointInsertion().)
    * Not thread safe.
    */
-  void InsertPoint(vtkIdType ptId, const double x[3]) VTK_OVERRIDE;
+  void InsertPoint(vtkIdType ptId, const double x[3]) override;
 
   /**
    * Incrementally insert a point into search structure. The method returns
@@ -145,7 +141,7 @@ public:
    * properly set. (See InitPointInsertion().)
    * Not thread safe.
    */
-  vtkIdType InsertNextPoint(const double x[3]) VTK_OVERRIDE;
+  vtkIdType InsertNextPoint(const double x[3]) override;
 
   //@{
   /**
@@ -153,13 +149,15 @@ public:
    * Return id of previously inserted point if this is true, otherwise return
    * -1. This method is thread safe.
    */
-  vtkIdType IsInsertedPoint(double x, double  y, double z) VTK_OVERRIDE
+  vtkIdType IsInsertedPoint(double x, double y, double z) override
   {
     double xyz[3];
-    xyz[0] = x; xyz[1] = y; xyz[2] = z;
-    return this->IsInsertedPoint (xyz);
+    xyz[0] = x;
+    xyz[1] = y;
+    xyz[2] = z;
+    return this->IsInsertedPoint(xyz);
   };
-  vtkIdType IsInsertedPoint(const double x[3]) VTK_OVERRIDE;
+  vtkIdType IsInsertedPoint(const double x[3]) override;
   //@}
 
   /**
@@ -171,16 +169,16 @@ public:
    * by a call to InsertNextPoint().
    * This method is not thread safe.
    */
-  int InsertUniquePoint(const double x[3], vtkIdType &ptId) VTK_OVERRIDE;
+  int InsertUniquePoint(const double x[3], vtkIdType& ptId) override;
 
   /**
    * Given a position x, return the id of the point closest to it. This method
    * is used when performing incremental point insertion. Note that -1
    * indicates that no point was found.
-   * This method is thread safe if  BuildLocator() is directly or
+   * This method is thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  vtkIdType FindClosestInsertedPoint(const double x[3]) VTK_OVERRIDE;
+  vtkIdType FindClosestInsertedPoint(const double x[3]) override;
 
   /**
    * Find the closest N points to a position. This returns the closest
@@ -190,8 +188,7 @@ public:
    * These methods are thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  void FindClosestNPoints(int N, const double x[3],
-                          vtkIdList *result) VTK_OVERRIDE;
+  void FindClosestNPoints(int N, const double x[3], vtkIdList* result) override;
 
   //@{
   /**
@@ -201,10 +198,8 @@ public:
    * These methods are thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  virtual void FindDistributedPoints(int N, const double x[3],
-                                     vtkIdList *result, int M);
-  virtual void FindDistributedPoints(int N, double x, double y,
-                                     double z, vtkIdList *result, int M);
+  virtual void FindDistributedPoints(int N, const double x[3], vtkIdList* result, int M);
+  virtual void FindDistributedPoints(int N, double x, double y, double z, vtkIdList* result, int M);
   //@}
 
   /**
@@ -213,8 +208,7 @@ public:
    * These methods are thread safe if BuildLocator() is directly or
    * indirectly called from a single thread first.
    */
-  void FindPointsWithinRadius(double R, const double x[3],
-                              vtkIdList *result) VTK_OVERRIDE;
+  void FindPointsWithinRadius(double R, const double x[3], vtkIdList* result) override;
 
   /**
    * Given a position x, return the list of points in the bucket that
@@ -222,7 +216,7 @@ public:
    * provides an ijk array that is the indices into the locator.
    * This method is thread safe.
    */
-  virtual vtkIdList *GetPointsInBucket(const double x[3], int ijk[3]);
+  virtual vtkIdList* GetPointsInBucket(const double x[3], int ijk[3]);
 
   //@{
   /**
@@ -236,36 +230,32 @@ public:
    * See vtkLocator interface documentation.
    * These methods are not thread safe.
    */
-  void Initialize() VTK_OVERRIDE;
-  void FreeSearchStructure() VTK_OVERRIDE;
-  void BuildLocator() VTK_OVERRIDE;
-  void GenerateRepresentation(int level, vtkPolyData *pd) VTK_OVERRIDE;
+  void Initialize() override;
+  void FreeSearchStructure() override;
+  void BuildLocator() override;
+  void GenerateRepresentation(int level, vtkPolyData* pd) override;
   //@}
 
 protected:
   vtkPointLocator();
-  ~vtkPointLocator() VTK_OVERRIDE;
+  ~vtkPointLocator() override;
 
   // place points in appropriate buckets
-  void GetBucketNeighbors(vtkNeighborPoints* buckets,
-                          const int ijk[3], const int ndivs[3], int level);
-  void GetOverlappingBuckets(vtkNeighborPoints* buckets,
-                             const double x[3], const int ijk[3], double dist,
-                             int level);
-  void GetOverlappingBuckets(vtkNeighborPoints* buckets,
-                             const double x[3], double dist,
-                             int prevMinLevel[3],
-                             int prevMaxLevel[3]);
-  void GenerateFace(int face, int i, int j, int k,
-                    vtkPoints *pts, vtkCellArray *polys);
+  void GetBucketNeighbors(
+    vtkNeighborPoints* buckets, const int ijk[3], const int ndivs[3], int level);
+  void GetOverlappingBuckets(
+    vtkNeighborPoints* buckets, const double x[3], const int ijk[3], double dist, int level);
+  void GetOverlappingBuckets(vtkNeighborPoints* buckets, const double x[3], double dist,
+    int prevMinLevel[3], int prevMaxLevel[3]);
+  void GenerateFace(int face, int i, int j, int k, vtkPoints* pts, vtkCellArray* polys);
   double Distance2ToBucket(const double x[3], const int nei[3]);
   double Distance2ToBounds(const double x[3], const double bounds[6]);
 
-  vtkPoints *Points; // Used for merging points
-  int Divisions[3]; // Number of sub-divisions in x-y-z directions
-  int NumberOfPointsPerBucket; //Used with previous boolean to control subdivide
-  vtkIdList **HashTable; // lists of point ids in buckets
-  double H[3]; // width of each bucket in x-y-z directions
+  vtkPoints* Points;           // Used for merging points
+  int Divisions[3];            // Number of sub-divisions in x-y-z directions
+  int NumberOfPointsPerBucket; // Used with previous boolean to control subdivide
+  vtkIdList** HashTable;       // lists of point ids in buckets
+  double H[3];                 // width of each bucket in x-y-z directions
 
   double InsertionTol2;
   vtkIdType InsertionPointId;
@@ -276,30 +266,30 @@ protected:
   double FX, FY, FZ, BX, BY, BZ;
   vtkIdType XD, YD, ZD, SliceSize;
 
-  void GetBucketIndices(const double *x, int ijk[3]) const
+  void GetBucketIndices(const double* x, int ijk[3]) const
   {
     // Compute point index. Make sure it lies within range of locator.
     vtkIdType tmp0 = static_cast<vtkIdType>(((x[0] - this->BX) * this->FX));
     vtkIdType tmp1 = static_cast<vtkIdType>(((x[1] - this->BY) * this->FY));
     vtkIdType tmp2 = static_cast<vtkIdType>(((x[2] - this->BZ) * this->FZ));
 
-    ijk[0] = tmp0 < 0 ? 0 : (tmp0 >= this->XD ? this->XD-1 : tmp0);
-    ijk[1] = tmp1 < 0 ? 0 : (tmp1 >= this->YD ? this->YD-1 : tmp1);
-    ijk[2] = tmp2 < 0 ? 0 : (tmp2 >= this->ZD ? this->ZD-1 : tmp2);
+    ijk[0] = tmp0 < 0 ? 0 : (tmp0 >= this->XD ? this->XD - 1 : tmp0);
+    ijk[1] = tmp1 < 0 ? 0 : (tmp1 >= this->YD ? this->YD - 1 : tmp1);
+    ijk[2] = tmp2 < 0 ? 0 : (tmp2 >= this->ZD ? this->ZD - 1 : tmp2);
   }
 
-  vtkIdType GetBucketIndex(const double *x) const
+  vtkIdType GetBucketIndex(const double* x) const
   {
     int ijk[3];
     this->GetBucketIndices(x, ijk);
-    return ijk[0] + ijk[1]*this->XD + ijk[2]*this->SliceSize;
+    return ijk[0] + ijk[1] * this->XD + ijk[2] * this->SliceSize;
   }
 
   void ComputePerformanceFactors();
 
 private:
-  vtkPointLocator(const vtkPointLocator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPointLocator&) VTK_DELETE_FUNCTION;
+  vtkPointLocator(const vtkPointLocator&) = delete;
+  void operator=(const vtkPointLocator&) = delete;
 };
 
 #endif

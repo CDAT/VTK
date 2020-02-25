@@ -17,7 +17,7 @@
  *
  *
  *  Empty class for backwards compatibility.
-*/
+ */
 
 #ifndef vtkHierarchicalBoxDataIterator_h
 #define vtkHierarchicalBoxDataIterator_h
@@ -25,21 +25,21 @@
 #include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkUniformGridAMRDataIterator.h"
 
-class VTKCOMMONDATAMODEL_EXPORT vtkHierarchicalBoxDataIterator :
-  public vtkUniformGridAMRDataIterator
+class VTKCOMMONDATAMODEL_EXPORT vtkHierarchicalBoxDataIterator
+  : public vtkUniformGridAMRDataIterator
 {
-  public:
-    static vtkHierarchicalBoxDataIterator* New();
-    vtkTypeMacro(vtkHierarchicalBoxDataIterator,vtkUniformGridAMRDataIterator);
-    void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+public:
+  static vtkHierarchicalBoxDataIterator* New();
+  vtkTypeMacro(vtkHierarchicalBoxDataIterator, vtkUniformGridAMRDataIterator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  protected:
-    vtkHierarchicalBoxDataIterator();
-    ~vtkHierarchicalBoxDataIterator() VTK_OVERRIDE;
+protected:
+  vtkHierarchicalBoxDataIterator();
+  ~vtkHierarchicalBoxDataIterator() override;
 
-  private:
-    vtkHierarchicalBoxDataIterator(const vtkHierarchicalBoxDataIterator&) VTK_DELETE_FUNCTION;
-    void operator=(const vtkHierarchicalBoxDataIterator&) VTK_DELETE_FUNCTION;
+private:
+  vtkHierarchicalBoxDataIterator(const vtkHierarchicalBoxDataIterator&) = delete;
+  void operator=(const vtkHierarchicalBoxDataIterator&) = delete;
 };
 
 #endif /* VTKHIERARCHICALBOXDATAITERATOR_H_ */

@@ -18,6 +18,7 @@
   the U.S. Government retains certain rights in this software.
 -------------------------------------------------------------------------*/
 #include "vtkSQLiteDatabase.h"
+#include "vtkSQLiteDatabaseInternals.h"
 #include "vtkSQLiteQuery.h"
 
 #include "vtkSQLDatabaseSchema.h"
@@ -25,18 +26,20 @@
 #include "vtkObjectFactory.h"
 #include "vtkStringArray.h"
 
-#include <vtksys/SystemTools.hxx>
 #include <fstream>
 #include <sstream>
+#include <vtksys/FStream.hxx>
+#include <vtksys/SystemTools.hxx>
 
-#include <vtksqlite/vtk_sqlite3.h>
+#include "vtk_sqlite.h"
 
 vtkStandardNewMacro(vtkSQLiteDatabase);
 
 // ----------------------------------------------------------------------
 vtkSQLiteDatabase::vtkSQLiteDatabase()
 {
-  this->SQLiteInstance = nullptr;
+  this->Internal = new vtkSQLiteDatabaseInternals;
+  this->Internal->SQLiteInstance = nullptr;
 
   this->Tables = vtkStringArray::New();
   this->Tables->Register(this);
@@ -51,52 +54,53 @@ vtkSQLiteDatabase::vtkSQLiteDatabase()
 // ----------------------------------------------------------------------
 vtkSQLiteDatabase::~vtkSQLiteDatabase()
 {
-  if (this->IsOpen() )
+  if (this->IsOpen())
   {
     this->Close();
   }
-  if ( this->DatabaseType )
+  if (this->DatabaseType)
   {
     this->SetDatabaseType(nullptr);
   }
-  if ( this->DatabaseFileName )
+  if (this->DatabaseFileName)
   {
     this->SetDatabaseFileName(nullptr);
   }
   this->Tables->UnRegister(this);
+  delete this->Internal;
 }
 
 // ----------------------------------------------------------------------
-void vtkSQLiteDatabase::PrintSelf(ostream &os, vtkIndent indent)
+void vtkSQLiteDatabase::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
   os << indent << "SQLiteInstance: ";
-  if (this->SQLiteInstance)
+  if (this->Internal->SQLiteInstance)
   {
-    os << this->SQLiteInstance << "\n";
+    os << this->Internal->SQLiteInstance << "\n";
   }
   else
   {
-    os << "(null)" << "\n";
+    os << "(null)"
+       << "\n";
   }
-  os << indent << "DatabaseType: "
-    << (this->DatabaseType ? this->DatabaseType : "nullptr") << endl;
-  os << indent << "DatabaseFileName: "
-    << (this->DatabaseFileName ? this->DatabaseFileName : "nullptr") << endl;
+  os << indent << "DatabaseType: " << (this->DatabaseType ? this->DatabaseType : "nullptr") << endl;
+  os << indent
+     << "DatabaseFileName: " << (this->DatabaseFileName ? this->DatabaseFileName : "nullptr")
+     << endl;
 }
 
 // ----------------------------------------------------------------------
-vtkStdString vtkSQLiteDatabase::GetColumnSpecification( vtkSQLDatabaseSchema* schema,
-                                                     int tblHandle,
-                                                     int colHandle )
+vtkStdString vtkSQLiteDatabase::GetColumnSpecification(
+  vtkSQLDatabaseSchema* schema, int tblHandle, int colHandle)
 {
   std::ostringstream queryStr;
-  queryStr << schema->GetColumnNameFromHandle( tblHandle, colHandle );
+  queryStr << schema->GetColumnNameFromHandle(tblHandle, colHandle);
 
   // Figure out column type
-  int colType = schema->GetColumnTypeFromHandle( tblHandle, colHandle );
+  int colType = schema->GetColumnTypeFromHandle(tblHandle, colHandle);
   vtkStdString colTypeStr;
-  switch ( static_cast<vtkSQLDatabaseSchema::DatabaseColumnType>( colType ) )
+  switch (static_cast<vtkSQLDatabaseSchema::DatabaseColumnType>(colType))
   {
     case vtkSQLDatabaseSchema::SERIAL:
       colTypeStr = "INTEGER NOT NULL";
@@ -135,80 +139,80 @@ vtkStdString vtkSQLiteDatabase::GetColumnSpecification( vtkSQLDatabaseSchema* sc
       colTypeStr = "TIMESTAMP";
   }
 
-  if ( !colTypeStr.empty() )
+  if (!colTypeStr.empty())
   {
     queryStr << " " << colTypeStr;
   }
   else // if ( colTypeStr.size() )
   {
-    vtkGenericWarningMacro( "Unable to get column specification: unsupported data type " << colType );
+    vtkGenericWarningMacro("Unable to get column specification: unsupported data type " << colType);
     return vtkStdString();
   }
 
   // Decide whether size is allowed, required, or unused
   int colSizeType = 0;
-  switch ( static_cast<vtkSQLDatabaseSchema::DatabaseColumnType>( colType ) )
+  switch (static_cast<vtkSQLDatabaseSchema::DatabaseColumnType>(colType))
   {
     case vtkSQLDatabaseSchema::SERIAL:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::SMALLINT:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::INTEGER:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::BIGINT:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::VARCHAR:
       colSizeType = -1;
       break;
     case vtkSQLDatabaseSchema::TEXT:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::REAL:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::DOUBLE:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::BLOB:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::TIME:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::DATE:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
     case vtkSQLDatabaseSchema::TIMESTAMP:
-      colSizeType =  0;
+      colSizeType = 0;
       break;
   }
 
   // Specify size if allowed or required
-  if ( colSizeType )
+  if (colSizeType)
   {
-    int colSize = schema->GetColumnSizeFromHandle( tblHandle, colHandle );
+    int colSize = schema->GetColumnSizeFromHandle(tblHandle, colHandle);
     // IF size is provided but absurd,
     // OR, if size is required but not provided OR absurd,
     // THEN assign the default size.
-    if ( ( colSize < 0 ) || ( colSizeType == -1 && colSize < 1 ) )
+    if ((colSize < 0) || (colSizeType == -1 && colSize < 1))
     {
       colSize = VTK_SQL_DEFAULT_COLUMN_SIZE;
     }
 
     // At this point, we have either a valid size if required, or a possibly null valid size
     // if not required. Thus, skip sizing in the latter case.
-    if ( colSize > 0 )
+    if (colSize > 0)
     {
       queryStr << "(" << colSize << ")";
     }
   }
 
-  vtkStdString attStr = schema->GetColumnAttributesFromHandle( tblHandle, colHandle );
-  if ( !attStr.empty() )
+  vtkStdString attStr = schema->GetColumnAttributesFromHandle(tblHandle, colHandle);
+  if (!attStr.empty())
   {
     queryStr << " " << attStr;
   }
@@ -259,7 +263,7 @@ bool vtkSQLiteDatabase::Open(const char* password, int mode)
     return true;
   }
 
-  if(password && strlen(password))
+  if (password && strlen(password))
   {
     vtkGenericWarningMacro("Password will be ignored by vtkSQLiteDatabase::Open().");
   }
@@ -272,7 +276,7 @@ bool vtkSQLiteDatabase::Open(const char* password, int mode)
 
   if (this->IsOpen())
   {
-    vtkGenericWarningMacro( "Open(): Database is already open." );
+    vtkGenericWarningMacro("Open(): Database is already open.");
     return true;
   }
 
@@ -296,7 +300,7 @@ bool vtkSQLiteDatabase::Open(const char* password, int mode)
     if (mode == CREATE_OR_CLEAR && exists)
     {
       // Here we need to clear the file if it exists by opening it.
-      std::ofstream os;
+      vtksys::ofstream os;
       os.open(this->DatabaseFileName);
       if (!os.is_open())
       {
@@ -307,20 +311,19 @@ bool vtkSQLiteDatabase::Open(const char* password, int mode)
     }
   }
 
-  int result = vtk_sqlite3_open(this->DatabaseFileName, & (this->SQLiteInstance));
+  int result = sqlite3_open(this->DatabaseFileName, &(this->Internal->SQLiteInstance));
 
-  if (result != VTK_SQLITE_OK)
+  if (result != SQLITE_OK)
   {
-    vtkDebugMacro(<<"SQLite open() failed.  Error code is "
-                  << result << " and message is "
-                  << vtk_sqlite3_errmsg(this->SQLiteInstance) );
+    vtkDebugMacro(<< "SQLite open() failed.  Error code is " << result << " and message is "
+                  << sqlite3_errmsg(this->Internal->SQLiteInstance));
 
-    vtk_sqlite3_close(this->SQLiteInstance);
+    sqlite3_close(this->Internal->SQLiteInstance);
     return false;
   }
   else
   {
-    vtkDebugMacro(<<"SQLite open() succeeded.");
+    vtkDebugMacro(<< "SQLite open() succeeded.");
     return true;
   }
 }
@@ -328,62 +331,62 @@ bool vtkSQLiteDatabase::Open(const char* password, int mode)
 // ----------------------------------------------------------------------
 void vtkSQLiteDatabase::Close()
 {
-  if (this->SQLiteInstance == nullptr)
+  if (this->Internal->SQLiteInstance == nullptr)
   {
-    vtkDebugMacro(<<"Close(): Database is already closed.");
+    vtkDebugMacro(<< "Close(): Database is already closed.");
   }
   else
   {
-    int result = vtk_sqlite3_close(this->SQLiteInstance);
-    if (result != VTK_SQLITE_OK)
+    int result = sqlite3_close(this->Internal->SQLiteInstance);
+    if (result != SQLITE_OK)
     {
       vtkWarningMacro(<< "Close(): SQLite returned result code " << result);
     }
-    this->SQLiteInstance = nullptr;
+    this->Internal->SQLiteInstance = nullptr;
   }
 }
 
 // ----------------------------------------------------------------------
 bool vtkSQLiteDatabase::IsOpen()
 {
-  return (this->SQLiteInstance != nullptr);
+  return (this->Internal->SQLiteInstance != nullptr);
 }
 
 // ----------------------------------------------------------------------
-vtkSQLQuery * vtkSQLiteDatabase::GetQueryInstance()
+vtkSQLQuery* vtkSQLiteDatabase::GetQueryInstance()
 {
-  vtkSQLiteQuery *query = vtkSQLiteQuery::New();
+  vtkSQLiteQuery* query = vtkSQLiteQuery::New();
   query->SetDatabase(this);
   return query;
 }
 
 // ----------------------------------------------------------------------
-vtkStringArray * vtkSQLiteDatabase::GetTables()
+vtkStringArray* vtkSQLiteDatabase::GetTables()
 {
   this->Tables->Resize(0);
-  if (this->SQLiteInstance == nullptr)
+  if (this->Internal->SQLiteInstance == nullptr)
   {
-    vtkErrorMacro(<<"GetTables(): Database is not open!");
+    vtkErrorMacro(<< "GetTables(): Database is not open!");
     return this->Tables;
   }
 
-  vtkSQLQuery *query = this->GetQueryInstance();
+  vtkSQLQuery* query = this->GetQueryInstance();
   query->SetQuery("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
   bool status = query->Execute();
 
   if (!status)
   {
     vtkErrorMacro(<< "GetTables(): Database returned error: "
-                  << vtk_sqlite3_errmsg(this->SQLiteInstance) );
+                  << sqlite3_errmsg(this->Internal->SQLiteInstance));
     query->Delete();
     return this->Tables;
   }
   else
   {
-    vtkDebugMacro(<<"GetTables(): SQL query succeeded.");
-    while (query->NextRow() )
+    vtkDebugMacro(<< "GetTables(): SQL query succeeded.");
+    while (query->NextRow())
     {
-      this->Tables->InsertNextValue(query->DataValue(0).ToString() );
+      this->Tables->InsertNextValue(query->DataValue(0).ToString());
     }
     query->Delete();
     return this->Tables;
@@ -391,19 +394,19 @@ vtkStringArray * vtkSQLiteDatabase::GetTables()
 }
 
 // ----------------------------------------------------------------------
-vtkStringArray * vtkSQLiteDatabase::GetRecord(const char *table)
+vtkStringArray* vtkSQLiteDatabase::GetRecord(const char* table)
 {
-  vtkSQLQuery *query = this->GetQueryInstance();
+  vtkSQLQuery* query = this->GetQueryInstance();
   vtkStdString text("PRAGMA table_info ('");
   text += table;
   text += "')";
 
-  query->SetQuery(text.c_str() );
+  query->SetQuery(text.c_str());
   bool status = query->Execute();
   if (!status)
   {
     vtkErrorMacro(<< "GetRecord(" << table << "): Database returned error: "
-                  << vtk_sqlite3_errmsg(this->SQLiteInstance) );
+                  << sqlite3_errmsg(this->Internal->SQLiteInstance));
     query->Delete();
     return nullptr;
   }
@@ -417,11 +420,11 @@ vtkStringArray * vtkSQLiteDatabase::GetRecord(const char *table)
     //
     // (I don't know what the ??? column is.  It's probably maximum
     // length.)
-    vtkStringArray *results = vtkStringArray::New();
+    vtkStringArray* results = vtkStringArray::New();
 
-    while (query->NextRow() )
+    while (query->NextRow())
     {
-      results->InsertNextValue(query->DataValue(1).ToString() );
+      results->InsertNextValue(query->DataValue(1).ToString());
     }
 
     query->Delete();
@@ -435,7 +438,7 @@ vtkStdString vtkSQLiteDatabase::GetURL()
   const char* fname = this->GetDatabaseFileName();
   this->TempURL = this->GetDatabaseType();
   this->TempURL += "://";
-  if ( fname )
+  if (fname)
   {
     this->TempURL += fname;
   }
@@ -445,19 +448,19 @@ vtkStdString vtkSQLiteDatabase::GetURL()
 // ----------------------------------------------------------------------
 bool vtkSQLiteDatabase::ParseURL(const char* URL)
 {
-  std::string urlstr( URL ? URL : "" );
+  std::string urlstr(URL ? URL : "");
   std::string protocol;
   std::string dataglom;
 
-  if ( ! vtksys::SystemTools::ParseURLProtocol( urlstr, protocol, dataglom))
+  if (!vtksys::SystemTools::ParseURLProtocol(urlstr, protocol, dataglom))
   {
-    vtkErrorMacro( "Invalid URL: \"" << urlstr.c_str() << "\"" );
+    vtkErrorMacro("Invalid URL: \"" << urlstr.c_str() << "\"");
     return false;
   }
 
-  if ( protocol == "sqlite" )
+  if (protocol == "sqlite")
   {
-    this->SetDatabaseFileName( dataglom.c_str() );
+    this->SetDatabaseFileName(dataglom.c_str());
     return true;
   }
 
@@ -467,10 +470,10 @@ bool vtkSQLiteDatabase::ParseURL(const char* URL)
 // ----------------------------------------------------------------------
 bool vtkSQLiteDatabase::HasError()
 {
-  return (vtk_sqlite3_errcode(this->SQLiteInstance)!=VTK_SQLITE_OK);
+  return (sqlite3_errcode(this->Internal->SQLiteInstance) != SQLITE_OK);
 }
 
 const char* vtkSQLiteDatabase::GetLastErrorText()
 {
-  return vtk_sqlite3_errmsg(this->SQLiteInstance);
+  return sqlite3_errmsg(this->Internal->SQLiteInstance);
 }

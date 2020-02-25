@@ -24,7 +24,7 @@
  *
  * @sa
  * vtkHierarchicalBoxDataSet, vtkMultiBlockDataSet vtkMultiPieceDataSet
-*/
+ */
 
 #ifndef vtkExtractDataSets_h
 #define vtkExtractDataSets_h
@@ -32,13 +32,12 @@
 #include "vtkFiltersExtractionModule.h" // For export macro
 #include "vtkMultiBlockDataSetAlgorithm.h"
 
-class VTKFILTERSEXTRACTION_EXPORT vtkExtractDataSets :
-          public vtkMultiBlockDataSetAlgorithm
+class VTKFILTERSEXTRACTION_EXPORT vtkExtractDataSets : public vtkMultiBlockDataSetAlgorithm
 {
 public:
   static vtkExtractDataSets* New();
   vtkTypeMacro(vtkExtractDataSets, vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Add a dataset to be extracted.
@@ -52,23 +51,18 @@ public:
 
 protected:
   vtkExtractDataSets();
-  ~vtkExtractDataSets() VTK_OVERRIDE;
+  ~vtkExtractDataSets() override;
 
-  int RequestData(vtkInformation *,
-                          vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-  int FillOutputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkExtractDataSets(const vtkExtractDataSets&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractDataSets&) VTK_DELETE_FUNCTION;
+  vtkExtractDataSets(const vtkExtractDataSets&) = delete;
+  void operator=(const vtkExtractDataSets&) = delete;
 
   class vtkInternals;
   vtkInternals* Internals;
-
 };
 
 #endif
-
-

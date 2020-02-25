@@ -24,7 +24,7 @@
  *
  * This filter is used to extract either the field, cell or point data of
  * any data object as a table.
-*/
+ */
 
 #ifndef vtkDataObjectToTable_h
 #define vtkDataObjectToTable_h
@@ -36,8 +36,8 @@ class VTKINFOVISCORE_EXPORT vtkDataObjectToTable : public vtkTableAlgorithm
 {
 public:
   static vtkDataObjectToTable* New();
-  vtkTypeMacro(vtkDataObjectToTable,vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkDataObjectToTable, vtkTableAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   enum
   {
@@ -59,21 +59,17 @@ public:
 
 protected:
   vtkDataObjectToTable();
-  ~vtkDataObjectToTable() VTK_OVERRIDE;
+  ~vtkDataObjectToTable() override;
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   int FieldType;
 
 private:
-  vtkDataObjectToTable(const vtkDataObjectToTable&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDataObjectToTable&) VTK_DELETE_FUNCTION;
+  vtkDataObjectToTable(const vtkDataObjectToTable&) = delete;
+  void operator=(const vtkDataObjectToTable&) = delete;
 };
 
 #endif
-

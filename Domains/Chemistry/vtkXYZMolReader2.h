@@ -21,7 +21,7 @@
  *
  * @par Thanks:
  * Dr. Jean M. Favre who developed and contributed this class
-*/
+ */
 
 #ifndef vtkXYZMolReader2_h
 #define vtkXYZMolReader2_h
@@ -29,25 +29,24 @@
 #include "vtkDomainsChemistryModule.h" // For export macro
 #include "vtkMoleculeAlgorithm.h"
 
-#include <vector>
-#include <fstream>
-#include <iostream>
+#include <istream> // for std::istream
+#include <vector>  // for std::vector
 
 class vtkMolecule;
 
 class VTKDOMAINSCHEMISTRY_EXPORT vtkXYZMolReader2 : public vtkMoleculeAlgorithm
 {
 public:
-  static vtkXYZMolReader2 *New();
-  vtkTypeMacro(vtkXYZMolReader2,vtkMoleculeAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkXYZMolReader2* New();
+  vtkTypeMacro(vtkXYZMolReader2, vtkMoleculeAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get/Set the output (vtkMolecule) that the reader will fill
    */
-  vtkMolecule *GetOutput();
-  void SetOutput(vtkMolecule *) VTK_OVERRIDE;
+  vtkMolecule* GetOutput();
+  void SetOutput(vtkMolecule*) override;
   //@}
 
   //@{
@@ -60,14 +59,12 @@ public:
 
 protected:
   vtkXYZMolReader2();
-  ~vtkXYZMolReader2() VTK_OVERRIDE;
+  ~vtkXYZMolReader2() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  char *FileName;
+  char* FileName;
   std::vector<istream::pos_type> file_positions; // to store beginning of each tstep
   std::vector<double> TimeSteps;
 
@@ -75,8 +72,8 @@ protected:
   int NumberOfAtoms;
 
 private:
-  vtkXYZMolReader2(const vtkXYZMolReader2&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkXYZMolReader2&) VTK_DELETE_FUNCTION;
+  vtkXYZMolReader2(const vtkXYZMolReader2&) = delete;
+  void operator=(const vtkXYZMolReader2&) = delete;
 };
 
 #endif

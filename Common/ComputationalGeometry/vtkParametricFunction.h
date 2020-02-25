@@ -51,7 +51,7 @@
  * vtkParametricEnneper vtkParametricRandomHills vtkParametricSuperEllipsoid
  * vtkParametricSuperToroid vtkParametricTorus
  *
-*/
+ */
 
 #ifndef vtkParametricFunction_h
 #define vtkParametricFunction_h
@@ -63,7 +63,7 @@ class VTKCOMMONCOMPUTATIONALGEOMETRY_EXPORT vtkParametricFunction : public vtkOb
 {
 public:
   vtkTypeMacro(vtkParametricFunction, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Return the dimension of parametric space. Depending on the dimension,
@@ -94,7 +94,7 @@ public:
    * This is a pure virtual function that must be instantiated in
    * a derived class.
 
-   * uvw are the parameters with Pt being the the cartesian point,
+   * uvw are the parameters with Pt being the cartesian point,
    * Duvw are the derivatives of this point with respect to u, v, and w.
    * Pt, Duvw are obtained from Evaluate().
    */
@@ -104,75 +104,75 @@ public:
   /**
    * Set/Get the minimum u-value.
    */
-  vtkSetMacro(MinimumU,double);
-  vtkGetMacro(MinimumU,double);
+  vtkSetMacro(MinimumU, double);
+  vtkGetMacro(MinimumU, double);
   //@}
 
   //@{
   /**
    * Set/Get the maximum u-value.
    */
-  vtkSetMacro(MaximumU,double);
-  vtkGetMacro(MaximumU,double);
+  vtkSetMacro(MaximumU, double);
+  vtkGetMacro(MaximumU, double);
   //@}
 
   //@{
   /**
    * Set/Get the minimum v-value.
    */
-  vtkSetMacro(MinimumV,double);
-  vtkGetMacro(MinimumV,double);
+  vtkSetMacro(MinimumV, double);
+  vtkGetMacro(MinimumV, double);
   //@}
 
   //@{
   /**
    * Set/Get the maximum v-value.
    */
-  vtkSetMacro(MaximumV,double);
-  vtkGetMacro(MaximumV,double);
+  vtkSetMacro(MaximumV, double);
+  vtkGetMacro(MaximumV, double);
   //@}
 
   //@{
   /**
    * Set/Get the minimum w-value.
    */
-  vtkSetMacro(MinimumW,double);
-  vtkGetMacro(MinimumW,double);
+  vtkSetMacro(MinimumW, double);
+  vtkGetMacro(MinimumW, double);
   //@}
 
   //@{
   /**
    * Set/Get the maximum w-value.
    */
-  vtkSetMacro(MaximumW,double);
-  vtkGetMacro(MaximumW,double);
+  vtkSetMacro(MaximumW, double);
+  vtkGetMacro(MaximumW, double);
   //@}
 
   //@{
   /**
    * Set/Get the flag which joins the first triangle strip to the last one.
    */
-  vtkSetClampMacro(JoinU,int,0,1);
-  vtkGetMacro(JoinU,int);
-  vtkBooleanMacro(JoinU,int);
+  vtkSetClampMacro(JoinU, vtkTypeBool, 0, 1);
+  vtkGetMacro(JoinU, vtkTypeBool);
+  vtkBooleanMacro(JoinU, vtkTypeBool);
   //@}
 
   //@{
   /**
-   * Set/Get the flag which joins the the ends of the triangle strips.
+   * Set/Get the flag which joins the ends of the triangle strips.
    */
-  vtkSetClampMacro(JoinV, int, 0, 1);
-  vtkGetMacro(JoinV, int);
-  vtkBooleanMacro(JoinV, int);
+  vtkSetClampMacro(JoinV, vtkTypeBool, 0, 1);
+  vtkGetMacro(JoinV, vtkTypeBool);
+  vtkBooleanMacro(JoinV, vtkTypeBool);
   //@}
 
   //@{
   /**
-   * Set/Get the flag which joins the the ends of the triangle strips.
+   * Set/Get the flag which joins the ends of the triangle strips.
    */
-  vtkSetClampMacro(JoinW, int, 0, 1);
-  vtkGetMacro(JoinW, int);
-  vtkBooleanMacro(JoinW, int);
+  vtkSetClampMacro(JoinW, vtkTypeBool, 0, 1);
+  vtkGetMacro(JoinW, vtkTypeBool);
+  vtkBooleanMacro(JoinW, vtkTypeBool);
   //@}
 
   //@{
@@ -182,9 +182,9 @@ public:
    * JoinU must also be set if this is set.
    * Used when building some non-orientable surfaces.
    */
-  vtkSetClampMacro(TwistU,int,0,1);
-  vtkGetMacro(TwistU,int);
-  vtkBooleanMacro(TwistU,int);
+  vtkSetClampMacro(TwistU, vtkTypeBool, 0, 1);
+  vtkGetMacro(TwistU, vtkTypeBool);
+  vtkBooleanMacro(TwistU, vtkTypeBool);
   //@}
 
   //@{
@@ -194,9 +194,9 @@ public:
    * JoinV must also be set if this is set.
    * Used when building some non-orientable surfaces.
    */
-  vtkSetClampMacro(TwistV, int, 0, 1);
-  vtkGetMacro(TwistV, int);
-  vtkBooleanMacro(TwistV, int);
+  vtkSetClampMacro(TwistV, vtkTypeBool, 0, 1);
+  vtkGetMacro(TwistV, vtkTypeBool);
+  vtkBooleanMacro(TwistV, vtkTypeBool);
   //@}
 
   //@{
@@ -206,14 +206,14 @@ public:
    * JoinW must also be set if this is set.
    * Used when building some non-orientable surfaces.
    */
-  vtkSetClampMacro(TwistW, int, 0, 1);
-  vtkGetMacro(TwistW, int);
-  vtkBooleanMacro(TwistW, int);
+  vtkSetClampMacro(TwistW, vtkTypeBool, 0, 1);
+  vtkGetMacro(TwistW, vtkTypeBool);
+  vtkBooleanMacro(TwistW, vtkTypeBool);
   //@}
 
   //@{
   /**
-   * Set/Get the flag which determines the ordering of the the
+   * Set/Get the flag which determines the ordering of the
    * vertices forming the triangle strips. The ordering of the
    * points being inserted into the triangle strip is important
    * because it determines the direction of the normals for the
@@ -221,9 +221,9 @@ public:
    * ordering is anti-clockwise. Default is true (i.e. clockwise
    * ordering).
    */
-  vtkSetClampMacro(ClockwiseOrdering,int,0,1);
-  vtkGetMacro(ClockwiseOrdering,int);
-  vtkBooleanMacro(ClockwiseOrdering,int);
+  vtkSetClampMacro(ClockwiseOrdering, vtkTypeBool, 0, 1);
+  vtkGetMacro(ClockwiseOrdering, vtkTypeBool);
+  vtkBooleanMacro(ClockwiseOrdering, vtkTypeBool);
   //@}
 
   //@{
@@ -232,14 +232,14 @@ public:
    * from the parametric function (i.e., whether the Evaluate() method
    * returns valid derivatives).
    */
-  vtkSetClampMacro(DerivativesAvailable,int,0,1);
-  vtkGetMacro(DerivativesAvailable,int);
-  vtkBooleanMacro(DerivativesAvailable,int);
+  vtkSetClampMacro(DerivativesAvailable, vtkTypeBool, 0, 1);
+  vtkGetMacro(DerivativesAvailable, vtkTypeBool);
+  vtkBooleanMacro(DerivativesAvailable, vtkTypeBool);
   //@}
 
 protected:
   vtkParametricFunction();
-  ~vtkParametricFunction() VTK_OVERRIDE;
+  ~vtkParametricFunction() override;
 
   // Variables
   double MinimumU;
@@ -249,22 +249,21 @@ protected:
   double MinimumW;
   double MaximumW;
 
-  int JoinU;
-  int JoinV;
-  int JoinW;
+  vtkTypeBool JoinU;
+  vtkTypeBool JoinV;
+  vtkTypeBool JoinW;
 
-  int TwistU;
-  int TwistV;
-  int TwistW;
+  vtkTypeBool TwistU;
+  vtkTypeBool TwistV;
+  vtkTypeBool TwistW;
 
-  int ClockwiseOrdering;
+  vtkTypeBool ClockwiseOrdering;
 
-  int DerivativesAvailable;
+  vtkTypeBool DerivativesAvailable;
 
 private:
-  vtkParametricFunction(const vtkParametricFunction&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkParametricFunction&) VTK_DELETE_FUNCTION;
-
+  vtkParametricFunction(const vtkParametricFunction&) = delete;
+  void operator=(const vtkParametricFunction&) = delete;
 };
 
 #endif

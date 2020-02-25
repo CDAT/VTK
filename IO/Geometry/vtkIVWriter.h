@@ -21,7 +21,7 @@
  *
  * @sa
  * vtkPolyDataWriter
-*/
+ */
 
 #ifndef vtkIVWriter_h
 #define vtkIVWriter_h
@@ -34,9 +34,9 @@ class vtkPolyData;
 class VTKIOGEOMETRY_EXPORT vtkIVWriter : public vtkWriter
 {
 public:
-  static vtkIVWriter *New();
-  vtkTypeMacro(vtkIVWriter,vtkWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkIVWriter* New();
+  vtkTypeMacro(vtkIVWriter, vtkWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -55,27 +55,20 @@ public:
   //@}
 
 protected:
-  vtkIVWriter()
-  {
-    this->FileName = nullptr;
-  }
+  vtkIVWriter() { this->FileName = nullptr; }
 
-  ~vtkIVWriter() VTK_OVERRIDE
-  {
-    delete[] this->FileName;
-  }
+  ~vtkIVWriter() override { delete[] this->FileName; }
 
-  void WriteData() VTK_OVERRIDE;
-  void WritePolyData(vtkPolyData *polyData, FILE *fp);
+  void WriteData() override;
+  void WritePolyData(vtkPolyData* polyData, FILE* fp);
 
-  char *FileName;
+  char* FileName;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkIVWriter(const vtkIVWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkIVWriter&) VTK_DELETE_FUNCTION;
+  vtkIVWriter(const vtkIVWriter&) = delete;
+  void operator=(const vtkIVWriter&) = delete;
 };
 
 #endif
-

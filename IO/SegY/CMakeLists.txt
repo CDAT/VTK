@@ -1,19 +1,17 @@
-set(Module_SRCS
-  vtkSegY2DReader.cxx
-  vtkSegY3DReader.cxx
-  )
+set(classes
+  vtkSegYReader)
 
-set (Module_PRIVATE_SRCS
+set(sources
   vtkSegYIOUtils.cxx
-  vtkSegYReader.cxx
-  vtkSegYTraceReader.cxx
-  )
+  vtkSegYReaderInternal.cxx
+  vtkSegYTraceReader.cxx)
 
-set_source_files_properties(
-  ${Module_PRIVATE_SRCS}
-  PROPERTIES
-    WRAP_EXCLUDE 1
-    WRAP_EXCLUDE_PYTHON 1
-  )
+set(private_headers
+  vtkSegYIOUtils.h
+  vtkSegYReaderInternal.h
+  vtkSegYTraceReader.h)
 
-vtk_module_library(vtkIOSegY ${Module_SRCS} ${Module_PRIVATE_SRCS})
+vtk_module_add_module(VTK::IOSegY
+  CLASSES ${classes}
+  SOURCES ${sources}
+  PRIVATE_HEADERS ${private_headers})

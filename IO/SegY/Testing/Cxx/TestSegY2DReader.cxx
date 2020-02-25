@@ -12,11 +12,11 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME Test of vtkSegY2DReader
+// .NAME Test of vtkSegYReader
 // .SECTION Description
 //
 
-#include "vtkSegY2DReader.h"
+#include "vtkSegYReader.h"
 
 #include "vtkActor.h"
 #include "vtkCamera.h"
@@ -37,29 +37,24 @@ int TestSegY2DReader(int argc, char* argv[])
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetSize(300, 300);
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   // Read file name.
   char* fname[5];
-  fname[0] =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineA.sgy");
-  fname[1] =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineB.sgy");
-  fname[2] =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineC.sgy");
-  fname[3] =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineD.sgy");
-  fname[4] =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineE.sgy");
+  fname[0] = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineA.sgy");
+  fname[1] = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineB.sgy");
+  fname[2] = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineC.sgy");
+  fname[3] = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineD.sgy");
+  fname[4] = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SegY/lineE.sgy");
 
   vtkNew<vtkColorTransferFunction> lut;
   lut->AddRGBPoint(-6.4, 0.23, 0.30, 0.75);
   lut->AddRGBPoint(0.0, 0.86, 0.86, 0.86);
   lut->AddRGBPoint(6.6, 0.70, 0.02, 0.15);
 
-  vtkNew<vtkSegY2DReader> reader[5];
+  vtkNew<vtkSegYReader> reader[5];
   vtkNew<vtkDataSetMapper> mapper[5];
   vtkNew<vtkActor> actor[5];
 
@@ -70,12 +65,12 @@ int TestSegY2DReader(int argc, char* argv[])
     delete[] fname[i];
 
     mapper[i]->SetInputConnection(reader[i]->GetOutputPort());
-    mapper[i]->SetLookupTable(lut.GetPointer());
+    mapper[i]->SetLookupTable(lut);
     mapper[i]->SetColorModeToMapScalars();
 
-    actor[i]->SetMapper(mapper[i].GetPointer());
+    actor[i]->SetMapper(mapper[i]);
 
-    ren->AddActor(actor[i].GetPointer());
+    ren->AddActor(actor[i]);
     ren->ResetCamera();
   }
 

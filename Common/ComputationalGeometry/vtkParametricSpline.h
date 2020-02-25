@@ -33,7 +33,7 @@
  *
  * @sa
  * vtkSpline vtkKochanekSpline vtkCardinalSpline
-*/
+ */
 
 #ifndef vtkParametricSpline_h
 #define vtkParametricSpline_h
@@ -47,8 +47,8 @@ class vtkPoints;
 class VTKCOMMONCOMPUTATIONALGEOMETRY_EXPORT vtkParametricSpline : public vtkParametricFunction
 {
 public:
-  vtkTypeMacro(vtkParametricSpline,vtkParametricFunction);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkParametricSpline, vtkParametricFunction);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct the spline with the following parameters:
@@ -56,24 +56,24 @@ public:
    * closed, then JoinU = 1), TwistU = 0, DerivativesSupplied = 0
    * (the other vtkParametricFunction parameters are ignored).
    */
-  static vtkParametricSpline *New();
+  static vtkParametricSpline* New();
 
   /**
    * Return the parametric dimension of the class.
    */
-  int GetDimension() VTK_OVERRIDE {return 1;}
+  int GetDimension() override { return 1; }
 
   /**
    * Evaluate the spline at parametric coordinate u[0] returning
    * the point coordinate Pt[3].
    */
-  void Evaluate(double u[3], double Pt[3], double Du[9]) VTK_OVERRIDE;
+  void Evaluate(double u[3], double Pt[3], double Du[9]) override;
 
   /**
    * Evaluate a scalar value at parametric coordinate u[0] and Pt[3].
    * The scalar value is just the parameter u[0].
    */
-  double EvaluateScalar(double u[3], double Pt[3], double Du[9]) VTK_OVERRIDE;
+  double EvaluateScalar(double u[3], double Pt[3], double Du[9]) override;
 
   //@{
   /**
@@ -84,9 +84,9 @@ public:
   void SetXSpline(vtkSpline*);
   void SetYSpline(vtkSpline*);
   void SetZSpline(vtkSpline*);
-  vtkGetObjectMacro(XSpline,vtkSpline);
-  vtkGetObjectMacro(YSpline,vtkSpline);
-  vtkGetObjectMacro(ZSpline,vtkSpline);
+  vtkGetObjectMacro(XSpline, vtkSpline);
+  vtkGetObjectMacro(YSpline, vtkSpline);
+  vtkGetObjectMacro(ZSpline, vtkSpline);
   //@}
 
   //@{
@@ -97,7 +97,7 @@ public:
    * splines will be fit.
    */
   void SetPoints(vtkPoints*);
-  vtkGetObjectMacro(Points,vtkPoints);
+  vtkGetObjectMacro(Points, vtkPoints);
   //@}
 
   //@{
@@ -115,9 +115,9 @@ public:
    * a continuous loop: the first and last points are the same, and
    * derivatives are continuous.
    */
-  vtkSetMacro(Closed,int);
-  vtkGetMacro(Closed,int);
-  vtkBooleanMacro(Closed,int);
+  vtkSetMacro(Closed, vtkTypeBool);
+  vtkGetMacro(Closed, vtkTypeBool);
+  vtkBooleanMacro(Closed, vtkTypeBool);
   //@}
 
   //@{
@@ -125,9 +125,9 @@ public:
    * Control whether the spline is parameterized by length or by point index.
    * Default is by length.
    */
-  vtkSetMacro(ParameterizeByLength,int);
-  vtkGetMacro(ParameterizeByLength,int);
-  vtkBooleanMacro(ParameterizeByLength,int);
+  vtkSetMacro(ParameterizeByLength, vtkTypeBool);
+  vtkGetMacro(ParameterizeByLength, vtkTypeBool);
+  vtkBooleanMacro(ParameterizeByLength, vtkTypeBool);
   //@}
 
   //@{
@@ -147,10 +147,10 @@ public:
    * 3: the second derivative at left(right)most points is Left(Right)Value
    * times second derivative at first interior point.
    */
-  vtkSetClampMacro(LeftConstraint,int,0,3);
-  vtkGetMacro(LeftConstraint,int);
-  vtkSetClampMacro(RightConstraint,int,0,3);
-  vtkGetMacro(RightConstraint,int);
+  vtkSetClampMacro(LeftConstraint, int, 0, 3);
+  vtkGetMacro(LeftConstraint, int);
+  vtkSetClampMacro(RightConstraint, int, 0, 3);
+  vtkGetMacro(RightConstraint, int);
   //@}
 
   //@{
@@ -158,31 +158,31 @@ public:
    * The values of the derivative on the left and right sides. The value
    * is used only if the left(right) constraint is type 1-3.
    */
-  vtkSetMacro(LeftValue,double);
-  vtkGetMacro(LeftValue,double);
-  vtkSetMacro(RightValue,double);
-  vtkGetMacro(RightValue,double);
+  vtkSetMacro(LeftValue, double);
+  vtkGetMacro(LeftValue, double);
+  vtkSetMacro(RightValue, double);
+  vtkGetMacro(RightValue, double);
   //@}
 
 protected:
   vtkParametricSpline();
-  ~vtkParametricSpline() VTK_OVERRIDE;
+  ~vtkParametricSpline() override;
 
   // Points definition
-  vtkPoints *Points;
+  vtkPoints* Points;
 
   // The interpolating splines for each of the x-y-z coordinates
-  vtkSpline *XSpline;
-  vtkSpline *YSpline;
-  vtkSpline *ZSpline;
+  vtkSpline* XSpline;
+  vtkSpline* YSpline;
+  vtkSpline* ZSpline;
 
   // Supplemental variables
-  int    Closed;
-  int    LeftConstraint;
-  int    RightConstraint;
+  vtkTypeBool Closed;
+  int LeftConstraint;
+  int RightConstraint;
   double LeftValue;
   double RightValue;
-  int    ParameterizeByLength;
+  vtkTypeBool ParameterizeByLength;
 
   // Initializing the spline
   vtkMTimeType InitializeTime;
@@ -193,8 +193,8 @@ protected:
   double ClosedLength;
 
 private:
-  vtkParametricSpline(const vtkParametricSpline&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkParametricSpline&) VTK_DELETE_FUNCTION;
+  vtkParametricSpline(const vtkParametricSpline&) = delete;
+  void operator=(const vtkParametricSpline&) = delete;
 };
 
 #endif

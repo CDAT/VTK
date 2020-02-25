@@ -45,13 +45,13 @@
  *
  * @sa
  * vtkLODActor vtkQuadricClustering
-*/
+ */
 
 #ifndef vtkQuadricLODActor_h
 #define vtkQuadricLODActor_h
 
-#include "vtkRenderingLODModule.h" // For export macro
 #include "vtkActor.h"
+#include "vtkRenderingLODModule.h" // For export macro
 
 class vtkQuadricClustering;
 class vtkPolyDataMapper;
@@ -64,14 +64,14 @@ public:
   /**
    * Creates a vtkQuadricLODActor.
    */
-  static vtkQuadricLODActor *New();
+  static vtkQuadricLODActor* New();
 
   //@{
   /**
    * Standard class methods.
    */
   vtkTypeMacro(vtkQuadricLODActor, vtkActor);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -80,9 +80,9 @@ public:
    * or to wait until the LOD is requested in a subsequent render. By default,
    * LOD construction is not deferred (DeferLODConstruction is false).
    */
-  vtkSetMacro(DeferLODConstruction, int);
-  vtkGetMacro(DeferLODConstruction, int);
-  vtkBooleanMacro(DeferLODConstruction, int);
+  vtkSetMacro(DeferLODConstruction, vtkTypeBool);
+  vtkGetMacro(DeferLODConstruction, vtkTypeBool);
+  vtkBooleanMacro(DeferLODConstruction, vtkTypeBool);
   //@}
 
   //@{
@@ -93,16 +93,20 @@ public:
    * off because trying to debug this is tricky, and you should only use it
    * when you know what you are doing.
    */
-  vtkSetMacro(Static, int);
-  vtkGetMacro(Static, int);
-  vtkBooleanMacro(Static, int);
+  vtkSetMacro(Static, vtkTypeBool);
+  vtkGetMacro(Static, vtkTypeBool);
+  vtkBooleanMacro(Static, vtkTypeBool);
   //@}
 
   enum DataConfigurationEnum
   {
     UNKNOWN = 0,
-    XLINE, YLINE, ZLINE,
-    XYPLANE, XZPLANE, YZPLANE,
+    XLINE,
+    YLINE,
+    ZLINE,
+    XYPLANE,
+    XZPLANE,
+    YZPLANE,
     XYZVOLUME
   };
 
@@ -120,24 +124,16 @@ public:
    * will attempt to figure the dimension of the class automatically using
    * the CollapseDimensionRatio ivar.
    */
-  vtkSetClampMacro(DataConfiguration, int, UNKNOWN,XYZVOLUME);
+  vtkSetClampMacro(DataConfiguration, int, UNKNOWN, XYZVOLUME);
   vtkGetMacro(DataConfiguration, int);
-  void SetDataConfigurationToUnknown()
-    { this->SetDataConfiguration(UNKNOWN); }
-  void SetDataConfigurationToXLine()
-    { this->SetDataConfiguration(XLINE); }
-  void SetDataConfigurationToYLine()
-    { this->SetDataConfiguration(YLINE); }
-  void SetDataConfigurationToZLine()
-    { this->SetDataConfiguration(ZLINE); }
-  void SetDataConfigurationToXYPlane()
-    { this->SetDataConfiguration(XYPLANE); }
-  void SetDataConfigurationToYZPlane()
-    { this->SetDataConfiguration(YZPLANE); }
-  void SetDataConfigurationToXZPlane()
-    { this->SetDataConfiguration(XZPLANE); }
-  void SetDataConfigurationToXYZVolume()
-    { this->SetDataConfiguration(XYZVOLUME); }
+  void SetDataConfigurationToUnknown() { this->SetDataConfiguration(UNKNOWN); }
+  void SetDataConfigurationToXLine() { this->SetDataConfiguration(XLINE); }
+  void SetDataConfigurationToYLine() { this->SetDataConfiguration(YLINE); }
+  void SetDataConfigurationToZLine() { this->SetDataConfiguration(ZLINE); }
+  void SetDataConfigurationToXYPlane() { this->SetDataConfiguration(XYPLANE); }
+  void SetDataConfigurationToYZPlane() { this->SetDataConfiguration(YZPLANE); }
+  void SetDataConfigurationToXZPlane() { this->SetDataConfiguration(XZPLANE); }
+  void SetDataConfigurationToXYZVolume() { this->SetDataConfiguration(XYZVOLUME); }
   //@}
 
   //@{
@@ -158,21 +154,8 @@ public:
    * However, if you would like to specify the filter to use, or to access it
    * and configure it, these method provide access to the filter.
    */
-  void SetLODFilter(vtkQuadricClustering *lodFilter);
+  void SetLODFilter(vtkQuadricClustering* lodFilter);
   vtkGetObjectMacro(LODFilter, vtkQuadricClustering);
-  //@}
-
-  //@{
-  /**
-   * Specify the maximum display list size. This variable is used to determine
-   * whether to use display lists (ImmediateModeRenderingOff) or not.
-   * Controlling display list size is important to prevent program crashes (i.e.,
-   * overly large display lists on some graphics hardware will cause faults).
-   * The display list size is the length of the vtkCellArray representing the
-   * topology of the input vtkPolyData.
-   */
-  vtkSetClampMacro(MaximumDisplayListSize, int, 1000, VTK_INT_MAX);
-  vtkGetMacro(MaximumDisplayListSize, int);
   //@}
 
   enum PropTypeEnum
@@ -188,10 +171,8 @@ public:
    */
   vtkSetClampMacro(PropType, int, FOLLOWER, ACTOR);
   vtkGetMacro(PropType, int);
-  void SetPropTypeToFollower()
-    { this->SetPropType(FOLLOWER); }
-  void SetPropTypeToActor()
-    { this->SetPropType(ACTOR); }
+  void SetPropTypeToFollower() { this->SetPropType(FOLLOWER); }
+  void SetPropTypeToActor() { this->SetPropType(ACTOR); }
   //@}
 
   //@{
@@ -208,42 +189,42 @@ public:
    * it will use either a full resolution render or an interactive render (i.e.,
    * it will use the decimated geometry).
    */
-  void Render(vtkRenderer *, vtkMapper *) VTK_OVERRIDE;
+  void Render(vtkRenderer*, vtkMapper*) override;
 
   /**
    * This method is used internally by the rendering process. We override
    * the superclass method to properly set the estimated render time.
    */
-  int RenderOpaqueGeometry(vtkViewport *viewport) VTK_OVERRIDE;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
 
   /**
    * Release any graphics resources that are being consumed by this actor.
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
   /**
    * Shallow copy of an LOD actor. Overloads the virtual vtkProp method.
    */
-  void ShallowCopy(vtkProp *prop) VTK_OVERRIDE;
+  void ShallowCopy(vtkProp* prop) override;
 
 protected:
   vtkQuadricLODActor();
-  ~vtkQuadricLODActor() VTK_OVERRIDE;
+  ~vtkQuadricLODActor() override;
 
   // Renders the LOD
-  vtkActor *LODActor;
-  vtkPolyDataMapper *LODMapper;
+  vtkActor* LODActor;
+  vtkPolyDataMapper* LODMapper;
 
   // Keep track of the requested interactive frame rate
   double CachedInteractiveFrameRate;
 
   // Support various strategies
-  vtkQuadricClustering *LODFilter;
+  vtkQuadricClustering* LODFilter;
 
   // Specify whether the mapper's should be set in to Static mode.
-  int Static;
+  vtkTypeBool Static;
 
   // The dimension of the data
   double CollapseDimensionRatio;
@@ -251,24 +232,17 @@ protected:
 
   // Control whether this is a follower or regular actor
   int PropType;
-  vtkCamera *Camera;
-
-  // Control what size (in terms of number of graphics primitives)
-  // where display lists should be used.
-  int MaximumDisplayListSize;
+  vtkCamera* Camera;
 
   // Specify to defer construction of the LOD.
-  int DeferLODConstruction;
+  vtkTypeBool DeferLODConstruction;
 
   // Keep track of building
   vtkTimeStamp BuildTime;
 
-  // Helper function determines display list size
-  vtkIdType GetDisplayListSize(vtkPolyData *pd);
-
 private:
-  vtkQuadricLODActor(const vtkQuadricLODActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQuadricLODActor&) VTK_DELETE_FUNCTION;
+  vtkQuadricLODActor(const vtkQuadricLODActor&) = delete;
+  void operator=(const vtkQuadricLODActor&) = delete;
 };
 
 #endif

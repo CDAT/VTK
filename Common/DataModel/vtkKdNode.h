@@ -28,7 +28,7 @@
  *
  * @sa
  *      vtkKdTree vtkOBSPCuts
-*/
+ */
 
 #ifndef vtkKdNode_h
 #define vtkKdNode_h
@@ -43,9 +43,9 @@ class VTKCOMMONDATAMODEL_EXPORT vtkKdNode : public vtkObject
 {
 public:
   vtkTypeMacro(vtkKdNode, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkKdNode *New();
+  static vtkKdNode* New();
 
   //@{
   /**
@@ -76,12 +76,9 @@ public:
    * Set/Get the bounds of the spatial region represented by this node.
    * Caller allocates storage for 6-vector in GetBounds.
    */
-  void SetBounds(double x1,double x2,double y1,double y2,double z1,double z2);
-  void SetBounds(const double b[6])
-  {
-    this->SetBounds(b[0], b[1], b[2], b[3], b[4], b[5]);
-  }
-  void GetBounds(double *b) const;
+  void SetBounds(double x1, double x2, double y1, double y2, double z1, double z2);
+  void SetBounds(const double b[6]) { this->SetBounds(b[0], b[1], b[2], b[3], b[4], b[5]); }
+  void GetBounds(double* b) const;
   //@}
 
   //@{
@@ -90,51 +87,51 @@ public:
    * This may be smaller than the bounds of the region itself.
    * Caller allocates storage for 6-vector in GetDataBounds.
    */
-  void SetDataBounds(double x1,double x2,double y1,double y2,double z1,double z2);
-  void GetDataBounds(double *b) const;
+  void SetDataBounds(double x1, double x2, double y1, double y2, double z1, double z2);
+  void GetDataBounds(double* b) const;
   //@}
 
   /**
    * Given a pointer to NumberOfPoints points, set the DataBounds of this
    * node to the bounds of these points.
    */
-  void SetDataBounds(float *v);
+  void SetDataBounds(float* v);
 
   /**
    * Get a pointer to the 3 bound minima (xmin, ymin and zmin) or the
    * 3 bound maxima (xmax, ymax, zmax).  Don't free this pointer.
    */
-  double *GetMinBounds() {return this->Min;}
-  double *GetMaxBounds() {return this->Max;}
+  double* GetMinBounds() VTK_SIZEHINT(3) { return this->Min; }
+  double* GetMaxBounds() VTK_SIZEHINT(3) { return this->Max; }
 
   /**
    * Set the xmin, ymin and zmin value of the bounds of this region
    */
-  void SetMinBounds(const double *mb);
+  void SetMinBounds(const double* mb);
 
   /**
    * Set the xmax, ymax and zmax value of the bounds of this region
    */
-  void SetMaxBounds(const double *mb);
+  void SetMaxBounds(const double* mb);
 
   /**
    * Get a pointer to the 3 data bound minima (xmin, ymin and zmin) or the
    * 3 data bound maxima (xmax, ymax, zmax).  Don't free this pointer.
    */
-  double *GetMinDataBounds() {return this->MinVal;}
-  double *GetMaxDataBounds() {return this->MaxVal;}
+  double* GetMinDataBounds() VTK_SIZEHINT(3) { return this->MinVal; }
+  double* GetMaxDataBounds() VTK_SIZEHINT(3) { return this->MaxVal; }
 
   /**
    * Set the xmin, ymin and zmin value of the bounds of this
    * data within this region
    */
-  void SetMinDataBounds(const double *mb);
+  void SetMinDataBounds(const double* mb);
 
   /**
    * Set the xmax, ymax and zmax value of the bounds of this
    * data within this region
    */
-  void SetMaxDataBounds(const double *mb);
+  void SetMaxDataBounds(const double* mb);
 
   //@{
   /**
@@ -149,7 +146,7 @@ public:
   /**
    * If this node is not a leaf node, there are leaf nodes below it whose
    * regions represent a partitioning of this region.  The IDs of these
-   * leaf nodes form a contigous set.  Set/Get the range of the IDs of
+   * leaf nodes form a contiguous set.  Set/Get the range of the IDs of
    * the leaf nodes below this node.  If this is already a leaf node, these
    * values should be the same as the ID.
    */
@@ -162,7 +159,7 @@ public:
   /**
    * Add the left and right children.
    */
-  void AddChildNodes(vtkKdNode *left, vtkKdNode *right);
+  void AddChildNodes(vtkKdNode* left, vtkKdNode* right);
 
   /**
    * Delete the left and right children.
@@ -182,7 +179,7 @@ public:
    * Set/Get a pointer to the right child of this node.
    */
   vtkGetObjectMacro(Right, vtkKdNode);
-  void SetRight(vtkKdNode *right);
+  void SetRight(vtkKdNode* right);
   //@}
 
   //@{
@@ -198,16 +195,15 @@ public:
    * by the bounds passed in.  Use the possibly smaller bounds of the points
    * within the region if useDataBounds is non-zero.
    */
-  int IntersectsBox(double x1,double x2,double y1,double y2,double z1,double z2,
-                    int useDataBounds);
+  int IntersectsBox(
+    double x1, double x2, double y1, double y2, double z1, double z2, int useDataBounds);
 
   /**
    * Return 1 if this spatial region intersects a sphere described by
    * it's center and the square of it's radius. Use the possibly smaller
    * bounds of the points within the region if useDataBounds is non-zero.
    */
-  int IntersectsSphere2(double x, double y, double z, double rSquared,
-                        int useDataBounds);
+  int IntersectsSphere2(double x, double y, double z, double rSquared, int useDataBounds);
 
   /**
    * A vtkPlanesIntersection object represents a convex 3D region bounded
@@ -217,7 +213,7 @@ public:
    * Use the possibly smaller bounds of the points within the region
    * if useDataBounds is non-zero.
    */
-  int IntersectsRegion(vtkPlanesIntersection *pi, int useDataBounds);
+  int IntersectsRegion(vtkPlanesIntersection* pi, int useDataBounds);
 
   /**
    * Return 1 if the cell specified intersects this region.  If you
@@ -228,23 +224,23 @@ public:
    * Use the possibly smaller bounds of the points within the region
    * if useDataBounds is non-zero.
    */
-  int IntersectsCell(vtkCell *cell, int useDataBounds,
-                     int cellRegion=-1, double *cellBounds=nullptr);
+  int IntersectsCell(
+    vtkCell* cell, int useDataBounds, int cellRegion = -1, double* cellBounds = nullptr);
 
   /**
    * Return 1 if this spatial region entirely contains a box specified
    * by it's bounds. Use the possibly smaller
    * bounds of the points within the region if useDataBounds is non-zero.
    */
-  int ContainsBox(double x1,double x2,double y1,double y2,double z1,double z2,
-                  int useDataBounds);
+  int ContainsBox(
+    double x1, double x2, double y1, double y2, double z1, double z2, int useDataBounds);
 
   /**
    * Return 1 if this spatial region entirely contains the given point.
    * Use the possibly smaller bounds of the points within the region
    * if useDataBounds is non-zero.
    */
-  int ContainsPoint(double x, double y, double z, int useDataBounds);
+  vtkTypeBool ContainsPoint(double x, double y, double z, int useDataBounds);
 
   /**
    * Calculate the distance squared from any point to the boundary of this
@@ -258,8 +254,8 @@ public:
    * region.  Use the boundary of the points within the region if useDataBounds
    * is non-zero.  Set boundaryPt to the point on the boundary.
    */
-  double GetDistance2ToBoundary(double x, double y, double z, double *boundaryPt,
-                                int useDataBounds);
+  double GetDistance2ToBoundary(
+    double x, double y, double z, double* boundaryPt, int useDataBounds);
 
   /**
    * Calculate the distance from the specified point (which is required to
@@ -278,36 +274,33 @@ public:
   //@}
 
 protected:
-
   vtkKdNode();
-  ~vtkKdNode() VTK_OVERRIDE;
+  ~vtkKdNode() override;
 
 private:
-
   double _GetDistance2ToBoundary(
-    double x, double y, double z, double *boundaryPt,
-    int innerBoundaryOnly, int useDataBounds);
+    double x, double y, double z, double* boundaryPt, int innerBoundaryOnly, int useDataBounds);
 
-  double Min[3];       // spatial bounds of node
-  double Max[3];       // spatial bounds of node
-  double MinVal[3];    // spatial bounds of data within node
-  double MaxVal[3];    // spatial bounds of data within node
+  double Min[3];    // spatial bounds of node
+  double Max[3];    // spatial bounds of node
+  double MinVal[3]; // spatial bounds of data within node
+  double MaxVal[3]; // spatial bounds of data within node
   int NumberOfPoints;
 
-  vtkKdNode *Up;
+  vtkKdNode* Up;
 
-  vtkKdNode *Left;
-  vtkKdNode *Right;
+  vtkKdNode* Left;
+  vtkKdNode* Right;
 
   int Dim;
 
-  int ID;        // region id
+  int ID; // region id
 
   int MinID;
   int MaxID;
 
-  vtkKdNode(const vtkKdNode&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkKdNode&) VTK_DELETE_FUNCTION;
+  vtkKdNode(const vtkKdNode&) = delete;
+  void operator=(const vtkKdNode&) = delete;
 };
 
 #endif

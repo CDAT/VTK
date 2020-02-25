@@ -29,7 +29,7 @@
  *
  * @par Thanks:
  * This class was written by Kitware SAS and supported by EDF - www.edf.fr
-*/
+ */
 
 #ifndef vtkComputeQuartiles_h
 #define vtkComputeQuartiles_h
@@ -42,31 +42,29 @@ class vtkDoubleArray;
 class vtkFieldData;
 class vtkTable;
 
-
 class VTKFILTERSSTATISTICS_EXPORT vtkComputeQuartiles : public vtkTableAlgorithm
 {
 public:
   static vtkComputeQuartiles* New();
   vtkTypeMacro(vtkComputeQuartiles, vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkComputeQuartiles();
-  ~vtkComputeQuartiles() VTK_OVERRIDE;
+  ~vtkComputeQuartiles() override;
 
-  int FillInputPortInformation (int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int RequestData(vtkInformation *request,
-                  vtkInformationVector **inputVector,
-                  vtkInformationVector *outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   void ComputeTable(vtkDataObject*, vtkTable*, vtkIdType);
 
   int FieldAssociation;
 
 private:
-  void operator=(const vtkComputeQuartiles&) VTK_DELETE_FUNCTION;
-  vtkComputeQuartiles(const vtkComputeQuartiles&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkComputeQuartiles&) = delete;
+  vtkComputeQuartiles(const vtkComputeQuartiles&) = delete;
 
   int GetInputFieldAssociation();
   vtkFieldData* GetInputFieldData(vtkDataObject* input);

@@ -29,12 +29,12 @@
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
 
-int TestGPURayCastBlendModes(int argc, char *argv[])
+int TestGPURayCastBlendModes(int argc, char* argv[])
 {
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
-  int dims[3] = {100, 100, 100};
-  int boundary[3] = {10, 10, 10};
+  int dims[3] = { 100, 100, 100 };
+  int boundary[3] = { 10, 10, 10 };
 
   // Create a vtkImageData with two components
   vtkNew<vtkImageData> image;
@@ -43,8 +43,7 @@ int TestGPURayCastBlendModes(int argc, char *argv[])
 
   // Fill the first half rectangular parallelopiped along X with the
   // first component values and the second half with second component values
-  unsigned char * ptr =
-    static_cast<unsigned char *> (image->GetScalarPointer(0, 0, 0));
+  unsigned char* ptr = static_cast<unsigned char*>(image->GetScalarPointer(0, 0, 0));
 
   for (int z = 0; z < dims[2]; ++z)
   {
@@ -53,8 +52,8 @@ int TestGPURayCastBlendModes(int argc, char *argv[])
       for (int x = 0; x < dims[0]; ++x)
       {
         if ((z < boundary[2] || z > (dims[2] - boundary[2] - 1)) ||
-            (y < boundary[1] || y > (dims[1] - boundary[1] - 1)) ||
-            (x < boundary[0] || x > (dims[0] - boundary[0] - 1)))
+          (y < boundary[1] || y > (dims[1] - boundary[1] - 1)) ||
+          (x < boundary[0] || x > (dims[0] - boundary[0] - 1)))
         {
           *ptr++ = 255;
         }
@@ -75,8 +74,8 @@ int TestGPURayCastBlendModes(int argc, char *argv[])
   opacity->AddPoint(255.0, 0.8);
 
   vtkNew<vtkVolumeProperty> property;
-  property->SetScalarOpacity(opacity.GetPointer());
-  property->SetColor(color.GetPointer());
+  property->SetScalarOpacity(opacity);
+  property->SetColor(color);
 
   vtkNew<vtkVolume> volume[4];
 
@@ -98,22 +97,22 @@ int TestGPURayCastBlendModes(int argc, char *argv[])
 
   for (int i = 0; i < 4; ++i)
   {
-    mapper[i]->SetInputData(image.GetPointer());
-    volume[i]->SetMapper(mapper[i].GetPointer());
-    volume[i]->SetProperty(property.GetPointer());
-    renderer[i]->AddVolume(volume[i].GetPointer());
+    mapper[i]->SetInputData(image);
+    volume[i]->SetMapper(mapper[i]);
+    volume[i]->SetProperty(property);
+    renderer[i]->AddVolume(volume[i]);
     renderer[i]->SetBackground(0.3, 0.3, 0.3);
     renderer[i]->GetActiveCamera()->Yaw(20.0);
     renderer[i]->ResetCamera();
-    renWin->AddRenderer(renderer[i].GetPointer());
+    renWin->AddRenderer(renderer[i]);
   }
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   renWin->Render();
 
-  int retVal = vtkTesting::Test(argc, argv, renWin.GetPointer(), 15);
+  int retVal = vtkTesting::Test(argc, argv, renWin, 15);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

@@ -19,33 +19,32 @@
 
 #include "vtkNew.h"
 
-#include "vtkRenderWindowInteractor.h"
-#include "vtkInteractorStyleImage.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderer.h"
 #include "vtkCamera.h"
 #include "vtkImageData.h"
-#include "vtkImageSliceMapper.h"
 #include "vtkImageProperty.h"
-#include "vtkImageSlice.h"
-#include "vtkPNGReader.h"
-#include "vtkTransform.h"
 #include "vtkImageReslice.h"
+#include "vtkImageSlice.h"
+#include "vtkImageSliceMapper.h"
+#include "vtkInteractorStyleImage.h"
+#include "vtkPNGReader.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkTransform.h"
 
 #include "vtkTestUtilities.h"
 
-int ImageReslice(int argc, char *argv[])
+int ImageReslice(int argc, char* argv[])
 {
   vtkNew<vtkRenderWindowInteractor> iren;
   vtkNew<vtkInteractorStyle> style;
   vtkNew<vtkRenderWindow> renWin;
-  iren->SetRenderWindow(renWin.Get());
-  iren->SetInteractorStyle(style.Get());
+  iren->SetRenderWindow(renWin);
+  iren->SetInteractorStyle(style);
 
   vtkNew<vtkPNGReader> reader;
 
-  char* fname = vtkTestUtilities::ExpandDataFileName(
-    argc, argv, "Data/fullhead15.png");
+  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/fullhead15.png");
 
   reader->SetFileName(fname);
   delete[] fname;
@@ -82,7 +81,7 @@ int ImageReslice(int argc, char *argv[])
     {
       // Images on the top, note that (by design) the ResliceTransform
       // is ignored by TransformInputSampling, unlike the ResliceAxes
-      reslice->SetResliceTransform(transform.Get());
+      reslice->SetResliceTransform(transform);
     }
 
     vtkNew<vtkImageSliceMapper> imageMapper;
@@ -90,37 +89,35 @@ int ImageReslice(int argc, char *argv[])
     imageMapper->BorderOn();
 
     vtkNew<vtkImageSlice> image;
-    image->SetMapper(imageMapper.Get());
+    image->SetMapper(imageMapper);
 
     image->GetProperty()->SetColorWindow(range[1] - range[0]);
-    image->GetProperty()->SetColorLevel(0.5*(range[0] + range[1]));
+    image->GetProperty()->SetColorLevel(0.5 * (range[0] + range[1]));
     image->GetProperty()->SetInterpolationTypeToNearest();
 
     vtkNew<vtkRenderer> renderer;
-    renderer->AddViewProp(image.Get());
-    renderer->SetBackground(0.0,0.0,0.0);
-    renderer->SetViewport(0.5*(i&1), 0.25*(i&2),
-                          0.5 + 0.5*(i&1), 0.5 + 0.25*(i&2));
-    renWin->AddRenderer(renderer.Get());
+    renderer->AddViewProp(image);
+    renderer->SetBackground(0.0, 0.0, 0.0);
+    renderer->SetViewport(0.5 * (i & 1), 0.25 * (i & 2), 0.5 + 0.5 * (i & 1), 0.5 + 0.25 * (i & 2));
+    renWin->AddRenderer(renderer);
 
     // use center point to set camera
-    const double *bounds = imageMapper->GetBounds();
+    const double* bounds = imageMapper->GetBounds();
     double point[3];
-    point[0] = 0.5*(bounds[0] + bounds[1]);
-    point[1] = 0.5*(bounds[2] + bounds[3]);
-    point[2] = 0.5*(bounds[4] + bounds[5]);
+    point[0] = 0.5 * (bounds[0] + bounds[1]);
+    point[1] = 0.5 * (bounds[2] + bounds[3]);
+    point[2] = 0.5 * (bounds[4] + bounds[5]);
 
-    vtkCamera *camera = renderer->GetActiveCamera();
+    vtkCamera* camera = renderer->GetActiveCamera();
     camera->SetFocalPoint(point);
     point[imageMapper->GetOrientation()] += 500.0;
     camera->SetPosition(point);
     camera->SetViewUp(0.0, 1.0, 0.0);
     camera->ParallelProjectionOn();
     camera->SetParallelScale(128);
-
   }
 
-  renWin->SetSize(512,512);
+  renWin->SetSize(512, 512);
 
   iren->Initialize();
   renWin->Render();

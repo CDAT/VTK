@@ -25,21 +25,17 @@
 #include "vtkUnsignedCharArray.h"
 #include "vtkUnstructuredGrid.h"
 
-
 #include "vtkmlib/ArrayConverters.h"
-#include "vtkmlib/DataSetConverters.h"
-#include "vtkmlib/Storage.h"
 #include "vtkmlib/CellSetConverters.h"
+#include "vtkmlib/DataSetConverters.h"
 #include "vtkmlib/UnstructuredGridConverter.h"
 
-#include "vtkmCellSetExplicit.h"
-#include "vtkmCellSetSingleType.h"
 #include "vtkmFilterPolicy.h"
 
 #include <vtkm/filter/ExternalFaces.h>
+#include <vtkm/filter/ExternalFaces.hxx>
 
-
-vtkStandardNewMacro(vtkmExternalFaces)
+vtkStandardNewMacro(vtkmExternalFaces);
 
 //------------------------------------------------------------------------------
 vtkmExternalFaces::vtkmExternalFaces()
@@ -50,9 +46,7 @@ vtkmExternalFaces::vtkmExternalFaces()
 }
 
 //------------------------------------------------------------------------------
-vtkmExternalFaces::~vtkmExternalFaces()
-{
-}
+vtkmExternalFaces::~vtkmExternalFaces() {}
 
 //------------------------------------------------------------------------------
 void vtkmExternalFaces::PrintSelf(ostream& os, vtkIndent indent)
@@ -61,7 +55,7 @@ void vtkmExternalFaces::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //------------------------------------------------------------------------------
-void vtkmExternalFaces::SetInputData(vtkUnstructuredGrid *ds)
+void vtkmExternalFaces::SetInputData(vtkUnstructuredGrid* ds)
 {
   this->SetInputDataObject(0, ds);
 }
@@ -76,24 +70,25 @@ vtkUnstructuredGrid* vtkmExternalFaces::GetOutput()
 int vtkmExternalFaces::FillInputPortInformation(int, vtkInformation* info)
 {
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkUnstructuredGrid");
+  info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkImageData");
+  info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkStructuredGrid");
+  info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkRectilinearGrid");
   return 1;
 }
 
 //------------------------------------------------------------------------------
-int vtkmExternalFaces::FillOutputPortInformation(int vtkNotUsed(port),
-                                                  vtkInformation *info)
+int vtkmExternalFaces::FillOutputPortInformation(int vtkNotUsed(port), vtkInformation* info)
 {
   info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkUnstructuredGrid");
   return 1;
 }
 
 //------------------------------------------------------------------------------
-int vtkmExternalFaces::ProcessRequest(vtkInformation* request,
-                                      vtkInformationVector** inputVector,
-                                      vtkInformationVector* outputVector)
+vtkTypeBool vtkmExternalFaces::ProcessRequest(
+  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // generate the data
-  if(request->Has(vtkDemandDrivenPipeline::REQUEST_DATA()))
+  if (request->Has(vtkDemandDrivenPipeline::REQUEST_DATA()))
   {
     return this->RequestData(request, inputVector, outputVector);
   }
@@ -102,88 +97,39 @@ int vtkmExternalFaces::ProcessRequest(vtkInformation* request,
 }
 
 //------------------------------------------------------------------------------
-int vtkmExternalFaces::RequestData(vtkInformation* request,
-                                   vtkInformationVector** inputVector,
-                                   vtkInformationVector* outputVector)
+int vtkmExternalFaces::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
-  vtkUnstructuredGrid* input =
-    vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet* input = vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkUnstructuredGrid* output =
     vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  // convert the input dataset to a vtkm::cont::DataSet
-  vtkm::cont::DataSet in = tovtkm::Convert(input,
-                                           tovtkm::FieldsFlag::PointsAndCells);
-  if (in.GetNumberOfCoordinateSystems() <= 0 || in.GetNumberOfCellSets() <= 0)
+  try
   {
-    vtkErrorMacro(<< "Could not convert vtk dataset to vtkm dataset");
-    return 0;
-  }
+    // convert the input dataset to a vtkm::cont::DataSet
+    auto in = tovtkm::Convert(input, tovtkm::FieldsFlag::PointsAndCells);
 
-  vtkmInputFilterPolicy policy;
-
-  // apply the filter
-  vtkm::filter::ExternalFaces filter;
-  filter.SetCompactPoints(this->CompactPoints);
-  vtkm::filter::ResultDataSet result = filter.Execute(in, policy);
-  if (!result.IsValid())
-  {
-    vtkErrorMacro(<< "VTKm ExternalFaces algorithm failed to run");
-    return 0;
-  }
-
-  if (this->CompactPoints)
-  {
-    // map fields
-    vtkm::Id numFields = static_cast<vtkm::Id>(in.GetNumberOfFields());
-    for (vtkm::Id fieldIdx = 0; fieldIdx < numFields; ++fieldIdx)
-    {
-      const vtkm::cont::Field &field = in.GetField(fieldIdx);
-      try
-      {
-        filter.MapFieldOntoOutput(result, field, policy);
-      }
-      catch (vtkm::cont::Error &e)
-      {
-        vtkWarningMacro(<< "Unable to use VTKm to convert field( "
-                        << field.GetName() << " ) to the ExternalFaces"
-                        << " output: " << e.what());
-      }
-    }
+    // apply the filter
+    vtkmInputFilterPolicy policy;
+    vtkm::filter::ExternalFaces filter;
+    filter.SetCompactPoints(this->CompactPoints);
+    filter.SetPassPolyData(true);
+    auto result = filter.Execute(in, policy);
 
     // convert back to vtkDataSet (vtkUnstructuredGrid)
-    if (!fromvtkm::Convert(result.GetDataSet(), output, input))
+    if (!fromvtkm::Convert(result, output, input))
     {
       vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
       return 0;
     }
   }
-  else
+  catch (const vtkm::cont::Error& e)
   {
-    // convert just the cellset from vtkm to vtk
-    vtkNew<vtkCellArray> cells;
-    vtkNew<vtkUnsignedCharArray> types;
-    vtkNew<vtkIdTypeArray> locations;
-    vtkm::cont::DynamicCellSet cellSet = result.GetDataSet().GetCellSet();
-    if (!fromvtkm::Convert(cellSet, cells.GetPointer(), types.GetPointer(),
-                           locations.GetPointer()))
-    {
-      vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
-      return 0;
-    }
-
-    // copy points from input to output
-    output->SetPoints(input->GetPoints());
-
-    // add the new cellset to output
-    output->SetCells(types.GetPointer(), locations.GetPointer(),
-                     cells.GetPointer());
-
-    // copy the point data from input to output
-    output->GetPointData()->PassData(input->GetPointData());
+    vtkErrorMacro(<< "VTK-m error: " << e.GetMessage());
+    return 0;
   }
 
   return 1;

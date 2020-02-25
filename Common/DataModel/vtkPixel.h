@@ -20,13 +20,13 @@
  * orthogonal quadrilateral. Unlike vtkQuad, the corners are at right angles,
  * and aligned along x-y-z coordinate axes leading to large increases in
  * computational efficiency.
-*/
+ */
 
 #ifndef vtkPixel_h
 #define vtkPixel_h
 
-#include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkCell.h"
+#include "vtkCommonDataModelModule.h" // For export macro
 
 class vtkLine;
 class vtkIncrementalPointLocator;
@@ -34,82 +34,70 @@ class vtkIncrementalPointLocator;
 class VTKCOMMONDATAMODEL_EXPORT vtkPixel : public vtkCell
 {
 public:
-  static vtkPixel *New();
-  vtkTypeMacro(vtkPixel,vtkCell);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPixel* New();
+  vtkTypeMacro(vtkPixel, vtkCell);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * See the vtkCell API for descriptions of these methods.
    */
-  int GetCellType() VTK_OVERRIDE {return VTK_PIXEL;};
-  int GetCellDimension() VTK_OVERRIDE {return 2;};
-  int GetNumberOfEdges() VTK_OVERRIDE {return 4;};
-  int GetNumberOfFaces() VTK_OVERRIDE {return 0;};
-  vtkCell *GetEdge(int edgeId) VTK_OVERRIDE;
-  vtkCell *GetFace(int) VTK_OVERRIDE {return nullptr;};
-  int CellBoundary(int subId, double pcoords[3], vtkIdList *pts) VTK_OVERRIDE;
-  void Contour(double value, vtkDataArray *cellScalars,
-               vtkIncrementalPointLocator *locator, vtkCellArray *verts,
-               vtkCellArray *lines, vtkCellArray *polys,
-               vtkPointData *inPd, vtkPointData *outPd,
-               vtkCellData *inCd, vtkIdType cellId, vtkCellData *outCd) VTK_OVERRIDE;
-  void Clip(double value, vtkDataArray *cellScalars,
-            vtkIncrementalPointLocator *locator, vtkCellArray *polys,
-            vtkPointData *inPd, vtkPointData *outPd,
-            vtkCellData *inCd, vtkIdType cellId, vtkCellData *outCd,
-            int insideOut) VTK_OVERRIDE;
-  int EvaluatePosition(double x[3], double* closestPoint,
-                       int& subId, double pcoords[3],
-                       double& dist2, double *weights) VTK_OVERRIDE;
-  void EvaluateLocation(int& subId, double pcoords[3], double x[3],
-                        double *weights) VTK_OVERRIDE;
+  int GetCellType() override { return VTK_PIXEL; }
+  int GetCellDimension() override { return 2; }
+  int GetNumberOfEdges() override { return 4; }
+  int GetNumberOfFaces() override { return 0; }
+  vtkCell* GetEdge(int edgeId) override;
+  vtkCell* GetFace(int) override { return nullptr; }
+  int CellBoundary(int subId, const double pcoords[3], vtkIdList* pts) override;
+  void Contour(double value, vtkDataArray* cellScalars, vtkIncrementalPointLocator* locator,
+    vtkCellArray* verts, vtkCellArray* lines, vtkCellArray* polys, vtkPointData* inPd,
+    vtkPointData* outPd, vtkCellData* inCd, vtkIdType cellId, vtkCellData* outCd) override;
+  void Clip(double value, vtkDataArray* cellScalars, vtkIncrementalPointLocator* locator,
+    vtkCellArray* polys, vtkPointData* inPd, vtkPointData* outPd, vtkCellData* inCd,
+    vtkIdType cellId, vtkCellData* outCd, int insideOut) override;
+  int EvaluatePosition(const double x[3], double closestPoint[3], int& subId, double pcoords[3],
+    double& dist2, double weights[]) override;
+  void EvaluateLocation(int& subId, const double pcoords[3], double x[3], double* weights) override;
   //@}
 
   /**
    * Return the center of the triangle in parametric coordinates.
    */
-  int GetParametricCenter(double pcoords[3]) VTK_OVERRIDE;
+  int GetParametricCenter(double pcoords[3]) override;
 
-  int IntersectWithLine(double p1[3], double p2[3], double tol, double& t,
-                        double x[3], double pcoords[3], int& subId) VTK_OVERRIDE;
-  int Triangulate(int index, vtkIdList *ptIds, vtkPoints *pts) VTK_OVERRIDE;
-  void Derivatives(int subId, double pcoords[3], double *values,
-                   int dim, double *derivs) VTK_OVERRIDE;
-  double *GetParametricCoords() VTK_OVERRIDE;
+  int IntersectWithLine(const double p1[3], const double p2[3], double tol, double& t, double x[3],
+    double pcoords[3], int& subId) override;
+  int Triangulate(int index, vtkIdList* ptIds, vtkPoints* pts) override;
+  void Derivatives(
+    int subId, const double pcoords[3], const double* values, int dim, double* derivs) override;
+  double* GetParametricCoords() override;
 
-  /**
-   * @deprecated Replaced by vtkPixel::InterpolateFunctions as of VTK 5.2
-   */
-  static void InterpolationFunctions(double pcoords[3], double weights[4]);
-  /**
-   * @deprecated Replaced by vtkPixel::InterpolateDerivs as of VTK 5.2
-   */
-  static void InterpolationDerivs(double pcoords[3], double derivs[8]);
+  static void InterpolationFunctions(const double pcoords[3], double weights[4]);
+  static void InterpolationDerivs(const double pcoords[3], double derivs[8]);
   //@{
   /**
    * Compute the interpolation functions/derivatives
    * (aka shape functions/derivatives)
    */
-  void InterpolateFunctions(double pcoords[3], double weights[4]) VTK_OVERRIDE
+  void InterpolateFunctions(const double pcoords[3], double weights[4]) override
   {
-    vtkPixel::InterpolationFunctions(pcoords,weights);
+    vtkPixel::InterpolationFunctions(pcoords, weights);
   }
-  void InterpolateDerivs(double pcoords[3], double derivs[8]) VTK_OVERRIDE
+  void InterpolateDerivs(const double pcoords[3], double derivs[8]) override
   {
-    vtkPixel::InterpolationDerivs(pcoords,derivs);
+    vtkPixel::InterpolationDerivs(pcoords, derivs);
   }
   //@}
 
 protected:
   vtkPixel();
-  ~vtkPixel() VTK_OVERRIDE;
+  ~vtkPixel() override;
 
-  vtkLine *Line;
+  vtkLine* Line;
 
 private:
-  vtkPixel(const vtkPixel&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPixel&) VTK_DELETE_FUNCTION;
+  vtkPixel(const vtkPixel&) = delete;
+  void operator=(const vtkPixel&) = delete;
 };
 
 //----------------------------------------------------------------------------
@@ -121,5 +109,3 @@ inline int vtkPixel::GetParametricCenter(double pcoords[3])
 }
 
 #endif
-
-

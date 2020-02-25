@@ -32,22 +32,22 @@
  * option with vtkImageMask may result in results being slightly off since 0
  * could be a valid value from your input.
  *
-*/
+ */
 
 #ifndef vtkImageAccumulate_h
 #define vtkImageAccumulate_h
 
-#include "vtkImagingStatisticsModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
+#include "vtkImagingStatisticsModule.h" // For export macro
 
 class vtkImageStencilData;
 
 class VTKIMAGINGSTATISTICS_EXPORT vtkImageAccumulate : public vtkImageAlgorithm
 {
 public:
-  static vtkImageAccumulate *New();
-  vtkTypeMacro(vtkImageAccumulate,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageAccumulate* New();
+  vtkTypeMacro(vtkImageAccumulate, vtkImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -87,12 +87,10 @@ public:
    * Initial value is (0,255,0,0,0,0)
    */
   void SetComponentExtent(int extent[6]);
-  void SetComponentExtent(int minX, int maxX, int minY, int maxY,
-        int minZ, int maxZ);
+  void SetComponentExtent(int minX, int maxX, int minY, int maxY, int minZ, int maxZ);
   void GetComponentExtent(int extent[6]);
-  int *GetComponentExtent() {return this->ComponentExtent;}
+  int* GetComponentExtent() VTK_SIZEHINT(6) { return this->ComponentExtent; }
   //@}
-
 
   //@{
   /**
@@ -101,17 +99,17 @@ public:
    * It set and get the stencil on input port 1.
    * Initial value is nullptr.
    */
-  void SetStencilData(vtkImageStencilData *stencil);
-  vtkImageStencilData *GetStencil();
+  void SetStencilData(vtkImageStencilData* stencil);
+  vtkImageStencilData* GetStencil();
   //@}
 
   //@{
   /**
    * Reverse the stencil. Initial value is false.
    */
-  vtkSetClampMacro(ReverseStencil, int, 0, 1);
-  vtkBooleanMacro(ReverseStencil, int);
-  vtkGetMacro(ReverseStencil, int);
+  vtkSetClampMacro(ReverseStencil, vtkTypeBool, 0, 1);
+  vtkBooleanMacro(ReverseStencil, vtkTypeBool);
+  vtkGetMacro(ReverseStencil, vtkTypeBool);
   //@}
 
   //@{
@@ -131,46 +129,38 @@ public:
   /**
    * Should the data with value 0 be ignored? Initial value is false.
    */
-  vtkSetClampMacro(IgnoreZero, int, 0, 1);
-  vtkGetMacro(IgnoreZero, int);
-  vtkBooleanMacro(IgnoreZero, int);
+  vtkSetClampMacro(IgnoreZero, vtkTypeBool, 0, 1);
+  vtkGetMacro(IgnoreZero, vtkTypeBool);
+  vtkBooleanMacro(IgnoreZero, vtkTypeBool);
   //@}
 
 protected:
   vtkImageAccumulate();
-  ~vtkImageAccumulate() VTK_OVERRIDE;
+  ~vtkImageAccumulate() override;
 
   double ComponentSpacing[3];
   double ComponentOrigin[3];
   int ComponentExtent[6];
 
-  int RequestUpdateExtent(vtkInformation*,
-                                   vtkInformationVector**,
-                                   vtkInformationVector*) VTK_OVERRIDE;
-  int RequestInformation (vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*) VTK_OVERRIDE;
-  int RequestData(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int    IgnoreZero;
+  vtkTypeBool IgnoreZero;
   double Min[3];
   double Max[3];
   double Mean[3];
   double StandardDeviation[3];
   vtkIdType VoxelCount;
 
-  int ReverseStencil;
+  vtkTypeBool ReverseStencil;
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkImageAccumulate(const vtkImageAccumulate&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageAccumulate&) VTK_DELETE_FUNCTION;
+  vtkImageAccumulate(const vtkImageAccumulate&) = delete;
+  void operator=(const vtkImageAccumulate&) = delete;
 };
 
 #endif
-
-
-

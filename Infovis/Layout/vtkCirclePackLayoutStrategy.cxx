@@ -22,18 +22,11 @@
 
 #include "vtkTree.h"
 
+vtkCirclePackLayoutStrategy::vtkCirclePackLayoutStrategy() = default;
 
-vtkCirclePackLayoutStrategy::vtkCirclePackLayoutStrategy()
-{
-
-}
-
-vtkCirclePackLayoutStrategy::~vtkCirclePackLayoutStrategy()
-{
-
-}
+vtkCirclePackLayoutStrategy::~vtkCirclePackLayoutStrategy() = default;
 
 void vtkCirclePackLayoutStrategy::PrintSelf(ostream& os, vtkIndent indent)
 {
-    this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

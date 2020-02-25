@@ -29,14 +29,14 @@
  *
  * @sa
  * vtkGraph vtkMutableDirectedGraph vtkMutableUndirectedGraph
-*/
+ */
 
 #ifndef vtkMutableGraphHelper_h
 #define vtkMutableGraphHelper_h
 
+#include "vtkGraph.h"             // For vtkEdgeType
 #include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkObject.h"
-#include "vtkGraph.h" // For vtkEdgeType
 
 class vtkDataSetAttributes;
 class vtkGraph;
@@ -47,9 +47,9 @@ class vtkMutableUndirectedGraph;
 class VTKINFOVISCORE_EXPORT vtkMutableGraphHelper : public vtkObject
 {
 public:
-  static vtkMutableGraphHelper *New();
+  static vtkMutableGraphHelper* New();
   vtkTypeMacro(vtkMutableGraphHelper, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -95,7 +95,7 @@ public:
 
 protected:
   vtkMutableGraphHelper();
-  ~vtkMutableGraphHelper() VTK_OVERRIDE;
+  ~vtkMutableGraphHelper() override;
 
   vtkGetObjectMacro(InternalGraph, vtkGraph);
   void SetInternalGraph(vtkGraph* g);
@@ -107,8 +107,8 @@ protected:
   vtkMutableUndirectedGraph* UndirectedGraph;
 
 private:
-  vtkMutableGraphHelper(const vtkMutableGraphHelper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMutableGraphHelper&) VTK_DELETE_FUNCTION;
+  vtkMutableGraphHelper(const vtkMutableGraphHelper&) = delete;
+  void operator=(const vtkMutableGraphHelper&) = delete;
 };
 
 #endif

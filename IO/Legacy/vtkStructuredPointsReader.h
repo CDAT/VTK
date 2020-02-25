@@ -26,54 +26,51 @@
  * Binary files written on one system may not be readable on other systems.
  * @sa
  * vtkStructuredPoints vtkDataReader
-*/
+ */
 
 #ifndef vtkStructuredPointsReader_h
 #define vtkStructuredPointsReader_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataReader.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkStructuredPoints;
 
 class VTKIOLEGACY_EXPORT vtkStructuredPointsReader : public vtkDataReader
 {
 public:
-  static vtkStructuredPointsReader *New();
-  vtkTypeMacro(vtkStructuredPointsReader,vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkStructuredPointsReader* New();
+  vtkTypeMacro(vtkStructuredPointsReader, vtkDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/Get the output of this reader.
    */
-  void SetOutput(vtkStructuredPoints *output);
-  vtkStructuredPoints *GetOutput(int idx);
-  vtkStructuredPoints *GetOutput();
+  void SetOutput(vtkStructuredPoints* output);
+  vtkStructuredPoints* GetOutput(int idx);
+  vtkStructuredPoints* GetOutput();
   //@}
 
   /**
-   * Read the meta information from the file.  This needs to be public to it
-   * can be accessed by vtkDataSetReader.
+   * Read the meta information from the file (WHOLE_EXTENT).
    */
-  int ReadMetaData(vtkInformation *outInfo) VTK_OVERRIDE;
+  int ReadMetaDataSimple(const std::string& fname, vtkInformation* metadata) override;
+
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname, vtkDataObject* output) override;
 
 protected:
   vtkStructuredPointsReader();
-  ~vtkStructuredPointsReader() VTK_OVERRIDE;
+  ~vtkStructuredPointsReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
-  // Default method performs Update to get information.  Not all the old
-  // structured points sources compute information
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *) VTK_OVERRIDE;
-
-  int FillOutputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
 private:
-  vtkStructuredPointsReader(const vtkStructuredPointsReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkStructuredPointsReader&) VTK_DELETE_FUNCTION;
+  vtkStructuredPointsReader(const vtkStructuredPointsReader&) = delete;
+  void operator=(const vtkStructuredPointsReader&) = delete;
 };
 
 #endif

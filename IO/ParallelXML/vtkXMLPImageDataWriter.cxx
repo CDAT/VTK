@@ -23,14 +23,10 @@
 vtkStandardNewMacro(vtkXMLPImageDataWriter);
 
 //----------------------------------------------------------------------------
-vtkXMLPImageDataWriter::vtkXMLPImageDataWriter()
-{
-}
+vtkXMLPImageDataWriter::vtkXMLPImageDataWriter() = default;
 
 //----------------------------------------------------------------------------
-vtkXMLPImageDataWriter::~vtkXMLPImageDataWriter()
-{
-}
+vtkXMLPImageDataWriter::~vtkXMLPImageDataWriter() = default;
 
 //----------------------------------------------------------------------------
 void vtkXMLPImageDataWriter::PrintSelf(ostream& os, vtkIndent indent)
@@ -57,7 +53,7 @@ const char* vtkXMLPImageDataWriter::GetDefaultFileExtension()
 }
 
 //----------------------------------------------------------------------------
-void vtkXMLPImageDataWriter::WritePrimaryElementAttributes(ostream &os, vtkIndent indent)
+void vtkXMLPImageDataWriter::WritePrimaryElementAttributes(ostream& os, vtkIndent indent)
 {
   this->Superclass::WritePrimaryElementAttributes(os, indent);
   if (this->ErrorCode == vtkErrorCode::OutOfDiskSpaceError)
@@ -76,8 +72,7 @@ void vtkXMLPImageDataWriter::WritePrimaryElementAttributes(ostream &os, vtkInden
 }
 
 //----------------------------------------------------------------------------
-vtkXMLStructuredDataWriter*
-  vtkXMLPImageDataWriter::CreateStructuredPieceWriter()
+vtkXMLStructuredDataWriter* vtkXMLPImageDataWriter::CreateStructuredPieceWriter()
 {
   // Create the writer for the piece.
   vtkXMLImageDataWriter* pWriter = vtkXMLImageDataWriter::New();
@@ -86,8 +81,7 @@ vtkXMLStructuredDataWriter*
 }
 
 //----------------------------------------------------------------------------
-int vtkXMLPImageDataWriter::FillInputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
+int vtkXMLPImageDataWriter::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* info)
 {
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkImageData");
   return 1;

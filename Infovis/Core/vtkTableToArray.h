@@ -36,20 +36,20 @@
  *
  * @par Thanks:
  * Developed by Timothy M. Shead (tshead@sandia.gov) at Sandia National Laboratories.
-*/
+ */
 
 #ifndef vtkTableToArray_h
 #define vtkTableToArray_h
 
-#include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkArrayDataAlgorithm.h"
+#include "vtkInfovisCoreModule.h" // For export macro
 
 class VTKINFOVISCORE_EXPORT vtkTableToArray : public vtkArrayDataAlgorithm
 {
 public:
   static vtkTableToArray* New();
   vtkTypeMacro(vtkTableToArray, vtkArrayDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Reset the list of input table columns that will be mapped to columns
@@ -73,23 +73,18 @@ public:
 
 protected:
   vtkTableToArray();
-  ~vtkTableToArray() VTK_OVERRIDE;
+  ~vtkTableToArray() override;
 
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkTableToArray(const vtkTableToArray&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTableToArray&) VTK_DELETE_FUNCTION;
+  vtkTableToArray(const vtkTableToArray&) = delete;
+  void operator=(const vtkTableToArray&) = delete;
 
   class implementation;
   implementation* const Implementation;
-
 };
 
 #endif
-

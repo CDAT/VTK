@@ -20,32 +20,23 @@
 #include "vtkNew.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkTesting.h"
+#include "vtkRenderer.h"
+#include "vtkTestUtilities.h"
 #include "vtkTriangleFilter.h"
 #include "vtkTriangleMeshPointNormals.h"
 #include "vtkXMLPolyDataReader.h"
 
 int TestTriangleMeshPointNormals(int argc, char* argv[])
 {
-  vtkSmartPointer<vtkTesting> testHelper =
-    vtkSmartPointer<vtkTesting>::New();
-  testHelper->AddArguments(argc, argv);
-  if (!testHelper->IsFlagSpecified("-D"))
-  {
-    std::cerr << "Error: -D /path/to/data was not specified.";
-    return EXIT_FAILURE;
-  }
-
-  std::string dataRoot = testHelper->GetDataRoot();
-  std::string fileName = dataRoot + "/Data/cow.vtp";
+  char* fileName = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/cow.vtp");
   std::cout << fileName << std::endl;
 
   // reader
   vtkNew<vtkXMLPolyDataReader> reader;
-  reader->SetFileName(fileName.c_str());
+  reader->SetFileName(fileName);
+  delete[] fileName;
 
   // triangle filter
   vtkNew<vtkTriangleFilter> triFilter;
@@ -63,7 +54,7 @@ int TestTriangleMeshPointNormals(int argc, char* argv[])
   vtkNew<vtkPolyDataMapper> mapper;
   mapper->SetInputConnection(normFilter->GetOutputPort());
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   // glyphs
   vtkNew<vtkArrowSource> glyphsource;
@@ -77,32 +68,32 @@ int TestTriangleMeshPointNormals(int argc, char* argv[])
   vtkNew<vtkPolyDataMapper> glyphmapper;
   glyphmapper->SetInputConnection(glyph->GetOutputPort());
   vtkNew<vtkActor> glyphactor;
-  glyphactor->SetMapper(glyphmapper.GetPointer());
+  glyphactor->SetMapper(glyphmapper);
 
   // renderer
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.GetPointer());
-  renderer->AddActor(glyphactor.GetPointer());
+  renderer->AddActor(actor);
+  renderer->AddActor(glyphactor);
   renderer->SetBackground(0.0, 0.0, 0.0);
   renderer->ResetCamera();
 
   // renderwindow, interactor
-  vtkNew<vtkRenderWindow> renWin ;
-  renWin->AddRenderer(renderer.GetPointer());
-  renWin->SetSize(300,300);
+  vtkNew<vtkRenderWindow> renWin;
+  renWin->AddRenderer(renderer);
+  renWin->SetSize(300, 300);
   renWin->SetMultiSamples(0);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   iren->Initialize();
   renWin->Render();
 
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
+  int retVal = vtkRegressionTestImage(renWin);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     vtkNew<vtkInteractorStyleTrackballCamera> iStyle;
-    iren->SetInteractorStyle(iStyle.GetPointer());
-    renWin->SetSize(1000,1000);
+    iren->SetInteractorStyle(iStyle);
+    renWin->SetSize(1000, 1000);
     iren->Start();
   }
 

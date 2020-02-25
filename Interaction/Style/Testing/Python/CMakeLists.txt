@@ -1,5 +1,4 @@
-include(vtkOpenGL)
-if(VTK_CAN_DO_ONSCREEN AND NOT VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN)
+if (VTK_CAN_DO_ONSCREEN AND NOT VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN)
   vtk_add_test_python(
     TestFlyTo.py
     TestStyleRubberBandZoom.py
@@ -13,4 +12,7 @@ if(VTK_CAN_DO_ONSCREEN AND NOT VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN)
     TestStyleTrackballCamera.py,NO_RT
     TestStyleUser.py
     )
-endif()
+
+  set_tests_properties(vtkInteractionStylePython-TestStyleRubberBandZoomPerspective
+                       PROPERTIES RUN_SERIAL ON)
+endif ()

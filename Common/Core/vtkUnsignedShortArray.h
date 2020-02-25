@@ -23,14 +23,14 @@
  * The C++ standard does not define the exact size of the unsigned short type,
  * so use of this type directly is discouraged.  If an array of 16 bit
  * unsigned integers is needed, prefer vtkTypeUInt16Array to this class.
-*/
+ */
 
 #ifndef vtkUnsignedShortArray_h
 #define vtkUnsignedShortArray_h
 
-#include "vtkCommonCoreModule.h" // For export macro
-#include "vtkDataArray.h"
 #include "vtkAOSDataArrayTemplate.h" // Real Superclass
+#include "vtkCommonCoreModule.h"     // For export macro
+#include "vtkDataArray.h"
 
 // Fake the superclass for the wrappers.
 #ifndef __VTK_WRAP__
@@ -39,27 +39,26 @@
 class VTKCOMMONCORE_EXPORT vtkUnsignedShortArray : public vtkDataArray
 {
 public:
-  vtkTypeMacro(vtkUnsignedShortArray, vtkDataArray)
+  vtkTypeMacro(vtkUnsignedShortArray, vtkDataArray);
 #ifndef __VTK_WRAP__
 #undef vtkDataArray
 #endif
   static vtkUnsignedShortArray* New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // This macro expands to the set of method declarations that
   // make up the interface of vtkAOSDataArrayTemplate, which is ignored
   // by the wrappers.
-#if defined(__VTK_WRAP__) || defined (__WRAP_GCCXML__)
+#if defined(__VTK_WRAP__) || defined(__WRAP_GCCXML__)
   vtkCreateWrappedArrayInterface(unsigned short);
 #endif
 
   /**
    * A faster alternative to SafeDownCast for downcasting vtkAbstractArrays.
    */
-  static vtkUnsignedShortArray* FastDownCast(vtkAbstractArray *source)
+  static vtkUnsignedShortArray* FastDownCast(vtkAbstractArray* source)
   {
-    return static_cast<vtkUnsignedShortArray*>(
-          Superclass::FastDownCast(source));
+    return static_cast<vtkUnsignedShortArray*>(Superclass::FastDownCast(source));
   }
 
   /**
@@ -74,17 +73,16 @@ public:
 
 protected:
   vtkUnsignedShortArray();
-  ~vtkUnsignedShortArray() VTK_OVERRIDE;
+  ~vtkUnsignedShortArray() override;
 
 private:
-
   typedef vtkAOSDataArrayTemplate<unsigned short> RealSuperclass;
 
-  vtkUnsignedShortArray(const vtkUnsignedShortArray&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkUnsignedShortArray&) VTK_DELETE_FUNCTION;
+  vtkUnsignedShortArray(const vtkUnsignedShortArray&) = delete;
+  void operator=(const vtkUnsignedShortArray&) = delete;
 };
 
 // Define vtkArrayDownCast implementation:
-vtkArrayDownCast_FastCastMacro(vtkUnsignedShortArray)
+vtkArrayDownCast_FastCastMacro(vtkUnsignedShortArray);
 
 #endif

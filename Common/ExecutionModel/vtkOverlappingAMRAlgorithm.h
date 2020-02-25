@@ -18,7 +18,7 @@
  *
  *  A base class for all algorithms that take as input vtkOverlappingAMR and
  *  produce vtkOverlappingAMR.
-*/
+ */
 
 #ifndef vtkOverlappingAMRAlgorithm_h
 #define vtkOverlappingAMRAlgorithm_h
@@ -29,37 +29,36 @@
 class vtkOverlappingAMR;
 class vtkInformation;
 
-class VTKCOMMONEXECUTIONMODEL_EXPORT vtkOverlappingAMRAlgorithm :
-  public vtkUniformGridAMRAlgorithm
+class VTKCOMMONEXECUTIONMODEL_EXPORT vtkOverlappingAMRAlgorithm : public vtkUniformGridAMRAlgorithm
 {
-  public:
-    static vtkOverlappingAMRAlgorithm* New();
-    vtkTypeMacro(vtkOverlappingAMRAlgorithm,vtkUniformGridAMRAlgorithm);
-    void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+public:
+  static vtkOverlappingAMRAlgorithm* New();
+  vtkTypeMacro(vtkOverlappingAMRAlgorithm, vtkUniformGridAMRAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-    //@{
-    /**
-     * Get the output data object for a port on this algorithm
-     */
-    vtkOverlappingAMR* GetOutput();
-    vtkOverlappingAMR* GetOutput(int);
-    //@}
+  //@{
+  /**
+   * Get the output data object for a port on this algorithm
+   */
+  vtkOverlappingAMR* GetOutput();
+  vtkOverlappingAMR* GetOutput(int);
+  //@}
 
-  protected:
-    vtkOverlappingAMRAlgorithm();
-    ~vtkOverlappingAMRAlgorithm() VTK_OVERRIDE;
+protected:
+  vtkOverlappingAMRAlgorithm();
+  ~vtkOverlappingAMRAlgorithm() override;
 
-    //@{
-    /**
-     * See algorithm for more info.
-     */
-    int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-    int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-    //@}
+  //@{
+  /**
+   * See algorithm for more info.
+   */
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  //@}
 
-  private:
-    vtkOverlappingAMRAlgorithm(const vtkOverlappingAMRAlgorithm&) VTK_DELETE_FUNCTION;
-    void operator=(const vtkOverlappingAMRAlgorithm&) VTK_DELETE_FUNCTION;
+private:
+  vtkOverlappingAMRAlgorithm(const vtkOverlappingAMRAlgorithm&) = delete;
+  void operator=(const vtkOverlappingAMRAlgorithm&) = delete;
 };
 
 #endif /* VTKOVERLAPPINGAMRALGORITHM_H_ */

@@ -23,27 +23,27 @@
  * (33-126) inclusive.) The only control character supported is the line feed
  * character "\n", which advances to a new line.
  *
- * To use thie class, you normally couple it with a vtkPolyDataMapper and a
+ * To use this class, you normally couple it with a vtkPolyDataMapper and a
  * vtkActor. In this case you would use the vtkActor's transformation methods
  * to position, orient, and scale the text. You may also wish to use a
  * vtkFollower to orient the text so that it always faces the camera.
  *
  * @sa
  * vtkTextMapper vtkCaptionActor2D
-*/
+ */
 
 #ifndef vtkVectorText_h
 #define vtkVectorText_h
 
-#include "vtkRenderingFreeTypeModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
+#include "vtkRenderingFreeTypeModule.h" // For export macro
 
 class VTKRENDERINGFREETYPE_EXPORT vtkVectorText : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkVectorText *New();
-  vtkTypeMacro(vtkVectorText,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkVectorText* New();
+  vtkTypeMacro(vtkVectorText, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -55,14 +55,14 @@ public:
 
 protected:
   vtkVectorText();
-  ~vtkVectorText() VTK_OVERRIDE;
+  ~vtkVectorText() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  char *Text;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  char* Text;
 
 private:
-  vtkVectorText(const vtkVectorText&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkVectorText&) VTK_DELETE_FUNCTION;
+  vtkVectorText(const vtkVectorText&) = delete;
+  void operator=(const vtkVectorText&) = delete;
 };
 
 #endif

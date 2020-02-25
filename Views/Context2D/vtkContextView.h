@@ -23,14 +23,14 @@
  * of it.
  *
  * By default the scene has a white background.
-*/
+ */
 
 #ifndef vtkContextView_h
 #define vtkContextView_h
 
-#include "vtkViewsContext2DModule.h" // For export macro
 #include "vtkRenderViewBase.h"
-#include "vtkSmartPointer.h" // Needed for SP ivars
+#include "vtkSmartPointer.h"         // Needed for SP ivars
+#include "vtkViewsContext2DModule.h" // For export macro
 
 class vtkContext2D;
 class vtkContextScene;
@@ -38,7 +38,7 @@ class vtkContextScene;
 class VTKVIEWSCONTEXT2D_EXPORT vtkContextView : public vtkRenderViewBase
 {
 public:
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   vtkTypeMacro(vtkContextView, vtkRenderViewBase);
 
   static vtkContextView* New();
@@ -46,7 +46,7 @@ public:
   /**
    * Set the vtkContext2D for the view.
    */
-  virtual void SetContext(vtkContext2D *context);
+  virtual void SetContext(vtkContext2D* context);
 
   /**
    * Get the vtkContext2D for the view.
@@ -56,7 +56,7 @@ public:
   /**
    * Set the scene object for the view.
    */
-  virtual void SetScene(vtkContextScene *scene);
+  virtual void SetScene(vtkContextScene* scene);
 
   /**
    * Get the scene of the view.
@@ -65,14 +65,14 @@ public:
 
 protected:
   vtkContextView();
-  ~vtkContextView() VTK_OVERRIDE;
+  ~vtkContextView() override;
 
   vtkSmartPointer<vtkContextScene> Scene;
   vtkSmartPointer<vtkContext2D> Context;
 
 private:
-  vtkContextView(const vtkContextView&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContextView&) VTK_DELETE_FUNCTION;
+  vtkContextView(const vtkContextView&) = delete;
+  void operator=(const vtkContextView&) = delete;
 };
 
 #endif

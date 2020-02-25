@@ -27,13 +27,13 @@
  * @sa
  * vtkInteractorStyle vtkRenderWindowInteractor
  * vtkTDxInteractorStyleCamera
-*/
+ */
 
 #ifndef vtkTDxInteractorStyle_h
 #define vtkTDxInteractorStyle_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkTDxMotionEventInfo;
 class vtkRenderer;
@@ -42,14 +42,14 @@ class vtkTDxInteractorStyleSettings;
 class VTKRENDERINGCORE_EXPORT vtkTDxInteractorStyle : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkTDxInteractorStyle,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkTDxInteractorStyle, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Action on motion event. Default implementation is empty.
    * \pre: motionInfo_exist: motionInfo!=0
    */
-  virtual void OnMotionEvent(vtkTDxMotionEventInfo *motionInfo);
+  virtual void OnMotionEvent(vtkTDxMotionEventInfo* motionInfo);
 
   /**
    * Action on button pressed event. Default implementation is empty.
@@ -70,29 +70,27 @@ public:
    * the On*Event() methods only.
    * \pre renderer can be null.
    */
-  virtual void ProcessEvent(vtkRenderer *renderer,
-                            unsigned long event,
-                            void *calldata);
+  virtual void ProcessEvent(vtkRenderer* renderer, unsigned long event, void* calldata);
 
   //@{
   /**
    * 3Dconnexion device settings. (sensitivity, individual axis filters).
    * Initial object is not null.
    */
-  vtkGetObjectMacro(Settings,vtkTDxInteractorStyleSettings);
-  virtual void SetSettings(vtkTDxInteractorStyleSettings *settings);
+  vtkGetObjectMacro(Settings, vtkTDxInteractorStyleSettings);
+  virtual void SetSettings(vtkTDxInteractorStyleSettings* settings);
   //@}
 
 protected:
   vtkTDxInteractorStyle();
-  ~vtkTDxInteractorStyle() VTK_OVERRIDE;
+  ~vtkTDxInteractorStyle() override;
 
-  vtkTDxInteractorStyleSettings *Settings;
+  vtkTDxInteractorStyleSettings* Settings;
 
-  vtkRenderer *Renderer;
+  vtkRenderer* Renderer;
 
 private:
-  vtkTDxInteractorStyle(const vtkTDxInteractorStyle&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTDxInteractorStyle&) VTK_DELETE_FUNCTION;
+  vtkTDxInteractorStyle(const vtkTDxInteractorStyle&) = delete;
+  void operator=(const vtkTDxInteractorStyle&) = delete;
 };
 #endif

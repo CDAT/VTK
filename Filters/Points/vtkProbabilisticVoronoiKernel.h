@@ -31,7 +31,7 @@
  *
  * @sa
  * vtkInterpolationKernel vtkGeneralizedKernel vtkVoronoiKernel
-*/
+ */
 
 #ifndef vtkProbabilisticVoronoiKernel_h
 #define vtkProbabilisticVoronoiKernel_h
@@ -42,7 +42,6 @@
 class vtkIdList;
 class vtkDoubleArray;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkProbabilisticVoronoiKernel : public vtkGeneralizedKernel
 {
 public:
@@ -50,9 +49,9 @@ public:
   /**
    * Standard methods for instantiation, obtaining type information, and printing.
    */
-  static vtkProbabilisticVoronoiKernel *New();
-  vtkTypeMacro(vtkProbabilisticVoronoiKernel,vtkGeneralizedKernel);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkProbabilisticVoronoiKernel* New();
+  vtkTypeMacro(vtkProbabilisticVoronoiKernel, vtkGeneralizedKernel);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   // Re-use any superclass signatures that we don't override.
@@ -72,16 +71,16 @@ public:
    * are estimates of local confidence of weights. The prob may be nullptr in
    * which all probabilities are considered =1.
    */
-  vtkIdType ComputeWeights(double x[3], vtkIdList *pIds,
-                                   vtkDoubleArray *prob, vtkDoubleArray *weights) VTK_OVERRIDE;
+  vtkIdType ComputeWeights(
+    double x[3], vtkIdList* pIds, vtkDoubleArray* prob, vtkDoubleArray* weights) override;
 
 protected:
   vtkProbabilisticVoronoiKernel();
-  ~vtkProbabilisticVoronoiKernel() VTK_OVERRIDE;
+  ~vtkProbabilisticVoronoiKernel() override;
 
 private:
-  vtkProbabilisticVoronoiKernel(const vtkProbabilisticVoronoiKernel&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProbabilisticVoronoiKernel&) VTK_DELETE_FUNCTION;
+  vtkProbabilisticVoronoiKernel(const vtkProbabilisticVoronoiKernel&) = delete;
+  void operator=(const vtkProbabilisticVoronoiKernel&) = delete;
 };
 
 #endif

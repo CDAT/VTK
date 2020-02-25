@@ -26,51 +26,51 @@
  * Binary files written on one system may not be readable on other systems.
  * @sa
  * vtkStructuredGrid vtkDataReader
-*/
+ */
 
 #ifndef vtkStructuredGridReader_h
 #define vtkStructuredGridReader_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataReader.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkStructuredGrid;
 
 class VTKIOLEGACY_EXPORT vtkStructuredGridReader : public vtkDataReader
 {
 public:
-  static vtkStructuredGridReader *New();
-  vtkTypeMacro(vtkStructuredGridReader,vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkStructuredGridReader* New();
+  vtkTypeMacro(vtkStructuredGridReader, vtkDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the output of this reader.
    */
-  vtkStructuredGrid *GetOutput();
-  vtkStructuredGrid *GetOutput(int idx);
-  void SetOutput(vtkStructuredGrid *output);
+  vtkStructuredGrid* GetOutput();
+  vtkStructuredGrid* GetOutput(int idx);
+  void SetOutput(vtkStructuredGrid* output);
   //@}
 
   /**
-   * Read the meta information from the file.  This needs to be public to it
-   * can be accessed by vtkDataSetReader.
+   * Read the meta information from the file (WHOLE_EXTENT).
    */
-  int ReadMetaData(vtkInformation *outInfo) VTK_OVERRIDE;
+  int ReadMetaDataSimple(const std::string& fname, vtkInformation* metadata) override;
+
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname, vtkDataObject* output) override;
 
 protected:
   vtkStructuredGridReader();
-  ~vtkStructuredGridReader() VTK_OVERRIDE;
+  ~vtkStructuredGridReader() override;
 
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 private:
-  vtkStructuredGridReader(const vtkStructuredGridReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkStructuredGridReader&) VTK_DELETE_FUNCTION;
+  vtkStructuredGridReader(const vtkStructuredGridReader&) = delete;
+  void operator=(const vtkStructuredGridReader&) = delete;
 };
 
 #endif

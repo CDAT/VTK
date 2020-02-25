@@ -16,7 +16,7 @@
 //=========================================================================
 
 // move vector field to normalized image space
-// pre-procesing for vtkLineIntegralConvolution2D
+// pre-processing for vtkLineIntegralConvolution2D
 
 // the output of this shader
 //VTK::Output::Dec
@@ -26,7 +26,7 @@
 uniform sampler2D texVectors; // input texture
 uniform vec2      uTexSize;   // size of texture
 
-varying vec2 tcoordVC;
+in vec2 tcoordVC;
 
 void main(void)
 {

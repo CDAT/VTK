@@ -1,5 +1,3 @@
-static void _t1(inv_lift, Int)(Int* p, uint s);
-
 /* private functions ------------------------------------------------------- */
 
 /* scatter 4*4*4 block to strided array */
@@ -18,8 +16,8 @@ static void
 _t2(scatter_partial, Scalar, 3)(const Scalar* q, Scalar* p, uint nx, uint ny, uint nz, int sx, int sy, int sz)
 {
   uint x, y, z;
-  for (z = 0; z < nz; z++, p += sz - ny * sy, q += 4 * (4 - ny))
-    for (y = 0; y < ny; y++, p += sy - nx * sx, q += 4 - nx)
+  for (z = 0; z < nz; z++, p += sz - (ptrdiff_t)ny * sy, q += 4 * (4 - ny))
+    for (y = 0; y < ny; y++, p += sy - (ptrdiff_t)nx * sx, q += 1 * (4 - nx))
       for (x = 0; x < nx; x++, p += sx, q++)
         *p = *q;
 }
@@ -50,7 +48,7 @@ uint
 _t2(zfp_decode_block_strided, Scalar, 3)(zfp_stream* stream, Scalar* p, int sx, int sy, int sz)
 {
   /* decode contiguous block */
-  _cache_align(Scalar fblock[64]);
+  cache_align_(Scalar fblock[64]);
   uint bits = _t2(zfp_decode_block, Scalar, 3)(stream, fblock);
   /* scatter block to strided array */
   _t2(scatter, Scalar, 3)(fblock, p, sx, sy, sz);
@@ -62,7 +60,7 @@ uint
 _t2(zfp_decode_partial_block_strided, Scalar, 3)(zfp_stream* stream, Scalar* p, uint nx, uint ny, uint nz, int sx, int sy, int sz)
 {
   /* decode contiguous block */
-  _cache_align(Scalar fblock[64]);
+  cache_align_(Scalar fblock[64]);
   uint bits = _t2(zfp_decode_block, Scalar, 3)(stream, fblock);
   /* scatter block to strided array */
   _t2(scatter_partial, Scalar, 3)(fblock, p, nx, ny, nz, sx, sy, sz);

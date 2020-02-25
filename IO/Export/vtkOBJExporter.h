@@ -23,22 +23,26 @@
  *
  * @sa
  * vtkExporter
-*/
+ */
 
 #ifndef vtkOBJExporter_h
 #define vtkOBJExporter_h
 
-#include "vtkIOExportModule.h" // For export macro
 #include "vtkExporter.h"
+#include "vtkIOExportModule.h" // For export macro
+#include <fstream>             // For ofstream
+#include <map>                 // For map
+#include <vector>              // For string
 
 class vtkActor;
+class vtkTexture;
 
 class VTKIOEXPORT_EXPORT vtkOBJExporter : public vtkExporter
 {
 public:
-  static vtkOBJExporter *New();
-  vtkTypeMacro(vtkOBJExporter,vtkExporter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkOBJExporter* New();
+  vtkTypeMacro(vtkOBJExporter, vtkExporter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -49,17 +53,38 @@ public:
   vtkGetStringMacro(FilePrefix);
   //@}
 
+  //@{
+  /**
+   * Specify comment string that will be written to the obj file header.
+   */
+  vtkSetStringMacro(OBJFileComment);
+  vtkGetStringMacro(OBJFileComment);
+  //@}
+
+  //@{
+  /**
+   * Specify comment string that will be written to the mtl file header.
+   */
+  vtkSetStringMacro(MTLFileComment);
+  vtkGetStringMacro(MTLFileComment);
+  //@}
+
 protected:
   vtkOBJExporter();
-  ~vtkOBJExporter() VTK_OVERRIDE;
+  ~vtkOBJExporter() override;
 
-  void WriteData() VTK_OVERRIDE;
-  void WriteAnActor(vtkActor *anActor, FILE *fpObj, FILE *fpMat, int &id);
-  char *FilePrefix;
+  void WriteData() override;
+  void WriteAnActor(
+    vtkActor* anActor, std::ostream& fpObj, std::ostream& fpMat, std::string& modelName, int& id);
+  char* FilePrefix;
+  char* OBJFileComment;
+  char* MTLFileComment;
+  bool FlipTexture;
+  std::map<std::string, vtkTexture*> TextureFileMap;
+
 private:
-  vtkOBJExporter(const vtkOBJExporter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOBJExporter&) VTK_DELETE_FUNCTION;
+  vtkOBJExporter(const vtkOBJExporter&) = delete;
+  void operator=(const vtkOBJExporter&) = delete;
 };
 
 #endif
-

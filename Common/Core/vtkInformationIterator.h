@@ -22,7 +22,7 @@
  *
  * @sa
  * vtkInformation vtkInformationKey
-*/
+ */
 
 #ifndef vtkInformationIterator_h
 #define vtkInformationIterator_h
@@ -37,9 +37,9 @@ class vtkInformationIteratorInternals;
 class VTKCOMMONCORE_EXPORT vtkInformationIterator : public vtkObject
 {
 public:
-  static vtkInformationIterator *New();
-  vtkTypeMacro(vtkInformationIterator,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkInformationIterator* New();
+  vtkTypeMacro(vtkInformationIterator, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -86,7 +86,7 @@ public:
 
 protected:
   vtkInformationIterator();
-  ~vtkInformationIterator() VTK_OVERRIDE;
+  ~vtkInformationIterator() override;
 
   vtkInformation* Information;
   vtkInformationIteratorInternals* Internal;
@@ -94,8 +94,8 @@ protected:
   bool ReferenceIsWeak;
 
 private:
-  vtkInformationIterator(const vtkInformationIterator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInformationIterator&) VTK_DELETE_FUNCTION;
+  vtkInformationIterator(const vtkInformationIterator&) = delete;
+  void operator=(const vtkInformationIterator&) = delete;
 };
 
 #endif

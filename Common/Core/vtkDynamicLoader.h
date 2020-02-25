@@ -20,7 +20,7 @@
  * libraries into a process.
  * @sa
  * A more portable and lightweight solution is kwsys::DynamicLoader
-*/
+ */
 
 #ifndef vtkDynamicLoader_h
 #define vtkDynamicLoader_h
@@ -30,14 +30,13 @@
 #include <vtksys/DynamicLoader.hxx>
 
 typedef vtksys::DynamicLoader::LibraryHandle vtkLibHandle;
-// Cannot use this as this is a void (*)() but VTK old API used to be void*
 typedef vtksys::DynamicLoader::SymbolPointer vtkSymbolPointer;
 
 class VTKCOMMONCORE_EXPORT vtkDynamicLoader : public vtkObject
 {
 public:
   static vtkDynamicLoader* New();
-  vtkTypeMacro(vtkDynamicLoader,vtkObject);
+  vtkTypeMacro(vtkDynamicLoader, vtkObject);
 
   /**
    * Load a dynamic library into the current process.
@@ -45,6 +44,7 @@ public:
    * library.
    */
   static vtkLibHandle OpenLibrary(const char*);
+  static vtkLibHandle OpenLibrary(const char*, int);
 
   /**
    * Attempt to detach a dynamic library from the
@@ -54,9 +54,8 @@ public:
 
   /**
    * Find the address of the symbol in the given library
-   * static vtkSymbolPointer GetSymbolAddress(vtkLibHandle, const char*);
    */
-  static void* GetSymbolAddress(vtkLibHandle, const char*);
+  static vtkSymbolPointer GetSymbolAddress(vtkLibHandle, const char*);
 
   /**
    * Return the library prefix for the given architecture
@@ -75,11 +74,11 @@ public:
 
 protected:
   vtkDynamicLoader() {}
-  ~vtkDynamicLoader() VTK_OVERRIDE {}
+  ~vtkDynamicLoader() override {}
 
 private:
-  vtkDynamicLoader(const vtkDynamicLoader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDynamicLoader&) VTK_DELETE_FUNCTION;
+  vtkDynamicLoader(const vtkDynamicLoader&) = delete;
+  void operator=(const vtkDynamicLoader&) = delete;
 };
 
 #endif

@@ -32,7 +32,7 @@ PURPOSE.  See the above copyright notice for more information.
  * @sa
  * vtkTextCodecFactory
  *
-*/
+ */
 
 #ifndef vtkTextCodec_h
 #define vtkTextCodec_h
@@ -52,7 +52,7 @@ public:
    * to create it
    */
   virtual const char* Name();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   virtual bool CanHandle(const char* NameString);
@@ -75,13 +75,14 @@ public:
     virtual OutputIterator& operator++(int) = 0;
     virtual OutputIterator& operator*() = 0;
     virtual OutputIterator& operator=(const vtkUnicodeString::value_type value) = 0;
-  //@}
+    //@}
 
-    OutputIterator() {}    virtual ~OutputIterator() {}
+    OutputIterator() {}
+    virtual ~OutputIterator() {}
 
   private:
-    OutputIterator(const OutputIterator&) VTK_DELETE_FUNCTION;
-    const OutputIterator& operator=(const OutputIterator&) VTK_DELETE_FUNCTION;
+    OutputIterator(const OutputIterator&) = delete;
+    OutputIterator& operator=(const OutputIterator&) = delete;
   };
 
   /**
@@ -89,14 +90,13 @@ public:
    * to the output iterator.  The stream will be advanced to its end so
    * subsequent use would need to reset it.
    */
-  virtual void ToUnicode(istream& InputStream,
-                         vtkTextCodec::OutputIterator& output) = 0;
+  virtual void ToUnicode(istream& InputStream, vtkTextCodec::OutputIterator& output) = 0;
 
   /**
    * convenience method to take data from the stream and put it into a
    * vtkUnicodeString.
    */
-  vtkUnicodeString ToUnicode(istream & inputStream);
+  vtkUnicodeString ToUnicode(istream& inputStream);
 
   /**
    * Return the next code point from the sequence represented by the stream
@@ -107,12 +107,11 @@ public:
 
 protected:
   vtkTextCodec();
-  ~vtkTextCodec() VTK_OVERRIDE;
+  ~vtkTextCodec() override;
 
 private:
-  vtkTextCodec(const vtkTextCodec &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTextCodec &) VTK_DELETE_FUNCTION;
-
+  vtkTextCodec(const vtkTextCodec&) = delete;
+  void operator=(const vtkTextCodec&) = delete;
 };
 
 #endif

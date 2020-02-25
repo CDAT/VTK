@@ -7,21 +7,19 @@
  * statement of authorship are reproduced on all copies.
  */
 
-
-#include "ui_SimpleView.h"
 #include "SimpleView.h"
+#include "ui_SimpleView.h"
 
+#include "vtkGenericOpenGLRenderWindow.h"
+#include "vtkSmartPointer.h"
 #include <vtkDataObjectToTable.h>
 #include <vtkElevationFilter.h>
+#include <vtkNew.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkQtTableView.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
 #include <vtkVectorText.h>
-
-#include "vtkSmartPointer.h"
-#define VTK_CREATE(type, name) \
-  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 // Constructor
 SimpleView::SimpleView()
@@ -36,34 +34,35 @@ SimpleView::SimpleView()
   this->ui->tableFrame->layout()->addWidget(this->TableView->GetWidget());
 
   // Geometry
-  VTK_CREATE(vtkVectorText, text);
+  vtkNew<vtkVectorText> text;
   text->SetText("VTK and Qt!");
-  VTK_CREATE(vtkElevationFilter, elevation);
+  vtkNew<vtkElevationFilter> elevation;
   elevation->SetInputConnection(text->GetOutputPort());
-  elevation->SetLowPoint(0,0,0);
-  elevation->SetHighPoint(10,0,0);
+  elevation->SetLowPoint(0, 0, 0);
+  elevation->SetHighPoint(10, 0, 0);
 
   // Mapper
-  VTK_CREATE(vtkPolyDataMapper, mapper);
-  mapper->ImmediateModeRenderingOn();
+  vtkNew<vtkPolyDataMapper> mapper;
   mapper->SetInputConnection(elevation->GetOutputPort());
 
   // Actor in scene
-  VTK_CREATE(vtkActor, actor);
+  vtkNew<vtkActor> actor;
   actor->SetMapper(mapper);
 
   // VTK Renderer
-  VTK_CREATE(vtkRenderer, ren);
+  vtkNew<vtkRenderer> ren;
 
   // Add Actor to renderer
   ren->AddActor(actor);
 
   // VTK/Qt wedded
-  this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren);
+  vtkNew<vtkGenericOpenGLRenderWindow> renderWindow;
+  this->ui->qvtkWidget->setRenderWindow(renderWindow);
+  this->ui->qvtkWidget->renderWindow()->AddRenderer(ren);
 
   // Just a bit of Qt interest: Culling off the
   // point data and handing it to a vtkQtTableView
-  VTK_CREATE(vtkDataObjectToTable, toTable);
+  vtkNew<vtkDataObjectToTable> toTable;
   toTable->SetInputConnection(elevation->GetOutputPort());
   toTable->SetFieldType(vtkDataObjectToTable::POINT_DATA);
 
@@ -73,21 +72,17 @@ SimpleView::SimpleView()
   // Set up action signals and slots
   connect(this->ui->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenFile()));
   connect(this->ui->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
-
 };
 
 SimpleView::~SimpleView()
 {
   // The smart pointers should clean up for up
-
 }
 
 // Action to be taken upon file open
-void SimpleView::slotOpenFile()
+void SimpleView::slotOpenFile() {}
+
+void SimpleView::slotExit()
 {
-
-}
-
-void SimpleView::slotExit() {
   qApp->exit();
 }

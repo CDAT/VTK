@@ -24,30 +24,30 @@
  *
  * @sa
  * vtkRenderPass
-*/
+ */
 
 #ifndef vtkLightsPass_h
 #define vtkLightsPass_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkRenderPass.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
 
 class vtkOpenGLRenderWindow;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkLightsPass : public vtkRenderPass
 {
 public:
-  static vtkLightsPass *New();
-  vtkTypeMacro(vtkLightsPass,vtkRenderPass);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkLightsPass* New();
+  vtkTypeMacro(vtkLightsPass, vtkRenderPass);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform rendering according to a render state \p s.
    * \pre s_exists: s!=0
    */
-  void Render(const vtkRenderState *s) VTK_OVERRIDE;
+  void Render(const vtkRenderState* s) override;
 
- protected:
+protected:
   /**
    * Default constructor.
    */
@@ -56,11 +56,11 @@ public:
   /**
    * Destructor.
    */
-  ~vtkLightsPass() VTK_OVERRIDE;
+  ~vtkLightsPass() override;
 
- private:
-  vtkLightsPass(const vtkLightsPass&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLightsPass&) VTK_DELETE_FUNCTION;
+private:
+  vtkLightsPass(const vtkLightsPass&) = delete;
+  void operator=(const vtkLightsPass&) = delete;
 };
 
 #endif

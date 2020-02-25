@@ -14,7 +14,7 @@
 =========================================================================*/
 /**
  * @class   vtkImplicitCylinderWidget
- * @brief   3D widget for manipulating an infinite cylnder
+ * @brief   3D widget for manipulating an infinite cylinder
  *
  * This 3D widget defines an infinite cylinder that can be
  * interactively placed in a scene. The widget is assumed to consist
@@ -24,7 +24,7 @@
  * actual geometry of the widget.)
  *
  * To use this widget, you generally pair it with a vtkImplicitCylinderRepresentation
- * (or a subclass). Variuos options are available for controlling how the
+ * (or a subclass). Various options are available for controlling how the
  * representation appears, and how the widget functions.
  *
  * @par Event Bindings:
@@ -83,13 +83,13 @@
  *
  * @sa
  * vtk3DWidget vtkImplicitPlaneWidget
-*/
+ */
 
 #ifndef vtkImplicitCylinderWidget_h
 #define vtkImplicitCylinderWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkImplicitCylinderRepresentation;
 
@@ -99,14 +99,14 @@ public:
   /**
    * Instantiate the object.
    */
-  static vtkImplicitCylinderWidget *New();
+  static vtkImplicitCylinderWidget* New();
 
   //@{
   /**
    * Standard vtkObject methods
    */
-  vtkTypeMacro(vtkImplicitCylinderWidget,vtkAbstractWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImplicitCylinderWidget, vtkAbstractWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -114,31 +114,32 @@ public:
    * widget in the scene. Note that the representation is a subclass of vtkProp
    * so it can be added to the renderer independent of the widget.
    */
-  void SetRepresentation( vtkImplicitCylinderRepresentation *rep );
-
-  // Descritpion:
-  // Disable/Enable the widget if needed.
-  // Unobserved the camera if the widget is disabled.
-  void SetEnabled(int enabling) VTK_OVERRIDE;
+  void SetRepresentation(vtkImplicitCylinderRepresentation* rep);
 
   /**
    * Return the representation as a vtkImplicitCylinderRepresentation.
    */
-  vtkImplicitCylinderRepresentation *GetCylinderRepresentation()
-    {return reinterpret_cast<vtkImplicitCylinderRepresentation*>(this->WidgetRep);}
+  vtkImplicitCylinderRepresentation* GetCylinderRepresentation()
+  {
+    return reinterpret_cast<vtkImplicitCylinderRepresentation*>(this->WidgetRep);
+  }
 
   /**
    * Create the default widget representation if one is not set.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
+  void CreateDefaultRepresentation() override;
 
 protected:
   vtkImplicitCylinderWidget();
-  ~vtkImplicitCylinderWidget() VTK_OVERRIDE;
+  ~vtkImplicitCylinderWidget() override = default;
 
   // Manage the state of the widget
   int WidgetState;
-  enum _WidgetState {Start=0,Active};
+  enum _WidgetState
+  {
+    Start = 0,
+    Active
+  };
 
   // These methods handle events
   static void SelectAction(vtkAbstractWidget*);
@@ -147,16 +148,18 @@ protected:
   static void EndSelectAction(vtkAbstractWidget*);
   static void MoveAction(vtkAbstractWidget*);
   static void MoveCylinderAction(vtkAbstractWidget*);
+  static void TranslationAxisLock(vtkAbstractWidget*);
+  static void TranslationAxisUnLock(vtkAbstractWidget*);
 
   /**
    * Update the cursor shape based on the interaction state. Returns 1
    * if the cursor shape requested is different from the existing one.
    */
-  int UpdateCursorShape( int interactionState );
+  int UpdateCursorShape(int interactionState);
 
 private:
-  vtkImplicitCylinderWidget(const vtkImplicitCylinderWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImplicitCylinderWidget&) VTK_DELETE_FUNCTION;
+  vtkImplicitCylinderWidget(const vtkImplicitCylinderWidget&) = delete;
+  void operator=(const vtkImplicitCylinderWidget&) = delete;
 };
 
 #endif

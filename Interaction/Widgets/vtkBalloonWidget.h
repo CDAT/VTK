@@ -66,13 +66,13 @@
  *
  * @sa
  * vtkAbstractWidget
-*/
+ */
 
 #ifndef vtkBalloonWidget_h
 #define vtkBalloonWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkHoverWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkBalloonRepresentation;
 class vtkProp;
@@ -81,69 +81,74 @@ class vtkStdString;
 class vtkPropMap;
 class vtkImageData;
 
-
 class VTKINTERACTIONWIDGETS_EXPORT vtkBalloonWidget : public vtkHoverWidget
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkBalloonWidget *New();
+  static vtkBalloonWidget* New();
 
   //@{
   /**
    * Standard methods for a VTK class.
    */
-  vtkTypeMacro(vtkBalloonWidget,vtkHoverWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkBalloonWidget, vtkHoverWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * The method for activating and deactivating this widget. This method
    * must be overridden because it performs special timer-related operations.
    */
-  void SetEnabled(int) VTK_OVERRIDE;
+  void SetEnabled(int) override;
 
   /**
    * Specify an instance of vtkWidgetRepresentation used to represent this
    * widget in the scene. Note that the representation is a subclass of vtkProp
    * so it can be added to the renderer independent of the widget.
    */
-  void SetRepresentation(vtkBalloonRepresentation *r)
-    {this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));}
+  void SetRepresentation(vtkBalloonRepresentation* r)
+  {
+    this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));
+  }
 
   /**
    * Return the representation as a vtkBalloonRepresentation.
    */
-  vtkBalloonRepresentation *GetBalloonRepresentation()
-    {return reinterpret_cast<vtkBalloonRepresentation*>(this->WidgetRep);}
+  vtkBalloonRepresentation* GetBalloonRepresentation()
+  {
+    return reinterpret_cast<vtkBalloonRepresentation*>(this->WidgetRep);
+  }
 
   /**
    * Create the default widget representation if one is not set.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
+  void CreateDefaultRepresentation() override;
 
   //@{
   /**
    * Add and remove text and/or an image to be associated with a vtkProp. You
    * may add one or both of them.
    */
-  void AddBalloon(vtkProp *prop, vtkStdString *str, vtkImageData *img);
-  void AddBalloon(vtkProp *prop, const char *str, vtkImageData *img);
-  void AddBalloon(vtkProp *prop, const char *str) //for wrapping
-    {this->AddBalloon(prop,str,nullptr);}
-  void RemoveBalloon(vtkProp *prop);
+  void AddBalloon(vtkProp* prop, vtkStdString* str, vtkImageData* img);
+  void AddBalloon(vtkProp* prop, const char* str, vtkImageData* img);
+  void AddBalloon(vtkProp* prop, const char* str) // for wrapping
+  {
+    this->AddBalloon(prop, str, nullptr);
+  }
+  void RemoveBalloon(vtkProp* prop);
   //@}
 
   //@{
   /**
    * Methods to retrieve the information associated with each vtkProp (i.e.,
-   * the information that makes up each balloon). A NULL will be returned if
+   * the information that makes up each balloon). A nullptr will be returned if
    * the vtkProp does not exist, or if a string or image have not been
    * associated with the specified vtkProp.
    */
-  const char *GetBalloonString(vtkProp *prop);
-  vtkImageData *GetBalloonImage(vtkProp *prop);
+  const char* GetBalloonString(vtkProp* prop);
+  vtkImageData* GetBalloonImage(vtkProp* prop);
   //@}
 
   //@{
@@ -151,16 +156,15 @@ public:
    * Update the balloon string or image. If the specified prop does not exist,
    * then nothing is added not changed.
    */
-  void UpdateBalloonString(vtkProp *prop, const char *str);
-  void UpdateBalloonImage(vtkProp *prop, vtkImageData *image);
+  void UpdateBalloonString(vtkProp* prop, const char* str);
+  void UpdateBalloonImage(vtkProp* prop, vtkImageData* image);
   //@}
 
   /**
    * Return the current vtkProp that is being hovered over. Note that the
-   * value may be NULL (if hovering over nothing or the mouse is moving).
+   * value may be nullptr (if hovering over nothing or the mouse is moving).
    */
-  virtual vtkProp *GetCurrentProp()
-    {return this->CurrentProp;}
+  virtual vtkProp* GetCurrentProp() { return this->CurrentProp; }
 
   //@{
   /**
@@ -170,32 +174,34 @@ public:
    * vtkPropPicker is used.)
    */
   void SetPicker(vtkAbstractPropPicker*);
-  vtkGetObjectMacro(Picker,vtkAbstractPropPicker);
+  vtkGetObjectMacro(Picker, vtkAbstractPropPicker);
   //@}
+
+  /*
+   * Register internal Pickers within PickingManager
+   */
+  void RegisterPickers() override;
 
 protected:
   vtkBalloonWidget();
-  ~vtkBalloonWidget() VTK_OVERRIDE;
+  ~vtkBalloonWidget() override;
 
   // This class implements the method called from its superclass.
-  int SubclassEndHoverAction() VTK_OVERRIDE;
-  int SubclassHoverAction() VTK_OVERRIDE;
+  int SubclassEndHoverAction() override;
+  int SubclassHoverAction() override;
 
   // Classes for managing balloons
-  vtkPropMap *PropMap; //PIMPL'd map of (vtkProp,vtkStdString)
+  vtkPropMap* PropMap; // PIMPL'd map of (vtkProp,vtkStdString)
 
   // Support for picking
-  vtkAbstractPropPicker *Picker;
+  vtkAbstractPropPicker* Picker;
 
-  // Register internal Pickers within PickingManager
-  void RegisterPickers() VTK_OVERRIDE;
-
-  // The vtkProp that is being hovered over (which may be NULL)
-  vtkProp *CurrentProp;
+  // The vtkProp that is being hovered over (which may be nullptr)
+  vtkProp* CurrentProp;
 
 private:
-  vtkBalloonWidget(const vtkBalloonWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBalloonWidget&) VTK_DELETE_FUNCTION;
+  vtkBalloonWidget(const vtkBalloonWidget&) = delete;
+  void operator=(const vtkBalloonWidget&) = delete;
 };
 
 #endif

@@ -28,14 +28,14 @@
  * isn't the case then please override this method in your subclass.
  * You should implement the subclass's algorithm into
  * RequestData( request, inputVec, outputVec).
-*/
+ */
 
 #ifndef vtkPiecewiseFunctionAlgorithm_h
 #define vtkPiecewiseFunctionAlgorithm_h
 
-#include "vtkCommonExecutionModelModule.h" // For export macro
 #include "vtkAlgorithm.h"
-#include "vtkPiecewiseFunction.h" // makes things a bit easier
+#include "vtkCommonExecutionModelModule.h" // For export macro
+#include "vtkPiecewiseFunction.h"          // makes things a bit easier
 
 class vtkDataSet;
 class vtkDataObject;
@@ -43,9 +43,9 @@ class vtkDataObject;
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkPiecewiseFunctionAlgorithm : public vtkAlgorithm
 {
 public:
-  static vtkPiecewiseFunctionAlgorithm *New();
-  vtkTypeMacro(vtkPiecewiseFunctionAlgorithm,vtkAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPiecewiseFunctionAlgorithm* New();
+  vtkTypeMacro(vtkPiecewiseFunctionAlgorithm, vtkAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -59,14 +59,13 @@ public:
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation*,
-                             vtkInformationVector**,
-                             vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   // this method is not recommended for use, but lots of old style filters
   // use it
   vtkDataObject* GetInput();
-  vtkDataObject *GetInput(int port);
+  vtkDataObject* GetInput(int port);
 
   //@{
   /**
@@ -74,7 +73,7 @@ public:
    * establish a pipeline connection. Use SetInputConnection() to
    * setup a pipeline connection.
    */
-  void SetInputData(vtkDataObject *);
+  void SetInputData(vtkDataObject*);
   void SetInputData(int, vtkDataObject*);
   //@}
 
@@ -84,29 +83,28 @@ public:
    * establish a pipeline connection. Use AddInputConnection() to
    * setup a pipeline connection.
    */
-  void AddInputData(vtkDataObject *);
+  void AddInputData(vtkDataObject*);
   void AddInputData(int, vtkDataObject*);
   //@}
 
 protected:
   vtkPiecewiseFunctionAlgorithm();
-  ~vtkPiecewiseFunctionAlgorithm() VTK_OVERRIDE;
+  ~vtkPiecewiseFunctionAlgorithm() override;
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestData(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector);
+  virtual int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector);
 
   // see algorithm for more info
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkPiecewiseFunctionAlgorithm(const vtkPiecewiseFunctionAlgorithm&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPiecewiseFunctionAlgorithm&) VTK_DELETE_FUNCTION;
+  vtkPiecewiseFunctionAlgorithm(const vtkPiecewiseFunctionAlgorithm&) = delete;
+  void operator=(const vtkPiecewiseFunctionAlgorithm&) = delete;
 };
 
 #endif

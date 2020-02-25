@@ -28,7 +28,7 @@
  *
  * The best way to use this class is to subclass it to set the DataKey data member.
  * This is usually done in the subclass' constructor.
-*/
+ */
 
 #ifndef vtkInformationIntegerRequestKey_h
 #define vtkInformationIntegerRequestKey_h
@@ -38,14 +38,15 @@
 
 #include "vtkCommonInformationKeyManager.h" // Manage instances of this type.
 
-class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationIntegerRequestKey : public vtkInformationIntegerKey
+class VTKCOMMONEXECUTIONMODEL_EXPORT vtkInformationIntegerRequestKey
+  : public vtkInformationIntegerKey
 {
 public:
-  vtkTypeMacro(vtkInformationIntegerRequestKey,vtkInformationIntegerKey);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkInformationIntegerRequestKey, vtkInformationIntegerKey);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   vtkInformationIntegerRequestKey(const char* name, const char* location);
-  ~vtkInformationIntegerRequestKey() VTK_OVERRIDE;
+  ~vtkInformationIntegerRequestKey() override;
 
   /**
    * This method simply returns a new vtkInformationIntegerRequestKey,
@@ -62,32 +63,28 @@ public:
    * or if it is different that the value stored in pipelineInfo using
    * this key.
    */
-  bool NeedToExecute(vtkInformation* pipelineInfo,
-                             vtkInformation* dobjInfo) VTK_OVERRIDE;
+  bool NeedToExecute(vtkInformation* pipelineInfo, vtkInformation* dobjInfo) override;
 
   /**
    * Copies the value stored in pipelineInfo using this key into
    * dobjInfo.
    */
-  void StoreMetaData(vtkInformation* request,
-                             vtkInformation* pipelineInfo,
-                             vtkInformation* dobjInfo) VTK_OVERRIDE;
+  void StoreMetaData(
+    vtkInformation* request, vtkInformation* pipelineInfo, vtkInformation* dobjInfo) override;
 
   /**
    * Copies the value stored in fromInfo using this key into toInfo
    * if request has the REQUEST_UPDATE_EXTENT key.
    */
-  void CopyDefaultInformation(vtkInformation* request,
-                                      vtkInformation* fromInfo,
-                                      vtkInformation* toInfo) VTK_OVERRIDE;
+  void CopyDefaultInformation(
+    vtkInformation* request, vtkInformation* fromInfo, vtkInformation* toInfo) override;
 
 protected:
   vtkInformationIntegerKey* DataKey;
 
 private:
-  vtkInformationIntegerRequestKey(const vtkInformationIntegerRequestKey&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInformationIntegerRequestKey&) VTK_DELETE_FUNCTION;
-
+  vtkInformationIntegerRequestKey(const vtkInformationIntegerRequestKey&) = delete;
+  void operator=(const vtkInformationIntegerRequestKey&) = delete;
 };
 
 #endif

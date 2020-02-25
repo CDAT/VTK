@@ -18,27 +18,22 @@
 #include "vtkGenericAttribute.h"
 #include <cassert>
 
+//---------------------------------------------------------------------------
+vtkGenericAttribute::vtkGenericAttribute() = default;
 
 //---------------------------------------------------------------------------
-vtkGenericAttribute::vtkGenericAttribute()
-{
-}
-
-//---------------------------------------------------------------------------
-vtkGenericAttribute::~vtkGenericAttribute()
-{
-}
+vtkGenericAttribute::~vtkGenericAttribute() = default;
 
 //---------------------------------------------------------------------------
 void vtkGenericAttribute::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "Name: " << this->GetName() << endl;
   os << indent << "Number of components: " << this->GetNumberOfComponents() << endl;
   os << indent << "Centering: ";
 
-  switch(this->GetCentering())
+  switch (this->GetCentering())
   {
     case vtkPointCentered:
       os << "on points";

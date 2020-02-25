@@ -20,26 +20,20 @@
  * vtkCamera.  vtkExternalOpenGLCamera interfaces to the OpenGL rendering library.
  * This class extends vtkOpenGLCamera by introducing API wherein the camera
  * matrices can be set explicitly by the application.
-*/
+ */
 
 #ifndef vtkExternalOpenGLCamera_h
 #define vtkExternalOpenGLCamera_h
 
-#include "vtkRenderingExternalModule.h" // For export macro
 #include "vtkOpenGLCamera.h"
+#include "vtkRenderingExternalModule.h" // For export macro
 
-class VTKRENDERINGEXTERNAL_EXPORT vtkExternalOpenGLCamera :
-  public vtkOpenGLCamera
+class VTKRENDERINGEXTERNAL_EXPORT vtkExternalOpenGLCamera : public vtkOpenGLCamera
 {
 public:
-  static vtkExternalOpenGLCamera *New();
+  static vtkExternalOpenGLCamera* New();
   vtkTypeMacro(vtkExternalOpenGLCamera, vtkOpenGLCamera);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-
-  /**
-   * Implement base class method.
-   */
-  void Render(vtkRenderer *ren) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Set the view transform matrix
@@ -53,19 +47,19 @@ public:
 
 protected:
   vtkExternalOpenGLCamera();
-  ~vtkExternalOpenGLCamera() VTK_OVERRIDE {}
+  ~vtkExternalOpenGLCamera() override {}
 
   /**
    * These methods should only be used within vtkCamera.cxx.
    * Bypass computation if user provided the view transform
    */
-  void ComputeViewTransform() VTK_OVERRIDE;
+  void ComputeViewTransform() override;
 
 private:
   bool UserProvidedViewTransform;
 
-  vtkExternalOpenGLCamera(const vtkExternalOpenGLCamera&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExternalOpenGLCamera&) VTK_DELETE_FUNCTION;
+  vtkExternalOpenGLCamera(const vtkExternalOpenGLCamera&) = delete;
+  void operator=(const vtkExternalOpenGLCamera&) = delete;
 };
 
 #endif

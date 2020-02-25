@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkRectilinearGridToTetrahedra.h
+  Module:    vtkImageDataToPointSet.cxx
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -22,6 +22,7 @@
 #include "vtkImageData.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkStructuredGrid.h"
@@ -31,22 +32,17 @@
 vtkStandardNewMacro(vtkImageDataToPointSet);
 
 //-------------------------------------------------------------------------
-vtkImageDataToPointSet::vtkImageDataToPointSet()
-{
-}
+vtkImageDataToPointSet::vtkImageDataToPointSet() = default;
 
-vtkImageDataToPointSet::~vtkImageDataToPointSet()
-{
-}
+vtkImageDataToPointSet::~vtkImageDataToPointSet() = default;
 
-void vtkImageDataToPointSet::PrintSelf(ostream &os, vtkIndent indent)
+void vtkImageDataToPointSet::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //-------------------------------------------------------------------------
-int vtkImageDataToPointSet::FillInputPortInformation(int port,
-                                                     vtkInformation *info)
+int vtkImageDataToPointSet::FillInputPortInformation(int port, vtkInformation* info)
 {
   if (!this->Superclass::FillInputPortInformation(port, info))
   {
@@ -57,63 +53,12 @@ int vtkImageDataToPointSet::FillInputPortInformation(int port,
 }
 
 //-------------------------------------------------------------------------
-int vtkImageDataToPointSet::CopyStructure(vtkStructuredGrid *outData,
-                                          vtkImageData *inData)
+int vtkImageDataToPointSet::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
-  double origin[3];
-  double spacing[3];
-
-  inData->GetOrigin(origin);
-  inData->GetSpacing(spacing);
-
-  int extent[6];
-  inData->GetExtent(extent);
-
-  outData->SetExtent(extent);
-
-  vtkNew<vtkPoints> points;
-  points->SetDataTypeToDouble();
-  points->SetNumberOfPoints(inData->GetNumberOfPoints());
-
-  vtkIdType pointId = 0;
-  int ijk[3];
-  for (ijk[2] = extent[4]; ijk[2] <= extent[5]; ijk[2]++)
-  {
-    for (ijk[1] = extent[2]; ijk[1] <= extent[3]; ijk[1]++)
-    {
-      for (ijk[0] = extent[0]; ijk[0] <= extent[1]; ijk[0]++)
-      {
-        double coord[3];
-
-        for (int axis = 0; axis < 3; axis++)
-        {
-          coord[axis] = origin[axis] + spacing[axis]*ijk[axis];
-        }
-
-        points->SetPoint(pointId, coord);
-        pointId++;
-      }
-    }
-  }
-
-  if (pointId != points->GetNumberOfPoints())
-  {
-    vtkErrorMacro(<< "Somehow misscounted points");
-    return 0;
-  }
-
-  outData->SetPoints(points.GetPointer());
-
-  return 1;
-}
-
-//-------------------------------------------------------------------------
-int vtkImageDataToPointSet::RequestData(vtkInformation *vtkNotUsed(request),
-                                        vtkInformationVector **inputVector,
-                                        vtkInformationVector *outputVector)
-{
-  vtkImageData *inData = vtkImageData::GetData(inputVector[0]);
-  vtkStructuredGrid *outData = vtkStructuredGrid::GetData(outputVector);
+  // Retrieve input and output
+  vtkImageData* inData = vtkImageData::GetData(inputVector[0]);
+  vtkStructuredGrid* outData = vtkStructuredGrid::GetData(outputVector);
 
   if (inData == nullptr)
   {
@@ -126,14 +71,27 @@ int vtkImageDataToPointSet::RequestData(vtkInformation *vtkNotUsed(request),
     return 0;
   }
 
-  int result = vtkImageDataToPointSet::CopyStructure(outData, inData);
-  if (!result)
-  {
-    return 0;
-  }
-
+  // Copy input point and cell data to output
   outData->GetPointData()->PassData(inData->GetPointData());
   outData->GetCellData()->PassData(inData->GetCellData());
+
+  // Extract points coordinates from the image
+  vtkIdType nbPoints = inData->GetNumberOfPoints();
+  vtkNew<vtkPoints> points;
+  points->SetDataTypeToDouble();
+  points->SetNumberOfPoints(nbPoints);
+  for (vtkIdType i = 0; i < nbPoints; i++)
+  {
+    double p[3];
+    inData->GetPoint(i, p);
+    points->SetPoint(i, p);
+  }
+  outData->SetPoints(points);
+
+  // Copy Extent
+  int extent[6];
+  inData->GetExtent(extent);
+  outData->SetExtent(extent);
 
   return 1;
 }

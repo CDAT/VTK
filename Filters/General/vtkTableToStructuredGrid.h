@@ -21,7 +21,7 @@
  * points in the output structured grid. The specified dimensions of the output
  * (specified using SetWholeExtent()) must match the number of rows in the input
  * table.
-*/
+ */
 
 #ifndef vtkTableToStructuredGrid_h
 #define vtkTableToStructuredGrid_h
@@ -36,7 +36,7 @@ class VTKFILTERSGENERAL_EXPORT vtkTableToStructuredGrid : public vtkStructuredGr
 public:
   static vtkTableToStructuredGrid* New();
   vtkTypeMacro(vtkTableToStructuredGrid, vtkStructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -103,27 +103,26 @@ public:
 
 protected:
   vtkTableToStructuredGrid();
-  ~vtkTableToStructuredGrid() VTK_OVERRIDE;
+  ~vtkTableToStructuredGrid() override;
 
   int Convert(vtkTable*, vtkStructuredGrid*, int extent[6]);
 
   /**
    * Overridden to specify that input must be a vtkTable.
    */
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Convert input vtkTable to vtkStructuredGrid.
    */
-  int RequestData(vtkInformation* request,
-    vtkInformationVector** inputVector, vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   /**
    * Request information -- pass whole extent to the pipeline.
    */
-  int RequestInformation(vtkInformation *vtkNotUsed(request),
-    vtkInformationVector **vtkNotUsed(inputVector),
-    vtkInformationVector *outputVector) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* vtkNotUsed(request),
+    vtkInformationVector** vtkNotUsed(inputVector), vtkInformationVector* outputVector) override;
 
   char* XColumn;
   char* YColumn;
@@ -134,11 +133,8 @@ protected:
   int WholeExtent[6];
 
 private:
-  vtkTableToStructuredGrid(const vtkTableToStructuredGrid&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTableToStructuredGrid&) VTK_DELETE_FUNCTION;
-
+  vtkTableToStructuredGrid(const vtkTableToStructuredGrid&) = delete;
+  void operator=(const vtkTableToStructuredGrid&) = delete;
 };
 
 #endif
-
-

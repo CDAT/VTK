@@ -23,13 +23,13 @@
  * This is an experimental format. Use XML-based formats for writing composite
  * datasets. Saving composite dataset in legacy VTK format is expected to change
  * in future including changes to the file layout.
-*/
+ */
 
 #ifndef vtkCompositeDataWriter_h
 #define vtkCompositeDataWriter_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataWriter.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkCompositeDataSet;
 class vtkHierarchicalBoxDataSet;
@@ -37,13 +37,15 @@ class vtkMultiBlockDataSet;
 class vtkMultiPieceDataSet;
 class vtkNonOverlappingAMR;
 class vtkOverlappingAMR;
+class vtkPartitionedDataSet;
+class vtkPartitionedDataSetCollection;
 
 class VTKIOLEGACY_EXPORT vtkCompositeDataWriter : public vtkDataWriter
 {
 public:
   static vtkCompositeDataWriter* New();
   vtkTypeMacro(vtkCompositeDataWriter, vtkDataWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -55,14 +57,14 @@ public:
 
 protected:
   vtkCompositeDataWriter();
-  ~vtkCompositeDataWriter() VTK_OVERRIDE;
+  ~vtkCompositeDataWriter() override;
 
   //@{
   /**
    * Performs the actual writing.
    */
-  void WriteData() VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  void WriteData() override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
   //@}
 
   bool WriteCompositeData(ostream*, vtkMultiBlockDataSet*);
@@ -70,12 +72,13 @@ protected:
   bool WriteCompositeData(ostream*, vtkHierarchicalBoxDataSet*);
   bool WriteCompositeData(ostream*, vtkOverlappingAMR*);
   bool WriteCompositeData(ostream*, vtkNonOverlappingAMR*);
+  bool WriteCompositeData(ostream*, vtkPartitionedDataSet*);
+  bool WriteCompositeData(ostream*, vtkPartitionedDataSetCollection*);
   bool WriteBlock(ostream* fp, vtkDataObject* block);
 
 private:
-  vtkCompositeDataWriter(const vtkCompositeDataWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositeDataWriter&) VTK_DELETE_FUNCTION;
-
+  vtkCompositeDataWriter(const vtkCompositeDataWriter&) = delete;
+  void operator=(const vtkCompositeDataWriter&) = delete;
 };
 
 #endif

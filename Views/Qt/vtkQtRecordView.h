@@ -29,27 +29,27 @@
  * @par Thanks:
  * Thanks to Brian Wylie from Sandia National Laboratories for implementing
  * this class
-*/
+ */
 
 #ifndef vtkQtRecordView_h
 #define vtkQtRecordView_h
 
-#include "vtkViewsQtModule.h" // For export macro
 #include "vtkQtView.h"
-#include "vtkSmartPointer.h" // Needed for data table member
-#include <QPointer> // Needed for the text widget member
+#include "vtkSmartPointer.h"  // Needed for data table member
+#include "vtkViewsQtModule.h" // For export macro
+#include <QPointer>           // Needed for the text widget member
 
 class QTextEdit;
 class vtkDataObjectToTable;
 
 class VTKVIEWSQT_EXPORT vtkQtRecordView : public vtkQtView
 {
-Q_OBJECT
+  Q_OBJECT
 
 public:
-  static vtkQtRecordView *New();
+  static vtkQtRecordView* New();
   vtkTypeMacro(vtkQtRecordView, vtkQtView);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Get the main container of this view (a  QWidget).
@@ -57,7 +57,7 @@ public:
    * to GetWidget(): something like this
    * this->ui->box->layout()->addWidget(this->View->GetWidget());
    */
-  QWidget* GetWidget() VTK_OVERRIDE;
+  QWidget* GetWidget() override;
 
   enum
   {
@@ -84,15 +84,14 @@ public:
   /**
    * Updates the view.
    */
-  void Update() VTK_OVERRIDE;
+  void Update() override;
 
 protected:
-
   vtkQtRecordView();
-  ~vtkQtRecordView() VTK_OVERRIDE;
+  ~vtkQtRecordView() override;
 
-  void AddRepresentationInternal(vtkDataRepresentation* rep) VTK_OVERRIDE;
-  void RemoveRepresentationInternal(vtkDataRepresentation* rep) VTK_OVERRIDE;
+  void AddRepresentationInternal(vtkDataRepresentation* rep) override;
+  void RemoveRepresentationInternal(vtkDataRepresentation* rep) override;
 
   vtkSmartPointer<vtkDataObjectToTable> DataObjectToTable;
 
@@ -102,10 +101,9 @@ protected:
   int FieldType;
   int CurrentRow;
 
-
 private:
-  vtkQtRecordView(const vtkQtRecordView&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtRecordView&) VTK_DELETE_FUNCTION;
+  vtkQtRecordView(const vtkQtRecordView&) = delete;
+  void operator=(const vtkQtRecordView&) = delete;
 
   vtkMTimeType CurrentSelectionMTime;
   vtkMTimeType LastInputMTime;

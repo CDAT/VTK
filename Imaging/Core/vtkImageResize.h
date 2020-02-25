@@ -20,13 +20,13 @@
  * antialiasing.  The resizing is done with a 5-lobe Lanczos-windowed sinc
  * filter that is bandlimited to the output sampling frequency in order to
  * avoid aliasing when the image size is reduced.  This filter utilizes a
- * O(n) algorithm to provide good effiency even though the filtering kernel
+ * O(n) algorithm to provide good efficiency even though the filtering kernel
  * is large.  The sinc interpolator can be turned off if nearest-neighbor
  * interpolation is required, or it can be replaced with a different
  * vtkImageInterpolator object.
  * @par Thanks:
  * Thanks to David Gobbi for contributing this class to VTK.
-*/
+ */
 
 #ifndef vtkImageResize_h
 #define vtkImageResize_h
@@ -39,9 +39,9 @@ class vtkAbstractImageInterpolator;
 class VTKIMAGINGCORE_EXPORT vtkImageResize : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageResize *New();
+  static vtkImageResize* New();
   vtkTypeMacro(vtkImageResize, vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   enum
   {
@@ -59,13 +59,10 @@ public:
    */
   vtkSetClampMacro(ResizeMethod, int, OUTPUT_DIMENSIONS, MAGNIFICATION_FACTORS);
   vtkGetMacro(ResizeMethod, int);
-  void SetResizeMethodToOutputDimensions() {
-    this->SetResizeMethod(OUTPUT_DIMENSIONS); }
-  void SetResizeMethodToOutputSpacing() {
-    this->SetResizeMethod(OUTPUT_SPACING); }
-  void SetResizeMethodToMagnificationFactors() {
-    this->SetResizeMethod(MAGNIFICATION_FACTORS); }
-  virtual const char *GetResizeMethodAsString();
+  void SetResizeMethodToOutputDimensions() { this->SetResizeMethod(OUTPUT_DIMENSIONS); }
+  void SetResizeMethodToOutputSpacing() { this->SetResizeMethod(OUTPUT_SPACING); }
+  void SetResizeMethodToMagnificationFactors() { this->SetResizeMethod(MAGNIFICATION_FACTORS); }
+  virtual const char* GetResizeMethodAsString();
   //@}
 
   //@{
@@ -108,9 +105,9 @@ public:
    * MagnificationFactor of two is applied to a 256x256 image, the output
    * image will be 512x512 if Border is On, or 511x511 if Border is Off.
    */
-  vtkSetMacro(Border, int);
-  vtkBooleanMacro(Border, int);
-  vtkGetMacro(Border, int);
+  vtkSetMacro(Border, vtkTypeBool);
+  vtkBooleanMacro(Border, vtkTypeBool);
+  vtkGetMacro(Border, vtkTypeBool);
   //@}
 
   //@{
@@ -118,9 +115,9 @@ public:
    * Whether to crop the input image before resizing (Off by default).  If this
    * is On, then the CroppingRegion must be set.
    */
-  vtkSetMacro(Cropping, int);
-  vtkBooleanMacro(Cropping, int);
-  vtkGetMacro(Cropping, int);
+  vtkSetMacro(Cropping, vtkTypeBool);
+  vtkBooleanMacro(Cropping, vtkTypeBool);
+  vtkGetMacro(Cropping, vtkTypeBool);
   //@}
 
   //@{
@@ -137,60 +134,55 @@ public:
   /**
    * Turn interpolation on or off (by default, interpolation is on).
    */
-  vtkSetMacro(Interpolate, int);
-  vtkBooleanMacro(Interpolate, int);
-  vtkGetMacro(Interpolate, int);
+  vtkSetMacro(Interpolate, vtkTypeBool);
+  vtkBooleanMacro(Interpolate, vtkTypeBool);
+  vtkGetMacro(Interpolate, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set the interpolator for resampling the data.
    */
-  virtual void SetInterpolator(vtkAbstractImageInterpolator *sampler);
-  virtual vtkAbstractImageInterpolator *GetInterpolator();
+  virtual void SetInterpolator(vtkAbstractImageInterpolator* sampler);
+  virtual vtkAbstractImageInterpolator* GetInterpolator();
   //@}
 
   /**
    * Get the modified time of the filter.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkImageResize();
-  ~vtkImageResize() VTK_OVERRIDE;
+  ~vtkImageResize() override;
 
-  virtual vtkAbstractImageInterpolator *GetInternalInterpolator();
+  virtual vtkAbstractImageInterpolator* GetInternalInterpolator();
 
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  void ThreadedRequestData(vtkInformation *request,
-                                   vtkInformationVector **inputVector,
-                                   vtkInformationVector *outputVector,
-                                   vtkImageData ***inData,
-                                   vtkImageData **outData, int ext[6], int id) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData, int ext[6],
+    int id) override;
 
   int ResizeMethod;
   int OutputDimensions[3];
   double OutputSpacing[3];
   double MagnificationFactors[3];
-  int Border;
-  int Cropping;
+  vtkTypeBool Border;
+  vtkTypeBool Cropping;
   double CroppingRegion[6];
 
   double IndexStretch[3];
   double IndexTranslate[3];
 
-  vtkAbstractImageInterpolator *Interpolator;
-  vtkAbstractImageInterpolator *NNInterpolator;
-  int Interpolate;
+  vtkAbstractImageInterpolator* Interpolator;
+  vtkAbstractImageInterpolator* NNInterpolator;
+  vtkTypeBool Interpolate;
 
 private:
-  vtkImageResize(const vtkImageResize&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageResize&) VTK_DELETE_FUNCTION;
+  vtkImageResize(const vtkImageResize&) = delete;
+  void operator=(const vtkImageResize&) = delete;
 };
 
 #endif

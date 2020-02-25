@@ -51,7 +51,7 @@
  * @par Thanks:
  * Thanks to Bradley Lowekamp of the National Library of Medicine/NIH for
  * contributing this class.
-*/
+ */
 
 #ifndef vtkQuadricDecimation_h
 #define vtkQuadricDecimation_h
@@ -69,8 +69,8 @@ class VTKFILTERSCORE_EXPORT vtkQuadricDecimation : public vtkPolyDataAlgorithm
 {
 public:
   vtkTypeMacro(vtkQuadricDecimation, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkQuadricDecimation *New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkQuadricDecimation* New();
 
   //@{
   /**
@@ -88,9 +88,9 @@ public:
    * then only geometric error is used to control the decimation. By default
    * the attribute errors are off.
    */
-  vtkSetMacro(AttributeErrorMetric, int);
-  vtkGetMacro(AttributeErrorMetric, int);
-  vtkBooleanMacro(AttributeErrorMetric, int);
+  vtkSetMacro(AttributeErrorMetric, vtkTypeBool);
+  vtkGetMacro(AttributeErrorMetric, vtkTypeBool);
+  vtkBooleanMacro(AttributeErrorMetric, vtkTypeBool);
   //@}
 
   //@{
@@ -101,9 +101,9 @@ public:
    * By default VolumePreservation is off
    * the attribute errors are off.
    */
-  vtkSetMacro(VolumePreservation, int);
-  vtkGetMacro(VolumePreservation, int);
-  vtkBooleanMacro(VolumePreservation, int);
+  vtkSetMacro(VolumePreservation, vtkTypeBool);
+  vtkGetMacro(VolumePreservation, vtkTypeBool);
+  vtkBooleanMacro(VolumePreservation, vtkTypeBool);
   //@}
 
   //@{
@@ -113,21 +113,21 @@ public:
    * attributes are to be included in the error calculation. By default all
    * of these are on.
    */
-  vtkSetMacro(ScalarsAttribute, int);
-  vtkGetMacro(ScalarsAttribute, int);
-  vtkBooleanMacro(ScalarsAttribute, int);
-  vtkSetMacro(VectorsAttribute, int);
-  vtkGetMacro(VectorsAttribute, int);
-  vtkBooleanMacro(VectorsAttribute, int);
-  vtkSetMacro(NormalsAttribute, int);
-  vtkGetMacro(NormalsAttribute, int);
-  vtkBooleanMacro(NormalsAttribute, int);
-  vtkSetMacro(TCoordsAttribute, int);
-  vtkGetMacro(TCoordsAttribute, int);
-  vtkBooleanMacro(TCoordsAttribute, int);
-  vtkSetMacro(TensorsAttribute, int);
-  vtkGetMacro(TensorsAttribute, int);
-  vtkBooleanMacro(TensorsAttribute, int);
+  vtkSetMacro(ScalarsAttribute, vtkTypeBool);
+  vtkGetMacro(ScalarsAttribute, vtkTypeBool);
+  vtkBooleanMacro(ScalarsAttribute, vtkTypeBool);
+  vtkSetMacro(VectorsAttribute, vtkTypeBool);
+  vtkGetMacro(VectorsAttribute, vtkTypeBool);
+  vtkBooleanMacro(VectorsAttribute, vtkTypeBool);
+  vtkSetMacro(NormalsAttribute, vtkTypeBool);
+  vtkGetMacro(NormalsAttribute, vtkTypeBool);
+  vtkBooleanMacro(NormalsAttribute, vtkTypeBool);
+  vtkSetMacro(TCoordsAttribute, vtkTypeBool);
+  vtkGetMacro(TCoordsAttribute, vtkTypeBool);
+  vtkBooleanMacro(TCoordsAttribute, vtkTypeBool);
+  vtkSetMacro(TensorsAttribute, vtkTypeBool);
+  vtkGetMacro(TensorsAttribute, vtkTypeBool);
+  vtkBooleanMacro(TensorsAttribute, vtkTypeBool);
   //@}
 
   //@{
@@ -158,9 +158,9 @@ public:
 
 protected:
   vtkQuadricDecimation();
-  ~vtkQuadricDecimation() VTK_OVERRIDE;
+  ~vtkQuadricDecimation() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Do the dirty work of eliminating the edge; return the number of
@@ -194,8 +194,8 @@ protected:
    * Compute cost for contracting this edge and the point that gives us this
    * cost.
    */
-  double ComputeCost(vtkIdType edgeId, double *x);
-  double ComputeCost2(vtkIdType edgeId, double *x);
+  double ComputeCost(vtkIdType edgeId, double* x);
+  double ComputeCost2(vtkIdType edgeId, double* x);
   //@}
 
   /**
@@ -203,16 +203,16 @@ protected:
    * collapse.  p1Id and p2Id are the endpoints of the edge.  p2Id is the
    * pointId being removed.
    */
-  void FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id, vtkIdList *edges);
+  void FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id, vtkIdList* edges);
 
   /**
    * Find a cell that uses this edge.
    */
   vtkIdType GetEdgeCellId(vtkIdType p1Id, vtkIdType p2Id);
 
-  int IsGoodPlacement(vtkIdType pt0Id, vtkIdType pt1Id, const double *x);
-  int TrianglePlaneCheck(const double t0[3], const double t1[3],
-                         const double t2[3],  const double *x);
+  int IsGoodPlacement(vtkIdType pt0Id, vtkIdType pt1Id, const double* x);
+  int TrianglePlaneCheck(
+    const double t0[3], const double t1[3], const double t2[3], const double* x);
   void ComputeNumberOfComponents(void);
   void UpdateEdgeData(vtkIdType ptoId, vtkIdType pt1Id);
 
@@ -220,8 +220,8 @@ protected:
   /**
    * Helper function to set and get the point and it's attributes as an array
    */
-  void SetPointAttributeArray(vtkIdType ptId, const double *x);
-  void GetPointAttributeArray(vtkIdType ptId, double *x);
+  void SetPointAttributeArray(vtkIdType ptId, const double* x);
+  void GetPointAttributeArray(vtkIdType ptId, double* x);
   //@}
 
   /**
@@ -232,14 +232,14 @@ protected:
 
   double TargetReduction;
   double ActualReduction;
-  int   AttributeErrorMetric;
-  int   VolumePreservation;
+  vtkTypeBool AttributeErrorMetric;
+  vtkTypeBool VolumePreservation;
 
-  int ScalarsAttribute;
-  int VectorsAttribute;
-  int NormalsAttribute;
-  int TCoordsAttribute;
-  int TensorsAttribute;
+  vtkTypeBool ScalarsAttribute;
+  vtkTypeBool VectorsAttribute;
+  vtkTypeBool NormalsAttribute;
+  vtkTypeBool TCoordsAttribute;
+  vtkTypeBool TensorsAttribute;
 
   double ScalarsWeight;
   double VectorsWeight;
@@ -247,40 +247,39 @@ protected:
   double TCoordsWeight;
   double TensorsWeight;
 
-  int               NumberOfEdgeCollapses;
-  vtkEdgeTable     *Edges;
-  vtkIdList        *EndPoint1List;
-  vtkIdList        *EndPoint2List;
-  vtkPriorityQueue *EdgeCosts;
-  vtkDoubleArray   *TargetPoints;
-  int               NumberOfComponents;
-  vtkPolyData      *Mesh;
+  int NumberOfEdgeCollapses;
+  vtkEdgeTable* Edges;
+  vtkIdList* EndPoint1List;
+  vtkIdList* EndPoint2List;
+  vtkPriorityQueue* EdgeCosts;
+  vtkDoubleArray* TargetPoints;
+  int NumberOfComponents;
+  vtkPolyData* Mesh;
 
   struct ErrorQuadric
   {
-    double *Quadric;
+    double* Quadric;
   };
 
-
   // One ErrorQuadric per point
-  ErrorQuadric *ErrorQuadrics;
+  ErrorQuadric* ErrorQuadrics;
 
   // Contains 4 doubles per point. Length = nPoints * 4
-  double *VolumeConstraints;
+  double* VolumeConstraints;
   int AttributeComponents[6];
-  double        AttributeScale[6];
+  double AttributeScale[6];
 
   // Temporary variables for performance
-  vtkIdList *CollapseCellIds;
-  double *TempX;
-  double *TempQuad;
-  double *TempB;
-  double **TempA;
-  double *TempData;
+  vtkIdList* CollapseCellIds;
+  double* TempX;
+  double* TempQuad;
+  double* TempB;
+  double** TempA;
+  double* TempData;
 
 private:
-  vtkQuadricDecimation(const vtkQuadricDecimation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQuadricDecimation&) VTK_DELETE_FUNCTION;
+  vtkQuadricDecimation(const vtkQuadricDecimation&) = delete;
+  void operator=(const vtkQuadricDecimation&) = delete;
 };
 
 #endif

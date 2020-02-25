@@ -37,7 +37,7 @@
  * A typical hardware driver has lots of options and some settings can
  * cause this mapper to produce artifacts.
  *
-*/
+ */
 
 #ifndef vtkProjectedTetrahedraMapper_h
 #define vtkProjectedTetrahedraMapper_h
@@ -52,47 +52,43 @@ class vtkVisibilitySort;
 class vtkVolumeProperty;
 class vtkRenderWindow;
 
-class VTKRENDERINGVOLUME_EXPORT vtkProjectedTetrahedraMapper : public vtkUnstructuredGridVolumeMapper
+class VTKRENDERINGVOLUME_EXPORT vtkProjectedTetrahedraMapper
+  : public vtkUnstructuredGridVolumeMapper
 {
 public:
-  vtkTypeMacro(vtkProjectedTetrahedraMapper,
-                       vtkUnstructuredGridVolumeMapper);
-  static vtkProjectedTetrahedraMapper *New();
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkProjectedTetrahedraMapper, vtkUnstructuredGridVolumeMapper);
+  static vtkProjectedTetrahedraMapper* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  virtual void SetVisibilitySort(vtkVisibilitySort *sort);
+  virtual void SetVisibilitySort(vtkVisibilitySort* sort);
   vtkGetObjectMacro(VisibilitySort, vtkVisibilitySort);
 
-  static void MapScalarsToColors(vtkDataArray *colors,
-                                 vtkVolumeProperty *property,
-                                 vtkDataArray *scalars);
-  static void TransformPoints(vtkPoints *inPoints,
-                              const float projection_mat[16],
-                              const float modelview_mat[16],
-                              vtkFloatArray *outPoints);
+  static void MapScalarsToColors(
+    vtkDataArray* colors, vtkVolumeProperty* property, vtkDataArray* scalars);
+  static void TransformPoints(vtkPoints* inPoints, const float projection_mat[16],
+    const float modelview_mat[16], vtkFloatArray* outPoints);
 
   /**
    * Return true if the rendering context provides
    * the nececessary functionality to use this class.
    */
-  virtual bool IsSupported(vtkRenderWindow *)
-    { return false; }
+  virtual bool IsSupported(vtkRenderWindow*) { return false; }
 
 protected:
   vtkProjectedTetrahedraMapper();
-  ~vtkProjectedTetrahedraMapper() VTK_OVERRIDE;
+  ~vtkProjectedTetrahedraMapper() override;
 
-  vtkVisibilitySort *VisibilitySort;
+  vtkVisibilitySort* VisibilitySort;
 
   /**
    * The visibility sort will probably make a reference loop by holding a
    * reference to the input.
    */
-  void ReportReferences(vtkGarbageCollector *collector) VTK_OVERRIDE;
+  void ReportReferences(vtkGarbageCollector* collector) override;
 
 private:
-  vtkProjectedTetrahedraMapper(const vtkProjectedTetrahedraMapper &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProjectedTetrahedraMapper &) VTK_DELETE_FUNCTION;
+  vtkProjectedTetrahedraMapper(const vtkProjectedTetrahedraMapper&) = delete;
+  void operator=(const vtkProjectedTetrahedraMapper&) = delete;
 };
 
 #endif

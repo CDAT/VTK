@@ -26,6 +26,13 @@
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tif_config.h.cmake.in
                ${CMAKE_CURRENT_BINARY_DIR}/tif_config.h
                @ONLY)
+
+if (BUILD_SHARED_LIBS)
+  set(TIFF_SHARED_LIBS 1)
+else ()
+  set(TIFF_SHARED_LIBS 0)
+endif ()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tiffconf.h.cmake.in
                ${CMAKE_CURRENT_BINARY_DIR}/tiffconf.h
                @ONLY)
@@ -45,7 +52,6 @@ set(tiff_HEADERS
   tiff.h
   tiffio.h
   tiffvers.h
-  # XXX(kitware): install mangling header
   vtk_tiff_mangle.h)
 
 set(tiff_noinst_HEADERS
@@ -95,63 +101,89 @@ set(tiff_SOURCES
   tif_tile.c
   tif_version.c
   tif_warning.c
+  tif_webp.c
   tif_write.c
-  tif_zip.c)
+  tif_zip.c
+  tif_zstd.c)
 
-if (BUILD_SHARED_LIBS)
-  set(tiff_DEFS
-    libtiff.def)
-endif ()
+set(tiffxx_HEADERS
+  tiffio.hxx)
 
-if(WIN32_IO)
+set(tiffxx_SOURCES
+  tif_stream.cxx)
+
+if(USE_WIN32_FILEIO)
   extra_dist(tif_unix.c)
   list(APPEND tiff_SOURCES tif_win32.c)
-  add_definitions(-DUSE_WIN32_FILEIO)
 else()
   extra_dist(tif_win32.c)
   list(APPEND tiff_SOURCES tif_unix.c)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR}
-                    ${TIFF_INCLUDES})
-
-if (FALSE) # XXX(kitware): mangle library name
+if (FALSE) # XXX(kitware): Use VTK's module system.
 add_library(tiff ${tiff_SOURCES} ${tiff_HEADERS} ${nodist_tiff_HEADERS}
-            ${tiff_port_SOURCES} ${tiff_DEFS})
+            ${tiff_port_SOURCES} libtiff.def)
+target_include_directories(tiff
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        ${TIFF_INCLUDES}
+)
 target_link_libraries(tiff ${TIFF_LIBRARY_DEPS})
 set_target_properties(tiff PROPERTIES SOVERSION ${SO_COMPATVERSION})
-endif ()
-
-vtk_add_library(vtktiff ${tiff_SOURCES} ${tiff_HEADERS} ${nodist_tiff_HEADERS}
-            ${tiff_port_SOURCES} ${tiff_DEFS})
-target_link_libraries(vtktiff ${TIFF_LIBRARY_DEPS})
 if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
     # encoded into their final filename.  We disable this on Cygwin because
     # it causes cygz-${TIFF_FULL_VERSION}.dll to be created when cygz.dll
     # seems to be the default.
-    if (FALSE) # XXX(kitware): mangle library name
     set_target_properties(tiff PROPERTIES VERSION ${SO_VERSION})
-    endif ()
 endif()
+else ()
+vtk_module_add_module(VTK::tiff
+  SOURCES ${tiff_SOURCES}
+          ${tiff_port_SOURCES}
+          ${tiff_DEFS}
+  HEADERS ${tiff_HEADERS}
+  HEADERS_SUBDIR "vtktiff/libtiff"
+  PRIVATE_HEADERS ${nodist_tiff_HEADERS})
+endif ()
 if(HAVE_LD_VERSION_SCRIPT)
-  if (FALSE) # XXX(kitware): mangle library name
   set_target_properties(tiff PROPERTIES LINK_FLAGS
-                        "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiff.map")
-  endif ()
-  set_target_properties(vtktiff PROPERTIES LINK_FLAGS
                         "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiff.map")
 endif()
 
-if (FALSE) # XXX(kitware): mangle library name
+if (FALSE) # XXX(kitware): VTK handles installation.
 install(TARGETS tiff
         RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
-endif ()
 
-if (NOT_VTK_INSTALL_NO_DEVELOPMENT) # XXX(kitware): install headers when VTK does
 install(FILES ${tiff_HEADERS} ${nodist_tiff_HEADERS}
         DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 endif ()
+
+if(CXX_SUPPORT)
+  add_library(tiffxx ${tiffxx_SOURCES} ${tiffxx_HEADERS})
+  target_link_libraries(tiffxx tiff)
+  set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})
+  if(NOT CYGWIN)
+    # This property causes shared libraries on Linux to have the full version
+    # encoded into their final filename.  We disable this on Cygwin because
+    # it causes cygz-${TIFF_FULL_VERSION}.dll to be created when cygz.dll
+    # seems to be the default.
+    set_target_properties(tiffxx PROPERTIES VERSION ${SO_VERSION})
+  endif()
+  if(HAVE_LD_VERSION_SCRIPT)
+    set_target_properties(tiffxx PROPERTIES LINK_FLAGS
+                          "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiffxx.map")
+  endif()
+
+  install(TARGETS tiffxx
+          RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+          LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+
+  install(FILES ${tiffxx_HEADERS}
+          DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+
+endif()

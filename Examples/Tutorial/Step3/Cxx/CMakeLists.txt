@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.3...3.12 FATAL_ERROR)
 
 
 project (Step3)
@@ -8,7 +8,7 @@ vtk_module_config(VTK
   vtkCommonCore
   vtkFiltersSources
   vtkInteractionStyle
-  vtkRendering${VTK_RENDERING_BACKEND}
+  vtkRenderingOpenGL2
 )
 include(${VTK_USE_FILE})
 

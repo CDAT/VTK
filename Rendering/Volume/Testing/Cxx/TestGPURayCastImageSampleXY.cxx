@@ -29,18 +29,17 @@
 #include "vtkPiecewiseFunction.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkTestUtilities.h"
 #include "vtkVolume.h"
-#include "vtkVolumeProperty.h"
 #include "vtkVolume16Reader.h"
-
+#include "vtkVolumeProperty.h"
 
 int TestGPURayCastImageSampleXY(int argc, char* argv[])
 {
-  //cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
+  // cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
   // Load data
   vtkNew<vtkVolume16Reader> reader;
@@ -61,26 +60,26 @@ int TestGPURayCastImageSampleXY(int argc, char* argv[])
 
   // Setup mappers, properties and actors
   vtkNew<vtkColorTransferFunction> ctf;
-  ctf->AddRGBPoint(0,    0.0, 0.0, 0.0);
-  ctf->AddRGBPoint(500,  0.1, 1.0, 0.3);
+  ctf->AddRGBPoint(0, 0.0, 0.0, 0.0);
+  ctf->AddRGBPoint(500, 0.1, 1.0, 0.3);
   ctf->AddRGBPoint(1000, 0.1, 1.0, 0.3);
   ctf->AddRGBPoint(1150, 1.0, 1.0, 0.9);
 
   vtkNew<vtkPiecewiseFunction> pf;
-  pf->AddPoint(0,    0.00);
-  pf->AddPoint(500,  0.15);
+  pf->AddPoint(0, 0.00);
+  pf->AddPoint(500, 0.15);
   pf->AddPoint(1000, 0.15);
   pf->AddPoint(1150, 0.85);
 
   vtkNew<vtkPiecewiseFunction> gf;
-  gf->AddPoint(0,   0.0);
-  gf->AddPoint(90,  0.5);
+  gf->AddPoint(0, 0.0);
+  gf->AddPoint(90, 0.5);
   gf->AddPoint(100, 1.0);
 
   vtkNew<vtkVolumeProperty> volumeProperty;
-  volumeProperty->SetScalarOpacity(pf.GetPointer());
-  volumeProperty->SetGradientOpacity(gf.GetPointer());
-  volumeProperty->SetColor(ctf.GetPointer());
+  volumeProperty->SetScalarOpacity(pf);
+  volumeProperty->SetGradientOpacity(gf);
+  volumeProperty->SetColor(ctf);
   volumeProperty->ShadeOn();
   volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
 
@@ -91,8 +90,8 @@ int TestGPURayCastImageSampleXY(int argc, char* argv[])
   mapper->SetImageSampleDistance(8.0);
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(volumeProperty);
 
   // Without down-sampling
   vtkNew<vtkGPUVolumeRayCastMapper> mapper2;
@@ -101,8 +100,8 @@ int TestGPURayCastImageSampleXY(int argc, char* argv[])
   mapper2->SetImageSampleDistance(1.0);
 
   vtkNew<vtkVolume> volume2;
-  volume2->SetMapper(mapper2.GetPointer());
-  volume2->SetProperty(volumeProperty.GetPointer());
+  volume2->SetMapper(mapper2);
+  volume2->SetProperty(volumeProperty);
 
   vtkNew<vtkConeSource> coneSource;
   coneSource->SetResolution(20);
@@ -115,7 +114,7 @@ int TestGPURayCastImageSampleXY(int argc, char* argv[])
   coneMapper->SetInputConnection(coneSource->GetOutputPort());
 
   vtkNew<vtkActor> coneActor;
-  coneActor->SetMapper(coneMapper.GetPointer());
+  coneActor->SetMapper(coneMapper);
 
   // Setup rendering context
   vtkNew<vtkRenderWindow> renWin;
@@ -125,33 +124,33 @@ int TestGPURayCastImageSampleXY(int argc, char* argv[])
   vtkNew<vtkRenderer> ren;
   ren->SetBackground(0.3, 0.3, 0.5);
   ren->SetViewport(0.0, 0.0, 0.5, 0.5);
-  ren->AddVolume(volume.GetPointer());
-  ren->AddActor(coneActor.GetPointer());
-  renWin->AddRenderer(ren.GetPointer());
+  ren->AddVolume(volume);
+  ren->AddActor(coneActor);
+  renWin->AddRenderer(ren);
 
   vtkNew<vtkRenderer> ren2;
   ren2->SetBackground(0., 0., 0.);
   ren2->SetViewport(0.0, 0.5, 0.5, 1.0);
   ren2->SetActiveCamera(ren->GetActiveCamera());
-  ren2->AddVolume(volume.GetPointer());
-  ren2->AddActor(coneActor.GetPointer());
-  renWin->AddRenderer(ren2.GetPointer());
+  ren2->AddVolume(volume);
+  ren2->AddActor(coneActor);
+  renWin->AddRenderer(ren2);
 
   vtkNew<vtkRenderer> ren3;
   ren3->SetBackground(0., 0., 0.);
   ren3->SetViewport(0.5, 0.0, 1.0, 0.5);
   ren3->SetActiveCamera(ren->GetActiveCamera());
-  ren3->AddVolume(volume.GetPointer());
-  ren3->AddActor(coneActor.GetPointer());
-  renWin->AddRenderer(ren3.GetPointer());
+  ren3->AddVolume(volume);
+  ren3->AddActor(coneActor);
+  renWin->AddRenderer(ren3);
 
   vtkNew<vtkRenderer> ren4;
   ren4->SetBackground(0.3, 0.3, 0.5);
   ren4->SetViewport(0.5, 0.5, 1.0, 1.0);
   ren4->SetActiveCamera(ren->GetActiveCamera());
-  ren4->AddVolume(volume2.GetPointer());
-  ren4->AddActor(coneActor.GetPointer());
-  renWin->AddRenderer(ren4.GetPointer());
+  ren4->AddVolume(volume2);
+  ren4->AddActor(coneActor);
+  renWin->AddRenderer(ren4);
 
   ren->ResetCamera();
   ren->GetActiveCamera()->Azimuth(-10);
@@ -160,19 +159,18 @@ int TestGPURayCastImageSampleXY(int argc, char* argv[])
 
   // Interactor
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
+  iren->SetInteractorStyle(style);
 
   renWin->Render();
 
-  int retVal = vtkTesting::Test(argc, argv, renWin.GetPointer(), 90);
+  int retVal = vtkTesting::Test(argc, argv, renWin, 90);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
-    {
+  {
     iren->Start();
-    }
+  }
 
-  return !((retVal == vtkTesting::PASSED) ||
-           (retVal == vtkTesting::DO_INTERACTOR));
+  return !((retVal == vtkTesting::PASSED) || (retVal == vtkTesting::DO_INTERACTOR));
 }

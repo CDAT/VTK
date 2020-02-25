@@ -23,8 +23,8 @@
  * triangles,", Masters Thesis, University of Utah, August 1987.
  * For a nice summary of the technique see, Hoppe, H., et. al,
  * "Piecewise Smooth Surface Reconstruction,:, Proceedings of Siggraph 94
- * (Orlando, Florida, July 24-29, 1994). In COmputer Graphics
- * Proceedings, Annual COnference Series, 1994, ACM SIGGRAPH,
+ * (Orlando, Florida, July 24-29, 1994). In Computer Graphics
+ * Proceedings, Annual Conference Series, 1994, ACM SIGGRAPH,
  * pp. 295-302.
  * <P>
  * The filter only operates on triangles. Users should use the
@@ -41,13 +41,13 @@
  *
  * @sa
  * vtkApproximatingSubdivisionFilter
-*/
+ */
 
 #ifndef vtkLoopSubdivisionFilter_h
 #define vtkLoopSubdivisionFilter_h
 
-#include "vtkFiltersModelingModule.h" // For export macro
 #include "vtkApproximatingSubdivisionFilter.h"
+#include "vtkFiltersModelingModule.h" // For export macro
 
 class vtkPolyData;
 class vtkIntArray;
@@ -61,27 +61,25 @@ public:
   /**
    * Construct object with NumberOfSubdivisions set to 1.
    */
-  static vtkLoopSubdivisionFilter *New();
-  vtkTypeMacro(vtkLoopSubdivisionFilter,vtkApproximatingSubdivisionFilter);
+  static vtkLoopSubdivisionFilter* New();
+  vtkTypeMacro(vtkLoopSubdivisionFilter, vtkApproximatingSubdivisionFilter);
   //@}
 
 protected:
-  vtkLoopSubdivisionFilter () {}
-  ~vtkLoopSubdivisionFilter () VTK_OVERRIDE {}
+  vtkLoopSubdivisionFilter() {}
+  ~vtkLoopSubdivisionFilter() override {}
 
-  int GenerateSubdivisionPoints (vtkPolyData *inputDS, vtkIntArray *edgeData,
-                                 vtkPoints *outputPts,
-                                 vtkPointData *outputPD) VTK_OVERRIDE;
-  int  GenerateEvenStencil (vtkIdType p1, vtkPolyData *polys,
-                            vtkIdList *stencilIds, double *weights);
-  void GenerateOddStencil (vtkIdType p1, vtkIdType p2, vtkPolyData *polys,
-                           vtkIdList *stencilIds, double *weights);
+  int GenerateSubdivisionPoints(vtkPolyData* inputDS, vtkIntArray* edgeData, vtkPoints* outputPts,
+    vtkPointData* outputPD) override;
+  int GenerateEvenStencil(vtkIdType p1, vtkPolyData* polys, vtkIdList* stencilIds, double* weights);
+  void GenerateOddStencil(
+    vtkIdType p1, vtkIdType p2, vtkPolyData* polys, vtkIdList* stencilIds, double* weights);
 
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkLoopSubdivisionFilter(const vtkLoopSubdivisionFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLoopSubdivisionFilter&) VTK_DELETE_FUNCTION;
+  vtkLoopSubdivisionFilter(const vtkLoopSubdivisionFilter&) = delete;
+  void operator=(const vtkLoopSubdivisionFilter&) = delete;
 };
 
 #endif

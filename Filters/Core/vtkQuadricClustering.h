@@ -48,7 +48,7 @@
  * error to produce the output triangles or 2) compute an optimal position in
  * each bin to produce the output triangles (recommended and default behavior).
  *
- * This filter can take multiple inputs.  To do this, the user must explicity
+ * This filter can take multiple inputs.  To do this, the user must explicitly
  * call StartAppend, Append (once for each input), and EndAppend.  StartAppend
  * sets up the data structure to hold the quadric matrices.  Append processes
  * each triangle in the input poly data it was called on, hashes its vertices
@@ -76,11 +76,11 @@
  * @warning
  * Note that for certain types of geometry (e.g., a mostly 2D plane with
  * jitter in the normal direction), the decimator can perform badly. In this
- * sitation, set the number of bins in the normal direction to one.
+ * situation, set the number of bins in the normal direction to one.
  *
  * @sa
  * vtkQuadricDecimation vtkDecimatePro vtkDecimate vtkQuadricLODActor
-*/
+ */
 
 #ifndef vtkQuadricClustering_h
 #define vtkQuadricClustering_h
@@ -93,7 +93,6 @@ class vtkFeatureEdges;
 class vtkPoints;
 class vtkQuadricClusteringCellSet;
 
-
 class VTKFILTERSCORE_EXPORT vtkQuadricClustering : public vtkPolyDataAlgorithm
 {
 public:
@@ -102,8 +101,8 @@ public:
    * Standard instantition, type and print methods.
    */
   vtkTypeMacro(vtkQuadricClustering, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkQuadricClustering *New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkQuadricClustering* New();
   //@}
 
   //@{
@@ -120,10 +119,9 @@ public:
   vtkGetMacro(NumberOfXDivisions, int);
   vtkGetMacro(NumberOfYDivisions, int);
   vtkGetMacro(NumberOfZDivisions, int);
-  void SetNumberOfDivisions(int div[3])
-    { this->SetNumberOfDivisions(div[0], div[1], div[2]); }
+  void SetNumberOfDivisions(int div[3]) { this->SetNumberOfDivisions(div[0], div[1], div[2]); }
   void SetNumberOfDivisions(int div0, int div1, int div2);
-  int *GetNumberOfDivisions();
+  int* GetNumberOfDivisions() VTK_SIZEHINT(3);
   void GetNumberOfDivisions(int div[3]);
   //@}
 
@@ -133,9 +131,9 @@ public:
    * of divisions specified by the user is always used (as long as it is valid).
    * The default is On
    */
-  vtkSetMacro(AutoAdjustNumberOfDivisions,int);
-  vtkGetMacro(AutoAdjustNumberOfDivisions,int);
-  vtkBooleanMacro(AutoAdjustNumberOfDivisions,int);
+  vtkSetMacro(AutoAdjustNumberOfDivisions, vtkTypeBool);
+  vtkGetMacro(AutoAdjustNumberOfDivisions, vtkTypeBool);
+  vtkBooleanMacro(AutoAdjustNumberOfDivisions, vtkTypeBool);
   //@}
 
   //@{
@@ -146,12 +144,10 @@ public:
    * of the spatial binning.
    */
   void SetDivisionOrigin(double x, double y, double z);
-  void SetDivisionOrigin(double o[3])
-    {this->SetDivisionOrigin(o[0],o[1],o[2]);}
+  void SetDivisionOrigin(double o[3]) { this->SetDivisionOrigin(o[0], o[1], o[2]); }
   vtkGetVector3Macro(DivisionOrigin, double);
   void SetDivisionSpacing(double x, double y, double z);
-  void SetDivisionSpacing(double s[3])
-    {this->SetDivisionSpacing(s[0],s[1],s[2]);}
+  void SetDivisionSpacing(double s[3]) { this->SetDivisionSpacing(s[0], s[1], s[2]); }
   vtkGetVector3Macro(DivisionSpacing, double);
   //@}
 
@@ -164,9 +160,9 @@ public:
    * when the append methods (StartAppend(), Append(), EndAppend()) are being
    * called directly.
    */
-  vtkSetMacro(UseInputPoints, int);
-  vtkGetMacro(UseInputPoints, int);
-  vtkBooleanMacro(UseInputPoints, int);
+  vtkSetMacro(UseInputPoints, vtkTypeBool);
+  vtkGetMacro(UseInputPoints, vtkTypeBool);
+  vtkBooleanMacro(UseInputPoints, vtkTypeBool);
   //@}
 
   //@{
@@ -176,10 +172,10 @@ public:
    * the quadrics (position of points), but not the mesh.  Which features to
    * use can be controlled by the filter "FeatureEdges".
    */
-  vtkSetMacro(UseFeatureEdges, int);
-  vtkGetMacro(UseFeatureEdges, int);
-  vtkBooleanMacro(UseFeatureEdges, int);
-  vtkFeatureEdges *GetFeatureEdges() {return this->FeatureEdges;}
+  vtkSetMacro(UseFeatureEdges, vtkTypeBool);
+  vtkGetMacro(UseFeatureEdges, vtkTypeBool);
+  vtkBooleanMacro(UseFeatureEdges, vtkTypeBool);
+  vtkFeatureEdges* GetFeatureEdges() { return this->FeatureEdges; }
   //@}
 
   //@{
@@ -190,9 +186,9 @@ public:
    * / feature edges.  They influence the quadrics (position of points), but
    * not the mesh.
    */
-  vtkSetMacro(UseFeaturePoints, int);
-  vtkGetMacro(UseFeaturePoints, int);
-  vtkBooleanMacro(UseFeaturePoints, int);
+  vtkSetMacro(UseFeaturePoints, vtkTypeBool);
+  vtkGetMacro(UseFeaturePoints, vtkTypeBool);
+  vtkBooleanMacro(UseFeaturePoints, vtkTypeBool);
   //@}
 
   //@{
@@ -211,9 +207,9 @@ public:
    * the flag is off the filter operates faster, but the surface may not be
    * as well behaved.
    */
-  vtkSetMacro(UseInternalTriangles, int);
-  vtkGetMacro(UseInternalTriangles, int);
-  vtkBooleanMacro(UseInternalTriangles, int);
+  vtkSetMacro(UseInternalTriangles, vtkTypeBool);
+  vtkGetMacro(UseInternalTriangles, vtkTypeBool);
+  vtkBooleanMacro(UseInternalTriangles, vtkTypeBool);
   //@}
 
   //@{
@@ -223,11 +219,19 @@ public:
    * In this mode, the user must specify the bounds of the entire model
    * as an argument to the "StartAppend" method.
    */
-  void StartAppend(double *bounds);
-  void StartAppend(double x0,double x1,double y0,double y1,double z0,double z1)
-    {double b[6]; b[0]=x0; b[1]=x1; b[2]=y0; b[3]=y1; b[4]=z0; b[5]=z1;
-    this->StartAppend(b);}
-  void Append(vtkPolyData *piece);
+  void StartAppend(double* bounds);
+  void StartAppend(double x0, double x1, double y0, double y1, double z0, double z1)
+  {
+    double b[6];
+    b[0] = x0;
+    b[1] = x1;
+    b[2] = y0;
+    b[3] = y1;
+    b[4] = z0;
+    b[5] = z1;
+    this->StartAppend(b);
+  }
+  void Append(vtkPolyData* piece);
   void EndAppend();
   //@}
 
@@ -238,9 +242,9 @@ public:
    * of output cells (no averaging).  This is off by default, and does
    * not work when append is being called explicitly (non-pipeline usage).
    */
-  vtkSetMacro(CopyCellData, int);
-  vtkGetMacro(CopyCellData, int);
-  vtkBooleanMacro(CopyCellData, int);
+  vtkSetMacro(CopyCellData, vtkTypeBool);
+  vtkGetMacro(CopyCellData, vtkTypeBool);
+  vtkBooleanMacro(CopyCellData, vtkTypeBool);
   //@}
 
   //@{
@@ -250,17 +254,17 @@ public:
    * in some cases can reduce the number of cells produced by an order of
    * magnitude. By default, this flag is true.
    */
-  vtkSetMacro(PreventDuplicateCells,int);
-  vtkGetMacro(PreventDuplicateCells,int);
-  vtkBooleanMacro(PreventDuplicateCells,int);
+  vtkSetMacro(PreventDuplicateCells, vtkTypeBool);
+  vtkGetMacro(PreventDuplicateCells, vtkTypeBool);
+  vtkBooleanMacro(PreventDuplicateCells, vtkTypeBool);
   //@}
 
 protected:
   vtkQuadricClustering();
-  ~vtkQuadricClustering() VTK_OVERRIDE;
+  ~vtkQuadricClustering() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
   /**
    * Given a point, determine what bin it falls into.
@@ -270,20 +274,19 @@ protected:
   /**
    * Determine the representative point for this bin.
    */
-  void ComputeRepresentativePoint(double quadric[9], vtkIdType binId,
-                                  double point[3]);
+  void ComputeRepresentativePoint(double quadric[9], vtkIdType binId, double point[3]);
 
   //@{
   /**
    * Add triangles to the quadric array.  If geometry flag is on then
    * triangles are added to the output.
    */
-  void AddPolygons(vtkCellArray *polys, vtkPoints *points, int geometryFlag,
-                   vtkPolyData *input, vtkPolyData *output);
-  void AddStrips(vtkCellArray *strips, vtkPoints *points, int geometryFlag,
-                 vtkPolyData *input, vtkPolyData *output);
-  void AddTriangle(vtkIdType *binIds, double *pt0, double *pt1, double *pt2,
-                   int geometeryFlag, vtkPolyData *input, vtkPolyData *output);
+  void AddPolygons(vtkCellArray* polys, vtkPoints* points, int geometryFlag, vtkPolyData* input,
+    vtkPolyData* output);
+  void AddStrips(vtkCellArray* strips, vtkPoints* points, int geometryFlag, vtkPolyData* input,
+    vtkPolyData* output);
+  void AddTriangle(vtkIdType* binIds, double* pt0, double* pt1, double* pt2, int geometeryFlag,
+    vtkPolyData* input, vtkPolyData* output);
   //@}
 
   //@{
@@ -291,11 +294,10 @@ protected:
    * Add edges to the quadric array.  If geometry flag is on then
    * edges are added to the output.
    */
-  void AddEdges(vtkCellArray *edges, vtkPoints *points,
-                int geometryFlag,
-                vtkPolyData *input, vtkPolyData *output);
-  void AddEdge(vtkIdType *binIds, double *pt0, double *pt1, int geometeryFlag,
-               vtkPolyData *input, vtkPolyData *output);
+  void AddEdges(vtkCellArray* edges, vtkPoints* points, int geometryFlag, vtkPolyData* input,
+    vtkPolyData* output);
+  void AddEdge(vtkIdType* binIds, double* pt0, double* pt1, int geometeryFlag, vtkPolyData* input,
+    vtkPolyData* output);
   //@}
 
   //@{
@@ -303,10 +305,10 @@ protected:
    * Add vertices to the quadric array.  If geometry flag is on then
    * vertices are added to the output.
    */
-  void AddVertices(vtkCellArray *verts, vtkPoints *points, int geometryFlag,
-                   vtkPolyData *input, vtkPolyData *output);
-  void AddVertex(vtkIdType binId, double *pt, int geometryFlag,
-                 vtkPolyData *input, vtkPolyData *output);
+  void AddVertices(vtkCellArray* verts, vtkPoints* points, int geometryFlag, vtkPolyData* input,
+    vtkPolyData* output);
+  void AddVertex(
+    vtkIdType binId, double* pt, int geometryFlag, vtkPolyData* input, vtkPolyData* output);
   //@}
 
   /**
@@ -325,63 +327,67 @@ protected:
    * used by > 2 edges, and (3) those where the angle between 2 edges
    * using this point is < angle.
    */
-  void FindFeaturePoints(vtkCellArray *edges, vtkPoints *edgePts, double angle);
+  void FindFeaturePoints(vtkCellArray* edges, vtkPoints* edgePts, double angle);
 
   //@{
   /**
-   * This method will rep[lace the quadric  generated points with the
+   * This method will rep[lace the quadric generated points with the
    * input points with the lowest error.
    */
-  void EndAppendUsingPoints(vtkPolyData *input, vtkPolyData *output);
-  int UseInputPoints;
+  void EndAppendUsingPoints(vtkPolyData* input, vtkPolyData* output);
+  vtkTypeBool UseInputPoints;
   //@}
 
   /**
    * This method sets the vertices of the output.
    * It duplicates the structure of the input cells (but decimiated).
    */
-  void EndAppendVertexGeometry(vtkPolyData *input, vtkPolyData *output);
+  void EndAppendVertexGeometry(vtkPolyData* input, vtkPolyData* output);
 
   // Unfinished option to handle boundary edges differently.
-  void AppendFeatureQuadrics(vtkPolyData *pd, vtkPolyData *output);
-  int UseFeatureEdges;
-  int UseFeaturePoints;
-  int UseInternalTriangles;
+  void AppendFeatureQuadrics(vtkPolyData* pd, vtkPolyData* output);
+  vtkTypeBool UseFeatureEdges;
+  vtkTypeBool UseFeaturePoints;
+  vtkTypeBool UseInternalTriangles;
 
   int NumberOfXDivisions;
   int NumberOfYDivisions;
   int NumberOfZDivisions;
 
   // Set this to eliminate duplicate cells
-  int PreventDuplicateCells;
-  vtkQuadricClusteringCellSet *CellSet; //PIMPLd stl set for tracking inserted cells
+  vtkTypeBool PreventDuplicateCells;
+  vtkQuadricClusteringCellSet* CellSet; // PIMPLd stl set for tracking inserted cells
   vtkIdType NumberOfBins;
 
   // Used internally.
   // can be smaller than user values when input numb er of points is small.
   int NumberOfDivisions[3];
 
-  // Since there are two was of specifing the grid, we have this flag
+  // Since there are two was of specifying the grid, we have this flag
   // to indicate which the user has set.  When this flag is on,
   // the bin sizes are computed from the DivisionOrigin and DivisionSpacing.
   int ComputeNumberOfDivisions;
 
   double DivisionOrigin[3];
   double DivisionSpacing[3];
-  int   AutoAdjustNumberOfDivisions;
+  vtkTypeBool AutoAdjustNumberOfDivisions;
 
   double Bounds[6];
   double XBinSize;
   double YBinSize;
   double ZBinSize;
-  double XBinStep;     //replace some divisions with multiplication
+  double XBinStep; // replace some divisions with multiplication
   double YBinStep;
   double ZBinStep;
-  vtkIdType SliceSize; //eliminate one multiplication
+  vtkIdType SliceSize; // eliminate one multiplication
 
   struct PointQuadric
   {
-    PointQuadric():VertexId(-1),Dimension(255) {}
+    PointQuadric()
+      : VertexId(-1)
+      , Dimension(255)
+    {
+    }
 
     vtkIdType VertexId;
     // Dimension is supposed to be a flag representing the dimension of the
@@ -396,20 +402,20 @@ protected:
 
   // Have to make these instance variables if we are going to allow
   // the algorithm to be driven by the Append methods.
-  vtkCellArray *OutputTriangleArray;
-  vtkCellArray *OutputLines;
+  vtkCellArray* OutputTriangleArray;
+  vtkCellArray* OutputLines;
 
-  vtkFeatureEdges *FeatureEdges;
-  vtkPoints *FeaturePoints;
+  vtkFeatureEdges* FeatureEdges;
+  vtkPoints* FeaturePoints;
   double FeaturePointsAngle;
 
-  int CopyCellData;
+  vtkTypeBool CopyCellData;
   int InCellCount;
   int OutCellCount;
 
 private:
-  vtkQuadricClustering(const vtkQuadricClustering&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQuadricClustering&) VTK_DELETE_FUNCTION;
+  vtkQuadricClustering(const vtkQuadricClustering&) = delete;
+  void operator=(const vtkQuadricClustering&) = delete;
 };
 
 #endif

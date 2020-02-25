@@ -21,20 +21,20 @@
 #include "vtk_glew.h"
 
 // glQueryCounter unavailable in OpenGL ES:
-#if defined(GL_ES_VERSION_3_0)
+#ifdef GL_ES_VERSION_3_0
 #define NO_TIMESTAMP_QUERIES
 #endif
 
 //------------------------------------------------------------------------------
 vtkOpenGLRenderTimer::vtkOpenGLRenderTimer()
-  : StartReady(false),
-    EndReady(false),
-    StartQuery(0),
-    EndQuery(0),
-    StartTime(0),
-    EndTime(0),
-    ReusableStarted(false),
-    ReusableEnded(false)
+  : StartReady(false)
+  , EndReady(false)
+  , StartQuery(0)
+  , EndQuery(0)
+  , StartTime(0)
+  , EndTime(0)
+  , ReusableStarted(false)
+  , ReusableEnded(false)
 {
 }
 
@@ -62,6 +62,15 @@ bool vtkOpenGLRenderTimer::IsSupported()
 void vtkOpenGLRenderTimer::Reset()
 {
 #ifndef NO_TIMESTAMP_QUERIES
+  if (this->StartQuery == 0 && this->EndQuery == 0)
+  {
+    // short-circuit to avoid checking if queries weren't initialized at all.
+    // this is necessary since `IsSupported` may make OpenGL calls on APPLE
+    // through `HaveAppleQueryAllocationBug` invocation and that may be not be
+    // correct when timers are being destroyed.
+    return;
+  }
+
   if (!this->IsSupported())
   {
     return;
@@ -135,7 +144,7 @@ bool vtkOpenGLRenderTimer::Started()
 {
 #ifndef NO_TIMESTAMP_QUERIES
   return this->StartQuery != 0;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return false;
 #endif // NO_TIMESTAMP_QUERIES
 }
@@ -145,7 +154,7 @@ bool vtkOpenGLRenderTimer::Stopped()
 {
 #ifndef NO_TIMESTAMP_QUERIES
   return this->EndQuery != 0;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return false;
 #endif // NO_TIMESTAMP_QUERIES
 }
@@ -162,33 +171,29 @@ bool vtkOpenGLRenderTimer::Ready()
   if (!this->StartReady)
   {
     GLint ready;
-    glGetQueryObjectiv(static_cast<GLuint>(this->StartQuery),
-                       GL_QUERY_RESULT_AVAILABLE, &ready);
+    glGetQueryObjectiv(static_cast<GLuint>(this->StartQuery), GL_QUERY_RESULT_AVAILABLE, &ready);
     if (!ready)
     {
       return false;
     }
 
     this->StartReady = true;
-    glGetQueryObjectui64v(static_cast<GLuint>(this->StartQuery),
-                          GL_QUERY_RESULT,
-                          reinterpret_cast<GLuint64*>(&this->StartTime));
+    glGetQueryObjectui64v(static_cast<GLuint>(this->StartQuery), GL_QUERY_RESULT,
+      reinterpret_cast<GLuint64*>(&this->StartTime));
   }
 
   if (!this->EndReady)
   {
     GLint ready;
-    glGetQueryObjectiv(static_cast<GLuint>(this->EndQuery),
-                       GL_QUERY_RESULT_AVAILABLE, &ready);
+    glGetQueryObjectiv(static_cast<GLuint>(this->EndQuery), GL_QUERY_RESULT_AVAILABLE, &ready);
     if (!ready)
     {
       return false;
     }
 
     this->EndReady = true;
-    glGetQueryObjectui64v(static_cast<GLuint>(this->EndQuery),
-                          GL_QUERY_RESULT,
-                          reinterpret_cast<GLuint64*>(&this->EndTime));
+    glGetQueryObjectui64v(static_cast<GLuint>(this->EndQuery), GL_QUERY_RESULT,
+      reinterpret_cast<GLuint64*>(&this->EndTime));
   }
 #endif // NO_TIMESTAMP_QUERIES
 
@@ -205,7 +210,7 @@ float vtkOpenGLRenderTimer::GetElapsedSeconds()
   }
 
   return (this->EndTime - this->StartTime) * 1e-9f;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return 0.f;
 #endif // NO_TIMESTAMP_QUERIES
 }
@@ -220,14 +225,13 @@ float vtkOpenGLRenderTimer::GetElapsedMilliseconds()
   }
 
   return (this->EndTime - this->StartTime) * 1e-6f;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return 0.f;
 #endif // NO_TIMESTAMP_QUERIES
 }
 
 //------------------------------------------------------------------------------
-vtkTypeUInt64
-vtkOpenGLRenderTimer::GetElapsedNanoseconds()
+vtkTypeUInt64 vtkOpenGLRenderTimer::GetElapsedNanoseconds()
 {
 #ifndef NO_TIMESTAMP_QUERIES
   if (!this->Ready())
@@ -236,7 +240,7 @@ vtkOpenGLRenderTimer::GetElapsedNanoseconds()
   }
 
   return (this->EndTime - this->StartTime);
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return 0;
 #endif // NO_TIMESTAMP_QUERIES
 }
@@ -251,7 +255,7 @@ vtkTypeUInt64 vtkOpenGLRenderTimer::GetStartTime()
   }
 
   return this->StartTime;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return 0;
 #endif // NO_TIMESTAMP_QUERIES
 }
@@ -266,7 +270,7 @@ vtkTypeUInt64 vtkOpenGLRenderTimer::GetStopTime()
   }
 
   return this->EndTime;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return 0;
 #endif // NO_TIMESTAMP_QUERIES
 }
@@ -345,19 +349,17 @@ float vtkOpenGLRenderTimer::GetReusableElapsedSeconds()
   if (this->ReusableStarted && !this->StartReady)
   {
     GLint ready;
-    glGetQueryObjectiv(static_cast<GLuint>(this->StartQuery),
-                       GL_QUERY_RESULT_AVAILABLE, &ready);
+    glGetQueryObjectiv(static_cast<GLuint>(this->StartQuery), GL_QUERY_RESULT_AVAILABLE, &ready);
     if (ready)
     {
-     this->StartReady = true;
+      this->StartReady = true;
     }
   }
 
   if (this->StartReady && this->ReusableEnded && !this->EndReady)
   {
     GLint ready;
-    glGetQueryObjectiv(static_cast<GLuint>(this->EndQuery),
-                       GL_QUERY_RESULT_AVAILABLE, &ready);
+    glGetQueryObjectiv(static_cast<GLuint>(this->EndQuery), GL_QUERY_RESULT_AVAILABLE, &ready);
     if (ready)
     {
       this->EndReady = true;
@@ -370,12 +372,10 @@ float vtkOpenGLRenderTimer::GetReusableElapsedSeconds()
   // beyond the first flight.
   if (this->StartReady && this->EndReady)
   {
-    glGetQueryObjectui64v(static_cast<GLuint>(this->StartQuery),
-                          GL_QUERY_RESULT,
-                          reinterpret_cast<GLuint64*>(&this->StartTime));
-    glGetQueryObjectui64v(static_cast<GLuint>(this->EndQuery),
-                          GL_QUERY_RESULT,
-                          reinterpret_cast<GLuint64*>(&this->EndTime));
+    glGetQueryObjectui64v(static_cast<GLuint>(this->StartQuery), GL_QUERY_RESULT,
+      reinterpret_cast<GLuint64*>(&this->StartTime));
+    glGetQueryObjectui64v(static_cast<GLuint>(this->EndQuery), GL_QUERY_RESULT,
+      reinterpret_cast<GLuint64*>(&this->EndTime));
     // it was ready so prepare another flight
     this->ReusableStarted = false;
     this->ReusableEnded = false;
@@ -384,7 +384,7 @@ float vtkOpenGLRenderTimer::GetReusableElapsedSeconds()
   }
 
   return (this->EndTime - this->StartTime) * 1e-9f;
-#else // NO_TIMESTAMP_QUERIES
+#else  // NO_TIMESTAMP_QUERIES
   return 0.f;
 #endif // NO_TIMESTAMP_QUERIES
 }

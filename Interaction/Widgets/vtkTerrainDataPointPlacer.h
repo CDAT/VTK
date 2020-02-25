@@ -32,7 +32,7 @@
  *
  * @sa
  * vtkPointPlacer vtkTerrainContourLineInterpolator
-*/
+ */
 
 #ifndef vtkTerrainDataPointPlacer_h
 #define vtkTerrainDataPointPlacer_h
@@ -50,20 +50,20 @@ public:
   /**
    * Instantiate this class.
    */
-  static vtkTerrainDataPointPlacer *New();
+  static vtkTerrainDataPointPlacer* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkTerrainDataPointPlacer,vtkPointPlacer);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkTerrainDataPointPlacer, vtkPointPlacer);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   // Descuription:
   // Add an actor (that represents a terrain in a rendererd scene) to the
   // list. Only props in this list are considered by the PointPlacer
-  virtual void AddProp( vtkProp * );
+  virtual void AddProp(vtkProp*);
   virtual void RemoveAllProps();
 
   //@{
@@ -73,8 +73,8 @@ public:
    * terrain; negative values indicate distances below the terrain. The
    * default is 0.0.
    */
-  vtkSetMacro(HeightOffset,double);
-  vtkGetMacro(HeightOffset,double);
+  vtkSetMacro(HeightOffset, double);
+  vtkGetMacro(HeightOffset, double);
   //@}
 
   /**
@@ -85,10 +85,8 @@ public:
    * For the Terrain point placer this computes world points that
    * lie at the specified height above the terrain.
    */
-  int ComputeWorldPosition( vtkRenderer *ren,
-                                    double displayPos[2],
-                                    double worldPos[3],
-                                    double worldOrient[9] ) VTK_OVERRIDE;
+  int ComputeWorldPosition(
+    vtkRenderer* ren, double displayPos[2], double worldPos[3], double worldOrient[9]) override;
 
   /**
    * Given a renderer, a display position, and a reference world
@@ -96,50 +94,46 @@ public:
    * of this point. This method is typically used by the
    * representation to move the point.
    */
-  int ComputeWorldPosition( vtkRenderer *ren,
-                                    double displayPos[2],
-                                    double refWorldPos[3],
-                                    double worldPos[3],
-                                    double worldOrient[9] ) VTK_OVERRIDE;
+  int ComputeWorldPosition(vtkRenderer* ren, double displayPos[2], double refWorldPos[3],
+    double worldPos[3], double worldOrient[9]) override;
 
   /**
    * Given a world position check the validity of this
    * position according to the constraints of the placer
    */
-  int ValidateWorldPosition( double worldPos[3] ) VTK_OVERRIDE;
+  int ValidateWorldPosition(double worldPos[3]) override;
 
   /**
    * Given a display position, check the validity of this position.
    */
-  int ValidateDisplayPosition( vtkRenderer *, double displayPos[2] ) VTK_OVERRIDE;
+  int ValidateDisplayPosition(vtkRenderer*, double displayPos[2]) override;
 
   /**
    * Given a world position and a world orientation,
    * validate it according to the constraints of the placer.
    */
-  int ValidateWorldPosition( double worldPos[3],
-                                     double worldOrient[9] ) VTK_OVERRIDE;
+  int ValidateWorldPosition(double worldPos[3], double worldOrient[9]) override;
 
   //@{
   /**
    * Get the Prop picker.
    */
-  vtkGetObjectMacro( PropPicker, vtkPropPicker );
+  vtkGetObjectMacro(PropPicker, vtkPropPicker);
   //@}
 
 protected:
   vtkTerrainDataPointPlacer();
-  ~vtkTerrainDataPointPlacer() VTK_OVERRIDE;
+  ~vtkTerrainDataPointPlacer() override;
 
   // The props that represents the terrain data (one or more) in a rendered
   // scene
-  vtkPropCollection  *TerrainProps;
-  vtkPropPicker      *PropPicker;
-  double              HeightOffset;
+  vtkPropCollection* TerrainProps;
+  vtkPropPicker* PropPicker;
+  double HeightOffset;
 
 private:
-  vtkTerrainDataPointPlacer(const vtkTerrainDataPointPlacer&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTerrainDataPointPlacer&) VTK_DELETE_FUNCTION;
+  vtkTerrainDataPointPlacer(const vtkTerrainDataPointPlacer&) = delete;
+  void operator=(const vtkTerrainDataPointPlacer&) = delete;
 };
 
 #endif

@@ -40,14 +40,14 @@
  * @par Thanks:
  *  Developed by David Feng and Philippe Pebay at Sandia National Laboratories
  *------------------------------------------------------------------------------
-*/
+ */
 
 #ifndef vtkPairwiseExtractHistogram2D_h
 #define vtkPairwiseExtractHistogram2D_h
 
 #include "vtkFiltersImagingModule.h" // For export macro
+#include "vtkSmartPointer.h"         //needed for smart pointer ivars
 #include "vtkStatisticsAlgorithm.h"
-#include "vtkSmartPointer.h"  //needed for smart pointer ivars
 class vtkCollection;
 class vtkExtractHistogram2D;
 class vtkImageData;
@@ -59,14 +59,14 @@ class VTKFILTERSIMAGING_EXPORT vtkPairwiseExtractHistogram2D : public vtkStatist
 public:
   static vtkPairwiseExtractHistogram2D* New();
   vtkTypeMacro(vtkPairwiseExtractHistogram2D, vtkStatisticsAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/get the bin dimensions of the histograms to compute
    */
-  vtkSetVector2Macro(NumberOfBins,int);
-  vtkGetVector2Macro(NumberOfBins,int);
+  vtkSetVector2Macro(NumberOfBins, int);
+  vtkGetVector2Macro(NumberOfBins, int);
   //@}
 
   //@{
@@ -75,8 +75,8 @@ public:
    * column range. This was (probably) necessary to get this class
    * to interact with the ParaView client/server message passing interface.
    */
-  vtkSetMacro(CustomColumnRangeIndex,int);
-  void SetCustomColumnRangeByIndex(double,double);
+  vtkSetMacro(CustomColumnRangeIndex, int);
+  void SetCustomColumnRangeByIndex(double, double);
   //@}
 
   //@{
@@ -93,16 +93,12 @@ public:
   /**
    * Set the scalar type for each of the computed histograms.
    */
-  vtkSetMacro(ScalarType,int);
-  void SetScalarTypeToUnsignedInt()
-    {this->SetScalarType(VTK_UNSIGNED_INT);};
-  void SetScalarTypeToUnsignedLong()
-    {this->SetScalarType(VTK_UNSIGNED_LONG);};
-  void SetScalarTypeToUnsignedShort()
-    {this->SetScalarType(VTK_UNSIGNED_SHORT);};
-  void SetScalarTypeToUnsignedChar()
-    {this->SetScalarType(VTK_UNSIGNED_CHAR);};
-  vtkGetMacro(ScalarType,int);
+  vtkSetMacro(ScalarType, int);
+  void SetScalarTypeToUnsignedInt() { this->SetScalarType(VTK_UNSIGNED_INT); }
+  void SetScalarTypeToUnsignedLong() { this->SetScalarType(VTK_UNSIGNED_LONG); }
+  void SetScalarTypeToUnsignedShort() { this->SetScalarType(VTK_UNSIGNED_SHORT); }
+  void SetScalarTypeToUnsignedChar() { this->SetScalarType(VTK_UNSIGNED_CHAR); }
+  vtkGetMacro(ScalarType, int);
   //@}
 
   /**
@@ -151,17 +147,17 @@ public:
 
   enum OutputIndices
   {
-    HISTOGRAM_IMAGE=3
+    HISTOGRAM_IMAGE = 3
   };
 
   /**
    * Given a collection of models, calculate aggregate model.  Not used
    */
-  void Aggregate( vtkDataObjectCollection*, vtkMultiBlockDataSet* ) VTK_OVERRIDE {}
+  void Aggregate(vtkDataObjectCollection*, vtkMultiBlockDataSet*) override {}
 
 protected:
   vtkPairwiseExtractHistogram2D();
-  ~vtkPairwiseExtractHistogram2D() VTK_OVERRIDE;
+  ~vtkPairwiseExtractHistogram2D() override;
 
   int NumberOfBins[2];
   int ScalarType;
@@ -176,48 +172,43 @@ protected:
    * Execute the calculations required by the Learn option.
    * Does the actual histogram computation works.
    */
-  void Learn( vtkTable* inData,
-                      vtkTable* inParameters,
-                      vtkMultiBlockDataSet* outMeta ) VTK_OVERRIDE;
+  void Learn(vtkTable* inData, vtkTable* inParameters, vtkMultiBlockDataSet* outMeta) override;
 
   /**
    * Execute the calculations required by the Derive option. Not used.
    */
-  void Derive( vtkMultiBlockDataSet* ) VTK_OVERRIDE {}
+  void Derive(vtkMultiBlockDataSet*) override {}
 
   /**
    * Execute the assess option. Not implemented.
    */
-  void Assess( vtkTable*,
-                       vtkMultiBlockDataSet*,
-                       vtkTable* ) VTK_OVERRIDE {}
+  void Assess(vtkTable*, vtkMultiBlockDataSet*, vtkTable*) override {}
 
   /**
    * Execute the calculations required by the Test option.
    */
-  void Test( vtkTable*,
-                     vtkMultiBlockDataSet*,
-                     vtkTable* ) VTK_OVERRIDE { return; };
+  void Test(vtkTable*, vtkMultiBlockDataSet*, vtkTable*) override { return; }
 
   /**
    * Provide the appropriate assessment functor.
    */
-  void SelectAssessFunctor( vtkTable* vtkNotUsed(outData),
-                                    vtkDataObject* vtkNotUsed(inMeta),
-                                    vtkStringArray* vtkNotUsed(rowNames),
-                                    AssessFunctor*& vtkNotUsed(dfunc) ) VTK_OVERRIDE {}
+  void SelectAssessFunctor(vtkTable* vtkNotUsed(outData), vtkDataObject* vtkNotUsed(inMeta),
+    vtkStringArray* vtkNotUsed(rowNames), AssessFunctor*& vtkNotUsed(dfunc)) override
+  {
+  }
 
   /**
    * Generate a new histogram filter
    */
   virtual vtkExtractHistogram2D* NewHistogramFilter();
 
-  int FillOutputPortInformation( int port, vtkInformation* info ) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   vtkTimeStamp BuildTime;
+
 private:
-  vtkPairwiseExtractHistogram2D(const vtkPairwiseExtractHistogram2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPairwiseExtractHistogram2D&) VTK_DELETE_FUNCTION;
+  vtkPairwiseExtractHistogram2D(const vtkPairwiseExtractHistogram2D&) = delete;
+  void operator=(const vtkPairwiseExtractHistogram2D&) = delete;
 };
 
 #endif

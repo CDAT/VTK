@@ -30,7 +30,7 @@
  * and an interpolation kernel (a subclass of vtkSPHKernel). In addition, the
  * name of the source's density and mass arrays can optionally be provided;
  * however if not provided then the local volume is computed from the
- * kernel's spatial step. Finally, a cutoff distance array can optionall be
+ * kernel's spatial step. Finally, a cutoff distance array can optionally be
  * provided when the local neighborhood around each point varies. The cutoff
  * distance defines a local neighborhood in which the points in that
  * neighborhood are used to interpolate values. If not provided, then the
@@ -72,15 +72,15 @@
  *
  * @sa
  * vtkPointInterpolator vtkSPHKernel vtkSPHQuinticKernel
-*/
+ */
 
 #ifndef vtkSPHInterpolator_h
 #define vtkSPHInterpolator_h
 
-#include "vtkFiltersPointsModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
-#include "vtkStdString.h" // For vtkStdString ivars
-#include <vector> //For STL vector
+#include "vtkFiltersPointsModule.h" // For export macro
+#include "vtkStdString.h"           // For vtkStdString ivars
+#include <vector>                   //For STL vector
 
 class vtkAbstractPointLocator;
 class vtkIdList;
@@ -88,7 +88,6 @@ class vtkDoubleArray;
 class vtkSPHKernel;
 class vtkCharArray;
 class vtkFloatArray;
-
 
 class VTKFILTERSPOINTS_EXPORT vtkSPHInterpolator : public vtkDataSetAlgorithm
 {
@@ -98,9 +97,9 @@ public:
    * Standard methods for instantiating, obtaining type information, and
    * printing.
    */
-  static vtkSPHInterpolator *New();
-  vtkTypeMacro(vtkSPHInterpolator,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkSPHInterpolator* New();
+  vtkTypeMacro(vtkSPHInterpolator, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -111,8 +110,8 @@ public:
    * scalars, vectors, etc. for the output points based on the point
    * locations.
    */
-  void SetSourceData(vtkDataObject *source);
-  vtkDataObject *GetSource();
+  void SetSourceData(vtkDataObject* source);
+  vtkDataObject* GetSource();
   //@}
 
   /**
@@ -129,8 +128,8 @@ public:
    * used. The locator performs efficient searches to locate near a
    * specified interpolation position.
    */
-  void SetLocator(vtkAbstractPointLocator *locator);
-  vtkGetObjectMacro(Locator,vtkAbstractPointLocator);
+  void SetLocator(vtkAbstractPointLocator* locator);
+  vtkGetObjectMacro(Locator, vtkAbstractPointLocator);
   //@}
 
   //@{
@@ -139,8 +138,8 @@ public:
    * (i.e., closest point). The interpolation kernel changes the basis of the
    * interpolation.
    */
-  void SetKernel(vtkSPHKernel *kernel);
-  vtkGetObjectMacro(Kernel,vtkSPHKernel);
+  void SetKernel(vtkSPHKernel* kernel);
+  vtkGetObjectMacro(Kernel, vtkSPHKernel);
   //@}
 
   //@{
@@ -148,8 +147,8 @@ public:
    * Specify an (optional) cutoff distance for each point in the input P. If
    * not specified, then the kernel cutoff is used.
    */
-  vtkSetMacro(CutoffArrayName,vtkStdString);
-  vtkGetMacro(CutoffArrayName,vtkStdString);
+  vtkSetMacro(CutoffArrayName, vtkStdString);
+  vtkGetMacro(CutoffArrayName, vtkStdString);
   //@}
 
   //@{
@@ -159,8 +158,8 @@ public:
    * Both the mass and density arrays must consist of tuples of 1-component. (Note that
    * the density array name specifies a point array found in the Pc source.)
    */
-  vtkSetMacro(DensityArrayName,vtkStdString);
-  vtkGetMacro(DensityArrayName,vtkStdString);
+  vtkSetMacro(DensityArrayName, vtkStdString);
+  vtkGetMacro(DensityArrayName, vtkStdString);
   //@}
 
   //@{
@@ -171,8 +170,8 @@ public:
    * of 1-component. (Note that the mass array name specifies a point
    * array found in the Pc source.)
    */
-  vtkSetMacro(MassArrayName,vtkStdString);
-  vtkGetMacro(MassArrayName,vtkStdString);
+  vtkSetMacro(MassArrayName, vtkStdString);
+  vtkGetMacro(MassArrayName, vtkStdString);
   //@}
 
   //@{
@@ -180,7 +179,7 @@ public:
    * Adds an array to the list of arrays which are to be excluded from the
    * interpolation process.
    */
-  void AddExcludedArray(const vtkStdString &excludedArray)
+  void AddExcludedArray(const vtkStdString& excludedArray)
   {
     this->ExcludedArrays.push_back(excludedArray);
     this->Modified();
@@ -201,8 +200,7 @@ public:
   /**
    * Return the number of excluded arrays.
    */
-  int GetNumberOfExcludedArrays()
-    {return static_cast<int>(this->ExcludedArrays.size());}
+  int GetNumberOfExcludedArrays() { return static_cast<int>(this->ExcludedArrays.size()); }
 
   //@{
   /**
@@ -210,11 +208,11 @@ public:
    */
   const char* GetExcludedArray(int i)
   {
-      if ( i < 0 || i >= static_cast<int>(this->ExcludedArrays.size()) )
-      {
-        return nullptr;
-      }
-      return this->ExcludedArrays[i].c_str();
+    if (i < 0 || i >= static_cast<int>(this->ExcludedArrays.size()))
+    {
+      return nullptr;
+    }
+    return this->ExcludedArrays[i].c_str();
   }
   //@}
 
@@ -224,7 +222,7 @@ public:
    * the name of the array is "derivArray" this will produce an output array
    * with the name "derivArray_deriv" (after filter execution).
    */
-  void AddDerivativeArray(const vtkStdString &derivArray)
+  void AddDerivativeArray(const vtkStdString& derivArray)
   {
     this->DerivArrays.push_back(derivArray);
     this->Modified();
@@ -245,8 +243,7 @@ public:
   /**
    * Return the number of derivative arrays.
    */
-  int GetNumberOfDerivativeArrays()
-    {return static_cast<int>(this->DerivArrays.size());}
+  int GetNumberOfDerivativeArrays() { return static_cast<int>(this->DerivArrays.size()); }
 
   //@{
   /**
@@ -254,19 +251,19 @@ public:
    */
   const char* GetDerivativeArray(int i)
   {
-      if ( i < 0 || i >= static_cast<int>(this->DerivArrays.size()) )
-      {
-        return nullptr;
-      }
-      return this->DerivArrays[i].c_str();
+    if (i < 0 || i >= static_cast<int>(this->DerivArrays.size()))
+    {
+      return nullptr;
+    }
+    return this->DerivArrays[i].c_str();
   }
   //@}
 
-  // How to handle nullptr points
+  // How to handle NULL/empty points
   enum NullStrategy
   {
-    MASK_POINTS=0,
-    NULL_VALUE=1
+    MASK_POINTS = 0,
+    NULL_VALUE = 1
   };
 
   //@{
@@ -279,12 +276,10 @@ public:
    * the strategy is set to NullValue, then the output data value(s) are set
    * to the NullPoint value.
    */
-  vtkSetMacro(NullPointsStrategy,int);
-  vtkGetMacro(NullPointsStrategy,int);
-  void SetNullPointsStrategyToMaskPoints()
-    { this->SetNullPointsStrategy(MASK_POINTS); }
-  void SetNullPointsStrategyToNullValue()
-    { this->SetNullPointsStrategy(NULL_VALUE); }
+  vtkSetMacro(NullPointsStrategy, int);
+  vtkGetMacro(NullPointsStrategy, int);
+  void SetNullPointsStrategyToMaskPoints() { this->SetNullPointsStrategy(MASK_POINTS); }
+  void SetNullPointsStrategyToNullValue() { this->SetNullPointsStrategy(NULL_VALUE); }
   //@}
 
   //@{
@@ -304,22 +299,22 @@ public:
    * components of each null tuple are set to this value. By default the
    * null value is set to zero.
    */
-  vtkSetMacro(NullValue,double);
-  vtkGetMacro(NullValue,double);
+  vtkSetMacro(NullValue, double);
+  vtkGetMacro(NullValue, double);
   //@}
 
   //@{
   /**
    * Indicate whether to compute the summation of weighting coefficients (the
    * so-called Shepard sum). In the interior of a SPH point cloud, the
-   * Shephard summation value should be ~1.0.  Towards the boundary, the
+   * Shepard summation value should be ~1.0.  Towards the boundary, the
    * Shepard summation generally falls off <1.0. If ComputeShepardSum is specified, then the
    * output will contain an array of summed Shepard weights for each output
    * point. On by default.
    */
-  vtkSetMacro(ComputeShepardSum, bool);
-  vtkBooleanMacro(ComputeShepardSum, bool);
-  vtkGetMacro(ComputeShepardSum, bool);
+  vtkSetMacro(ComputeShepardSum, vtkTypeBool);
+  vtkBooleanMacro(ComputeShepardSum, vtkTypeBool);
+  vtkGetMacro(ComputeShepardSum, vtkTypeBool);
   //@}
 
   //@{
@@ -340,9 +335,9 @@ public:
    * interpolation process may not be well behaved when integral types are
    * combined using interpolation weights.
    */
-  vtkSetMacro(PromoteOutputArrays, bool);
-  vtkBooleanMacro(PromoteOutputArrays, bool);
-  vtkGetMacro(PromoteOutputArrays, bool);
+  vtkSetMacro(PromoteOutputArrays, vtkTypeBool);
+  vtkBooleanMacro(PromoteOutputArrays, vtkTypeBool);
+  vtkGetMacro(PromoteOutputArrays, vtkTypeBool);
   //@}
 
   //@{
@@ -350,9 +345,9 @@ public:
    * Indicate whether to shallow copy the input point data arrays to the
    * output. On by default.
    */
-  vtkSetMacro(PassPointArrays, bool);
-  vtkBooleanMacro(PassPointArrays, bool);
-  vtkGetMacro(PassPointArrays, bool);
+  vtkSetMacro(PassPointArrays, vtkTypeBool);
+  vtkBooleanMacro(PassPointArrays, vtkTypeBool);
+  vtkGetMacro(PassPointArrays, vtkTypeBool);
   //@}
 
   //@{
@@ -360,9 +355,9 @@ public:
    * Indicate whether to shallow copy the input cell data arrays to the
    * output. On by default.
    */
-  vtkSetMacro(PassCellArrays, bool);
-  vtkBooleanMacro(PassCellArrays, bool);
-  vtkGetMacro(PassCellArrays, bool);
+  vtkSetMacro(PassCellArrays, vtkTypeBool);
+  vtkBooleanMacro(PassCellArrays, vtkTypeBool);
+  vtkGetMacro(PassCellArrays, vtkTypeBool);
   //@}
 
   //@{
@@ -370,22 +365,34 @@ public:
    * Indicate whether to pass the field-data arrays from the input to the
    * output. On by default.
    */
-  vtkSetMacro(PassFieldArrays, bool);
-  vtkBooleanMacro(PassFieldArrays, bool);
-  vtkGetMacro(PassFieldArrays, bool);
+  vtkSetMacro(PassFieldArrays, vtkTypeBool);
+  vtkBooleanMacro(PassFieldArrays, vtkTypeBool);
+  vtkGetMacro(PassFieldArrays, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
+   * Indicate whether to normalize all arrays with the Shepard coefficients
+   * (except the density array and the Shepard sum array). If the Shepard
+   * coefficient is 0, then the data value is set to zero. Note that enabling
+   * ShepardNormalization forces the computation of the ShepardSum array.
+   */
+  vtkSetMacro(ShepardNormalization, vtkTypeBool);
+  vtkBooleanMacro(ShepardNormalization, vtkTypeBool);
+  vtkGetMacro(ShepardNormalization, vtkTypeBool);
   //@}
 
   /**
    * Get the MTime of this object also considering the locator and kernel.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkSPHInterpolator();
-  ~vtkSPHInterpolator() VTK_OVERRIDE;
+  ~vtkSPHInterpolator() override;
 
-  vtkAbstractPointLocator *Locator;
-  vtkSPHKernel *Kernel;
+  vtkAbstractPointLocator* Locator;
+  vtkSPHKernel* Kernel;
 
   vtkStdString CutoffArrayName;
 
@@ -395,44 +402,41 @@ protected:
   std::vector<vtkStdString> ExcludedArrays;
   std::vector<vtkStdString> DerivArrays;
 
+  vtkTypeBool ShepardNormalization;
+
   int NullPointsStrategy;
   double NullValue;
   vtkStdString ValidPointsMaskArrayName;
-  vtkCharArray *ValidPointsMask;
+  vtkCharArray* ValidPointsMask;
 
-  bool ComputeShepardSum;
+  vtkTypeBool ComputeShepardSum;
   vtkStdString ShepardSumArrayName;
-  vtkFloatArray *ShepardSumArray;
+  vtkFloatArray* ShepardSumArray;
 
-  bool PromoteOutputArrays;
+  vtkTypeBool PromoteOutputArrays;
 
-  bool PassCellArrays;
-  bool PassPointArrays;
-  bool PassFieldArrays;
+  vtkTypeBool PassCellArrays;
+  vtkTypeBool PassPointArrays;
+  vtkTypeBool PassFieldArrays;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Virtual for specialized subclass(es)
    */
-  virtual void Probe(vtkDataSet *input, vtkDataSet *source, vtkDataSet *output);
+  virtual void Probe(vtkDataSet* input, vtkDataSet* source, vtkDataSet* output);
 
   /**
    * Call at end of RequestData() to pass attribute data respecting the
    * PassCellArrays, PassPointArrays, PassFieldArrays flags.
    */
-  virtual void PassAttributeData(
-    vtkDataSet* input, vtkDataObject* source, vtkDataSet* output);
+  virtual void PassAttributeData(vtkDataSet* input, vtkDataObject* source, vtkDataSet* output);
 
 private:
-  vtkSPHInterpolator(const vtkSPHInterpolator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSPHInterpolator&) VTK_DELETE_FUNCTION;
-
+  vtkSPHInterpolator(const vtkSPHInterpolator&) = delete;
+  void operator=(const vtkSPHInterpolator&) = delete;
 };
 
 #endif

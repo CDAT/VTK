@@ -26,11 +26,10 @@
  *
  * @sa
  * vtkImageButterworthHighPass vtkImageIdealLowPass vtkImageFFT vtkImageRFFT
-*/
+ */
 
 #ifndef vtkImageIdealHighPass_h
 #define vtkImageIdealHighPass_h
-
 
 #include "vtkImagingFourierModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -38,9 +37,9 @@
 class VTKIMAGINGFOURIER_EXPORT vtkImageIdealHighPass : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageIdealHighPass *New();
-  vtkTypeMacro(vtkImageIdealHighPass,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageIdealHighPass* New();
+  vtkTypeMacro(vtkImageIdealHighPass, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -48,31 +47,30 @@ public:
    * The values are specified in the order X, Y, Z, Time.
    * Units: Cycles per world unit (as defined by the data spacing).
    */
-  vtkSetVector3Macro(CutOff,double);
-  void SetCutOff(double v) {this->SetCutOff(v, v, v);}
+  vtkSetVector3Macro(CutOff, double);
+  void SetCutOff(double v) { this->SetCutOff(v, v, v); }
   void SetXCutOff(double v);
   void SetYCutOff(double v);
   void SetZCutOff(double v);
-  vtkGetVector3Macro(CutOff,double);
-  double GetXCutOff() {return this->CutOff[0];}
-  double GetYCutOff() {return this->CutOff[1];}
-  double GetZCutOff() {return this->CutOff[2];}
+  vtkGetVector3Macro(CutOff, double);
+  double GetXCutOff() { return this->CutOff[0]; }
+  double GetYCutOff() { return this->CutOff[1]; }
+  double GetZCutOff() { return this->CutOff[2]; }
   //@}
 
 protected:
   vtkImageIdealHighPass();
-  ~vtkImageIdealHighPass()VTK_OVERRIDE {}
+  ~vtkImageIdealHighPass() override {}
 
   double CutOff[3];
 
-  void ThreadedRequestData(vtkInformation *request,
-                           vtkInformationVector **inputVector,
-                           vtkInformationVector *outputVector,
-                           vtkImageData ***inData, vtkImageData **outData,
-                           int outExt[6], int id) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData,
+    int outExt[6], int id) override;
+
 private:
-  vtkImageIdealHighPass(const vtkImageIdealHighPass&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageIdealHighPass&) VTK_DELETE_FUNCTION;
+  vtkImageIdealHighPass(const vtkImageIdealHighPass&) = delete;
+  void operator=(const vtkImageIdealHighPass&) = delete;
 };
 
 #endif

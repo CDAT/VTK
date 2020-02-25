@@ -23,7 +23,7 @@
  * open-ended or capped. If you have the end points of the cylinder, you
  * should use a vtkLineSource followed by a vtkTubeFilter instead of the
  * vtkCylinderSource.
-*/
+ */
 
 #ifndef vtkCylinderSource_h
 #define vtkCylinderSource_h
@@ -36,49 +36,49 @@
 class VTKFILTERSSOURCES_EXPORT vtkCylinderSource : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkCylinderSource *New();
-  vtkTypeMacro(vtkCylinderSource,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkCylinderSource* New();
+  vtkTypeMacro(vtkCylinderSource, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set the height of the cylinder. Initial value is 1.
    */
-  vtkSetClampMacro(Height,double,0.0,VTK_DOUBLE_MAX)
-  vtkGetMacro(Height,double);
+  vtkSetClampMacro(Height, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(Height, double);
   //@}
 
   //@{
   /**
    * Set the radius of the cylinder. Initial value is 0.5
    */
-  vtkSetClampMacro(Radius,double,0.0,VTK_DOUBLE_MAX)
-  vtkGetMacro(Radius,double);
+  vtkSetClampMacro(Radius, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(Radius, double);
   //@}
 
   //@{
   /**
    * Set/Get cylinder center. Initial value is (0.0,0.0,0.0)
    */
-  vtkSetVector3Macro(Center,double);
-  vtkGetVectorMacro(Center,double,3);
+  vtkSetVector3Macro(Center, double);
+  vtkGetVectorMacro(Center, double, 3);
   //@}
 
   //@{
   /**
    * Set the number of facets used to define cylinder. Initial value is 6.
    */
-  vtkSetClampMacro(Resolution,int,2,VTK_CELL_SIZE)
-  vtkGetMacro(Resolution,int);
+  vtkSetClampMacro(Resolution, int, 2, VTK_CELL_SIZE);
+  vtkGetMacro(Resolution, int);
   //@}
 
   //@{
   /**
    * Turn on/off whether to cap cylinder with polygons. Initial value is true.
    */
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, vtkTypeBool);
+  vtkGetMacro(Capping, vtkTypeBool);
+  vtkBooleanMacro(Capping, vtkTypeBool);
   //@}
 
   //@{
@@ -87,25 +87,25 @@ public:
    * vtkAlgorithm::SINGLE_PRECISION - Output single-precision floating point.
    * vtkAlgorithm::DOUBLE_PRECISION - Output double-precision floating point.
    */
-  vtkSetMacro(OutputPointsPrecision,int);
-  vtkGetMacro(OutputPointsPrecision,int);
+  vtkSetMacro(OutputPointsPrecision, int);
+  vtkGetMacro(OutputPointsPrecision, int);
   //@}
 
 protected:
-  vtkCylinderSource(int res=6);
-  ~vtkCylinderSource() VTK_OVERRIDE {}
+  vtkCylinderSource(int res = 6);
+  ~vtkCylinderSource() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   double Height;
   double Radius;
   double Center[3];
   int Resolution;
-  int Capping;
+  vtkTypeBool Capping;
   int OutputPointsPrecision;
 
 private:
-  vtkCylinderSource(const vtkCylinderSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCylinderSource&) VTK_DELETE_FUNCTION;
+  vtkCylinderSource(const vtkCylinderSource&) = delete;
+  void operator=(const vtkCylinderSource&) = delete;
 };
 
 #endif

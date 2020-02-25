@@ -22,57 +22,52 @@
  * several imaging filters.
  * @sa
  * vtkImageStencilData vtkImageStencilSource
-*/
+ */
 
 #ifndef vtkImageStencilAlgorithm_h
 #define vtkImageStencilAlgorithm_h
 
-
-#include "vtkImagingCoreModule.h" // For export macro
 #include "vtkAlgorithm.h"
+#include "vtkImagingCoreModule.h" // For export macro
 
 class vtkImageStencilData;
 
 class VTKIMAGINGCORE_EXPORT vtkImageStencilAlgorithm : public vtkAlgorithm
 {
 public:
-  static vtkImageStencilAlgorithm *New();
+  static vtkImageStencilAlgorithm* New();
   vtkTypeMacro(vtkImageStencilAlgorithm, vtkAlgorithm);
 
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get or set the output for this source.
    */
-  void SetOutput(vtkImageStencilData *output);
-  vtkImageStencilData *GetOutput();
+  void SetOutput(vtkImageStencilData* output);
+  vtkImageStencilData* GetOutput();
   //@}
 
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation*,
-                             vtkInformationVector**,
-                             vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
   vtkImageStencilAlgorithm();
-  ~vtkImageStencilAlgorithm() VTK_OVERRIDE;
+  ~vtkImageStencilAlgorithm() override;
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *);
-  virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *);
-  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *);
-  vtkImageStencilData *AllocateOutputData(vtkDataObject *out, int* updateExt);
+  virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  virtual int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  virtual int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  vtkImageStencilData* AllocateOutputData(vtkDataObject* out, int* updateExt);
 
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
 private:
-  vtkImageStencilAlgorithm(const vtkImageStencilAlgorithm&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageStencilAlgorithm&) VTK_DELETE_FUNCTION;
+  vtkImageStencilAlgorithm(const vtkImageStencilAlgorithm&) = delete;
+  void operator=(const vtkImageStencilAlgorithm&) = delete;
 };
 
 #endif

@@ -18,7 +18,7 @@
  *
  *  An abstract base class that implements all the common functionality for
  *  all particle readers.
-*/
+ */
 
 #ifndef vtkAMRBaseParticlesReader_h
 #define vtkAMRBaseParticlesReader_h
@@ -34,45 +34,43 @@ class vtkPolyData;
 class vtkDataArraySelection;
 class vtkCallbackCommand;
 
-class VTKIOAMR_EXPORT vtkAMRBaseParticlesReader :
-  public vtkMultiBlockDataSetAlgorithm
+class VTKIOAMR_EXPORT vtkAMRBaseParticlesReader : public vtkMultiBlockDataSetAlgorithm
 {
 public:
-  vtkTypeMacro( vtkAMRBaseParticlesReader, vtkMultiBlockDataSetAlgorithm );
-  void PrintSelf(ostream &os, vtkIndent indent ) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAMRBaseParticlesReader, vtkMultiBlockDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set & Get the frequency.
    */
-  vtkGetMacro(Frequency,int);
-  vtkSetMacro(Frequency,int);
+  vtkGetMacro(Frequency, int);
+  vtkSetMacro(Frequency, int);
   //@}
 
   //@{
   /**
    * Set & Get the multi-process controller.
    */
-  vtkGetMacro(Controller, vtkMultiProcessController* );
-  vtkSetMacro(Controller, vtkMultiProcessController* );
+  vtkGetMacro(Controller, vtkMultiProcessController*);
+  vtkSetMacro(Controller, vtkMultiProcessController*);
   //@}
 
   //@{
   /**
    * Set & Get for filter location and boolean macro
    */
-  vtkSetMacro(FilterLocation,int);
-  vtkGetMacro(FilterLocation,int);
-  vtkBooleanMacro(FilterLocation,int);
+  vtkSetMacro(FilterLocation, vtkTypeBool);
+  vtkGetMacro(FilterLocation, vtkTypeBool);
+  vtkBooleanMacro(FilterLocation, vtkTypeBool);
   //@}
-
 
   //@{
   /**
    * Get the data array selection tables used to configure which data
    * arrays are loaded by the reader.
    */
-  vtkGetObjectMacro(ParticleDataArraySelection,vtkDataArraySelection);
+  vtkGetObjectMacro(ParticleDataArraySelection, vtkDataArraySelection);
   //@}
 
   /**
@@ -84,30 +82,28 @@ public:
    * Get the particle array name of the array associated with the given
    * index.
    */
-  const char* GetParticleArrayName( int index );
+  const char* GetParticleArrayName(int index);
 
   //@{
   /**
    * Get/Set whether the particle array status.
    */
-  int GetParticleArrayStatus( const char* name );
-  void SetParticleArrayStatus( const char* name, int status );
+  int GetParticleArrayStatus(const char* name);
+  void SetParticleArrayStatus(const char* name, int status);
   //@}
 
-
-  virtual void SetFileName( const char *fileName );
+  virtual void SetFileName(const char* fileName);
   vtkGetStringMacro(FileName);
 
   //@{
   /**
    * Sets the min location
    */
-  inline void SetMinLocation(
-      const double minx, const double miny, const double minz )
+  inline void SetMinLocation(const double minx, const double miny, const double minz)
   {
-    this->MinLocation[ 0 ] = minx;
-    this->MinLocation[ 1 ] = miny;
-    this->MinLocation[ 2 ] = minz;
+    this->MinLocation[0] = minx;
+    this->MinLocation[1] = miny;
+    this->MinLocation[2] = minz;
   }
   //@}
 
@@ -115,12 +111,11 @@ public:
   /**
    * Sets the max location
    */
-  inline void SetMaxLocation(
-      const double maxx, const double maxy, const double maxz )
+  inline void SetMaxLocation(const double maxx, const double maxy, const double maxz)
   {
-    this->MaxLocation[ 0 ] = maxx;
-    this->MaxLocation[ 1 ] = maxy;
-    this->MaxLocation[ 2 ] = maxz;
+    this->MaxLocation[0] = maxx;
+    this->MaxLocation[1] = maxy;
+    this->MaxLocation[2] = maxz;
   }
   //@}
 
@@ -131,7 +126,7 @@ public:
 
 protected:
   vtkAMRBaseParticlesReader();
-  ~vtkAMRBaseParticlesReader() VTK_OVERRIDE;
+  ~vtkAMRBaseParticlesReader() override;
 
   /**
    * Reads the metadata, e.g., the number of blocks in the file.
@@ -145,26 +140,26 @@ protected:
    * Reads the particles corresponding to the block associated with the
    * given supplied block index.
    */
-  virtual vtkPolyData* ReadParticles( const int blkIdx ) = 0;
+  virtual vtkPolyData* ReadParticles(const int blkIdx) = 0;
 
   /**
    * Filters particles by their location. If FilterLocation is ON, this
    * method returns whether or not the particle with the supplied xyz
-   * coordiantes flass within the bouning box spefixied by the user using
+   * coordinates class within the bounding box specified by the user using
    * the SetMinLocation & SetMaxLocation.
    */
-  bool CheckLocation( const double x, const double y, const double z );
+  bool CheckLocation(const double x, const double y, const double z);
 
   /**
    * Determines whether this reader instance is running in parallel or not.
    */
-  bool IsParallel( );
+  bool IsParallel();
 
   /**
    * Determines if the block associated with the given block index belongs
    * to the process that executes the current instance of the reader.
    */
-  bool IsBlockMine( const int blkIdx );
+  bool IsBlockMine(const int blkIdx);
 
   /**
    * Given the block index, this method determines the process Id.
@@ -173,7 +168,7 @@ protected:
    * block is assigned to a process according to blkIdx%N, where N is
    * the total number of processes.
    */
-  int GetBlockProcessId( const int blkIdx );
+  int GetBlockProcessId(const int blkIdx);
 
   /**
    * Initializes the AMR Particles reader
@@ -185,8 +180,8 @@ protected:
   /**
    * Standard Array selection variables & methods
    */
-  vtkDataArraySelection *ParticleDataArraySelection;
-  vtkCallbackCommand *SelectionObserver;
+  vtkDataArraySelection* ParticleDataArraySelection;
+  vtkCallbackCommand* SelectionObserver;
   //@}
 
   /**
@@ -207,34 +202,33 @@ protected:
    * particles
    */
   static void SelectionModifiedCallback(
-   vtkObject *caller,unsigned long eid,void *clientdata,void *calldata );
+    vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
 
   //@{
   /**
    * Standard pipeline operations
    */
-  int RequestData( vtkInformation *request,
-      vtkInformationVector **inputVector,
-      vtkInformationVector *outputVector ) VTK_OVERRIDE;
-  int FillOutputPortInformation( int port, vtkInformation *info ) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
   //@}
 
   int NumberOfBlocks;
 
-  int FilterLocation;
+  vtkTypeBool FilterLocation;
   double MinLocation[3];
   double MaxLocation[3];
 
   int Frequency;
-  vtkMultiProcessController *Controller;
+  vtkMultiProcessController* Controller;
 
-  bool  InitialRequest;
-  bool  Initialized;
-  char *FileName;
+  bool InitialRequest;
+  bool Initialized;
+  char* FileName;
 
 private:
-  vtkAMRBaseParticlesReader( const vtkAMRBaseParticlesReader& ) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAMRBaseParticlesReader& ) VTK_DELETE_FUNCTION;
+  vtkAMRBaseParticlesReader(const vtkAMRBaseParticlesReader&) = delete;
+  void operator=(const vtkAMRBaseParticlesReader&) = delete;
 };
 
 #endif /* vtkAMRBaseParticlesReader_h */

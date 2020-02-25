@@ -27,7 +27,7 @@
  *
  * @sa
  * vtkRungeKutta2 vtkRungeKutta4
-*/
+ */
 
 #ifndef vtkInitialValueProblemSolver_h
 #define vtkInitialValueProblemSolver_h
@@ -40,8 +40,8 @@ class vtkFunctionSet;
 class VTKCOMMONMATH_EXPORT vtkInitialValueProblemSolver : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkInitialValueProblemSolver,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkInitialValueProblemSolver, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -65,38 +65,66 @@ public:
    * NotInitialized = 2,
    * UnexpectedValue = 3
    */
-  virtual int ComputeNextStep(double* xprev, double* xnext, double t,
-                              double& delT, double maxError,
-                              double& error)
+  virtual int ComputeNextStep(
+    double* xprev, double* xnext, double t, double& delT, double maxError, double& error)
   {
-      double minStep = delT;
-      double maxStep = delT;
-      double delTActual;
-      return this->ComputeNextStep(xprev, nullptr, xnext, t, delT, delTActual,
-                                   minStep, maxStep, maxError, error);
+    return this->ComputeNextStep(xprev, xnext, t, delT, maxError, error, nullptr);
   }
-  virtual int ComputeNextStep(double* xprev, double* dxprev, double* xnext,
-                              double t, double& delT, double maxError,
-                              double& error)
+
+  virtual int ComputeNextStep(double* xprev, double* xnext, double t, double& delT, double maxError,
+    double& error, void* userData)
   {
-      double minStep = delT;
-      double maxStep = delT;
-      double delTActual;
-      return this->ComputeNextStep(xprev, dxprev, xnext, t, delT, delTActual,
-                                   minStep, maxStep, maxError, error);
+    double minStep = delT;
+    double maxStep = delT;
+    double delTActual;
+    return this->ComputeNextStep(
+      xprev, nullptr, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, userData);
   }
-  virtual int ComputeNextStep(double* xprev, double* xnext,
-                              double t, double& delT, double& delTActual,
-                              double minStep, double maxStep,
-                              double maxError, double& error)
+
+  virtual int ComputeNextStep(double* xprev, double* dxprev, double* xnext, double t, double& delT,
+    double maxError, double& error)
   {
-      return this->ComputeNextStep(xprev, nullptr, xnext, t, delT, delTActual,
-                                   minStep, maxStep, maxError, error);
+    return this->ComputeNextStep(xprev, dxprev, xnext, t, delT, maxError, error, nullptr);
   }
-  virtual int ComputeNextStep(double* xprev, double* dxprev, double* xnext,
-                              double t, double& delT, double& delTActual,
-                              double minStep, double maxStep,
-                              double maxError, double& error) = 0;
+
+  virtual int ComputeNextStep(double* xprev, double* dxprev, double* xnext, double t, double& delT,
+    double maxError, double& error, void* userData)
+  {
+    double minStep = delT;
+    double maxStep = delT;
+    double delTActual;
+    return this->ComputeNextStep(
+      xprev, dxprev, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, userData);
+  }
+  virtual int ComputeNextStep(double* xprev, double* xnext, double t, double& delT,
+    double& delTActual, double minStep, double maxStep, double maxError, double& error)
+  {
+    return this->ComputeNextStep(
+      xprev, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, nullptr);
+  }
+
+  virtual int ComputeNextStep(double* xprev, double* xnext, double t, double& delT,
+    double& delTActual, double minStep, double maxStep, double maxError, double& error,
+    void* userData)
+  {
+    return this->ComputeNextStep(
+      xprev, nullptr, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, userData);
+  }
+
+  virtual int ComputeNextStep(double* xprev, double* dxprev, double* xnext, double t, double& delT,
+    double& delTActual, double minStep, double maxStep, double maxError, double& error)
+  {
+    return this->ComputeNextStep(
+      xprev, dxprev, xnext, t, delT, delTActual, minStep, maxStep, maxError, error, nullptr);
+  }
+
+  virtual int ComputeNextStep(double* vtkNotUsed(xprev), double* vtkNotUsed(dxprev),
+    double* vtkNotUsed(xnext), double vtkNotUsed(t), double& vtkNotUsed(delT),
+    double& vtkNotUsed(delTActual), double vtkNotUsed(minStep), double vtkNotUsed(maxStep),
+    double vtkNotUsed(maxError), double& vtkNotUsed(error), void* vtkNotUsed(userData))
+  {
+    return 0;
+  }
   //@}
 
   //@{
@@ -104,14 +132,14 @@ public:
    * Set / get the dataset used for the implicit function evaluation.
    */
   virtual void SetFunctionSet(vtkFunctionSet* functionset);
-  vtkGetObjectMacro(FunctionSet,vtkFunctionSet);
+  vtkGetObjectMacro(FunctionSet, vtkFunctionSet);
   //@}
 
   /**
    * Returns 1 if the solver uses adaptive stepsize control,
    * 0 otherwise
    */
-  virtual int IsAdaptive() { return this->Adaptive; }
+  virtual vtkTypeBool IsAdaptive() { return this->Adaptive; }
 
   enum ErrorCodes
   {
@@ -122,7 +150,7 @@ public:
 
 protected:
   vtkInitialValueProblemSolver();
-  ~vtkInitialValueProblemSolver() VTK_OVERRIDE;
+  ~vtkInitialValueProblemSolver() override;
 
   virtual void Initialize();
 
@@ -131,15 +159,11 @@ protected:
   double* Vals;
   double* Derivs;
   int Initialized;
-  int Adaptive;
+  vtkTypeBool Adaptive;
 
 private:
-  vtkInitialValueProblemSolver(const vtkInitialValueProblemSolver&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInitialValueProblemSolver&) VTK_DELETE_FUNCTION;
+  vtkInitialValueProblemSolver(const vtkInitialValueProblemSolver&) = delete;
+  void operator=(const vtkInitialValueProblemSolver&) = delete;
 };
 
 #endif
-
-
-
-

@@ -27,10 +27,7 @@
 #include "vtkmlib/ArrayConverters.h"
 #include "vtkmlib/DataSetConverters.h"
 #include "vtkmlib/PolyDataConverter.h"
-#include "vtkmlib/Storage.h"
 
-#include "vtkmCellSetExplicit.h"
-#include "vtkmCellSetSingleType.h"
 #include "vtkmFilterPolicy.h"
 
 #include <vtkm/filter/VertexClustering.h>
@@ -38,8 +35,7 @@
 // the following
 #include <vtkm/cont/ArrayRangeCompute.hxx>
 
-
-vtkStandardNewMacro(vtkmLevelOfDetail)
+vtkStandardNewMacro(vtkmLevelOfDetail);
 
 //------------------------------------------------------------------------------
 vtkmLevelOfDetail::vtkmLevelOfDetail()
@@ -50,9 +46,7 @@ vtkmLevelOfDetail::vtkmLevelOfDetail()
 }
 
 //------------------------------------------------------------------------------
-vtkmLevelOfDetail::~vtkmLevelOfDetail()
-{
-}
+vtkmLevelOfDetail::~vtkmLevelOfDetail() {}
 
 //------------------------------------------------------------------------------
 void vtkmLevelOfDetail::SetNumberOfXDivisions(int num)
@@ -118,69 +112,50 @@ void vtkmLevelOfDetail::GetNumberOfDivisions(int div[3])
 
 //------------------------------------------------------------------------------
 int vtkmLevelOfDetail::RequestData(vtkInformation* vtkNotUsed(request),
-                                   vtkInformationVector** inputVector,
-                                   vtkInformationVector* outputVector)
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  vtkDataSet* input =
-      vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet* input = vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  vtkPolyData* output =
-      vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  // convert the input dataset to a vtkm::cont::DataSet
-  vtkm::cont::DataSet in = tovtkm::Convert(input,
-                                           tovtkm::FieldsFlag::PointsAndCells);
-  const bool dataSetValid =
-      in.GetNumberOfCoordinateSystems() > 0 && in.GetNumberOfCellSets() > 0;
-  if (!dataSetValid)
+  if (!input || input->GetNumberOfPoints() == 0)
   {
-    vtkErrorMacro(<< "Unable convert dataset over to VTK-m for input.");
+    // empty output for empty inputs
+    return 1;
+  }
+
+  try
+  {
+    // convert the input dataset to a vtkm::cont::DataSet
+    auto in = tovtkm::Convert(input, tovtkm::FieldsFlag::PointsAndCells);
+    if (in.GetNumberOfCells() == 0 || in.GetNumberOfPoints() == 0)
+    {
+      return 0;
+    }
+
+    vtkmInputFilterPolicy policy;
+    vtkm::filter::VertexClustering filter;
+    filter.SetNumberOfDivisions(vtkm::make_Vec(
+      this->NumberOfDivisions[0], this->NumberOfDivisions[1], this->NumberOfDivisions[2]));
+
+    auto result = filter.Execute(in, policy);
+
+    // convert back the dataset to VTK
+    if (!fromvtkm::Convert(result, output, input))
+    {
+      vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
+      return 0;
+    }
+  }
+  catch (const vtkm::cont::Error& e)
+  {
+    vtkErrorMacro(<< "VTK-m error: " << e.GetMessage());
     return 0;
   }
 
-  vtkm::filter::VertexClustering filter;
-
-  filter.SetNumberOfDivisions(vtkm::make_Vec(this->NumberOfDivisions[0],
-                                             this->NumberOfDivisions[1],
-                                             this->NumberOfDivisions[2]));
-
-  vtkmInputFilterPolicy policy;
-  vtkm::filter::ResultDataSet result = filter.Execute(in, policy);
-
-  // currently we can't convert point based scalar arrays over to the new output
-  // as the algorithm doesn't cache any of the interpolation data
-  //
-  // This shouldn't be hard, the question that we need answered is should
-  // we average the point field like we average the coordinates, or should
-  // we just take a random value. See VTKM issue #161. The mapping below is a
-  // no-op until this is resolved.
-  bool convertedDataSet = false;
-  if (result.IsValid())
-  {
-    // Map fields:
-    vtkm::Id numFields = static_cast<vtkm::Id>(in.GetNumberOfFields());
-    for (vtkm::Id fieldIdx = 0; fieldIdx < numFields; ++fieldIdx)
-    {
-      const vtkm::cont::Field &field = in.GetField(fieldIdx);
-      try
-      {
-        filter.MapFieldOntoOutput(result, field, policy);
-      }
-      catch (vtkm::cont::Error &e)
-      {
-        vtkWarningMacro(<< "Unable to use VTKm to convert field( "
-                        << field.GetName() << " ) to the LevelOfDetail"
-                        << " output: " << e.what());
-      }
-    }
-
-    // convert back the dataset to VTK
-    convertedDataSet = fromvtkm::Convert(result.GetDataSet(), output, input);
-  }
-
-  return static_cast<int>(convertedDataSet);
+  return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -188,10 +163,7 @@ void vtkmLevelOfDetail::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "Number of X Divisions: " << this->NumberOfDivisions[0]
-     << "\n";
-  os << indent << "Number of Y Divisions: " << this->NumberOfDivisions[1]
-     << "\n";
-  os << indent << "Number of Z Divisions: " << this->NumberOfDivisions[2]
-     << "\n";
+  os << indent << "Number of X Divisions: " << this->NumberOfDivisions[0] << "\n";
+  os << indent << "Number of Y Divisions: " << this->NumberOfDivisions[1] << "\n";
+  os << indent << "Number of Z Divisions: " << this->NumberOfDivisions[2] << "\n";
 }

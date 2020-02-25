@@ -19,8 +19,10 @@
  * vtkCellDataToPointData is a filter that transforms cell data (i.e., data
  * specified per cell) into point data (i.e., data specified at cell
  * points). The method of transformation is based on averaging the data
- * values of all cells using a particular point. Optionally, the input cell
- * data can be passed through to the output as well.
+ * values of all cells using a particular point. For large datasets with
+ * several cell data arrays, the filter optionally supports selective
+ * processing to speed up processing. Optionally, the input cell data can
+ * be passed through to the output as well.
  * Unstructured grids and polydata can have cells of different dimensions.
  * To handle different use cases in this situation, the user can specify
  * which cells contribute to the computation. The options for this are
@@ -36,28 +38,29 @@
  *
  * @sa
  * vtkPointData vtkCellData vtkPointDataToCellData
-*/
+ */
 
 #ifndef vtkCellDataToPointData_h
 #define vtkCellDataToPointData_h
 
-#include "vtkFiltersCoreModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersCoreModule.h" // For export macro
 
 class vtkDataSet;
 
 class VTKFILTERSCORE_EXPORT vtkCellDataToPointData : public vtkDataSetAlgorithm
 {
 public:
-  static vtkCellDataToPointData *New();
-  vtkTypeMacro(vtkCellDataToPointData,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkCellDataToPointData* New();
+  vtkTypeMacro(vtkCellDataToPointData, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /// Options to choose what cells contribute to the calculation
-  enum ContributingCellEnum {
-    All=0,        //!< All cells
-    Patch=1,      //!< Highest dimension cells in the patch of cells contributing to the calculation
-    DataSetMax=2  //!< Highest dimension cells in the data set
+  enum ContributingCellEnum
+  {
+    All = 0,   //!< All cells
+    Patch = 1, //!< Highest dimension cells in the patch of cells contributing to the calculation
+    DataSetMax = 2 //!< Highest dimension cells in the data set
   };
 
   //@{
@@ -66,9 +69,9 @@ public:
    * on, then the input cell data is passed through to the output; otherwise,
    * only generated point data is placed into the output.
    */
-  vtkSetMacro(PassCellData,int);
-  vtkGetMacro(PassCellData,int);
-  vtkBooleanMacro(PassCellData,int);
+  vtkSetMacro(PassCellData, bool);
+  vtkGetMacro(PassCellData, bool);
+  vtkBooleanMacro(PassCellData, bool);
   //@}
 
   //@{
@@ -80,30 +83,59 @@ public:
   vtkGetMacro(ContributingCellOption, int);
   //@}
 
+  //@{
+  /**
+   * Activate selective processing of arrays. If inactive, only arrays selected
+   * by the user will be considered by this filter. The default is true.
+   */
+  vtkSetMacro(ProcessAllArrays, bool);
+  vtkGetMacro(ProcessAllArrays, bool);
+  vtkBooleanMacro(ProcessAllArrays, bool);
+  //@}
+
+  /**
+   * Adds an array to be processed. This only has an effect if the
+   * ProcessAllArrays option is turned off. If a name is already present,
+   * nothing happens.
+   */
+  virtual void AddCellDataArray(const char* name);
+
+  /**
+   * Removes an array to be processed. This only has an effect if the
+   * ProcessAllArrays option is turned off. If the specified name is not
+   * present, nothing happens.
+   */
+  virtual void RemoveCellDataArray(const char* name);
+
+  /**
+   * Removes all arrays to be processed from the list. This only has an effect
+   * if the ProcessAllArrays option is turned off.
+   */
+  virtual void ClearCellDataArrays();
+
 protected:
   vtkCellDataToPointData();
-  ~vtkCellDataToPointData() VTK_OVERRIDE {}
+  ~vtkCellDataToPointData() override;
 
-  int RequestData(vtkInformation* request,
-                  vtkInformationVector** inputVector,
-                  vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   //@{
   /**
    * Special algorithm for unstructured grids and polydata to make sure
    * that we properly take into account ContributingCellOption.
    */
-  int RequestDataForUnstructuredData
-    (vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  int RequestDataForUnstructuredData(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*);
   //@}
 
-  void InterpolatePointData(vtkDataSet *input, vtkDataSet *output);
+  int InterpolatePointData(vtkDataSet* input, vtkDataSet* output);
 
   //@{
   /**
    * Option to pass cell data arrays through to the output. Default is 0/off.
    */
-  int PassCellData;
+  bool PassCellData;
   //@}
 
   //@{
@@ -114,11 +146,17 @@ protected:
   int ContributingCellOption;
   //@}
 
+  /**
+   * Option to activate selective processing of arrays.
+   */
+  bool ProcessAllArrays;
+
+  class Internals;
+  Internals* Implementation;
+
 private:
-  vtkCellDataToPointData(const vtkCellDataToPointData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCellDataToPointData&) VTK_DELETE_FUNCTION;
+  vtkCellDataToPointData(const vtkCellDataToPointData&) = delete;
+  void operator=(const vtkCellDataToPointData&) = delete;
 };
 
 #endif
-
-

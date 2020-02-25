@@ -31,22 +31,17 @@
 vtkStandardNewMacro(vtkRectilinearGridToPointSet);
 
 //-------------------------------------------------------------------------
-vtkRectilinearGridToPointSet::vtkRectilinearGridToPointSet()
-{
-}
+vtkRectilinearGridToPointSet::vtkRectilinearGridToPointSet() = default;
 
-vtkRectilinearGridToPointSet::~vtkRectilinearGridToPointSet()
-{
-}
+vtkRectilinearGridToPointSet::~vtkRectilinearGridToPointSet() = default;
 
-void vtkRectilinearGridToPointSet::PrintSelf(ostream &os, vtkIndent indent)
+void vtkRectilinearGridToPointSet::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //-------------------------------------------------------------------------
-int vtkRectilinearGridToPointSet::FillInputPortInformation(int port,
-                                                           vtkInformation *info)
+int vtkRectilinearGridToPointSet::FillInputPortInformation(int port, vtkInformation* info)
 {
   if (!this->Superclass::FillInputPortInformation(port, info))
   {
@@ -57,12 +52,12 @@ int vtkRectilinearGridToPointSet::FillInputPortInformation(int port,
 }
 
 //-------------------------------------------------------------------------
-int vtkRectilinearGridToPointSet::CopyStructure(vtkStructuredGrid *outData,
-                                                vtkRectilinearGrid *inData)
+int vtkRectilinearGridToPointSet::CopyStructure(
+  vtkStructuredGrid* outData, vtkRectilinearGrid* inData)
 {
-  vtkDataArray *xcoord = inData->GetXCoordinates();
-  vtkDataArray *ycoord = inData->GetYCoordinates();
-  vtkDataArray *zcoord = inData->GetZCoordinates();
+  vtkDataArray* xcoord = inData->GetXCoordinates();
+  vtkDataArray* ycoord = inData->GetYCoordinates();
+  vtkDataArray* zcoord = inData->GetZCoordinates();
 
   int extent[6];
   inData->GetExtent(extent);
@@ -82,9 +77,9 @@ int vtkRectilinearGridToPointSet::CopyStructure(vtkStructuredGrid *outData,
       for (ijk[0] = extent[0]; ijk[0] <= extent[1]; ijk[0]++)
       {
         double coord[3];
-        coord[0] = xcoord->GetComponent(ijk[0]-extent[0], 0);
-        coord[1] = ycoord->GetComponent(ijk[1]-extent[2], 0);
-        coord[2] = zcoord->GetComponent(ijk[2]-extent[4], 0);
+        coord[0] = xcoord->GetComponent(ijk[0] - extent[0], 0);
+        coord[1] = ycoord->GetComponent(ijk[1] - extent[2], 0);
+        coord[2] = zcoord->GetComponent(ijk[2] - extent[4], 0);
 
         points->SetPoint(pointId, coord);
         pointId++;
@@ -94,23 +89,21 @@ int vtkRectilinearGridToPointSet::CopyStructure(vtkStructuredGrid *outData,
 
   if (pointId != points->GetNumberOfPoints())
   {
-    vtkErrorMacro(<< "Somehow misscounted points");
+    vtkErrorMacro(<< "Somehow miscounted points");
     return 0;
   }
 
-  outData->SetPoints(points.GetPointer());
+  outData->SetPoints(points);
 
   return 1;
 }
 
 //-------------------------------------------------------------------------
-int vtkRectilinearGridToPointSet::RequestData(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector,
-  vtkInformationVector *outputVector)
+int vtkRectilinearGridToPointSet::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
-  vtkRectilinearGrid *inData = vtkRectilinearGrid::GetData(inputVector[0]);
-  vtkStructuredGrid *outData = vtkStructuredGrid::GetData(outputVector);
+  vtkRectilinearGrid* inData = vtkRectilinearGrid::GetData(inputVector[0]);
+  vtkStructuredGrid* outData = vtkStructuredGrid::GetData(outputVector);
 
   if (inData == nullptr)
   {

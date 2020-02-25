@@ -36,7 +36,7 @@
  *
  * @sa
  * vtkJPEGReader vtkPNGReader vtkImageReader vtkGESignaReader
-*/
+ */
 
 #ifndef vtkImageReader2_h
 #define vtkImageReader2_h
@@ -52,16 +52,16 @@ class vtkStringArray;
 class VTKIOIMAGE_EXPORT vtkImageReader2 : public vtkImageAlgorithm
 {
 public:
-  static vtkImageReader2 *New();
-  vtkTypeMacro(vtkImageReader2,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageReader2* New();
+  vtkTypeMacro(vtkImageReader2, vtkImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Specify file name for the image file. If the data is stored in
    * multiple files, then use SetFileNames or SetFilePrefix instead.
    */
-  virtual void SetFileName(const char *);
+  virtual void SetFileName(const char*);
   vtkGetStringMacro(FileName);
   //@}
 
@@ -73,7 +73,7 @@ public:
    * Use SetFileName when reading a volume (multiple slice), since
    * DataExtent will be modified after a SetFileNames call.
    */
-  virtual void SetFileNames(vtkStringArray *);
+  virtual void SetFileNames(vtkStringArray*);
   vtkGetObjectMacro(FileNames, vtkStringArray);
   //@}
 
@@ -85,7 +85,7 @@ public:
    * the DataExtent so that the reader will know what range of slices
    * to load.
    */
-  virtual void SetFilePrefix(const char *);
+  virtual void SetFilePrefix(const char*);
   vtkGetStringMacro(FilePrefix);
   //@}
 
@@ -94,7 +94,7 @@ public:
    * The snprintf-style format string used to build filename from
    * FilePrefix and slice number.
    */
-  virtual void SetFilePattern(const char *);
+  virtual void SetFilePattern(const char*);
   vtkGetStringMacro(FilePattern);
   //@}
 
@@ -103,8 +103,8 @@ public:
    * May be used by a reader to allow the reading
    * of an image from memory instead of from file.
    */
-  virtual void SetMemoryBuffer(void *);
-  virtual void *GetMemoryBuffer() { return this->MemoryBuffer; }
+  virtual void SetMemoryBuffer(const void*);
+  virtual const void* GetMemoryBuffer() { return this->MemoryBuffer; }
 
   /**
    * Specify the in memory image buffer length.
@@ -118,19 +118,15 @@ public:
    * after this method is called.
    */
   virtual void SetDataScalarType(int type);
-  virtual void SetDataScalarTypeToFloat(){this->SetDataScalarType(VTK_FLOAT);}
-  virtual void SetDataScalarTypeToDouble(){this->SetDataScalarType(VTK_DOUBLE);}
-  virtual void SetDataScalarTypeToInt(){this->SetDataScalarType(VTK_INT);}
-  virtual void SetDataScalarTypeToUnsignedInt(){this->SetDataScalarType(VTK_UNSIGNED_INT);}
-  virtual void SetDataScalarTypeToShort(){this->SetDataScalarType(VTK_SHORT);}
-  virtual void SetDataScalarTypeToUnsignedShort()
-    {this->SetDataScalarType(VTK_UNSIGNED_SHORT);}
-  virtual void SetDataScalarTypeToChar()
-    {this->SetDataScalarType(VTK_CHAR);}
-  virtual void SetDataScalarTypeToSignedChar()
-    {this->SetDataScalarType(VTK_SIGNED_CHAR);}
-  virtual void SetDataScalarTypeToUnsignedChar()
-    {this->SetDataScalarType(VTK_UNSIGNED_CHAR);}
+  virtual void SetDataScalarTypeToFloat() { this->SetDataScalarType(VTK_FLOAT); }
+  virtual void SetDataScalarTypeToDouble() { this->SetDataScalarType(VTK_DOUBLE); }
+  virtual void SetDataScalarTypeToInt() { this->SetDataScalarType(VTK_INT); }
+  virtual void SetDataScalarTypeToUnsignedInt() { this->SetDataScalarType(VTK_UNSIGNED_INT); }
+  virtual void SetDataScalarTypeToShort() { this->SetDataScalarType(VTK_SHORT); }
+  virtual void SetDataScalarTypeToUnsignedShort() { this->SetDataScalarType(VTK_UNSIGNED_SHORT); }
+  virtual void SetDataScalarTypeToChar() { this->SetDataScalarType(VTK_CHAR); }
+  virtual void SetDataScalarTypeToSignedChar() { this->SetDataScalarType(VTK_SIGNED_CHAR); }
+  virtual void SetDataScalarTypeToUnsignedChar() { this->SetDataScalarType(VTK_UNSIGNED_CHAR); }
 
   //@{
   /**
@@ -143,16 +139,16 @@ public:
   /**
    * Set/Get the number of scalar components
    */
-  vtkSetMacro(NumberOfScalarComponents,int);
-  vtkGetMacro(NumberOfScalarComponents,int);
+  vtkSetMacro(NumberOfScalarComponents, int);
+  vtkGetMacro(NumberOfScalarComponents, int);
   //@}
 
   //@{
   /**
    * Get/Set the extent of the data on disk.
    */
-  vtkSetVector6Macro(DataExtent,int);
-  vtkGetVector6Macro(DataExtent,int);
+  vtkSetVector6Macro(DataExtent, int);
+  vtkGetVector6Macro(DataExtent, int);
   //@}
 
   //@{
@@ -160,23 +156,31 @@ public:
    * The number of dimensions stored in a file. This defaults to two.
    */
   vtkSetMacro(FileDimensionality, int);
-  int GetFileDimensionality() {return this->FileDimensionality;}
+  int GetFileDimensionality() { return this->FileDimensionality; }
   //@}
 
   //@{
   /**
    * Set/Get the spacing of the data in the file.
    */
-  vtkSetVector3Macro(DataSpacing,double);
-  vtkGetVector3Macro(DataSpacing,double);
+  vtkSetVector3Macro(DataSpacing, double);
+  vtkGetVector3Macro(DataSpacing, double);
   //@}
 
   //@{
   /**
    * Set/Get the origin of the data (location of first pixel in the file).
    */
-  vtkSetVector3Macro(DataOrigin,double);
-  vtkGetVector3Macro(DataOrigin,double);
+  vtkSetVector3Macro(DataOrigin, double);
+  vtkGetVector3Macro(DataOrigin, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the direction of the data (9 elements: 3x3 matrix).
+   */
+  vtkSetVectorMacro(DataDirection, double, 9);
+  vtkGetVectorMacro(DataDirection, double, 9);
   //@}
 
   //@{
@@ -211,7 +215,7 @@ public:
   virtual void SetDataByteOrderToLittleEndian();
   virtual int GetDataByteOrder();
   virtual void SetDataByteOrder(int);
-  virtual const char *GetDataByteOrderAsString();
+  virtual const char* GetDataByteOrderAsString();
   //@}
 
   //@{
@@ -219,8 +223,8 @@ public:
    * When reading files which start at an unusual index, this can be added
    * to the slice number when generating the file name (default = 0)
    */
-  vtkSetMacro(FileNameSliceOffset,int);
-  vtkGetMacro(FileNameSliceOffset,int);
+  vtkSetMacro(FileNameSliceOffset, int);
+  vtkGetMacro(FileNameSliceOffset, int);
   //@}
 
   //@{
@@ -229,24 +233,24 @@ public:
    * (eg filename.1,filename.3,filename.5)
    * a spacing can be specified to skip missing files (default = 1)
    */
-  vtkSetMacro(FileNameSliceSpacing,int);
-  vtkGetMacro(FileNameSliceSpacing,int);
+  vtkSetMacro(FileNameSliceSpacing, int);
+  vtkGetMacro(FileNameSliceSpacing, int);
   //@}
-
 
   //@{
   /**
    * Set/Get the byte swapping to explicitly swap the bytes of a file.
    */
-  vtkSetMacro(SwapBytes,int);
-  virtual int GetSwapBytes() {return this->SwapBytes;}
-  vtkBooleanMacro(SwapBytes,int);
+  vtkSetMacro(SwapBytes, vtkTypeBool);
+  virtual vtkTypeBool GetSwapBytes() { return this->SwapBytes; }
+  vtkBooleanMacro(SwapBytes, vtkTypeBool);
   //@}
 
-  ifstream *GetFile() {return this->File;}
-  vtkGetVectorMacro(DataIncrements,unsigned long,4);
+  istream* GetFile() { return this->File; }
+  vtkGetVectorMacro(DataIncrements, unsigned long, 4);
 
   virtual int OpenFile();
+  void CloseFile();
   virtual void SeekFile(int i, int j, int k);
 
   //@{
@@ -254,9 +258,9 @@ public:
    * Set/Get whether the data comes from the file starting in the lower left
    * corner or upper left corner.
    */
-  vtkBooleanMacro(FileLowerLeft, int);
-  vtkGetMacro(FileLowerLeft, int);
-  vtkSetMacro(FileLowerLeft, int);
+  vtkBooleanMacro(FileLowerLeft, vtkTypeBool);
+  vtkGetMacro(FileLowerLeft, vtkTypeBool);
+  vtkSetMacro(FileLowerLeft, vtkTypeBool);
   //@}
 
   //@{
@@ -276,50 +280,42 @@ public:
    * 3 - I can read the file and I have validated that I am the
    * correct reader for this file
    */
-  virtual int CanReadFile(const char* vtkNotUsed(fname))
-  {
-      return 0;
-  }
+  virtual int CanReadFile(const char* vtkNotUsed(fname)) { return 0; }
 
   /**
    * Get the file extensions for this format.
    * Returns a string with a space separated list of extensions in
    * the format .extension
    */
-  virtual const char* GetFileExtensions()
-  {
-      return nullptr;
-  }
+  virtual const char* GetFileExtensions() { return nullptr; }
 
   //@{
   /**
    * Return a descriptive name for the file format that might be useful in a GUI.
    */
-  virtual const char* GetDescriptiveName()
-  {
-      return nullptr;
-  }
+  virtual const char* GetDescriptiveName() { return nullptr; }
+
 protected:
   vtkImageReader2();
-  ~vtkImageReader2() VTK_OVERRIDE;
+  ~vtkImageReader2() override;
   //@}
 
-  vtkStringArray *FileNames;
+  vtkStringArray* FileNames;
 
-  char *InternalFileName;
-  char *FileName;
-  char *FilePrefix;
-  char *FilePattern;
+  char* InternalFileName;
+  char* FileName;
+  char* FilePrefix;
+  char* FilePattern;
   int NumberOfScalarComponents;
-  int FileLowerLeft;
+  vtkTypeBool FileLowerLeft;
 
-  void *MemoryBuffer;
+  const void* MemoryBuffer;
   vtkIdType MemoryBufferLength;
 
-  ifstream *File;
+  istream* File;
   unsigned long DataIncrements[4];
   int DataExtent[6];
-  int SwapBytes;
+  vtkTypeBool SwapBytes;
 
   int FileDimensionality;
   unsigned long HeaderSize;
@@ -328,19 +324,20 @@ protected:
 
   double DataSpacing[3];
   double DataOrigin[3];
+  double DataDirection[9];
 
   int FileNameSliceOffset;
   int FileNameSliceSpacing;
 
-  int RequestInformation(vtkInformation* request,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
   virtual void ExecuteInformation();
-  void ExecuteDataWithInformation(vtkDataObject *data, vtkInformation *outInfo) VTK_OVERRIDE;
+  void ExecuteDataWithInformation(vtkDataObject* data, vtkInformation* outInfo) override;
   virtual void ComputeDataIncrements();
+
 private:
-  vtkImageReader2(const vtkImageReader2&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageReader2&) VTK_DELETE_FUNCTION;
+  vtkImageReader2(const vtkImageReader2&) = delete;
+  void operator=(const vtkImageReader2&) = delete;
 };
 
 #endif

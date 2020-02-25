@@ -15,8 +15,8 @@
 
 #include "vtkReduceTable.h"
 
-#include "vtkIntArray.h"
 #include "vtkDoubleArray.h"
+#include "vtkIntArray.h"
 #include "vtkNew.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
@@ -28,12 +28,12 @@ int TestReduceTable(int, char*[])
 
   vtkNew<vtkStringArray> indexColumn;
   indexColumn->SetNumberOfTuples(6);
-  indexColumn->SetValue(0,  "a");
-  indexColumn->SetValue(1,  "b");
-  indexColumn->SetValue(2,  "b");
-  indexColumn->SetValue(3,  "c");
-  indexColumn->SetValue(4,  "c");
-  indexColumn->SetValue(5,  "c");
+  indexColumn->SetValue(0, "a");
+  indexColumn->SetValue(1, "b");
+  indexColumn->SetValue(2, "b");
+  indexColumn->SetValue(3, "c");
+  indexColumn->SetValue(4, "c");
+  indexColumn->SetValue(5, "c");
 
   vtkNew<vtkDoubleArray> meanColumn;
   meanColumn->SetNumberOfTuples(6);
@@ -62,20 +62,20 @@ int TestReduceTable(int, char*[])
   modeColumn->SetValue(4, "c");
   modeColumn->SetValue(5, "d");
 
-  table->AddColumn(indexColumn.GetPointer());
-  table->AddColumn(meanColumn.GetPointer());
-  table->AddColumn(medianColumn.GetPointer());
-  table->AddColumn(modeColumn.GetPointer());
+  table->AddColumn(indexColumn);
+  table->AddColumn(meanColumn);
+  table->AddColumn(medianColumn);
+  table->AddColumn(modeColumn);
 
   vtkNew<vtkReduceTable> filter;
-  filter->SetInputData(0, table.GetPointer());
+  filter->SetInputData(0, table);
   filter->SetIndexColumn(0);
   filter->SetReductionMethodForColumn(1, vtkReduceTable::MEAN);
   filter->SetReductionMethodForColumn(2, vtkReduceTable::MEDIAN);
   filter->SetReductionMethodForColumn(3, vtkReduceTable::MODE);
   filter->Update();
 
-  vtkTable *output = filter->GetOutput();
+  vtkTable* output = filter->GetOutput();
 
   if (output->GetValue(0, 1) != 1)
   {

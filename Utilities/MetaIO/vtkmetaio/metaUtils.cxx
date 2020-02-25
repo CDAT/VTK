@@ -28,22 +28,26 @@ inline bool IsBlank(int c)
 
 #include "metaUtils.h"
 
-#include <stdio.h>
-#include <ctype.h>
-#include <stddef.h>
+#include <cassert>
+#include <cctype>
+#include <cstddef>
+#include <cstdio>
 
 #include <sys/stat.h>
 #include <fcntl.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
+#define NOMINMAX
 #include <winsock2.h>
 #else
 #include <unistd.h>
 #include <arpa/inet.h>
 #endif
 
-#include <stdlib.h>
-#include <string.h>
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
 #include <string>
 
 #if defined (__BORLANDC__) && (__BORLANDC__ >= 0x0580)
@@ -58,6 +62,8 @@ int META_DEBUG = 0;
 
 static char MET_SeperatorChar = '=';
 
+static const METAIO_STL::streamoff MET_MaxChunkSize = 1024*1024*1024;
+
 MET_FieldRecordType *
 MET_GetFieldRecord(const char * _fieldName,
                    METAIO_STL::vector<MET_FieldRecordType *> * _fields)
@@ -70,7 +76,7 @@ MET_GetFieldRecord(const char * _fieldName,
       return *fieldIter;
       }
     }
-  return NULL;
+  return nullptr;
   }
 
 
@@ -110,7 +116,7 @@ bool MET_SizeOfType(MET_ValueEnumType _vType, int *s)
 //
 //
 //
-bool MET_SystemByteOrderMSB(void)
+bool MET_SystemByteOrderMSB()
   {
   const int l = 1;
   const char * u = (const char *) & l;
@@ -119,7 +125,7 @@ bool MET_SystemByteOrderMSB(void)
     {
     return false;
     }
-   else
+  else
     {
     return true;
     }
@@ -199,7 +205,7 @@ char* MET_ReadSubType(METAIO_STREAM::istream &_fp)
   char s[1024];
   _fp.getline( s, 500 );
   METAIO_STL::string value = s;
-  size_t position = value.find("=");
+  size_t position = value.find('=');
   if(position!=METAIO_STL::string::npos)
     {
     value = value.substr(position+2,value.size()-position);
@@ -238,7 +244,8 @@ bool MET_StringToType(const char *_s, MET_ValueEnumType *_vType)
 //
 bool MET_TypeToString(MET_ValueEnumType _vType, char *_s)
   {
-  if(_vType>=0 && _vType<=MET_NUM_VALUE_TYPES)
+  assert(_vType>=0);
+  if(_vType<MET_NUM_VALUE_TYPES)
     {
     strcpy(_s, MET_ValueTypeName[_vType]);
     return true;
@@ -512,12 +519,12 @@ METAIO_STL::streamoff MET_UncompressStream(METAIO_STREAM::ifstream * stream,
 
   // Allocate the stream if necessary
   z_stream* d_stream = compressionTable->compressedStream;
-  if(compressionTable->compressedStream == NULL)
+  if(compressionTable->compressedStream == nullptr)
     {
     d_stream = new z_stream;
-    d_stream->zalloc = (alloc_func)0;
-    d_stream->zfree = (free_func)0;
-    d_stream->opaque = (voidpf)0;
+    d_stream->zalloc = (alloc_func)nullptr;
+    d_stream->zfree = (free_func)nullptr;
+    d_stream->opaque = (voidpf)nullptr;
     inflateInit2(d_stream,47); // allow both gzip and zlib compression headers
     compressionTable->compressedStream = d_stream;
     compressionTable->buffer = new char[1001];
@@ -688,83 +695,65 @@ unsigned char * MET_PerformCompression(const unsigned char * source,
                                        METAIO_STL::streamoff sourceSize,
                                        METAIO_STL::streamoff * compressedDataSize)
   {
-  unsigned char * compressedData;
 
   z_stream  z;
-  z.zalloc  = (alloc_func)0;
-  z.zfree   = (free_func)0;
-  z.opaque  = (voidpf)0;
+  z.zalloc  = (alloc_func)nullptr;
+  z.zfree   = (free_func)nullptr;
+  z.opaque  = (voidpf)nullptr;
 
   // Compression rate
   // Choices are Z_BEST_SPEED,Z_BEST_COMPRESSION,Z_DEFAULT_COMPRESSION
   int compression_rate = Z_DEFAULT_COMPRESSION;
 
-  METAIO_STL::streamoff             buffer_size     = sourceSize;
-  unsigned char * input_buffer    = const_cast<unsigned char *>(source);
-  unsigned char * output_buffer   = new unsigned char[static_cast<size_t>(buffer_size)];
+  METAIO_STL::streamoff buffer_out_size = sourceSize;
+  METAIO_STL::streamoff max_chunk_size = MET_MaxChunkSize;
+  METAIO_STL::streamoff chunk_size  = std::min(sourceSize, max_chunk_size);
+  unsigned char * input_buffer      = const_cast<unsigned char *>(source);
+  unsigned char * output_buffer     = new unsigned char[chunk_size];
+  unsigned char * compressed_data   = new unsigned char[buffer_out_size];
 
-  compressedData                  = new unsigned char[static_cast<size_t>(buffer_size)];
+  /*int ret =*/ deflateInit(&z, compression_rate);
+  //assert(ret == Z_OK);
 
-  deflateInit(&z, compression_rate);
-
-  z.avail_in   = (uInt)buffer_size;
-  z.next_in    = input_buffer;
-  z.next_out   = output_buffer;
-  z.avail_out  = (uInt)buffer_size;
-
-  METAIO_STL::streamoff count;
-  METAIO_STL::streamoff j=0;
-  // Perform the compression
-  for ( ; ; )
+  METAIO_STL::streamoff cur_in_start = 0;
+  METAIO_STL::streamoff cur_out_start = 0;
+  int flush;
+  do
     {
-    if ( z.avail_in == 0 )
+    z.avail_in = static_cast<uInt>(std::min(sourceSize - cur_in_start, chunk_size));
+    z.next_in  = input_buffer + cur_in_start;
+    bool last_chunk = (cur_in_start + z.avail_in) >= sourceSize;
+    flush = last_chunk ? Z_FINISH : Z_NO_FLUSH;
+    cur_in_start += z.avail_in;
+    do
       {
-      deflate( &z, Z_FINISH );
-      count = buffer_size - z.avail_out;
-      if ( count )
+      z.avail_out = static_cast<uInt>(chunk_size);
+      z.next_out  = output_buffer;
+      /*ret =*/ deflate(&z, flush);
+      //assert(ret != Z_STREAM_ERROR);
+      METAIO_STL::streamoff count_out = chunk_size - z.avail_out;
+      if ( (cur_out_start + count_out) >= buffer_out_size )
         {
         // if we don't have enough allocation for the output buffer
         // when the output is bigger than the input (true for small images)
-        if(j+count>=buffer_size)
-          {
-          unsigned char* compressedDataTemp = new unsigned char[static_cast<size_t>(j+count+1)];
-          memcpy(compressedDataTemp,compressedData,(size_t)buffer_size);
-          delete [] compressedData;
-          compressedData = compressedDataTemp;
-          }
-
-        memcpy((char*)compressedData+j, (char *)output_buffer, (size_t)count);
+        unsigned char* compressed_data_temp = new unsigned char[cur_out_start+count_out+1];
+        memcpy(compressed_data_temp, compressed_data, (size_t)buffer_out_size);
+        delete [] compressed_data;
+        compressed_data = compressed_data_temp;
+        buffer_out_size = cur_out_start+count_out+1;
         }
-      break;
+      memcpy((char*)compressed_data + cur_out_start, (char*)output_buffer, (size_t)count_out);
+      cur_out_start += count_out;
       }
-
-    deflate( &z, Z_NO_FLUSH );
-    count = buffer_size - z.avail_out;
-    if ( count )
-      {
-      if(j+count>=buffer_size)
-        {
-        unsigned char* compressedDataTemp = new unsigned char[static_cast<size_t>(j+count+1)];
-        memcpy(compressedDataTemp,compressedData,(size_t)buffer_size);
-        delete [] compressedData;
-        compressedData = compressedDataTemp;
-        }
-      memcpy((char*)compressedData+j, (char*)output_buffer, (size_t)count);
-      }
-
-    j += count;
-    z.next_out = output_buffer;
-    z.avail_out = (uInt)buffer_size;
+    while (z.avail_out == 0);
+    //assert(z.avail_in == 0);
     }
-
+  while (flush != Z_FINISH);
+  //assert(ret == Z_STREAM_END);
   delete [] output_buffer;
-
-  *compressedDataSize = z.total_out;
-
-  // Print the result
+  *compressedDataSize = cur_out_start;  // don't use z.total_out, it's limited to 2^32!
   deflateEnd(&z);
-
-  return compressedData;
+  return compressed_data;
   }
 
 //
@@ -777,35 +766,47 @@ bool MET_PerformUncompression(const unsigned char * sourceCompressed,
   {
   z_stream d_stream;
 
-  d_stream.zalloc = (alloc_func)0;
-  d_stream.zfree = (free_func)0;
-  d_stream.opaque = (voidpf)0;
+  d_stream.zalloc = (alloc_func)nullptr;
+  d_stream.zfree = (free_func)nullptr;
+  d_stream.opaque = (voidpf)nullptr;
 
   inflateInit2(&d_stream,47); // allow both gzip and zlib compression headers
-  d_stream.next_in  = const_cast<unsigned char *>(sourceCompressed);
-  d_stream.avail_in = (uInt)sourceCompressedSize;
 
-  for (;;)
+  METAIO_STL::streamoff max_chunk_size = MET_MaxChunkSize;
+  METAIO_STL::streamoff source_pos = 0;
+  METAIO_STL::streamoff dest_pos = 0;
+  int err;
+  do
     {
-    d_stream.next_out = (unsigned char *)uncompressedData;
-    d_stream.avail_out = (uInt)uncompressedDataSize;
-    int err = inflate(&d_stream, Z_NO_FLUSH);
-
-    if((err == Z_STREAM_END)
-       || (err == Z_BUF_ERROR) // Sometimes inflate returns this non fatal.
-       )
+    d_stream.next_in = const_cast<unsigned char *>(sourceCompressed + source_pos);
+    d_stream.avail_in = static_cast<uInt>(std::min(
+      sourceCompressedSize - source_pos,
+      max_chunk_size)
+    );
+    source_pos += d_stream.avail_in;
+    do
       {
-      break;
+      uInt cur_remain_chunk = static_cast<uInt>( std::min( uncompressedDataSize - dest_pos,
+                                                           MET_MaxChunkSize) );
+      d_stream.next_out = static_cast<unsigned char *>(uncompressedData) + dest_pos;
+      d_stream.avail_out = cur_remain_chunk;
+      err = inflate(&d_stream, Z_NO_FLUSH);
+      if (err == Z_STREAM_END || err < 0)
+        {
+        if (err != Z_STREAM_END &&
+            err != Z_BUF_ERROR) // Z_BUF_ERROR means there is still data to uncompress,
+          {                     // but no space left in buffer; non-fatal
+          METAIO_STREAM::cerr << "Uncompress failed" << METAIO_STREAM::endl;
+          }
+          break;
+        }
+      uInt count_uncompressed = cur_remain_chunk - d_stream.avail_out;
+      dest_pos += count_uncompressed;
       }
-    else if(err < 0)
-      {
-      METAIO_STREAM::cerr << "Uncompress failed" << METAIO_STREAM::endl;
-      break;
-      }
+    while (d_stream.avail_out == 0);
     }
-
+  while (err != Z_STREAM_END && err >= 0);
   inflateEnd(&d_stream);
-
   return true;
   }
 
@@ -1259,7 +1260,7 @@ bool MET_Read(METAIO_STREAM::istream &fp,
       }
     if(!found)
       {
-      if( newFields != NULL )
+      if( newFields != nullptr )
         {
         MET_SkipToVal(fp);
         if(fp.eof())
@@ -1292,6 +1293,20 @@ bool MET_Read(METAIO_STREAM::istream &fp,
 
   return MET_IsComplete(fields);
   }
+
+// Workaround for ancient compilers.
+#if defined(_MSC_VER) || defined(__HP_aCC)
+static std::string convert_ulonglong_to_string(MET_ULONG_LONG_TYPE val)
+  {
+  std::string result;
+  while (val > 0)
+    {
+    result = static_cast<char>((val % 10)+ '0') + result;
+    val /= 10;
+    }
+  return result;
+  }
+#endif
 
 //
 bool MET_Write(METAIO_STREAM::ostream &fp,
@@ -1354,21 +1369,13 @@ bool MET_Write(METAIO_STREAM::ostream &fp,
         break;
         }
       case MET_ULONG_LONG:
-        {
+        { // ToDo: check why name was not printed here previously!
+        fp << (*fieldIter)->name << " " << MET_SeperatorChar << " ";
 #if defined(_MSC_VER) || defined(__HP_aCC)
         // NOTE: you cannot use __int64 in an ostream in MSV6 or HPUX
-        fp << (double)((MET_LONG_LONG_TYPE)((MET_ULONG_LONG_TYPE)
-                       ((*fieldIter)->value[0])))
-           << METAIO_STREAM::endl;
-        METAIO_STREAM::cerr << "Programs compiled using MSV6 or HPUX"
-                            << " cannot write 64 bit ints"
-                            << METAIO_STREAM::endl;
-        METAIO_STREAM::cerr << "  Writing as double instead."
-                            << "  Loss of precision results."
-                            << METAIO_STREAM::endl;
+        fp << convert_ulonglong_to_string((MET_ULONG_LONG_TYPE)((*fieldIter)->value[0])) << METAIO_STREAM::endl;
 #else
-        fp << (MET_ULONG_LONG_TYPE)((*fieldIter)->value[0])
-           << METAIO_STREAM::endl;
+        fp << (MET_ULONG_LONG_TYPE)((*fieldIter)->value[0]) << METAIO_STREAM::endl;
 #endif
         break;
         }
@@ -1576,7 +1583,7 @@ bool MET_WriteFieldToFile(METAIO_STREAM::ostream & _fp, const char *_fieldName,
   size_t i;
   MET_FieldRecordType f;
 
-  sprintf(f.name, "%s", _fieldName);
+  snprintf(f.name, sizeof(f.name), "%s", _fieldName);
   f.defined = false;
   f.dependsOn = -1;
   f.length = static_cast<int>(_n);
@@ -1704,7 +1711,7 @@ bool MET_WriteFieldToFile(METAIO_STREAM::ostream & _fp, const char *_fieldName,
   {
   MET_FieldRecordType f;
 
-  sprintf(f.name, "%s", _fieldName);
+  snprintf(f.name, sizeof(f.name), "%s", _fieldName);
   f.defined = false;
   f.dependsOn = -1;
   f.length = 1;

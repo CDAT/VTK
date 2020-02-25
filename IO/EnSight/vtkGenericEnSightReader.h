@@ -18,7 +18,7 @@
  *
  * The class vtkGenericEnSightReader allows the user to read an EnSight data
  * set without a priori knowledge of what type of EnSight data set it is.
-*/
+ */
 
 #ifndef vtkGenericEnSightReader_h
 #define vtkGenericEnSightReader_h
@@ -39,18 +39,18 @@ class TranslationTableType;
 // Implicit Mode is for Structured Data
 enum EnsightReaderCellIdMode
 {
-    SINGLE_PROCESS_MODE,
-    SPARSE_MODE,
-    NON_SPARSE_MODE,
-    IMPLICIT_STRUCTURED_MODE
+  SINGLE_PROCESS_MODE,
+  SPARSE_MODE,
+  NON_SPARSE_MODE,
+  IMPLICIT_STRUCTURED_MODE
 };
 
 class VTKIOENSIGHT_EXPORT vtkGenericEnSightReader : public vtkMultiBlockDataSetAlgorithm
 {
 public:
-  static vtkGenericEnSightReader *New();
+  static vtkGenericEnSightReader* New();
   vtkTypeMacro(vtkGenericEnSightReader, vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -159,17 +159,17 @@ public:
    * Reads the FORMAT part of the case file to determine whether this is an
    * EnSight6 or EnSightGold data set.  Returns an identifier listed in
    * the FileTypes enum or -1 if an error occurred or the file could not
-   * be indentified as any EnSight type.
+   * be identified as any EnSight type.
    */
-  int DetermineEnSightVersion(int quiet=0);
+  int DetermineEnSightVersion(int quiet = 0);
 
   //@{
   /**
    * Set/get the flag for whether to read all the variables
    */
-  vtkBooleanMacro(ReadAllVariables, int);
-  vtkSetMacro(ReadAllVariables, int);
-  vtkGetMacro(ReadAllVariables, int);
+  vtkBooleanMacro(ReadAllVariables, vtkTypeBool);
+  vtkSetMacro(ReadAllVariables, vtkTypeBool);
+  vtkGetMacro(ReadAllVariables, vtkTypeBool);
   //@}
 
   //@{
@@ -211,10 +211,10 @@ public:
 
   enum FileTypes
   {
-    ENSIGHT_6             = 0,
-    ENSIGHT_6_BINARY      = 1,
-    ENSIGHT_GOLD          = 2,
-    ENSIGHT_GOLD_BINARY   = 3,
+    ENSIGHT_6 = 0,
+    ENSIGHT_6_BINARY = 1,
+    ENSIGHT_GOLD = 2,
+    ENSIGHT_GOLD_BINARY = 3,
     ENSIGHT_MASTER_SERVER = 4
   };
 
@@ -229,14 +229,14 @@ public:
   void SetByteOrderToLittleEndian();
   vtkSetMacro(ByteOrder, int);
   vtkGetMacro(ByteOrder, int);
-  const char *GetByteOrderAsString();
+  const char* GetByteOrderAsString();
   //@}
 
   enum
   {
-    FILE_BIG_ENDIAN=0,
-    FILE_LITTLE_ENDIAN=1,
-    FILE_UNKNOWN_ENDIAN=2
+    FILE_BIG_ENDIAN = 0,
+    FILE_LITTLE_ENDIAN = 1,
+    FILE_UNKNOWN_ENDIAN = 2
   };
 
   //@{
@@ -256,36 +256,36 @@ public:
    * will be generated incorrectly.
    * Setting ParticleCoordinatesByIndex to true will force
    * all Id's to increment from 0->N-1 (relative to their order
-   * in the file) and regardless of the actual Id of of the point.
+   * in the file) and regardless of the actual Id of the point.
    * Warning, if the Points are listed in non sequential order
    * then setting this flag will reorder them.
    */
-  vtkSetMacro(ParticleCoordinatesByIndex, int);
-  vtkGetMacro(ParticleCoordinatesByIndex, int);
-  vtkBooleanMacro(ParticleCoordinatesByIndex, int);
+  vtkSetMacro(ParticleCoordinatesByIndex, vtkTypeBool);
+  vtkGetMacro(ParticleCoordinatesByIndex, vtkTypeBool);
+  vtkBooleanMacro(ParticleCoordinatesByIndex, vtkTypeBool);
   //@}
 
   /**
    * Returns true if the file pointed to by casefilename appears to be a
    * valid EnSight case file.
    */
-  static int CanReadFile(const char *casefilename);
+  static bool IsEnSightFile(const char* casefilename);
 
-//THIB
-vtkGenericEnSightReader* GetReader() { return this->Reader; }
+  /**
+   * Returns IsEnSightFile() by default, but can be overridden
+   */
+  virtual int CanReadFile(const char* casefilename);
 
+  // THIB
+  vtkGenericEnSightReader* GetReader() { return this->Reader; }
 
 protected:
   vtkGenericEnSightReader();
-  ~vtkGenericEnSightReader() VTK_OVERRIDE;
+  ~vtkGenericEnSightReader() override;
 
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation*,
-                                 vtkInformationVector**,
-                                 vtkInformationVector*) VTK_OVERRIDE;
-  int RequestData(vtkInformation*,
-                          vtkInformationVector**,
-                          vtkInformationVector*) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Clear data structures such that setting a new case file name works.
@@ -339,13 +339,13 @@ protected:
    * Replace the wildcards in the geometry file name with appropriate filename
    * numbers as specified in the time set or file set.
    */
-  int  ReplaceWildcards(char* fileName, int timeSet, int fileSet);
+  int ReplaceWildcards(char* fileName, int timeSet, int fileSet);
   void ReplaceWildcardsHelper(char* fileName, int num);
   //@}
 
   // Callback registered with the SelectionObserver.
-  static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
-                                        void* clientdata, void* calldata);
+  static void SelectionModifiedCallback(
+    vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
   void SelectionModified();
 
   // Utility to create argument for vtkDataArraySelection::SetArrays.
@@ -365,8 +365,8 @@ protected:
   void SetReaderDataArraySelectionSetsFromSelf();
 
   istream* IS;
-  FILE *IFile;
-  vtkGenericEnSightReader *Reader;
+  FILE* IFile;
+  vtkGenericEnSightReader* Reader;
 
   char* CaseFileName;
   char* GeometryFileName;
@@ -404,13 +404,13 @@ protected:
   // Flag for whether TimeValue has been set.
   int TimeValueInitialized;
 
-  vtkDataArrayCollection *TimeSets;
+  vtkDataArrayCollection* TimeSets;
   virtual void SetTimeSets(vtkDataArrayCollection*);
 
-  int ReadAllVariables;
+  vtkTypeBool ReadAllVariables;
 
   int ByteOrder;
-  int ParticleCoordinatesByIndex;
+  vtkTypeBool ParticleCoordinatesByIndex;
 
   // The EnSight file version being read.  Valid after
   // UpdateInformation.  Value is -1 for unknown version.
@@ -433,11 +433,11 @@ protected:
   int InsertNewPartId(int partId);
 
   // Wrapper around an stl map
-  TranslationTableType *TranslationTable;
+  TranslationTableType* TranslationTable;
 
 private:
-  vtkGenericEnSightReader(const vtkGenericEnSightReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericEnSightReader&) VTK_DELETE_FUNCTION;
+  vtkGenericEnSightReader(const vtkGenericEnSightReader&) = delete;
+  void operator=(const vtkGenericEnSightReader&) = delete;
 };
 
 #endif

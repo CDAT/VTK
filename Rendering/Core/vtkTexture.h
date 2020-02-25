@@ -41,13 +41,14 @@
  * restriction and no extra computational cost.
  * @sa
  * vtkActor vtkRenderer vtkOpenGLTexture
-*/
+ */
 
 #ifndef vtkTexture_h
 #define vtkTexture_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
+#include "vtkRenderingCoreModule.h" // For export macro
+#include "vtkSystemIncludes.h"      // For VTK_COLOR_MODE_*
 
 class vtkImageData;
 class vtkScalarsToColors;
@@ -58,15 +59,15 @@ class vtkDataArray;
 class vtkTransform;
 
 #define VTK_TEXTURE_QUALITY_DEFAULT 0
-#define VTK_TEXTURE_QUALITY_16BIT   16
-#define VTK_TEXTURE_QUALITY_32BIT   32
+#define VTK_TEXTURE_QUALITY_16BIT 16
+#define VTK_TEXTURE_QUALITY_32BIT 32
 
 class VTKRENDERINGCORE_EXPORT vtkTexture : public vtkImageAlgorithm
 {
 public:
   static vtkTexture* New();
   vtkTypeMacro(vtkTexture, vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Renders a texture map. It first checks the object's modified time
@@ -100,9 +101,9 @@ public:
    * Turn on/off the repetition of the texture map when the texture
    * coords extend beyond the [0,1] range.
    */
-  vtkGetMacro(Repeat, int);
-  vtkSetMacro(Repeat, int);
-  vtkBooleanMacro(Repeat, int);
+  vtkGetMacro(Repeat, vtkTypeBool);
+  vtkSetMacro(Repeat, vtkTypeBool);
+  vtkBooleanMacro(Repeat, vtkTypeBool);
   //@}
 
   //@{
@@ -112,18 +113,18 @@ public:
    * Only used when Repeat is off, and edge clamping is supported by
    * the graphics card.
    */
-  vtkGetMacro(EdgeClamp, int);
-  vtkSetMacro(EdgeClamp, int);
-  vtkBooleanMacro(EdgeClamp, int);
+  vtkGetMacro(EdgeClamp, vtkTypeBool);
+  vtkSetMacro(EdgeClamp, vtkTypeBool);
+  vtkBooleanMacro(EdgeClamp, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off linear interpolation of the texture map when rendering.
    */
-  vtkGetMacro(Interpolate, int);
-  vtkSetMacro(Interpolate, int);
-  vtkBooleanMacro(Interpolate, int);
+  vtkGetMacro(Interpolate, vtkTypeBool);
+  vtkSetMacro(Interpolate, vtkTypeBool);
+  vtkBooleanMacro(Interpolate, vtkTypeBool);
   //@}
 
   //@{
@@ -137,31 +138,43 @@ public:
 
   //@{
   /**
+   * Set/Get the maximum anisotropic filtering to use. 1.0 means use no
+   * anisotropic filtering. The default value is 4.0 and a high value would
+   * be 16. This setting is only applied when mipmaps are used. This might
+   * not be supported on all machines.
+   */
+  vtkSetMacro(MaximumAnisotropicFiltering, float);
+  vtkGetMacro(MaximumAnisotropicFiltering, float);
+  //@}
+
+  //@{
+  /**
    * Force texture quality to 16-bit or 32-bit.
    * This might not be supported on all machines.
    */
   vtkSetMacro(Quality, int);
   vtkGetMacro(Quality, int);
-  void SetQualityToDefault()
-    { this->SetQuality(VTK_TEXTURE_QUALITY_DEFAULT); }
-  void SetQualityTo16Bit()
-    { this->SetQuality(VTK_TEXTURE_QUALITY_16BIT); }
-  void SetQualityTo32Bit()
-    { this->SetQuality(VTK_TEXTURE_QUALITY_32BIT); }
+  void SetQualityToDefault() { this->SetQuality(VTK_TEXTURE_QUALITY_DEFAULT); }
+  void SetQualityTo16Bit() { this->SetQuality(VTK_TEXTURE_QUALITY_16BIT); }
+  void SetQualityTo32Bit() { this->SetQuality(VTK_TEXTURE_QUALITY_32BIT); }
   //@}
 
   //@{
   /**
-   * Turn on/off the mapping of color scalars through the lookup table.
-   * The default is Off. If Off, unsigned char scalars will be used
-   * directly as texture. If On, scalars will be mapped through the
-   * lookup table to generate 4-component unsigned char scalars.
-   * This ivar does not affect other scalars like unsigned short, float,
-   * etc. These scalars are always mapped through lookup tables.
+   * Default: ColorModeToDefault. unsigned char scalars are treated
+   * as colors, and NOT mapped through the lookup table (set with SetLookupTable),
+   * while other kinds of scalars are. ColorModeToDirectScalar extends
+   * ColorModeToDefault such that all integer types are treated as
+   * colors with values in the range 0-255 and floating types are
+   * treated as colors with values in the range 0.0-1.0. Setting
+   * ColorModeToMapScalars means that all scalar data will be mapped
+   * through the lookup table.
    */
-  vtkGetMacro(MapColorScalarsThroughLookupTable, int);
-  vtkSetMacro(MapColorScalarsThroughLookupTable, int);
-  vtkBooleanMacro(MapColorScalarsThroughLookupTable, int);
+  vtkSetMacro(ColorMode, int);
+  vtkGetMacro(ColorMode, int);
+  void SetColorModeToDefault() { this->SetColorMode(VTK_COLOR_MODE_DEFAULT); }
+  void SetColorModeToMapScalars() { this->SetColorMode(VTK_COLOR_MODE_MAP_SCALARS); }
+  void SetColorModeToDirectScalars() { this->SetColorMode(VTK_COLOR_MODE_DIRECT_SCALARS); }
   //@}
 
   /**
@@ -174,7 +187,7 @@ public:
   /**
    * Specify the lookup table to convert scalars if necessary
    */
-  void SetLookupTable(vtkScalarsToColors *);
+  void SetLookupTable(vtkScalarsToColors*);
   vtkGetObjectMacro(LookupTable, vtkScalarsToColors);
   //@}
 
@@ -195,7 +208,7 @@ public:
    * Set a transform on the texture which allows one to scale,
    * rotate and translate the texture.
    */
-  void SetTransform(vtkTransform *transform);
+  void SetTransform(vtkTransform* transform);
   vtkGetObjectMacro(Transform, vtkTransform);
   //@}
 
@@ -236,14 +249,14 @@ public:
   //@{
   /**
    * When the texture is forced to be a power of 2, the default behavior is
-   * for the "new" image's dimensions  to be greater than or equal to with
+   * for the "new" image's dimensions to be greater than or equal to with
    * respects to the original.  Setting RestrictPowerOf2ImageSmaller to be
    * 1 (or ON) with force the new image's dimensions to be less than or equal
    * to with respects to the original.
    */
-  vtkGetMacro(RestrictPowerOf2ImageSmaller, int);
-  vtkSetMacro(RestrictPowerOf2ImageSmaller, int);
-  vtkBooleanMacro(RestrictPowerOf2ImageSmaller, int);
+  vtkGetMacro(RestrictPowerOf2ImageSmaller, vtkTypeBool);
+  vtkSetMacro(RestrictPowerOf2ImageSmaller, vtkTypeBool);
+  vtkBooleanMacro(RestrictPowerOf2ImageSmaller, vtkTypeBool);
   //@}
 
   /**
@@ -285,26 +298,25 @@ public:
 
 protected:
   vtkTexture();
-  ~vtkTexture() VTK_OVERRIDE;
+  ~vtkTexture() override;
 
   // A texture is a sink, so there is no need to do anything.
   // This definition avoids a warning when doing Update() on a vtkTexture object.
-  void ExecuteData(vtkDataObject *) VTK_OVERRIDE
-  {
-  }
+  void ExecuteData(vtkDataObject*) override {}
 
   bool Mipmap;
-  int Repeat;
-  int EdgeClamp;
-  int Interpolate;
+  float MaximumAnisotropicFiltering;
+  vtkTypeBool Repeat;
+  vtkTypeBool EdgeClamp;
+  vtkTypeBool Interpolate;
   int Quality;
-  int MapColorScalarsThroughLookupTable;
+  int ColorMode;
   vtkScalarsToColors* LookupTable;
   vtkUnsignedCharArray* MappedScalars;
-  vtkTransform * Transform;
+  vtkTransform* Transform;
 
   int BlendingMode;
-  int RestrictPowerOf2ImageSmaller;
+  vtkTypeBool RestrictPowerOf2ImageSmaller;
   // this is to duplicated the previous behavior of SelfCreatedLookUpTable
   int SelfAdjustingTableRange;
   bool PremultipliedAlpha;
@@ -316,8 +328,8 @@ protected:
   int TranslucentCachedResult;
 
 private:
-  vtkTexture(const vtkTexture&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTexture&) VTK_DELETE_FUNCTION;
+  vtkTexture(const vtkTexture&) = delete;
+  void operator=(const vtkTexture&) = delete;
 };
 
 #endif

@@ -42,7 +42,7 @@
  *
  * @sa
  * vtkImageCheckerboard
-*/
+ */
 
 #ifndef vtkImageRectilinearWipe_h
 #define vtkImageRectilinearWipe_h
@@ -61,17 +61,17 @@
 class VTKIMAGINGHYBRID_EXPORT vtkImageRectilinearWipe : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageRectilinearWipe *New();
-  vtkTypeMacro(vtkImageRectilinearWipe,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageRectilinearWipe* New();
+  vtkTypeMacro(vtkImageRectilinearWipe, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/Get the location of the image transition. Note that position is
    * specified in pixels.
    */
-  vtkSetVector2Macro(Position,int);
-  vtkGetVectorMacro(Position,int,2);
+  vtkSetVector2Macro(Position, int);
+  vtkGetVectorMacro(Position, int, 2);
   //@}
 
   //@{
@@ -79,15 +79,15 @@ public:
    * Set/Get the location of the wipe axes. The default is X,Y (ie vector
    * values of 0 and 1).
    */
-  vtkSetVector2Macro(Axis,int);
-  vtkGetVectorMacro(Axis,int,2);
+  vtkSetVector2Macro(Axis, int);
+  vtkGetVectorMacro(Axis, int, 2);
   //@}
 
   /**
    * Set the two inputs to this filter.
    */
-  virtual void SetInput1Data(vtkDataObject *in) { this->SetInputData(0,in); }
-  virtual void SetInput2Data(vtkDataObject *in) { this->SetInputData(1,in); }
+  virtual void SetInput1Data(vtkDataObject* in) { this->SetInputData(0, in); }
+  virtual void SetInput2Data(vtkDataObject* in) { this->SetInputData(1, in); }
 
   //@{
   /**
@@ -106,44 +106,34 @@ public:
    * transition between input 0 and input 1.
    * SetWipeToVertical - alternate input 0 and input 1 with a
    * horizontal split. Position[1] specifies the location of the
-   * horizonal transition between input 0 and input 1.
+   * horizontal transition between input 0 and input 1.
    */
-  vtkSetClampMacro(Wipe,int,VTK_WIPE_QUAD,VTK_WIPE_UPPER_RIGHT);
-  vtkGetMacro(Wipe,int);
-  void SetWipeToQuad()
-    {this->SetWipe(VTK_WIPE_QUAD);}
-  void SetWipeToHorizontal()
-    {this->SetWipe(VTK_WIPE_HORIZONTAL);}
-  void SetWipeToVertical()
-    {this->SetWipe(VTK_WIPE_VERTICAL);}
-  void SetWipeToLowerLeft()
-    {this->SetWipe(VTK_WIPE_LOWER_LEFT);}
-  void SetWipeToLowerRight()
-    {this->SetWipe(VTK_WIPE_LOWER_RIGHT);}
-  void SetWipeToUpperLeft()
-    {this->SetWipe(VTK_WIPE_UPPER_LEFT);}
-  void SetWipeToUpperRight()
-    {this->SetWipe(VTK_WIPE_UPPER_RIGHT);}
+  vtkSetClampMacro(Wipe, int, VTK_WIPE_QUAD, VTK_WIPE_UPPER_RIGHT);
+  vtkGetMacro(Wipe, int);
+  void SetWipeToQuad() { this->SetWipe(VTK_WIPE_QUAD); }
+  void SetWipeToHorizontal() { this->SetWipe(VTK_WIPE_HORIZONTAL); }
+  void SetWipeToVertical() { this->SetWipe(VTK_WIPE_VERTICAL); }
+  void SetWipeToLowerLeft() { this->SetWipe(VTK_WIPE_LOWER_LEFT); }
+  void SetWipeToLowerRight() { this->SetWipe(VTK_WIPE_LOWER_RIGHT); }
+  void SetWipeToUpperLeft() { this->SetWipe(VTK_WIPE_UPPER_LEFT); }
+  void SetWipeToUpperRight() { this->SetWipe(VTK_WIPE_UPPER_RIGHT); }
   //@}
 
 protected:
   vtkImageRectilinearWipe();
-  ~vtkImageRectilinearWipe() VTK_OVERRIDE {}
+  ~vtkImageRectilinearWipe() override {}
 
-  void ThreadedRequestData(vtkInformation *request,
-                                   vtkInformationVector **inputVector,
-                                   vtkInformationVector *outputVector,
-                                   vtkImageData ***inData,
-                                   vtkImageData **outData,
-                                   int extent[6], int threadId) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData,
+    int extent[6], int threadId) override;
 
   int Position[2];
   int Wipe;
   int Axis[2];
 
 private:
-  vtkImageRectilinearWipe(const vtkImageRectilinearWipe&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageRectilinearWipe&) VTK_DELETE_FUNCTION;
+  vtkImageRectilinearWipe(const vtkImageRectilinearWipe&) = delete;
+  void operator=(const vtkImageRectilinearWipe&) = delete;
 };
 
 #endif

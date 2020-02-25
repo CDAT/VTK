@@ -34,7 +34,7 @@
  *
  * @sa
  * vtkRectilinearWipeWidget vtkWidgetRepresentation vtkAbstractWidget
-*/
+ */
 
 #ifndef vtkRectilinearWipeRepresentation_h
 #define vtkRectilinearWipeRepresentation_h
@@ -51,37 +51,36 @@ class vtkProperty2D;
 class vtkPolyDataMapper2D;
 class vtkActor2D;
 
-
 class VTKINTERACTIONWIDGETS_EXPORT vtkRectilinearWipeRepresentation : public vtkWidgetRepresentation
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkRectilinearWipeRepresentation *New();
+  static vtkRectilinearWipeRepresentation* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkRectilinearWipeRepresentation,vtkWidgetRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkRectilinearWipeRepresentation, vtkWidgetRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
   /**
    * Specify an instance of vtkImageRectilinearWipe to manipulate.
    */
-  void SetRectilinearWipe(vtkImageRectilinearWipe *wipe);
-  vtkGetObjectMacro(RectilinearWipe,vtkImageRectilinearWipe);
+  void SetRectilinearWipe(vtkImageRectilinearWipe* wipe);
+  vtkGetObjectMacro(RectilinearWipe, vtkImageRectilinearWipe);
   //@}
 
   //@{
   /**
    * Specify an instance of vtkImageActor to decorate.
    */
-  void SetImageActor(vtkImageActor *imageActor);
-  vtkGetObjectMacro(ImageActor,vtkImageActor);
+  void SetImageActor(vtkImageActor* imageActor);
+  vtkGetObjectMacro(ImageActor, vtkImageActor);
   //@}
 
   //@{
@@ -90,8 +89,8 @@ public:
    * in which the cursor is considered to be on the widget, or on a
    * widget feature (e.g., a corner point or edge).
    */
-  vtkSetClampMacro(Tolerance,int,1,10);
-  vtkGetMacro(Tolerance,int);
+  vtkSetClampMacro(Tolerance, int, 1, 10);
+  vtkGetMacro(Tolerance, int);
   //@}
 
   //@{
@@ -99,7 +98,7 @@ public:
    * Get the properties for the widget. This can be manipulated to set
    * different colors, line widths, etc.
    */
-  vtkGetObjectMacro(Property,vtkProperty2D);
+  vtkGetObjectMacro(Property, vtkProperty2D);
   //@}
 
   //@{
@@ -108,10 +107,10 @@ public:
    * are the methods that the widget and its representation use to
    * communicate with each other.
    */
-  void BuildRepresentation() VTK_OVERRIDE;
-  void StartWidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  void WidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  int ComputeInteractionState(int X, int Y, int modify=0) VTK_OVERRIDE;
+  void BuildRepresentation() override;
+  void StartWidgetInteraction(double eventPos[2]) override;
+  void WidgetInteraction(double eventPos[2]) override;
+  int ComputeInteractionState(int X, int Y, int modify = 0) override;
   //@}
 
   // Enums define the state of the prop relative to the mouse pointer
@@ -119,7 +118,7 @@ public:
   // widget.
   enum _InteractionState
   {
-    Outside=0,
+    Outside = 0,
     MovingHPane,
     MovingVPane,
     MovingCenter
@@ -129,21 +128,21 @@ public:
   /**
    * Methods to make this class behave as a vtkProp.
    */
-  void GetActors2D(vtkPropCollection *) VTK_OVERRIDE;
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderOpaqueGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderTranslucentPolygonalGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  void GetActors2D(vtkPropCollection*) override;
+  void ReleaseGraphicsResources(vtkWindow*) override;
+  int RenderOverlay(vtkViewport* viewport) override;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) override;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
   //@}
 
 protected:
   vtkRectilinearWipeRepresentation();
-  ~vtkRectilinearWipeRepresentation() VTK_OVERRIDE;
+  ~vtkRectilinearWipeRepresentation() override;
 
   // Instances that this class manipulates
-  vtkImageRectilinearWipe *RectilinearWipe;
-  vtkImageActor           *ImageActor;
+  vtkImageRectilinearWipe* RectilinearWipe;
+  vtkImageActor* ImageActor;
 
   // The pick tolerance of the widget in pixels
   int Tolerance;
@@ -153,15 +152,15 @@ protected:
 
   // Indicates which part of widget is currently active based on the
   // state of the instance of the vtkImageRectilinearWipe.
-  int  ActiveParts;
+  int ActiveParts;
 
   // Geometric structure of widget
-  vtkPoints           *Points; // The nine points defining the widget geometry
-  vtkCellArray        *Lines;  // lines defining the boundary
-  vtkPolyData         *Wipe;
-  vtkPolyDataMapper2D *WipeMapper;
-  vtkActor2D          *WipeActor;
-  vtkProperty2D       *Property;
+  vtkPoints* Points;   // The nine points defining the widget geometry
+  vtkCellArray* Lines; // lines defining the boundary
+  vtkPolyData* Wipe;
+  vtkPolyDataMapper2D* WipeMapper;
+  vtkActor2D* WipeActor;
+  vtkProperty2D* Property;
 
   // These are used to track the coordinates (in display coordinate system)
   // of the mid-edge and center point of the widget
@@ -172,12 +171,12 @@ protected:
   double DP8[3];
 
   int Dims[3]; // Dimensions of the input image to the wipe
-  int I; //the i-j define the plane that is being displayed
+  int I;       // the i-j define the plane that is being displayed
   int J;
 
 private:
-  vtkRectilinearWipeRepresentation(const vtkRectilinearWipeRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRectilinearWipeRepresentation&) VTK_DELETE_FUNCTION;
+  vtkRectilinearWipeRepresentation(const vtkRectilinearWipeRepresentation&) = delete;
+  void operator=(const vtkRectilinearWipeRepresentation&) = delete;
 };
 
 #endif

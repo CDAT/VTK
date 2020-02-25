@@ -19,16 +19,14 @@
  *
  * This class is used internally by the vtkQtDebugLeaksView.  It installs an
  * observer on the vtkDebugLeaks singleton and uses the observer to maintain
- * a model of all vtkObjectBase dervied objects that are alive in memory.
-*/
+ * a model of all vtkObjectBase derived objects that are alive in memory.
+ */
 
 #ifndef vtkQtDebugLeaksModel_h
 #define vtkQtDebugLeaksModel_h
 
 #include "vtkGUISupportQtModule.h" // For export macro
 #include <QStandardItemModel>
-
-#include "vtkConfigure.h" //for VTK_OVERRIDE
 
 class vtkObjectBase;
 
@@ -37,9 +35,8 @@ class VTKGUISUPPORTQT_EXPORT vtkQtDebugLeaksModel : public QStandardItemModel
   Q_OBJECT
 
 public:
-
-  vtkQtDebugLeaksModel(QObject* p=0);
-  ~vtkQtDebugLeaksModel() VTK_OVERRIDE;
+  vtkQtDebugLeaksModel(QObject* p = nullptr);
+  ~vtkQtDebugLeaksModel() override;
 
   /**
    * Get the list of objects in the model that have the given class name
@@ -62,10 +59,9 @@ protected slots:
   void onAboutToQuit();
 
   // Inherited method from QAbstractItemModel
-  Qt::ItemFlags flags(const QModelIndex &index) const VTK_OVERRIDE;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
-
   class qInternal;
   qInternal* Internal;
 
@@ -75,7 +71,6 @@ private:
   Q_DISABLE_COPY(vtkQtDebugLeaksModel);
 };
 
-
 // TODO - move to private
 //-----------------------------------------------------------------------------
 class ReferenceCountModel : public QStandardItemModel
@@ -83,18 +78,18 @@ class ReferenceCountModel : public QStandardItemModel
   Q_OBJECT
 
 public:
-  ReferenceCountModel(QObject* p=0);
-  ~ReferenceCountModel() VTK_OVERRIDE;
+  ReferenceCountModel(QObject* p = nullptr);
+  ~ReferenceCountModel() override;
   void addObject(vtkObjectBase* obj);
   void removeObject(vtkObjectBase* obj);
   QString pointerAsString(void* ptr);
 
   // Inherited method from QAbstractItemModel
-  Qt::ItemFlags flags(const QModelIndex &index) const VTK_OVERRIDE;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 protected slots:
   void updateReferenceCounts();
 };
 
-
 #endif
+// VTK-HeaderTest-Exclude: vtkQtDebugLeaksModel.h

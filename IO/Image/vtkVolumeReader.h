@@ -30,7 +30,7 @@
  * read. Thus to read an image set ImageRange[0] = ImageRange[1] = slice
  * number. The default behavior is to read a single file (i.e., image slice 1).
  *
- * The DataMask instance variable is used to read data files with imbedded
+ * The DataMask instance variable is used to read data files with embedded
  * connectivity or segmentation information. For example, some data has
  * the high order bit set to indicate connected surface. The DataMask allows
  * you to select this data. Other important ivars include HeaderSize, which
@@ -40,7 +40,7 @@
  * @sa
  * vtkSliceCubes vtkMarchingCubes vtkPNMReader vtkVolume16Reader
  * vtkImageReader
-*/
+ */
 
 #ifndef vtkVolumeReader_h
 #define vtkVolumeReader_h
@@ -51,8 +51,8 @@
 class VTKIOIMAGE_EXPORT vtkVolumeReader : public vtkImageAlgorithm
 {
 public:
-  vtkTypeMacro(vtkVolumeReader,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkVolumeReader, vtkImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -74,45 +74,44 @@ public:
   /**
    * Set the range of files to read.
    */
-  vtkSetVector2Macro(ImageRange,int);
-  vtkGetVectorMacro(ImageRange,int,2);
+  vtkSetVector2Macro(ImageRange, int);
+  vtkGetVectorMacro(ImageRange, int, 2);
   //@}
 
   //@{
   /**
    * Specify the spacing for the data.
    */
-  vtkSetVector3Macro(DataSpacing,double);
-  vtkGetVectorMacro(DataSpacing,double,3);
+  vtkSetVector3Macro(DataSpacing, double);
+  vtkGetVectorMacro(DataSpacing, double, 3);
   //@}
 
   //@{
   /**
    * Specify the origin for the data.
    */
-  vtkSetVector3Macro(DataOrigin,double);
-  vtkGetVectorMacro(DataOrigin,double,3);
+  vtkSetVector3Macro(DataOrigin, double);
+  vtkGetVectorMacro(DataOrigin, double, 3);
   //@}
 
   /**
    * Other objects make use of this method.
    */
-  virtual vtkImageData *GetImage(int ImageNumber) = 0;
+  virtual vtkImageData* GetImage(int ImageNumber) = 0;
 
 protected:
   vtkVolumeReader();
-  ~vtkVolumeReader() VTK_OVERRIDE;
+  ~vtkVolumeReader() override;
 
-  char *FilePrefix;
-  char *FilePattern;
+  char* FilePrefix;
+  char* FilePattern;
   int ImageRange[2];
   double DataSpacing[3];
   double DataOrigin[3];
+
 private:
-  vtkVolumeReader(const vtkVolumeReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkVolumeReader&) VTK_DELETE_FUNCTION;
+  vtkVolumeReader(const vtkVolumeReader&) = delete;
+  void operator=(const vtkVolumeReader&) = delete;
 };
 
 #endif
-
-

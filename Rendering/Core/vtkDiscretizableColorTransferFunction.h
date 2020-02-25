@@ -34,44 +34,58 @@
  * of annotations. If a scalar value is not present in \a AnnotatedValues,
  * then \a NanColor will be used.
  *
+ * One can set a scalar opacity function to map scalars to color types handling
+ * transparency (VTK_RGBA, VTK_LUMINANCE_ALPHA). Opacity mapping is off by
+ * default. Call EnableOpacityMappingOn() to handle mapping of alpha values.
+ *
  * NOTE: One must call Build() after making any changes to the points
  * in the ColorTransferFunction to ensure that the discrete and non-discrete
  * versions match up.
-*/
+ */
 
 #ifndef vtkDiscretizableColorTransferFunction_h
 #define vtkDiscretizableColorTransferFunction_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkColorTransferFunction.h"
-#include "vtkSmartPointer.h" // for vtkSmartPointer
+#include "vtkRenderingCoreModule.h" // For export macro
+#include "vtkSmartPointer.h"        // for vtkSmartPointer
 
 class vtkColorTransferFunction;
 class vtkLookupTable;
 class vtkPiecewiseFunction;
 
-class VTKRENDERINGCORE_EXPORT vtkDiscretizableColorTransferFunction : public vtkColorTransferFunction
+class VTKRENDERINGCORE_EXPORT vtkDiscretizableColorTransferFunction
+  : public vtkColorTransferFunction
 {
 public:
   static vtkDiscretizableColorTransferFunction* New();
   vtkTypeMacro(vtkDiscretizableColorTransferFunction, vtkColorTransferFunction);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
+  //@{
   /**
    * Returns the negation of \a EnableOpacityMapping.
    */
-  int IsOpaque() VTK_OVERRIDE;
+  int IsOpaque() override;
+  int IsOpaque(vtkAbstractArray* scalars, int colorMode, int component) override;
+  //@}
 
   /**
    * Add colors to use when \a IndexedLookup is true.
    * \a SetIndexedColor() will automatically call
    * SetNumberOfIndexedColors(index+1) if the current number of indexed colors
    * is not sufficient for the specified index and all will be initialized to
-   * the RGB values passed to this call.
+   * the RGBA/RGB values passed to this call.
    */
-  void SetIndexedColor(unsigned int index, const double rgb[3])
-    { this->SetIndexedColor(index, rgb[0], rgb[1], rgb[2]); }
-  void SetIndexedColor(unsigned int index, double r, double g, double b);
+  void SetIndexedColorRGB(unsigned int index, const double rgb[3])
+  {
+    this->SetIndexedColor(index, rgb[0], rgb[1], rgb[2]);
+  }
+  void SetIndexedColorRGBA(unsigned int index, const double rgba[4])
+  {
+    this->SetIndexedColor(index, rgba[0], rgba[1], rgba[2], rgba[3]);
+  }
+  void SetIndexedColor(unsigned int index, double r, double g, double b, double a = 1.0);
 
   /**
    * Get the "indexed color" assigned to an index.
@@ -80,12 +94,12 @@ public:
    * the annotations were set).
    * Subclasses must implement this and interpret how to treat the index.
    * vtkLookupTable simply returns GetTableValue(\a index % \a this->GetNumberOfTableValues()).
-   * vtkColorTransferFunction returns the color assocated with node \a index % \a this->GetSize().
+   * vtkColorTransferFunction returns the color associated with node \a index % \a this->GetSize().
 
    * Note that implementations *must* set the opacity (alpha) component of the color, even if they
    * do not provide opacity values in their colormaps. In that case, alpha = 1 should be used.
    */
-  void GetIndexedColor(vtkIdType i, double rgba[4]) VTK_OVERRIDE;
+  void GetIndexedColor(vtkIdType i, double rgba[4]) override;
 
   //@{
   /**
@@ -103,7 +117,7 @@ public:
    * otherwise the discretized version will be inconsistent with the
    * non-discretized one.
    */
-  void Build() VTK_OVERRIDE;
+  void Build() override;
 
   //@{
   /**
@@ -112,9 +126,9 @@ public:
    * Not set by default, i.e. color value is determined by
    * interpolating at the scalar value.
    */
-  vtkSetMacro(Discretize, int);
-  vtkGetMacro(Discretize, int);
-  vtkBooleanMacro(Discretize, int);
+  vtkSetMacro(Discretize, vtkTypeBool);
+  vtkGetMacro(Discretize, vtkTypeBool);
+  vtkBooleanMacro(Discretize, vtkTypeBool);
   //@}
 
   //@{
@@ -140,48 +154,26 @@ public:
    * Map one value through the lookup table and return a color defined
    * as a RGBA unsigned char tuple (4 bytes).
    */
-  unsigned char *MapValue(double v) VTK_OVERRIDE;
+  const unsigned char* MapValue(double v) override;
 
   /**
    * Map one value through the lookup table and return the color as
    * an RGB array of doubles between 0 and 1.
    */
-  void GetColor(double v, double rgb[3]) VTK_OVERRIDE;
+  void GetColor(double v, double rgb[3]) override;
 
   /**
    * Return the opacity of a given scalar.
    */
-  double GetOpacity(double v) VTK_OVERRIDE;
-
-  //@{
-  /**
-   * Internal methods that map a data array into a 4-component, unsigned char
-   * RGBA array. The color mode determines the behavior of mapping. If
-   * VTK_COLOR_MODE_DEFAULT is set, then unsigned char data arrays are
-   * treated as colors (and converted to RGBA if necessary); otherwise,
-   * the data is mapped through this instance of ScalarsToColors. The offset
-   * is used for data arrays with more than one component; it indicates
-   * which component to use to do the blending.
-   * When the component argument is -1, then the this object uses its
-   * own selected technique to change a vector into a scalar to map.
-
-   * When \a IndexedLookup (inherited from vtkScalarsToColors) is true,
-   * the scalar opacity function is not used regardless of
-   * \a EnableOpacityMapping.
-   */
-  vtkUnsignedCharArray *MapScalars(vtkDataArray *scalars, int colorMode,
-                                           int component) VTK_OVERRIDE;
-  vtkUnsignedCharArray *MapScalars(vtkAbstractArray *scalars, int colorMode,
-                                           int component) VTK_OVERRIDE;
-  //@}
+  double GetOpacity(double v) override;
 
   /**
-   * Returns the (x, r, g, b) values as an array.
-   * vtkColorTransferFunction::GetDataPointer(). Retained for
-   * backwards compatibility.
-   * \deprecated Use GetDataPointer() instead.
+   * Map a set of scalars through the lookup table.
+   * Overridden to map the opacity value. This internal method is inherited
+   * from vtkScalarsToColors and should never be called directly.
    */
-  VTK_LEGACY(double* GetRGBPoints());
+  void MapScalarsThroughTable2(void* input, unsigned char* output, int inputDataType,
+    int numberOfValues, int inputIncrement, int outputFormat) override;
 
   /**
    * Specify an additional opacity (alpha) value to blend with. Values
@@ -190,7 +182,7 @@ public:
    * blend its opacity.
    * Overridden to pass the alpha to the internal vtkLookupTable.
    */
-  void SetAlpha(double alpha) VTK_OVERRIDE;
+  void SetAlpha(double alpha) override;
 
   //@{
   /**
@@ -198,29 +190,33 @@ public:
    * RGB 3-tuple color of doubles in the range [0, 1].
    * Overridden to pass the NanColor to the internal vtkLookupTable.
    */
-  void SetNanColor(double r, double g, double b) VTK_OVERRIDE;
-  void SetNanColor(double rgb[3]) VTK_OVERRIDE {
-    this->SetNanColor(rgb[0], rgb[1], rgb[2]);
-  }
+  void SetNanColor(double r, double g, double b) override;
+  void SetNanColor(const double rgb[3]) override { this->SetNanColor(rgb[0], rgb[1], rgb[2]); }
   //@}
+
+  /**
+   * Set the opacity to use when a NaN (not a number) is encountered.  This is an
+   * double in the range [0, 1].
+   * Overridden to pass the NanOpacity to the internal vtkLookupTable.
+   */
+  void SetNanOpacity(double a) override;
 
   /**
    * This should return 1 if the subclass is using log scale for
    * mapping scalars to colors.
    */
-  int UsingLogScale() VTK_OVERRIDE
-    { return this->UseLogScale; }
+  int UsingLogScale() override { return this->UseLogScale; }
 
   /**
    * Get the number of available colors for mapping to.
    */
-  vtkIdType GetNumberOfAvailableColors() VTK_OVERRIDE;
+  vtkIdType GetNumberOfAvailableColors() override;
 
   //@{
   /**
    * Set/get the opacity function to use.
    */
-  virtual void SetScalarOpacityFunction(vtkPiecewiseFunction *function);
+  virtual void SetScalarOpacityFunction(vtkPiecewiseFunction* function);
   virtual vtkPiecewiseFunction* GetScalarOpacityFunction() const;
   //@}
 
@@ -228,24 +224,24 @@ public:
   /**
    * Enable/disable the usage of the scalar opacity function.
    */
-  vtkSetMacro(EnableOpacityMapping, bool)
-  vtkGetMacro(EnableOpacityMapping, bool)
-  vtkBooleanMacro(EnableOpacityMapping, bool)
+  vtkSetMacro(EnableOpacityMapping, bool);
+  vtkGetMacro(EnableOpacityMapping, bool);
+  vtkBooleanMacro(EnableOpacityMapping, bool);
   //@}
 
   /**
    * Overridden to include the ScalarOpacityFunction's MTime.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkDiscretizableColorTransferFunction();
-  ~vtkDiscretizableColorTransferFunction() VTK_OVERRIDE;
+  ~vtkDiscretizableColorTransferFunction() override;
 
   /**
    * Flag indicating whether transfer function is discretized.
    */
-  int Discretize;
+  vtkTypeBool Discretize;
 
   /**
    * Flag indicating whether log scaling is to be used.
@@ -267,23 +263,19 @@ protected:
   bool EnableOpacityMapping;
   vtkSmartPointer<vtkPiecewiseFunction> ScalarOpacityFunction;
 
-  void MapDataArrayToOpacity(
-    vtkDataArray *scalars, int component, vtkUnsignedCharArray* colors);
+  void MapDataArrayToOpacity(vtkDataArray* scalars, int component, vtkUnsignedCharArray* colors);
 
 private:
-  vtkDiscretizableColorTransferFunction(const vtkDiscretizableColorTransferFunction&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDiscretizableColorTransferFunction&) VTK_DELETE_FUNCTION;
+  vtkDiscretizableColorTransferFunction(const vtkDiscretizableColorTransferFunction&) = delete;
+  void operator=(const vtkDiscretizableColorTransferFunction&) = delete;
 
-  template<typename T, typename VectorGetter>
-    void MapVectorToOpacity (
-      VectorGetter getter, T* scalars, int component,
-      int numberOfComponents, vtkIdType numberOfTuples, unsigned char* colors);
+  template <typename T, typename VectorGetter>
+  void MapVectorToOpacity(VectorGetter getter, T* scalars, int component, int numberOfComponents,
+    vtkIdType numberOfTuples, unsigned char* colors);
 
-  template<template<class> class VectorGetter>
-    void AllTypesMapVectorToOpacity (
-      int scalarType,
-      void* scalarsPtr, int component,
-      int numberOfComponents, vtkIdType numberOfTuples, unsigned char* colors);
+  template <template <class> class VectorGetter>
+  void AllTypesMapVectorToOpacity(int scalarType, void* scalarsPtr, int component,
+    int numberOfComponents, vtkIdType numberOfTuples, unsigned char* colors);
 
   class vtkInternals;
   vtkInternals* Internals;

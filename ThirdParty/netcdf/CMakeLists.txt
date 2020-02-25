@@ -1,19 +1,16 @@
-if(NOT VTK_USE_SYSTEM_NETCDF)
-  vtk_module_third_party(NetCDF
-    LIBRARIES vtkNetCDF
-    INCLUDE_DIRS
-      ${CMAKE_CURRENT_SOURCE_DIR}/vtknetcdf/include
-      ${CMAKE_CURRENT_BINARY_DIR}/vtknetcdf
-    COMPONENTS C
-    )
-else()
-  vtk_module_third_party(NetCDF
-    LIBRARIES vtkNetCDF netcdf
-    COMPONENTS C
-    )
-endif()
+vtk_module_third_party(
+  INTERNAL
+    LICENSE_FILES "vtknetcdf/COPYRIGHT"
+    VERSION       "4.7.3"
+    STANDARD_INCLUDE_DIRS
+  EXTERNAL
+    PACKAGE NetCDF
+    TARGETS NetCDF::NetCDF
+    STANDARD_INCLUDE_DIRS)
 
-# Remove old netcdfc++ header files if they exist.
-if (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/vtk_netcdfcpp.h")
-  file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/vtk_netcdfcpp.h")
-endif ()
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/vtk_netcdf.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/vtk_netcdf.h")
+
+vtk_module_install_headers(
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/vtk_netcdf.h")

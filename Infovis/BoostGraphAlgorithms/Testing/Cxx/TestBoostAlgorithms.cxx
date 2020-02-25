@@ -33,22 +33,20 @@
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 
-#include <boost/version.hpp>
 #include "vtkBoostBiconnectedComponents.h"
+#include <boost/version.hpp>
 
-#define VTK_CREATE(type,name) \
-  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 template <typename Algorithm>
-void RenderGraph(vtkRenderer* ren, Algorithm* alg,
-  double xoffset, double yoffset,
-  const char* vertColorArray, double vertMin, double vertMax,
-  const char* edgeColorArray, double edgeMin, double edgeMax)
+void RenderGraph(vtkRenderer* ren, Algorithm* alg, double xoffset, double yoffset,
+  const char* vertColorArray, double vertMin, double vertMax, const char* edgeColorArray,
+  double edgeMin, double edgeMax)
 {
   VTK_CREATE(vtkGraphToPolyData, graphToPoly);
   graphToPoly->SetInputConnection(alg->GetOutputPort());
@@ -162,37 +160,37 @@ int TestBoostAlgorithms(int argc, char* argv[])
   // Only available in Boost 1.33 or later
   VTK_CREATE(vtkBoostBiconnectedComponents, biconn);
   biconn->SetInputData(g);
-  RenderGraph(ren, biconn.GetPointer(), 0, 0, "biconnected component", -1, 3, "biconnected component", -1, 3);
-
+  RenderGraph(
+    ren, biconn.GetPointer(), 0, 0, "biconnected component", -1, 3, "biconnected component", -1, 3);
 
   // Test breadth first search
   VTK_CREATE(vtkBoostBreadthFirstSearch, bfs);
   bfs->SetInputData(g);
-  RenderGraph(ren, bfs.GetPointer(), 2, 0, "BFS", 0, 3, NULL, 0, 0);
+  RenderGraph(ren, bfs.GetPointer(), 2, 0, "BFS", 0, 3, nullptr, 0, 0);
 
   // Test centrality
   VTK_CREATE(vtkBoostBrandesCentrality, centrality);
   centrality->SetInputData(g);
-  RenderGraph(ren, centrality.GetPointer(), 0, 2, "centrality", 0, 1, NULL, 0, 0);
+  RenderGraph(ren, centrality.GetPointer(), 0, 2, "centrality", 0, 1, nullptr, 0, 0);
 
   // Test connected components
   VTK_CREATE(vtkBoostConnectedComponents, comp);
   comp->SetInputData(g);
-  RenderGraph(ren, comp.GetPointer(), 2, 2, "component", 0, 2, NULL, 0, 0);
+  RenderGraph(ren, comp.GetPointer(), 2, 2, "component", 0, 2, nullptr, 0, 0);
 
   // Test breadth first search tree
   VTK_CREATE(vtkBoostBreadthFirstSearchTree, bfsTree);
   bfsTree->SetInputData(g);
   VTK_CREATE(vtkBoostBreadthFirstSearch, bfs2);
   bfs2->SetInputConnection(bfsTree->GetOutputPort());
-  RenderGraph(ren, bfs2.GetPointer(), 0, 4, "BFS", 0, 3, NULL, 0, 0);
+  RenderGraph(ren, bfs2.GetPointer(), 0, 4, "BFS", 0, 3, nullptr, 0, 0);
 
   // Test Prim's MST
   VTK_CREATE(vtkBoostPrimMinimumSpanningTree, prim);
   prim->SetInputData(g2);
   prim->SetOriginVertex(0);
   prim->SetEdgeWeightArrayName("weight");
-  RenderGraph(ren, prim.GetPointer(), 2, 4, NULL, 0, 0, NULL, 0, 0);
+  RenderGraph(ren, prim.GetPointer(), 2, 4, nullptr, 0, 0, nullptr, 0, 0);
 
   VTK_CREATE(vtkRenderWindowInteractor, iren);
   VTK_CREATE(vtkRenderWindow, win);
@@ -211,4 +209,3 @@ int TestBoostAlgorithms(int argc, char* argv[])
 
   return !retVal;
 }
-

@@ -19,7 +19,7 @@
  *
  * vtkShepardKernel is an interpolation kernel that uses the method of
  * Shepard to perform interpolation. The weights are computed as 1/r^p, where
- * r is the distance to a neighbor point within the kernal radius R; and p
+ * r is the distance to a neighbor point within the kernel radius R; and p
  * (the power parameter) is a positive exponent (typically p=2).
  *
  * @warning
@@ -30,7 +30,7 @@
  * @sa
  * vtkPointInterpolator vtkPointInterpolator2D vtkInterpolationKernel
  * vtkGaussianKernel vtkSPHKernel vtkShepardKernel
-*/
+ */
 
 #ifndef vtkShepardKernel_h
 #define vtkShepardKernel_h
@@ -41,7 +41,6 @@
 class vtkIdList;
 class vtkDoubleArray;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkShepardKernel : public vtkGeneralizedKernel
 {
 public:
@@ -49,9 +48,9 @@ public:
   /**
    * Standard methods for instantiation, obtaining type information, and printing.
    */
-  static vtkShepardKernel *New();
-  vtkTypeMacro(vtkShepardKernel,vtkGeneralizedKernel);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkShepardKernel* New();
+  vtkTypeMacro(vtkShepardKernel, vtkGeneralizedKernel);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   // Re-use any superclass signatures that we don't override.
@@ -71,28 +70,28 @@ public:
    * are estimates of local confidence of weights. The prob may be nullptr in
    * which all probabilities are considered =1.
    */
-  vtkIdType ComputeWeights(double x[3], vtkIdList *pIds,
-                                   vtkDoubleArray *prob, vtkDoubleArray *weights) VTK_OVERRIDE;
+  vtkIdType ComputeWeights(
+    double x[3], vtkIdList* pIds, vtkDoubleArray* prob, vtkDoubleArray* weights) override;
 
   //@{
   /**
    * Set / Get the power parameter p. By default p=2. Values (which must be
    * a positive, real value) != 2 may affect performance significantly.
    */
-  vtkSetClampMacro(PowerParameter,double,0.001,100);
-  vtkGetMacro(PowerParameter,double);
+  vtkSetClampMacro(PowerParameter, double, 0.001, 100);
+  vtkGetMacro(PowerParameter, double);
   //@}
 
 protected:
   vtkShepardKernel();
-  ~vtkShepardKernel() VTK_OVERRIDE;
+  ~vtkShepardKernel() override;
 
   // The exponent of the weights, =2 by default (l2 norm)
   double PowerParameter;
 
 private:
-  vtkShepardKernel(const vtkShepardKernel&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkShepardKernel&) VTK_DELETE_FUNCTION;
+  vtkShepardKernel(const vtkShepardKernel&) = delete;
+  void operator=(const vtkShepardKernel&) = delete;
 };
 
 #endif

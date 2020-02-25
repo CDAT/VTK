@@ -33,11 +33,11 @@
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
 
-int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
+int TestGPURayCastIndependentComponentsLightParameters(int argc, char* argv[])
 {
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
-  int dims[3] = {100, 100, 100};
+  int dims[3] = { 100, 100, 100 };
 
   // Create a vtkImageData with two components
   vtkNew<vtkImageData> image;
@@ -46,12 +46,15 @@ int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
 
   // Fill the first half rectangular parallelopiped along X with the
   // first component values and the second half with second component values
-  double * ptr = static_cast<double *> (image->GetScalarPointer(0, 0, 0));
+  double* ptr = static_cast<double*>(image->GetScalarPointer(0, 0, 0));
 
   double center1[3], center2[3], center3[3];
-  center1[0] = dims[0]/3; center2[0] = center1[0]*2; center3[0] = dims[0]/2;
-  center1[1] = center2[1] = dims[1]/2; center3[1] = dims[1]/3;
-  center1[2] = center2[2] = center3[2] = dims[2]/2;
+  center1[0] = dims[0] / 3;
+  center2[0] = center1[0] * 2;
+  center3[0] = dims[0] / 2;
+  center1[1] = center2[1] = dims[1] / 2;
+  center3[1] = dims[1] / 3;
+  center1[2] = center2[2] = center3[2] = dims[2] / 2;
 
   double radius;
   radius = center1[0];
@@ -111,12 +114,12 @@ int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
   renWin->SetMultiSamples(0);
 
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
 
   vtkNew<vtkRenderWindowInteractor> iren;
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetInteractorStyle(style);
+  iren->SetRenderWindow(renWin);
 
   renWin->Render();
 
@@ -124,7 +127,7 @@ int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
   vtkNew<vtkGPUVolumeRayCastMapper> mapper;
   mapper->AutoAdjustSampleDistancesOff();
   mapper->SetSampleDistance(0.9);
-  mapper->SetInputData(image.GetPointer());
+  mapper->SetInputData(image);
 
   // Color transfer function
   vtkNew<vtkColorTransferFunction> ctf1;
@@ -157,12 +160,12 @@ int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
   property->IndependentComponentsOn();
 
   // Set color and opacity functions
-  property->SetColor(0, ctf1.GetPointer());
-  property->SetColor(1, ctf2.GetPointer());
-  property->SetColor(2, ctf3.GetPointer());
-  property->SetScalarOpacity(0, pf1.GetPointer());
-  property->SetScalarOpacity(1, pf2.GetPointer());
-  property->SetScalarOpacity(2, pf3.GetPointer());
+  property->SetColor(0, ctf1);
+  property->SetColor(1, ctf2);
+  property->SetColor(2, ctf3);
+  property->SetScalarOpacity(0, pf1);
+  property->SetScalarOpacity(1, pf2);
+  property->SetScalarOpacity(2, pf3);
 
   // Define light parameters
   property->ShadeOn();
@@ -181,9 +184,9 @@ int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
   property->SetSpecularPower(2, 10.0);
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(property.GetPointer());
-  ren->AddVolume(volume.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(property);
+  ren->AddVolume(volume);
 
   ren->ResetCamera();
 
@@ -192,7 +195,7 @@ int TestGPURayCastIndependentComponentsLightParameters(int argc, char *argv[])
 
   ren->GetActiveCamera()->Zoom(1.5);
 
-  int retVal = vtkTesting::Test(argc, argv, renWin.GetPointer(), 15);
+  int retVal = vtkTesting::Test(argc, argv, renWin, 15);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

@@ -17,48 +17,45 @@
  * @brief   Interpolates supplied nodes with line segments
  *
  * The line interpolator interpolates supplied nodes (see InterpolateLine)
- * with line segments. The finess of the curve may be controlled using
+ * with line segments. The fineness of the curve may be controlled using
  * SetMaximumCurveError and SetMaximumNumberOfLineSegments.
  *
  * @sa
  * vtkContourLineInterpolator
-*/
+ */
 
 #ifndef vtkLinearContourLineInterpolator_h
 #define vtkLinearContourLineInterpolator_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkContourLineInterpolator.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkLinearContourLineInterpolator
-                          : public vtkContourLineInterpolator
+  : public vtkContourLineInterpolator
 {
 public:
-
   /**
    * Instantiate this class.
    */
-  static vtkLinearContourLineInterpolator *New();
+  static vtkLinearContourLineInterpolator* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkLinearContourLineInterpolator,vtkContourLineInterpolator);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkLinearContourLineInterpolator, vtkContourLineInterpolator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
-  int InterpolateLine( vtkRenderer *ren,
-                               vtkContourRepresentation *rep,
-                               int idx1, int idx2 ) VTK_OVERRIDE;
+  int InterpolateLine(vtkRenderer* ren, vtkContourRepresentation* rep, int idx1, int idx2) override;
 
 protected:
   vtkLinearContourLineInterpolator();
-  ~vtkLinearContourLineInterpolator() VTK_OVERRIDE;
+  ~vtkLinearContourLineInterpolator() override;
 
 private:
-  vtkLinearContourLineInterpolator(const vtkLinearContourLineInterpolator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLinearContourLineInterpolator&) VTK_DELETE_FUNCTION;
+  vtkLinearContourLineInterpolator(const vtkLinearContourLineInterpolator&) = delete;
+  void operator=(const vtkLinearContourLineInterpolator&) = delete;
 };
 
 #endif

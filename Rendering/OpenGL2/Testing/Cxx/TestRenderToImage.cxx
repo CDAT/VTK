@@ -8,9 +8,9 @@
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRegressionTestImage.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 #include <vtkSphereSource.h>
 #include <vtkTestUtilities.h>
 #include <vtkUnsignedCharArray.h>
@@ -27,61 +27,52 @@ int TestRenderToImage(int argc, char* argv[])
   mapper->SetInputConnection(sphereSource->GetOutputPort());
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.Get());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
   vtkNew<vtkRenderWindow> renderWindow;
-  renderWindow->AddRenderer(renderer.Get());
+  renderWindow->AddRenderer(renderer);
   renderWindow->SetMultiSamples(0);
 
   vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
-  renderWindowInteractor->SetRenderWindow(renderWindow.Get());
+  renderWindowInteractor->SetRenderWindow(renderWindow);
   renderWindow->Render();
 
   // Render to the image
-  vtkOpenGLRenderWindow* glRenderWindow =
-    vtkOpenGLRenderWindow::SafeDownCast(renderWindow.Get());
+  vtkOpenGLRenderWindow* glRenderWindow = vtkOpenGLRenderWindow::SafeDownCast(renderWindow);
 
-  if (!glRenderWindow->SetUseOffScreenBuffers(true))
-  {
-    // Hardware off screen buffer failed to be created.
-    // Turn debug mode on to write the errors on the output.
-    glRenderWindow->DebugOn();
-    glRenderWindow->SetUseOffScreenBuffers(true);
-    glRenderWindow->DebugOff();
-    std::cout << "Unable to create a hardware frame buffer, the graphic board "
-      "or driver can be too old:\n"
-      << glRenderWindow->ReportCapabilities() << std::endl;
-
-    return EXIT_FAILURE;
-  }
+  glRenderWindow->SetShowWindow(false);
+  glRenderWindow->SetUseOffScreenBuffers(true);
   renderWindow->Render();
   // Create an (empty) image at the window size
-  int *size = renderWindow->GetSize();
+  int* size = renderWindow->GetSize();
   vtkNew<vtkImageData> image;
   image->SetDimensions(size[0], size[1], 1);
   image->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
   renderWindow->GetPixelData(0, 0, size[0] - 1, size[1] - 1, 0,
     vtkArrayDownCast<vtkUnsignedCharArray>(image->GetPointData()->GetScalars()));
+  glRenderWindow->SetShowWindow(true);
   glRenderWindow->SetUseOffScreenBuffers(false);
 
   // Now add the actor
-  renderer->AddActor(actor.Get());
+  renderer->AddActor(actor);
   renderer->ResetCamera();
   renderWindow->Render();
 
+  glRenderWindow->SetShowWindow(false);
   glRenderWindow->SetUseOffScreenBuffers(true);
   renderWindow->Render();
   // Capture the framebuffer to the image, again
-  renderWindow->GetPixelData(0, 0, size[0]-1, size[1]-1, 0,
+  renderWindow->GetPixelData(0, 0, size[0] - 1, size[1] - 1, 0,
     vtkArrayDownCast<vtkUnsignedCharArray>(image->GetPointData()->GetScalars()));
+  glRenderWindow->SetShowWindow(true);
   glRenderWindow->SetUseOffScreenBuffers(false);
 
   // Create a new image actor and remove the geometry one
   vtkNew<vtkImageActor> imageActor;
-  imageActor->GetMapper()->SetInputData(image.Get());
-  renderer->RemoveActor(actor.Get());
-  renderer->AddActor(imageActor.Get());
+  imageActor->GetMapper()->SetInputData(image);
+  renderer->RemoveActor(actor);
+  renderer->AddActor(imageActor);
 
   // Background color white to distinguish image boundary
   renderer->SetBackground(1, 1, 1);
@@ -89,7 +80,7 @@ int TestRenderToImage(int argc, char* argv[])
   renderWindow->Render();
   renderer->ResetCamera();
   renderWindow->Render();
-  int retVal = vtkRegressionTestImage(renderWindow.Get());
+  int retVal = vtkRegressionTestImage(renderWindow);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     renderWindowInteractor->Start();

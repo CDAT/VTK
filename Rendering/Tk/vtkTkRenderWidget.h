@@ -14,7 +14,7 @@
 =========================================================================*/
 /**
  * @class   vtkTkRenderWidget
- * @brief   a Tk Widget for vtk renderering
+ * @brief   a Tk Widget for vtk rendering
  *
  *
  * vtkTkRenderWidget is a Tk widget that you can render into. It has a
@@ -26,7 +26,7 @@
  *
  * @sa
  * vtkRenderWindow vtkRenderer
-*/
+ */
 
 #ifndef vtkTkRenderWidget_h
 #define vtkTkRenderWidget_h
@@ -47,15 +47,16 @@
 
 struct vtkTkRenderWidget
 {
-  Tk_Window  TkWin;             /* Tk window structure */
-  Tcl_Interp *Interp;           /* Tcl interpreter */
+  Tk_Window TkWin;    /* Tk window structure */
+  Tcl_Interp* Interp; /* Tcl interpreter */
   int Width;
   int Height;
-  vtkRenderWindow *RenderWindow;
-  char *RW;
+  vtkRenderWindow* RenderWindow;
+  char* RW;
 #ifdef _WIN32
   WNDPROC OldProc;
 #endif
 };
 
 #endif
+// VTK-HeaderTest-Exclude: vtkTkRenderWidget.h

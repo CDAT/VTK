@@ -33,28 +33,28 @@
  *
  * @sa
  * vtkSimpleElevationFilter
-*/
+ */
 
 #ifndef vtkElevationFilter_h
 #define vtkElevationFilter_h
 
-#include "vtkFiltersCoreModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersCoreModule.h" // For export macro
 
 class VTKFILTERSCORE_EXPORT vtkElevationFilter : public vtkDataSetAlgorithm
 {
 public:
   static vtkElevationFilter* New();
   vtkTypeMacro(vtkElevationFilter, vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Define one end of the line (small scalar values).  Default is
    * (0,0,0).
    */
-  vtkSetVector3Macro(LowPoint,double);
-  vtkGetVectorMacro(LowPoint,double,3);
+  vtkSetVector3Macro(LowPoint, double);
+  vtkGetVectorMacro(LowPoint, double, 3);
   //@}
 
   //@{
@@ -62,33 +62,31 @@ public:
    * Define other end of the line (large scalar values).  Default is
    * (0,0,1).
    */
-  vtkSetVector3Macro(HighPoint,double);
-  vtkGetVectorMacro(HighPoint,double,3);
+  vtkSetVector3Macro(HighPoint, double);
+  vtkGetVectorMacro(HighPoint, double, 3);
   //@}
 
   //@{
   /**
    * Specify range to map scalars into.  Default is [0, 1].
    */
-  vtkSetVector2Macro(ScalarRange,double);
-  vtkGetVectorMacro(ScalarRange,double,2);
+  vtkSetVector2Macro(ScalarRange, double);
+  vtkGetVectorMacro(ScalarRange, double, 2);
   //@}
 
 protected:
   vtkElevationFilter();
-  ~vtkElevationFilter() VTK_OVERRIDE;
+  ~vtkElevationFilter() override;
 
-  int RequestData(vtkInformation*,
-                  vtkInformationVector**,
-                  vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   double LowPoint[3];
   double HighPoint[3];
   double ScalarRange[2];
 
 private:
-  vtkElevationFilter(const vtkElevationFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkElevationFilter&) VTK_DELETE_FUNCTION;
+  vtkElevationFilter(const vtkElevationFilter&) = delete;
+  void operator=(const vtkElevationFilter&) = delete;
 };
 
 #endif

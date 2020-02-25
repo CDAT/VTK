@@ -18,18 +18,17 @@
 #include "vtkColorTransferFunction.h"
 #include "vtkGPUVolumeRayCastMapper.h"
 #include "vtkInteractorStyleTrackballCamera.h"
+#include "vtkLightKit.h"
 #include "vtkMetaImageReader.h"
 #include "vtkNew.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkTestUtilities.h"
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
-#include "vtkLightKit.h"
-
 
 int TestGPURayCastGradientOpacityLight(int argc, char* argv[])
 {
@@ -40,27 +39,26 @@ int TestGPURayCastGradientOpacityLight(int argc, char* argv[])
   renWin->SetMultiSamples(0);
 
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
   ren->SetBackground(0.1, 0.4, 0.2);
 
   // Setup lights
   vtkNew<vtkLightKit> lightKit;
-  lightKit->AddLightsToRenderer(ren.GetPointer());
+  lightKit->AddLightsToRenderer(ren);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
+  iren->SetInteractorStyle(style);
 
   // Load data
-  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv,
-   "Data/HeadMRVolume.mhd");
+  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/HeadMRVolume.mhd");
 
   vtkNew<vtkMetaImageReader> reader;
   reader->SetFileName(fname);
   reader->Update();
-  delete [] fname;
+  delete[] fname;
 
   vtkNew<vtkGPUVolumeRayCastMapper> mapper;
   mapper->SetInputConnection(reader->GetOutputPort());
@@ -82,27 +80,26 @@ int TestGPURayCastGradientOpacityLight(int argc, char* argv[])
   gf->AddPoint(70, 1.0);
 
   vtkNew<vtkVolumeProperty> volumeProperty;
-  volumeProperty->SetScalarOpacity(pwf.GetPointer());
-  volumeProperty->SetGradientOpacity(gf.GetPointer());
-  volumeProperty->SetColor(ctf.GetPointer());
+  volumeProperty->SetScalarOpacity(pwf);
+  volumeProperty->SetGradientOpacity(gf);
+  volumeProperty->SetColor(ctf);
   volumeProperty->ShadeOn();
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
-  ren->AddVolume(volume.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(volumeProperty);
+  ren->AddVolume(volume);
   volume->RotateX(-30);
   ren->ResetCamera();
   ren->GetActiveCamera()->Zoom(1.5);
 
   renWin->Render();
 
-  int retVal = vtkTesting::Test(argc, argv, renWin.GetPointer(), 90);
+  int retVal = vtkTesting::Test(argc, argv, renWin, 90);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }
 
-  return !((retVal == vtkTesting::PASSED) ||
-           (retVal == vtkTesting::DO_INTERACTOR));
+  return !((retVal == vtkTesting::PASSED) || (retVal == vtkTesting::DO_INTERACTOR));
 }

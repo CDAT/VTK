@@ -46,7 +46,7 @@
  * @sa
  * vtkDataSetGhostGenerator,vtkUniformGhostDataGenerator,
  * vtkPDataSetGhostGenerator
-*/
+ */
 
 #ifndef vtkPUniformGridGhostDataGenerator_h
 #define vtkPUniformGridGhostDataGenerator_h
@@ -58,52 +58,50 @@ class vtkMultiBlockDataSet;
 class vtkIndent;
 class vtkPStructuredGridConnectivity;
 
-class VTKFILTERSPARALLELGEOMETRY_EXPORT vtkPUniformGridGhostDataGenerator:
-  public vtkPDataSetGhostGenerator
+class VTKFILTERSPARALLELGEOMETRY_EXPORT vtkPUniformGridGhostDataGenerator
+  : public vtkPDataSetGhostGenerator
 {
 public:
   static vtkPUniformGridGhostDataGenerator* New();
-  vtkTypeMacro(vtkPUniformGridGhostDataGenerator,vtkPDataSetGhostGenerator);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPUniformGridGhostDataGenerator, vtkPDataSetGhostGenerator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkPUniformGridGhostDataGenerator();
-  virtual ~vtkPUniformGridGhostDataGenerator();
+  ~vtkPUniformGridGhostDataGenerator() override;
 
   /**
    * Registers grids associated with this object instance on this process.
    */
-  void RegisterGrids( vtkMultiBlockDataSet *in );
+  void RegisterGrids(vtkMultiBlockDataSet* in);
 
   /**
    * A collective operation that computes the global origin of the domain.
    */
-  void ComputeOrigin(vtkMultiBlockDataSet *in);
+  void ComputeOrigin(vtkMultiBlockDataSet* in);
 
   /**
    * A collective operations that computes the global spacing.
    */
-  void ComputeGlobalSpacing(vtkMultiBlockDataSet *in);
+  void ComputeGlobalSpacing(vtkMultiBlockDataSet* in);
 
   /**
    * Create ghosted data-set.
    */
-  void CreateGhostedDataSet(
-      vtkMultiBlockDataSet *in, vtkMultiBlockDataSet *out );
+  void CreateGhostedDataSet(vtkMultiBlockDataSet* in, vtkMultiBlockDataSet* out);
 
   /**
    * Generates ghost-layers
    */
-  virtual void GenerateGhostLayers(
-      vtkMultiBlockDataSet *in, vtkMultiBlockDataSet *out) VTK_OVERRIDE;
+  virtual void GenerateGhostLayers(vtkMultiBlockDataSet* in, vtkMultiBlockDataSet* out) override;
 
   double GlobalSpacing[3];
   double GlobalOrigin[3];
-  vtkPStructuredGridConnectivity *GridConnectivity;
+  vtkPStructuredGridConnectivity* GridConnectivity;
 
 private:
-  vtkPUniformGridGhostDataGenerator(const vtkPUniformGridGhostDataGenerator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPUniformGridGhostDataGenerator&) VTK_DELETE_FUNCTION;
+  vtkPUniformGridGhostDataGenerator(const vtkPUniformGridGhostDataGenerator&) = delete;
+  void operator=(const vtkPUniformGridGhostDataGenerator&) = delete;
 };
 
 #endif /* vtkPUniformGridGhostDataGenerator_h */

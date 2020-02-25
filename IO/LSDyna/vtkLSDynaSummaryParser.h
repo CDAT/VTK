@@ -18,35 +18,33 @@
  * This is a helper class used by vtkLSDynaReader to read XML files.
  * @sa
  * vtkLSDynaReader
-*/
+ */
 
 #ifndef vtkLSDynaSummaryParser_h
 #define vtkLSDynaSummaryParser_h
 
 #include "vtkIOLSDynaModule.h" // For export macro
+#include "vtkStdString.h"      //needed for vtkStdString
 #include "vtkXMLParser.h"
-#include "vtkStdString.h" //needed for vtkStdString
 
 class LSDynaMetaData;
 class VTKIOLSDYNA_EXPORT vtkLSDynaSummaryParser : public vtkXMLParser
 {
 public:
-  vtkTypeMacro(vtkLSDynaSummaryParser,vtkXMLParser);
+  vtkTypeMacro(vtkLSDynaSummaryParser, vtkXMLParser);
   static vtkLSDynaSummaryParser* New();
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
-
-
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /// Must be set before calling Parse();
   LSDynaMetaData* MetaData;
 
 protected:
   vtkLSDynaSummaryParser();
-  ~vtkLSDynaSummaryParser() VTK_OVERRIDE { };
+  ~vtkLSDynaSummaryParser() override {}
 
-  void StartElement(const char* name, const char** atts) VTK_OVERRIDE;
-  void EndElement(const char* name) VTK_OVERRIDE;
-  void CharacterDataHandler(const char* data, int length) VTK_OVERRIDE;
+  void StartElement(const char* name, const char** atts) override;
+  void EndElement(const char* name) override;
+  void CharacterDataHandler(const char* data, int length) override;
 
   vtkStdString PartName;
   int PartId;
@@ -57,8 +55,8 @@ protected:
   int InName;
 
 private:
-  vtkLSDynaSummaryParser( const vtkLSDynaSummaryParser& ) VTK_DELETE_FUNCTION;
-  void operator = ( const vtkLSDynaSummaryParser& ) VTK_DELETE_FUNCTION;
+  vtkLSDynaSummaryParser(const vtkLSDynaSummaryParser&) = delete;
+  void operator=(const vtkLSDynaSummaryParser&) = delete;
 };
 
-#endif //vtkLSDynaReader_h
+#endif // vtkLSDynaReader_h

@@ -169,60 +169,59 @@
 #ifndef vtkContinuousScatterplot_h
 #define vtkContinuousScatterplot_h
 
-#include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
+#include "vtkInfovisCoreModule.h" // For export macro
 
 class VTKINFOVISCORE_EXPORT vtkContinuousScatterplot : public vtkImageAlgorithm
 {
 public:
   static vtkContinuousScatterplot* New();
   vtkTypeMacro(vtkContinuousScatterplot, vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
-  * Get the tolerance used when comparing floating point numbers for equality.
-  */
+   * Get the tolerance used when comparing floating point numbers for equality.
+   */
   vtkGetMacro(Epsilon, double);
 
   /**
-  * Set the tolerance used when comparing floating point numbers for equality.
-  */
+   * Set the tolerance used when comparing floating point numbers for equality.
+   */
   vtkSetMacro(Epsilon, double);
 
   /**
-  * Specify the name of the first field to be used in subdividing the dataset.
-  * Specify the resolution along x axis of the output image.
-  */
-  void SetField1(char* fieldName, vtkIdType ResX);
+   * Specify the name of the first field to be used in subdividing the dataset.
+   * Specify the resolution along x axis of the output image.
+   */
+  void SetField1(const char* fieldName, vtkIdType ResX);
 
   /**
-  * Specify the name of the second field to be used in subdividing the dataset.
-  * Specify the resolution along y axis of the output image.
-  */
-  void SetField2(char* fieldName, vtkIdType ResY);
+   * Specify the name of the second field to be used in subdividing the dataset.
+   * Specify the resolution along y axis of the output image.
+   */
+  void SetField2(const char* fieldName, vtkIdType ResY);
 
 protected:
   vtkContinuousScatterplot();
 
   // Configure input port to accept only vtkUnstructuredGrid.
-  virtual int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   // Configure out port to be a vtkImageData data set.
-  virtual int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  virtual int RequestData(
-    vtkInformation*, vtkInformationVector**, vtkInformationVector*) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   // Set the tolerance used when comparing floating numbers for equality.
   double Epsilon;
 
   // Names of the scalar fields to be used in the filter.
-  char* Fields[2];
+  const char* Fields[2];
 
   // Resolution of the output image.
   vtkIdType ResX, ResY;
 
 private:
-  vtkContinuousScatterplot(const vtkContinuousScatterplot&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContinuousScatterplot&) VTK_DELETE_FUNCTION;
+  vtkContinuousScatterplot(const vtkContinuousScatterplot&) = delete;
+  void operator=(const vtkContinuousScatterplot&) = delete;
 };
 #endif

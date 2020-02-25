@@ -1,64 +1,25 @@
-include(vtkGhostscript)
-include(vtkWkHtmlToImage)
+include("${CMAKE_CURRENT_LIST_DIR}/vtkWkHtmlToImage.cmake")
 
-if (VTK_WKHTMLTOIMAGE_EXECUTABLE AND VTK_RENDERING_BACKEND STREQUAL "OpenGL2")
+if (VTK_WKHTMLTOIMAGE_EXECUTABLE)
   set(SVGTests
     TestSVGContextExport.cxx,NO_DATA,NO_VALID
     TestSVGContextShading.cxx,NO_DATA,NO_VALID
     TestSVGExporterContextPolyData.cxx,NO_VALID
     )
-else()
-  set(SVGTests)
 endif()
 
-# Only run GL2PS tests if GhostScript is available
-if(VTK_GHOSTSCRIPT_EXECUTABLE)
-  set(GL2PSTests
-    TestGL2PSBillboardTextActor3D.cxx
-    TestGL2PSScalarBar.cxx
-    TestGL2PSTextActor.cxx
-    TestGL2PSTextActor3D.cxx
-    TestGL2PSTextMapper.cxx
-    TestGL2PSLabeledDataMapper.cxx
-    TestStackedPlotGL2PS.cxx
-    )
 
-  set(GL2PSTestsPDFBothOpenGL
-    TestGL2PSExporterRaster.cxx
-    TestGL2PSExporterMultipleRenderers.cxx
-    TestGL2PSExporterVolumeRaster.cxx
-    )
-  # TODO: Check why this test fails on OpenGL2
-  set(GL2PSTestsPDFOpenGL1
-    TestLinePlotGL2PS.cxx
-  )
-  set(GL2PSTestsPDF
-    ${GL2PSTestsPDFBothOpenGL} ${GL2PSTestsPDFOpenGL1}
-  )
-
-  # These only produce PDFs. They're separated since the above tests produce
-  # and verify both PDF and PS.
-  if (VTK_RENDERING_BACKEND STREQUAL "OpenGL2")
-    set(PDFTests
-      TestPDFContextExport.cxx,NO_DATA
-      TestPDFContextShading.cxx,NO_DATA
-      TestPDFExporterContextPolyData.cxx
-    )
-  else()
-    # The Context2D on OpenGL1 does not support many of the options used by
-    # these tests. Skip them on the legacy backend.
-    set(PDFTests)
-  endif()
-endif()
-
-vtk_add_test_cxx(${vtk-module}CxxTests tests
+vtk_add_test_cxx(vtkIOExportCxxTests tests
   X3DTest.cxx,NO_DATA,NO_VALID
+  TestJSONRenderWindowExporter.cxx,NO_DATA,NO_VALID
   TestOBJExporter.cxx,NO_DATA,NO_VALID
-  ${GL2PSTests} ${GL2PSTestsPDF} ${PDFTests} ${SVGTests}
+  TestGLTFExporter.cxx,NO_DATA,NO_VALID
+  TestSingleVTPExporter.cxx,NO_DATA,NO_VALID
+  ${SVGTests}
   TestRIBExporter.cxx,NO_VALID
   UnitTestRIB.cxx,NO_DATA,NO_VALID
   )
-vtk_test_cxx_executable(${vtk-module}CxxTests tests
+vtk_test_cxx_executable(vtkIOExportCxxTests tests
   RENDERING_FACTORY
   )
 
@@ -72,60 +33,43 @@ mark_as_advanced(RMANTREE)
 # Tests to run if Renderman is present
 if(RMANTREE)
   # write a Renderman ini file to specify the shaderpath
-  write_file(${${vtk-module}_BINARY_DIR}/Testing/Cxx/rendermn.ini
-          "/shaderpath &:${${vtk-module}_SOURCE_DIR}/Testing/Cxx")
-  add_test(NAME ${vtk-module}-RIBExporterShaderCompile
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/rendermn.ini
+          "/shaderpath &:${CMAKE_CURRENT_SOURCE_DIR}/Testing/Cxx")
+  add_test(NAME VTK::IOExport-RIBExporterShaderCompile
           COMMAND ${RMANTREE}/bin/shader
-          ${${vtk-module}_SOURCE_DIR}/Testing/Data/Input/bozo.sl
-          ${${vtk-module}_SOURCE_DIR}/Testing/Data/Input/dented.sl
-          WORKING_DIRECTORY ${${vtk-module}_BINARY_DIR}/Testing/Cxx
+          ${CMAKE_CURRENT_SOURCE_DIR}/../Data/Input/bozo.sl
+          ${CMAKE_CURRENT_SOURCE_DIR}/../Data/Input/dented.sl
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
-  add_test(NAME ${vtk-module}-RIBExporterPrman
+  add_test(NAME VTK::IOExport-RIBExporterPrman
           COMMAND ${RMANTREE}/bin/prman
-            ${VTK_TEST_OUTPUT_DIR}/TestRIBExporter.rib
-          WORKING_DIRECTORY ${${vtk-module}_BINARY_DIR}/Testing/Cxx
+            ${_vtk_build_TEST_OUTPUT_DIRECTORY}/TestRIBExporter.rib
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
   # Image diff rman generated tif with baseline
-  set(baseline_dir ${${vtk-module}_SOURCE_DIR}/Testing/Data/Baseline)
-  ExternalData_add_test(VTKData
-        NAME ${vtk-module}Cxx-ComparePrmanImage
+  set(baseline_dir ${CMAKE_CURRENT_SOURCE_DIR}/../Data/Baseline)
+  ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+        NAME VTK::IOExportCxx-ComparePrmanImage
         COMMAND ${RMANTREE}/bin/cmptiff -d 100
         DATA{${baseline_dir}/TestRIBExporter.tif}
-        ${VTK_TEST_OUTPUT_DIR}/TestRIBExporter.tif
+        ${_vtk_build_TEST_OUTPUT_DIRECTORY}/TestRIBExporter.tif
   )
-  set_tests_properties(${vtk-module}-RIBExporterPrman
+  set_tests_properties(VTK::IOExport-RIBExporterPrman
         PROPERTIES
         DEPENDS
-        "${vtk-module}-TestRIBExporter"
+        "VTK::IOExport-TestRIBExporter"
         DEPENDS
-        "${vtk-module}-RIBExporterShaderCompile"
+        "VTK::IOExport-RIBExporterShaderCompile"
         ENVIRONMENT
         "RMANTREE=${RMANTREE}"
   )
-  set_tests_properties("${vtk-module}Cxx-ComparePrmanImage"
+  set_tests_properties("VTK::IOExportCxx-ComparePrmanImage"
         PROPERTIES
-        DEPENDS "${vtk-module}Cxx-TestRIBExporter"
+        DEPENDS "VTK::IOExportCxx-TestRIBExporter"
         REQUIRED_FILES
-          "${VTK_TEST_OUTPUT_DIR}/TestRIBExporter.tif"
+          "${_vtk_build_TEST_OUTPUT_DIRECTORY}/TestRIBExporter.tif"
   )
 endif()
 
-set(TestGL2PSExporterVolumeRasterError 50)
-
-include(vtkTestingGL2PS)
-vtk_add_pdf_test_cxx(${PDFTests})
-if (VTK_RENDERING_BACKEND STREQUAL "OpenGL2")
-  # text allignment and rotation with TextAsPath off is not
-  # yet implemented for the OpenGL2 backend.
-  vtk_add_gl2ps_test_cxx(${GL2PSTests} ${GL2PSTestsPDFOpenGL1})
-  # test postscript and pdf
-  vtk_add_gl2ps_test_cxx(pdf ${GL2PSTestsPDFBothOpenGL})
-else()
-  # tests postscript
-  vtk_add_gl2ps_test_cxx(${GL2PSTests})
-  # test postscript and pdf
-  vtk_add_gl2ps_test_cxx(pdf ${GL2PSTestsPDF})
-endif()
-
-include(vtkTestingSVG)
+include("${CMAKE_CURRENT_LIST_DIR}/vtkTestingSVG.cmake")
 vtk_add_svg_test(${SVGTests})

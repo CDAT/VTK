@@ -34,33 +34,34 @@
  *
  * @sa
  * vtkEncodedGradientEstimator
-*/
+ */
 
 #ifndef vtkFiniteDifferenceGradientEstimator_h
 #define vtkFiniteDifferenceGradientEstimator_h
 
-#include "vtkRenderingVolumeModule.h" // For export macro
 #include "vtkEncodedGradientEstimator.h"
+#include "vtkRenderingVolumeModule.h" // For export macro
 
-class VTKRENDERINGVOLUME_EXPORT vtkFiniteDifferenceGradientEstimator : public vtkEncodedGradientEstimator
+class VTKRENDERINGVOLUME_EXPORT vtkFiniteDifferenceGradientEstimator
+  : public vtkEncodedGradientEstimator
 {
 public:
-  vtkTypeMacro(vtkFiniteDifferenceGradientEstimator,vtkEncodedGradientEstimator);
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  vtkTypeMacro(vtkFiniteDifferenceGradientEstimator, vtkEncodedGradientEstimator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct a vtkFiniteDifferenceGradientEstimator with
    * a SampleSpacingInVoxels of 1.
    */
-  static vtkFiniteDifferenceGradientEstimator *New();
+  static vtkFiniteDifferenceGradientEstimator* New();
 
   //@{
   /**
    * Set/Get the spacing between samples for the finite differences
    * method used to compute the normal. This spacing is in voxel units.
    */
-  vtkSetMacro( SampleSpacingInVoxels, int );
-  vtkGetMacro( SampleSpacingInVoxels, int );
+  vtkSetMacro(SampleSpacingInVoxels, int);
+  vtkGetMacro(SampleSpacingInVoxels, int);
   //@}
 
   // The sample spacing between samples taken for the normal estimation
@@ -68,17 +69,16 @@ public:
 
 protected:
   vtkFiniteDifferenceGradientEstimator();
-  ~vtkFiniteDifferenceGradientEstimator() VTK_OVERRIDE;
+  ~vtkFiniteDifferenceGradientEstimator() override;
 
   /**
    * Recompute the encoded normals and gradient magnitudes.
    */
-  void UpdateNormals( void ) VTK_OVERRIDE;
+  void UpdateNormals(void) override;
 
 private:
-  vtkFiniteDifferenceGradientEstimator(const vtkFiniteDifferenceGradientEstimator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFiniteDifferenceGradientEstimator&) VTK_DELETE_FUNCTION;
+  vtkFiniteDifferenceGradientEstimator(const vtkFiniteDifferenceGradientEstimator&) = delete;
+  void operator=(const vtkFiniteDifferenceGradientEstimator&) = delete;
 };
-
 
 #endif

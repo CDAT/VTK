@@ -1,4 +1,4 @@
-vtk_add_test_cxx(${vtk-module}CxxTests tests
+vtk_add_test_cxx(vtkIOInfovisCxxTests tests
   NO_VALID
   TestBiomTableReader.cxx
   TestDIMACSGraphReader.cxx
@@ -12,5 +12,6 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestRISReader.cxx
   TestTulipReaderProperties.cxx
   TestDelimitedTextReader2.cxx
+  TestTemporalDelimitedTextReader.cxx
   )
-vtk_test_cxx_executable(${vtk-module}CxxTests tests)
+vtk_test_cxx_executable(vtkIOInfovisCxxTests tests)

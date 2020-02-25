@@ -34,29 +34,25 @@
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkDirectedGraph);
 //----------------------------------------------------------------------------
-vtkDirectedGraph::vtkDirectedGraph()
+vtkDirectedGraph::vtkDirectedGraph() = default;
+
+//----------------------------------------------------------------------------
+vtkDirectedGraph::~vtkDirectedGraph() = default;
+
+//----------------------------------------------------------------------------
+vtkDirectedGraph* vtkDirectedGraph::GetData(vtkInformation* info)
 {
+  return info ? vtkDirectedGraph::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
 }
 
 //----------------------------------------------------------------------------
-vtkDirectedGraph::~vtkDirectedGraph()
-{
-}
-
-//----------------------------------------------------------------------------
-vtkDirectedGraph *vtkDirectedGraph::GetData(vtkInformation *info)
-{
-  return info? vtkDirectedGraph::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
-}
-
-//----------------------------------------------------------------------------
-vtkDirectedGraph *vtkDirectedGraph::GetData(vtkInformationVector *v, int i)
+vtkDirectedGraph* vtkDirectedGraph::GetData(vtkInformationVector* v, int i)
 {
   return vtkDirectedGraph::GetData(v->GetInformationObject(i));
 }
 
 //----------------------------------------------------------------------------
-bool vtkDirectedGraph::IsStructureValid(vtkGraph *g)
+bool vtkDirectedGraph::IsStructureValid(vtkGraph* g)
 {
   if (!g)
   {
@@ -70,10 +66,8 @@ bool vtkDirectedGraph::IsStructureValid(vtkGraph *g)
   // Verify that each edge appears in exactly one in and one out edge list.
   std::vector<bool> in(g->GetNumberOfEdges(), false);
   std::vector<bool> out(g->GetNumberOfEdges(), false);
-  vtkSmartPointer<vtkInEdgeIterator> inIter =
-    vtkSmartPointer<vtkInEdgeIterator>::New();
-  vtkSmartPointer<vtkOutEdgeIterator> outIter =
-    vtkSmartPointer<vtkOutEdgeIterator>::New();
+  vtkSmartPointer<vtkInEdgeIterator> inIter = vtkSmartPointer<vtkInEdgeIterator>::New();
+  vtkSmartPointer<vtkOutEdgeIterator> outIter = vtkSmartPointer<vtkOutEdgeIterator>::New();
   for (vtkIdType v = 0; v < g->GetNumberOfVertices(); ++v)
   {
     g->GetInEdges(v, inIter);
@@ -111,5 +105,5 @@ bool vtkDirectedGraph::IsStructureValid(vtkGraph *g)
 //----------------------------------------------------------------------------
 void vtkDirectedGraph::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

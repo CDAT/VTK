@@ -23,14 +23,14 @@
  *
  * @sa
  * vtkCoordinate vtkTransformFilter vtkTransformPolyData vtkPolyDataMapper2D
-*/
+ */
 
 #ifndef vtkTransformCoordinateSystems_h
 #define vtkTransformCoordinateSystems_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
 #include "vtkCoordinate.h" //to get the defines in vtkCoordinate
+#include "vtkPointSetAlgorithm.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class VTKRENDERINGCORE_EXPORT vtkTransformCoordinateSystems : public vtkPointSetAlgorithm
 {
@@ -40,14 +40,14 @@ public:
    * Standard methods for type information and printing.
    */
   vtkTypeMacro(vtkTransformCoordinateSystems, vtkPointSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * Instantiate this class. By default no transformation is specified and
    * the input and output is identical.
    */
-  static vtkTransformCoordinateSystems *New();
+  static vtkTransformCoordinateSystems* New();
 
   //@{
   /**
@@ -57,12 +57,9 @@ public:
    */
   vtkSetMacro(InputCoordinateSystem, int);
   vtkGetMacro(InputCoordinateSystem, int);
-  void SetInputCoordinateSystemToDisplay()
-    { this->SetInputCoordinateSystem(VTK_DISPLAY); }
-  void SetInputCoordinateSystemToViewport()
-    { this->SetInputCoordinateSystem(VTK_VIEWPORT); }
-  void SetInputCoordinateSystemToWorld()
-    { this->SetInputCoordinateSystem(VTK_WORLD); }
+  void SetInputCoordinateSystemToDisplay() { this->SetInputCoordinateSystem(VTK_DISPLAY); }
+  void SetInputCoordinateSystemToViewport() { this->SetInputCoordinateSystem(VTK_VIEWPORT); }
+  void SetInputCoordinateSystemToWorld() { this->SetInputCoordinateSystem(VTK_WORLD); }
   //@}
 
   //@{
@@ -73,18 +70,15 @@ public:
    */
   vtkSetMacro(OutputCoordinateSystem, int);
   vtkGetMacro(OutputCoordinateSystem, int);
-  void SetOutputCoordinateSystemToDisplay()
-    { this->SetOutputCoordinateSystem(VTK_DISPLAY); }
-  void SetOutputCoordinateSystemToViewport()
-    { this->SetOutputCoordinateSystem(VTK_VIEWPORT); }
-  void SetOutputCoordinateSystemToWorld()
-    { this->SetOutputCoordinateSystem(VTK_WORLD); }
+  void SetOutputCoordinateSystemToDisplay() { this->SetOutputCoordinateSystem(VTK_DISPLAY); }
+  void SetOutputCoordinateSystemToViewport() { this->SetOutputCoordinateSystem(VTK_VIEWPORT); }
+  void SetOutputCoordinateSystemToWorld() { this->SetOutputCoordinateSystem(VTK_WORLD); }
   //@}
 
   /**
    * Return the MTime also considering the instance of vtkCoordinate.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -100,9 +94,9 @@ public:
 
 protected:
   vtkTransformCoordinateSystems();
-  ~vtkTransformCoordinateSystems() VTK_OVERRIDE;
+  ~vtkTransformCoordinateSystems() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   int InputCoordinateSystem;
   int OutputCoordinateSystem;
@@ -111,8 +105,8 @@ protected:
   vtkCoordinate* TransformCoordinate;
 
 private:
-  vtkTransformCoordinateSystems(const vtkTransformCoordinateSystems&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTransformCoordinateSystems&) VTK_DELETE_FUNCTION;
+  vtkTransformCoordinateSystems(const vtkTransformCoordinateSystems&) = delete;
+  void operator=(const vtkTransformCoordinateSystems&) = delete;
 };
 
 #endif

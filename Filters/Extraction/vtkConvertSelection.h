@@ -28,7 +28,7 @@
  *
  * @sa
  * vtkSelection vtkSelectionNode vtkExtractSelection vtkExtractSelectedGraph
-*/
+ */
 
 #ifndef vtkConvertSelection_h
 #define vtkConvertSelection_h
@@ -48,9 +48,9 @@ class vtkExtractSelection;
 class VTKFILTERSEXTRACTION_EXPORT vtkConvertSelection : public vtkSelectionAlgorithm
 {
 public:
-  static vtkConvertSelection *New();
+  static vtkConvertSelection* New();
   vtkTypeMacro(vtkConvertSelection, vtkSelectionAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * A convenience method for setting the second input (i.e. the data object).
@@ -129,7 +129,7 @@ public:
    * obtain IDs.
    */
   virtual void SetSelectionExtractor(vtkExtractSelection*);
-  vtkGetObjectMacro(SelectionExtractor,vtkExtractSelection);
+  vtkGetObjectMacro(SelectionExtractor, vtkExtractSelection);
   //@}
 
   //@{
@@ -138,23 +138,13 @@ public:
    * NOTE: The returned selection pointer IS reference counted,
    * so be sure to Delete() it when you are done with it.
    */
-  static vtkSelection* ToIndexSelection(
-    vtkSelection* input,
-    vtkDataObject* data);
-  static vtkSelection* ToGlobalIdSelection(
-    vtkSelection* input,
-    vtkDataObject* data);
-  static vtkSelection* ToPedigreeIdSelection(
-    vtkSelection* input,
-    vtkDataObject* data);
+  static vtkSelection* ToIndexSelection(vtkSelection* input, vtkDataObject* data);
+  static vtkSelection* ToGlobalIdSelection(vtkSelection* input, vtkDataObject* data);
+  static vtkSelection* ToPedigreeIdSelection(vtkSelection* input, vtkDataObject* data);
   static vtkSelection* ToValueSelection(
-    vtkSelection* input,
-    vtkDataObject* data,
-    const char* arrayName);
+    vtkSelection* input, vtkDataObject* data, const char* arrayName);
   static vtkSelection* ToValueSelection(
-    vtkSelection* input,
-    vtkDataObject* data,
-    vtkStringArray* arrayNames);
+    vtkSelection* input, vtkDataObject* data, vtkStringArray* arrayNames);
   //@}
 
   /**
@@ -162,84 +152,47 @@ public:
    * Other static methods (e.g. GetSelectedVertices) call this one.
    */
   static void GetSelectedItems(
-    vtkSelection* input,
-    vtkDataObject* data,
-    int fieldType,
-    vtkIdTypeArray* indices);
+    vtkSelection* input, vtkDataObject* data, int fieldType, vtkIdTypeArray* indices);
 
   //@{
   /**
    * Static methods for easily obtaining selected items from a data object.
    * The array argument will be filled with the selected items.
    */
-  static void GetSelectedVertices(
-    vtkSelection* input,
-    vtkGraph* data,
-    vtkIdTypeArray* indices);
-  static void GetSelectedEdges(
-    vtkSelection* input,
-    vtkGraph* data,
-    vtkIdTypeArray* indices);
-  static void GetSelectedPoints(
-    vtkSelection* input,
-    vtkDataSet* data,
-    vtkIdTypeArray* indices);
-  static void GetSelectedCells(
-    vtkSelection* input,
-    vtkDataSet* data,
-    vtkIdTypeArray* indices);
-  static void GetSelectedRows(
-    vtkSelection* input,
-    vtkTable* data,
-    vtkIdTypeArray* indices);
+  static void GetSelectedVertices(vtkSelection* input, vtkGraph* data, vtkIdTypeArray* indices);
+  static void GetSelectedEdges(vtkSelection* input, vtkGraph* data, vtkIdTypeArray* indices);
+  static void GetSelectedPoints(vtkSelection* input, vtkDataSet* data, vtkIdTypeArray* indices);
+  static void GetSelectedCells(vtkSelection* input, vtkDataSet* data, vtkIdTypeArray* indices);
+  static void GetSelectedRows(vtkSelection* input, vtkTable* data, vtkIdTypeArray* indices);
   //@}
 
   /**
    * A generic static method for converting selection types.
    * The type should be an integer constant defined in vtkSelectionNode.h.
    */
-  static vtkSelection* ToSelectionType(
-    vtkSelection* input,
-    vtkDataObject* data,
-    int type,
-    vtkStringArray* arrayNames = nullptr,
-    int inputFieldType = -1,
-    bool allowMissingArray = false);
+  static vtkSelection* ToSelectionType(vtkSelection* input, vtkDataObject* data, int type,
+    vtkStringArray* arrayNames = nullptr, int inputFieldType = -1, bool allowMissingArray = false);
 
 protected:
   vtkConvertSelection();
-  ~vtkConvertSelection() VTK_OVERRIDE;
+  ~vtkConvertSelection() override;
 
-  int RequestData(
-    vtkInformation *,
-    vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int Convert(
-    vtkSelection* input,
-    vtkDataObject* data,
-    vtkSelection* output);
+  int Convert(vtkSelection* input, vtkDataObject* data, vtkSelection* output);
 
-  int ConvertCompositeDataSet(
-    vtkSelection* input,
-    vtkCompositeDataSet* data,
-    vtkSelection* output);
+  int ConvertCompositeDataSet(vtkSelection* input, vtkCompositeDataSet* data, vtkSelection* output);
 
-  int ConvertToIndexSelection(
-    vtkSelectionNode* input,
-    vtkDataSet* data,
-    vtkSelectionNode* output);
+  int ConvertFromQueryNodeCompositeDataSet(
+    vtkSelectionNode* input, vtkCompositeDataSet* data, vtkSelection* output);
 
-  int SelectTableFromTable(
-    vtkTable* selTable,
-    vtkTable* dataTable,
-    vtkIdTypeArray* indices);
+  int ConvertToIndexSelection(vtkSelectionNode* input, vtkDataSet* data, vtkSelectionNode* output);
 
-  int ConvertToBlockSelection(
-    vtkSelection* input, vtkCompositeDataSet* data, vtkSelection* output);
+  int SelectTableFromTable(vtkTable* selTable, vtkTable* dataTable, vtkIdTypeArray* indices);
 
-  int FillInputPortInformation(
-    int port, vtkInformation* info) VTK_OVERRIDE;
+  int ConvertToBlockSelection(vtkSelection* input, vtkCompositeDataSet* data, vtkSelection* output);
+
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   int OutputType;
   int InputFieldType;
@@ -249,8 +202,8 @@ protected:
   vtkExtractSelection* SelectionExtractor;
 
 private:
-  vtkConvertSelection(const vtkConvertSelection&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkConvertSelection&) VTK_DELETE_FUNCTION;
+  vtkConvertSelection(const vtkConvertSelection&) = delete;
+  void operator=(const vtkConvertSelection&) = delete;
 };
 
 #endif

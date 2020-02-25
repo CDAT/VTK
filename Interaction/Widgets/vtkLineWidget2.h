@@ -77,17 +77,16 @@
  * @sa
  * vtkLineRepresentation vtkLineWidget vtk3DWidget vtkImplicitPlaneWidget
  * vtkImplicitPlaneWidget2
-*/
+ */
 
 #ifndef vtkLineWidget2_h
 #define vtkLineWidget2_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkLineRepresentation;
 class vtkHandleWidget;
-
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkLineWidget2 : public vtkAbstractWidget
 {
@@ -95,54 +94,62 @@ public:
   /**
    * Instantiate the object.
    */
-  static vtkLineWidget2 *New();
+  static vtkLineWidget2* New();
 
   //@{
   /**
    * Standard vtkObject methods
    */
-  vtkTypeMacro(vtkLineWidget2,vtkAbstractWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkLineWidget2, vtkAbstractWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * Override superclasses' SetEnabled() method because the line
    * widget must enable its internal handle widgets.
    */
-  void SetEnabled(int enabling) VTK_OVERRIDE;
+  void SetEnabled(int enabling) override;
 
   /**
    * Specify an instance of vtkWidgetRepresentation used to represent this
    * widget in the scene. Note that the representation is a subclass of vtkProp
    * so it can be added to the renderer independent of the widget.
    */
-  void SetRepresentation(vtkLineRepresentation *r)
-    {this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));}
+  void SetRepresentation(vtkLineRepresentation* r)
+  {
+    this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));
+  }
 
   /**
    * Return the representation as a vtkLineRepresentation.
    */
-  vtkLineRepresentation *GetLineRepresentation()
-    {return reinterpret_cast<vtkLineRepresentation*>(this->WidgetRep);}
+  vtkLineRepresentation* GetLineRepresentation()
+  {
+    return reinterpret_cast<vtkLineRepresentation*>(this->WidgetRep);
+  }
 
   /**
    * Create the default widget representation if one is not set.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
+  void CreateDefaultRepresentation() override;
 
   /**
    * Methods to change the whether the widget responds to interaction.
    * Overridden to pass the state to component widgets.
    */
-  void SetProcessEvents(int) VTK_OVERRIDE;
+  void SetProcessEvents(vtkTypeBool) override;
 
 protected:
   vtkLineWidget2();
-  ~vtkLineWidget2() VTK_OVERRIDE;
+  ~vtkLineWidget2() override;
 
   // Manage the state of the widget
   int WidgetState;
-  enum _WidgetState {Start=0,Active};
+  enum _WidgetState
+  {
+    Start = 0,
+    Active
+  };
   int CurrentHandle;
 
   // These methods handle events
@@ -153,17 +160,16 @@ protected:
   static void MoveAction(vtkAbstractWidget*);
 
   // The positioning handle widgets
-  vtkHandleWidget *Point1Widget; //first end point
-  vtkHandleWidget *Point2Widget; //second end point
-  vtkHandleWidget *LineHandle; //used when selecting the line
+  vtkHandleWidget* Point1Widget; // first end point
+  vtkHandleWidget* Point2Widget; // second end point
+  vtkHandleWidget* LineHandle;   // used when selecting the line
 
-  char ActiveKeyCode;
-  vtkCallbackCommand *KeyEventCallbackCommand;
-  static void ProcessKeyEvents(vtkObject *, unsigned long, void *, void *);
+  vtkCallbackCommand* KeyEventCallbackCommand;
+  static void ProcessKeyEvents(vtkObject*, unsigned long, void*, void*);
 
 private:
-  vtkLineWidget2(const vtkLineWidget2&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLineWidget2&) VTK_DELETE_FUNCTION;
+  vtkLineWidget2(const vtkLineWidget2&) = delete;
+  void operator=(const vtkLineWidget2&) = delete;
 };
 
 #endif

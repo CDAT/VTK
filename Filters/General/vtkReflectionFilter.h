@@ -20,23 +20,24 @@
  * planes formed by the data set's bounding box.
  * Since it converts data sets into unstructured grids, it is not efficient
  * for structured data sets.
-*/
+ */
 
 #ifndef vtkReflectionFilter_h
 #define vtkReflectionFilter_h
 
-#include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkDataObjectAlgorithm.h"
+#include "vtkFiltersGeneralModule.h" // For export macro
+
 class vtkUnstructuredGrid;
 class vtkDataSet;
 
 class VTKFILTERSGENERAL_EXPORT vtkReflectionFilter : public vtkDataObjectAlgorithm
 {
 public:
-  static vtkReflectionFilter *New();
+  static vtkReflectionFilter* New();
 
   vtkTypeMacro(vtkReflectionFilter, vtkDataObjectAlgorithm);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   enum ReflectionPlane
   {
@@ -57,15 +58,15 @@ public:
    */
   vtkSetClampMacro(Plane, int, 0, 8);
   vtkGetMacro(Plane, int);
-  void SetPlaneToX() { this->SetPlane(USE_X); };
-  void SetPlaneToY() { this->SetPlane(USE_Y); };
-  void SetPlaneToZ() { this->SetPlane(USE_Z); };
-  void SetPlaneToXMin() { this->SetPlane(USE_X_MIN); };
-  void SetPlaneToYMin() { this->SetPlane(USE_Y_MIN); };
-  void SetPlaneToZMin() { this->SetPlane(USE_Z_MIN); };
-  void SetPlaneToXMax() { this->SetPlane(USE_X_MAX); };
-  void SetPlaneToYMax() { this->SetPlane(USE_Y_MAX); };
-  void SetPlaneToZMax() { this->SetPlane(USE_Z_MAX); };
+  void SetPlaneToX() { this->SetPlane(USE_X); }
+  void SetPlaneToY() { this->SetPlane(USE_Y); }
+  void SetPlaneToZ() { this->SetPlane(USE_Z); }
+  void SetPlaneToXMin() { this->SetPlane(USE_X_MIN); }
+  void SetPlaneToYMin() { this->SetPlane(USE_Y_MIN); }
+  void SetPlaneToZMin() { this->SetPlane(USE_Z_MIN); }
+  void SetPlaneToXMax() { this->SetPlane(USE_X_MAX); }
+  void SetPlaneToYMax() { this->SetPlane(USE_Y_MAX); }
+  void SetPlaneToZMax() { this->SetPlane(USE_Z_MAX); }
   //@}
 
   //@{
@@ -82,29 +83,39 @@ public:
    * If on (the default), copy the input geometry to the output. If off,
    * the output will only contain the reflection.
    */
-  vtkSetMacro(CopyInput, int);
-  vtkGetMacro(CopyInput, int);
-  vtkBooleanMacro(CopyInput, int);
+  vtkSetMacro(CopyInput, vtkTypeBool);
+  vtkGetMacro(CopyInput, vtkTypeBool);
+  vtkBooleanMacro(CopyInput, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
+   * If off (the default), only Vectors, Normals and Tensors will be flipped.
+   * If on, all 3-component data arrays ( considered as 3D vectors),
+   * 6-component data arrays (considered as symmetric tensors),
+   * 9-component data arrays (considered as tensors ) of signed type will be flipped.
+   * All other won't be flipped and will only be copied.
+   */
+  vtkSetMacro(FlipAllInputArrays, bool);
+  vtkGetMacro(FlipAllInputArrays, bool);
+  vtkBooleanMacro(FlipAllInputArrays, bool);
   //@}
 
 protected:
   vtkReflectionFilter();
-  ~vtkReflectionFilter() VTK_OVERRIDE;
+  ~vtkReflectionFilter() override;
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    * Overridden to create the correct type of output.
    */
-  int RequestDataObject(vtkInformation*,
-                        vtkInformationVector**,
-                        vtkInformationVector*) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Actual implementation for reflection.
    */
-  virtual int RequestDataInternal(vtkDataSet* input, vtkUnstructuredGrid* output,
-    double bounds[6]);
+  virtual int RequestDataInternal(vtkDataSet* input, vtkUnstructuredGrid* output, double bounds[6]);
 
   /**
    * Internal method to compute bounds.
@@ -114,23 +125,22 @@ protected:
   /**
    * Generate new, non-3D cell and return the generated cells id.
    */
-  virtual vtkIdType ReflectNon3DCell(vtkDataSet* input, vtkUnstructuredGrid* output,
-                                     vtkIdType cellId,  vtkIdType numInputPoints);
+  virtual vtkIdType ReflectNon3DCell(
+    vtkDataSet* input, vtkUnstructuredGrid* output, vtkIdType cellId, vtkIdType numInputPoints);
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+
+  void FlipTuple(double* tuple, int* mirrorDir, int nComp);
 
   int Plane;
   double Center;
-  int CopyInput;
-
-  void FlipVector(double tuple[3], int mirrorDir[3]);
+  vtkTypeBool CopyInput;
+  bool FlipAllInputArrays;
 
 private:
-  vtkReflectionFilter(const vtkReflectionFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkReflectionFilter&) VTK_DELETE_FUNCTION;
+  vtkReflectionFilter(const vtkReflectionFilter&) = delete;
+  void operator=(const vtkReflectionFilter&) = delete;
 };
 
 #endif
-
-

@@ -540,43 +540,55 @@ int vtkAxisActor::RenderOpaqueGeometry(vtkViewport* viewport)
 
   // Everything is built, just have to render
 
+  // pass keys to sub props
+  vtkInformation* propKeys = this->GetPropertyKeys();
+
   if (!this->AxisHasZeroLength)
   {
     if (this->DrawGridlinesOnly && this->DrawGridlines)
     {
       // Exit !!!!
+      this->GridlinesActor->SetPropertyKeys(propKeys);
       return this->GridlinesActor->RenderOpaqueGeometry(viewport);
     }
     if (this->Title != nullptr && this->Title[0] != 0 && this->TitleVisibility)
     {
       if (this->Use2DMode)
       {
+        this->TitleActor2D->SetPropertyKeys(propKeys);
         renderedSomething += this->TitleActor2D->RenderOpaqueGeometry(viewport);
       }
       else if (this->UseTextActor3D)
       {
+        this->TitleProp3D->SetPropertyKeys(propKeys);
         renderedSomething += this->TitleProp3D->RenderOpaqueGeometry(viewport);
       }
       else
       {
+        this->TitleActor->SetPropertyKeys(propKeys);
         renderedSomething += this->TitleActor->RenderOpaqueGeometry(viewport);
       }
     }
     if (this->AxisVisibility)
     {
+      this->AxisLinesActor->SetPropertyKeys(propKeys);
       renderedSomething += this->AxisLinesActor->RenderOpaqueGeometry(viewport);
       if (this->TickVisibility)
       {
+        this->AxisMajorTicksActor->SetPropertyKeys(propKeys);
         renderedSomething += this->AxisMajorTicksActor->RenderOpaqueGeometry(viewport);
+        this->AxisMinorTicksActor->SetPropertyKeys(propKeys);
         renderedSomething += this->AxisMinorTicksActor->RenderOpaqueGeometry(viewport);
       }
     }
     if (this->DrawGridlines)
     {
+      this->GridlinesActor->SetPropertyKeys(propKeys);
       renderedSomething += this->GridlinesActor->RenderOpaqueGeometry(viewport);
     }
     if (this->DrawInnerGridlines)
     {
+      this->InnerGridlinesActor->SetPropertyKeys(propKeys);
       renderedSomething += this->InnerGridlinesActor->RenderOpaqueGeometry(viewport);
     }
     if (this->LabelVisibility)
@@ -585,14 +597,17 @@ int vtkAxisActor::RenderOpaqueGeometry(vtkViewport* viewport)
       {
         if (this->Use2DMode)
         {
+          this->LabelActors2D[i]->SetPropertyKeys(propKeys);
           renderedSomething += this->LabelActors2D[i]->RenderOpaqueGeometry(viewport);
         }
         else if (this->UseTextActor3D)
         {
+          this->LabelActors3D[i]->SetPropertyKeys(propKeys);
           renderedSomething += this->LabelActors3D[i]->RenderOpaqueGeometry(viewport);
         }
         else
         {
+          this->LabelActors[i]->SetPropertyKeys(propKeys);
           renderedSomething += this->LabelActors[i]->RenderOpaqueGeometry(viewport);
         }
       }
@@ -601,14 +616,17 @@ int vtkAxisActor::RenderOpaqueGeometry(vtkViewport* viewport)
       {
         if (this->Use2DMode)
         {
+          this->ExponentActor2D->SetPropertyKeys(propKeys);
           renderedSomething += this->ExponentActor2D->RenderOpaqueGeometry(viewport);
         }
         else if (this->UseTextActor3D)
         {
+          this->ExponentProp3D->SetPropertyKeys(propKeys);
           renderedSomething += this->ExponentProp3D->RenderOpaqueGeometry(viewport);
         }
         else
         {
+          this->ExponentActor->SetPropertyKeys(propKeys);
           renderedSomething += this->ExponentActor->RenderOpaqueGeometry(viewport);
         }
       }
@@ -638,24 +656,31 @@ int vtkAxisActor::RenderTranslucentPolygonalGeometry(vtkViewport* viewport)
 
   // Everything is built, just have to render
 
+  // pass keys to sub props
+  vtkInformation* propKeys = this->GetPropertyKeys();
+
   if (!this->AxisHasZeroLength && !this->DrawGridlinesOnly)
   {
     if (this->DrawGridpolys)
     {
+      this->GridpolysActor->SetPropertyKeys(propKeys);
       renderedSomething += this->GridpolysActor->RenderTranslucentPolygonalGeometry(viewport);
     }
     if (this->Title != nullptr && this->Title[0] != 0 && this->TitleVisibility)
     {
       if (this->Use2DMode)
       {
+        this->TitleActor2D->SetPropertyKeys(propKeys);
         renderedSomething += this->TitleActor2D->RenderTranslucentPolygonalGeometry(viewport);
       }
       else if (this->UseTextActor3D)
       {
+        this->TitleProp3D->SetPropertyKeys(propKeys);
         renderedSomething += this->TitleProp3D->RenderTranslucentPolygonalGeometry(viewport);
       }
       else
       {
+        this->TitleActor->SetPropertyKeys(propKeys);
         renderedSomething += this->TitleActor->RenderTranslucentPolygonalGeometry(viewport);
       }
     }
@@ -665,14 +690,17 @@ int vtkAxisActor::RenderTranslucentPolygonalGeometry(vtkViewport* viewport)
       {
         if (this->Use2DMode)
         {
+          this->LabelActors2D[i]->SetPropertyKeys(propKeys);
           renderedSomething += this->LabelActors2D[i]->RenderTranslucentPolygonalGeometry(viewport);
         }
         else if (this->UseTextActor3D)
         {
+          this->LabelProps3D[i]->SetPropertyKeys(propKeys);
           renderedSomething += this->LabelProps3D[i]->RenderTranslucentPolygonalGeometry(viewport);
         }
         else
         {
+          this->LabelActors[i]->SetPropertyKeys(propKeys);
           renderedSomething += this->LabelActors[i]->RenderTranslucentPolygonalGeometry(viewport);
         }
       }
@@ -680,14 +708,17 @@ int vtkAxisActor::RenderTranslucentPolygonalGeometry(vtkViewport* viewport)
       {
         if (this->Use2DMode)
         {
+          this->ExponentActor2D->SetPropertyKeys(propKeys);
           renderedSomething += this->ExponentActor2D->RenderTranslucentPolygonalGeometry(viewport);
         }
         else if (this->UseTextActor3D)
         {
+          this->ExponentProp3D->SetPropertyKeys(propKeys);
           renderedSomething += this->ExponentProp3D->RenderTranslucentPolygonalGeometry(viewport);
         }
         else
         {
+          this->ExponentActor->SetPropertyKeys(propKeys);
           renderedSomething += this->ExponentActor->RenderTranslucentPolygonalGeometry(viewport);
         }
       }
@@ -759,7 +790,7 @@ int vtkAxisActor::RenderOverlay(vtkViewport* viewport)
 }
 
 //-----------------------------------------------------------------------------*
-int vtkAxisActor::HasTranslucentPolygonalGeometry()
+vtkTypeBool vtkAxisActor::HasTranslucentPolygonalGeometry()
 {
   if (this->Visibility && !this->AxisHasZeroLength)
   {
@@ -1092,8 +1123,9 @@ void vtkAxisActor::SetLabelPositions(vtkViewport* viewport, bool force)
   double labelSin = fabs(sin(labelAngle));
   vtkAxisFollower* pAxisFollower = nullptr;
 
-  for (int i = 0, ptIdx = 0; i < this->NumberOfLabelsBuilt &&
-    ((ptIdx + 1) < this->MajorTickPts->GetNumberOfPoints()); i++, ptIdx += 4)
+  for (int i = 0, ptIdx = 0;
+       i < this->NumberOfLabelsBuilt && ((ptIdx + 1) < this->MajorTickPts->GetNumberOfPoints());
+       i++, ptIdx += 4)
   {
     this->MajorTickPts->GetPoint(ptIdx, tickTop);
     this->MajorTickPts->GetPoint(ptIdx + 1, tickBottom);
@@ -1136,8 +1168,7 @@ void vtkAxisActor::SetLabelPositions(vtkViewport* viewport, bool force)
       pos[2] = (tickTop[2] + tickBottom[2]) / 2;
     }
 
-    double deltaPixels =
-      0.5 * (labelWidth * labelSin + labelHeight * labelCos) / labelMagnitude;
+    double deltaPixels = 0.5 * (labelWidth * labelSin + labelHeight * labelCos) / labelMagnitude;
     pAxisFollower->SetScreenOffset(this->LabelOffset + deltaPixels * this->ScreenSize);
     this->LabelProps3D[i]->SetScreenOffset(this->LabelOffset + deltaPixels * this->ScreenSize);
 
@@ -1231,8 +1262,9 @@ void vtkAxisActor::SetLabelPositions2D(vtkViewport* viewport, bool force)
     return;
   }
 
-  for (int i = 0, ptIdx = 1; i < this->NumberOfLabelsBuilt &&
-    ((ptIdx + 1) < this->MajorTickPts->GetNumberOfPoints()); i++, ptIdx += 4)
+  for (int i = 0, ptIdx = 1;
+       i < this->NumberOfLabelsBuilt && ((ptIdx + 1) < this->MajorTickPts->GetNumberOfPoints());
+       i++, ptIdx += 4)
   {
     this->MajorTickPts->GetPoint(ptIdx, tick);
 
@@ -2575,8 +2607,8 @@ bool vtkAxisActor::BuildTickPoints(double p1[3], double p2[3], bool force)
   this->InnerGridlinePts->Reset();
   this->GridpolyPts->Reset();
 
-  // As we assume that the Axis is not necessery alined to the absolute X/Y/Z
-  // axis, we will convert the absolut XYZ information to relative one
+  // As we assume that the Axis is not necessary aligned to the absolute X/Y/Z
+  // axis, we will convert the absolute XYZ information to relative one
   // using a base composed as follow (axis, u, v)
 
   double coordSystem[3][3]; // axisVector, uVector, vVector

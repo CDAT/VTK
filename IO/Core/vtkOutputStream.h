@@ -22,7 +22,7 @@
  * lengths for Write calls refer to the length of the data in memory.
  * The actual length in the stream may differ for subclasses that
  * implement an encoding scheme.
-*/
+ */
 
 #ifndef vtkOutputStream_h
 #define vtkOutputStream_h
@@ -33,9 +33,9 @@
 class VTKIOCORE_EXPORT vtkOutputStream : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkOutputStream,vtkObject);
-  static vtkOutputStream *New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOutputStream, vtkObject);
+  static vtkOutputStream* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -67,15 +67,15 @@ public:
 
 protected:
   vtkOutputStream();
-  ~vtkOutputStream() VTK_OVERRIDE;
+  ~vtkOutputStream() override;
 
   // The real output stream.
   ostream* Stream;
   int WriteStream(const char* data, size_t length);
 
 private:
-  vtkOutputStream(const vtkOutputStream&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOutputStream&) VTK_DELETE_FUNCTION;
+  vtkOutputStream(const vtkOutputStream&) = delete;
+  void operator=(const vtkOutputStream&) = delete;
 };
 
 #endif

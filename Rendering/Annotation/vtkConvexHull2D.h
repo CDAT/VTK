@@ -43,14 +43,14 @@
  *
  * @par Thanks:
  * Thanks to Colin Myers, University of Leeds for providing this implementation.
-*/
+ */
 
 #ifndef vtkConvexHull2D_h
 #define vtkConvexHull2D_h
 
-#include "vtkRenderingAnnotationModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
-#include "vtkSmartPointer.h" // needed for ivars
+#include "vtkRenderingAnnotationModule.h" // For export macro
+#include "vtkSmartPointer.h"              // needed for ivars
 
 class vtkCoordinate;
 class vtkPoints;
@@ -60,12 +60,12 @@ class vtkRenderer;
 class vtkTransform;
 class vtkTransformPolyDataFilter;
 
-class VTKRENDERINGANNOTATION_EXPORT vtkConvexHull2D: public vtkPolyDataAlgorithm
+class VTKRENDERINGANNOTATION_EXPORT vtkConvexHull2D : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkConvexHull2D *New();
+  static vtkConvexHull2D* New();
   vtkTypeMacro(vtkConvexHull2D, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -84,7 +84,8 @@ public:
   vtkBooleanMacro(Outline, bool);
   //@}
 
-  enum HullShapes {
+  enum HullShapes
+  {
     BoundingRectangle = 0,
     ConvexHull
   };
@@ -106,7 +107,6 @@ public:
   vtkGetMacro(MinHullSizeInWorld, double);
   //@}
 
-
   //@{
   /**
    * Set the minimum x,y-dimensions of each hull in pixels. You must also set a
@@ -127,31 +127,30 @@ public:
   /**
    * The modified time of this filter.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
    * Convenience methods to calculate a convex hull from a set of vtkPointS.
    */
-  static void CalculateBoundingRectangle(vtkPoints* inPoints,
-    vtkPoints* outPoints, double minimumHullSize=1.0);
-  static void CalculateConvexHull(vtkPoints* inPoints, vtkPoints* outPoints,
-    double minimumHullSize=1.0);
+  static void CalculateBoundingRectangle(
+    vtkPoints* inPoints, vtkPoints* outPoints, double minimumHullSize = 1.0);
+  static void CalculateConvexHull(
+    vtkPoints* inPoints, vtkPoints* outPoints, double minimumHullSize = 1.0);
   //@}
 
 protected:
   vtkConvexHull2D();
-  ~vtkConvexHull2D() VTK_OVERRIDE;
+  ~vtkConvexHull2D() override;
 
   /**
    * This is called by the superclass. This is the method you should override.
    */
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkConvexHull2D(const vtkConvexHull2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkConvexHull2D&) VTK_DELETE_FUNCTION;
+  vtkConvexHull2D(const vtkConvexHull2D&) = delete;
+  void operator=(const vtkConvexHull2D&) = delete;
 
   void ResizeHullToMinimumInDisplay(vtkPolyData* hullPolyData);
 

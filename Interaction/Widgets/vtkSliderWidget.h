@@ -61,16 +61,15 @@
  *   vtkCommand::InteractionEvent (on vtkWidgetEvent::Move)
  * </pre>
  *
-*/
+ */
 
 #ifndef vtkSliderWidget_h
 #define vtkSliderWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkSliderRepresentation;
-
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkSliderWidget : public vtkAbstractWidget
 {
@@ -78,14 +77,14 @@ public:
   /**
    * Instantiate the class.
    */
-  static vtkSliderWidget *New();
+  static vtkSliderWidget* New();
 
   //@{
   /**
    * Standard macros.
    */
-  vtkTypeMacro(vtkSliderWidget,vtkAbstractWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSliderWidget, vtkAbstractWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -93,14 +92,18 @@ public:
    * widget in the scene. Note that the representation is a subclass of vtkProp
    * so it can be added to the renderer independent of the widget.
    */
-  void SetRepresentation(vtkSliderRepresentation *r)
-    {this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));}
+  void SetRepresentation(vtkSliderRepresentation* r)
+  {
+    this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));
+  }
 
   /**
    * Return the representation as a vtkSliderRepresentation.
    */
-  vtkSliderRepresentation *GetSliderRepresentation()
-    {return reinterpret_cast<vtkSliderRepresentation*>(this->WidgetRep);}
+  vtkSliderRepresentation* GetSliderRepresentation()
+  {
+    return reinterpret_cast<vtkSliderRepresentation*>(this->WidgetRep);
+  }
 
   //@{
   /**
@@ -122,18 +125,18 @@ public:
    * Specify the number of animation steps to take if the animation mode
    * is set to animate.
    */
-  vtkSetClampMacro(NumberOfAnimationSteps,int,1,VTK_INT_MAX);
-  vtkGetMacro(NumberOfAnimationSteps,int);
+  vtkSetClampMacro(NumberOfAnimationSteps, int, 1, VTK_INT_MAX);
+  vtkGetMacro(NumberOfAnimationSteps, int);
   //@}
 
   /**
    * Create the default widget representation if one is not set.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
+  void CreateDefaultRepresentation() override;
 
 protected:
   vtkSliderWidget();
-  ~vtkSliderWidget() VTK_OVERRIDE {}
+  ~vtkSliderWidget() override {}
 
   // These are the events that are handled
   static void SelectAction(vtkAbstractWidget*);
@@ -145,24 +148,23 @@ protected:
   int WidgetState;
   enum _WidgetState
   {
-    Start=0,
+    Start = 0,
     Sliding,
     Animating
   };
 
   int NumberOfAnimationSteps;
   int AnimationMode;
-  enum AnimationState {
+  enum AnimationState
+  {
     AnimateOff,
     Jump,
     Animate
   };
 
-
-
 private:
-  vtkSliderWidget(const vtkSliderWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSliderWidget&) VTK_DELETE_FUNCTION;
+  vtkSliderWidget(const vtkSliderWidget&) = delete;
+  void operator=(const vtkSliderWidget&) = delete;
 };
 
 #endif

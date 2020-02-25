@@ -83,7 +83,7 @@
  * 1             0                 0              0
  * 1             0                 0              1
  * </pre>
-*/
+ */
 
 #ifndef vtkXMLTreeReader_h
 #define vtkXMLTreeReader_h
@@ -95,8 +95,8 @@ class VTKIOINFOVIS_EXPORT vtkXMLTreeReader : public vtkTreeAlgorithm
 {
 public:
   static vtkXMLTreeReader* New();
-  vtkTypeMacro(vtkXMLTreeReader,vtkTreeAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkXMLTreeReader, vtkTreeAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -176,13 +176,12 @@ public:
   vtkBooleanMacro(ReadTagName, bool);
   //@}
 
-
-  static const char * TagNameField;
-  static const char * CharDataField;
+  static const char* TagNameField;
+  static const char* CharDataField;
 
 protected:
   vtkXMLTreeReader();
-  ~vtkXMLTreeReader() VTK_OVERRIDE;
+  ~vtkXMLTreeReader() override;
   char* FileName;
   char* XMLString;
   bool ReadCharData;
@@ -193,15 +192,11 @@ protected:
   bool GenerateEdgePedigreeIds;
   bool GenerateVertexPedigreeIds;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkXMLTreeReader(const vtkXMLTreeReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkXMLTreeReader&) VTK_DELETE_FUNCTION;
+  vtkXMLTreeReader(const vtkXMLTreeReader&) = delete;
+  void operator=(const vtkXMLTreeReader&) = delete;
 };
 
 #endif
-

@@ -22,7 +22,7 @@
  * @par Thanks:
  * This work was supported by PHS Research Grant No. 1 P41 RR13218-01
  * from the National Center for Research Resources.
-*/
+ */
 
 #ifndef vtkApproximatingSubdivisionFilter_h
 #define vtkApproximatingSubdivisionFilter_h
@@ -41,27 +41,25 @@ class VTKFILTERSGENERAL_EXPORT vtkApproximatingSubdivisionFilter : public vtkSub
 {
 public:
   vtkTypeMacro(vtkApproximatingSubdivisionFilter, vtkSubdivisionFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkApproximatingSubdivisionFilter();
-  ~vtkApproximatingSubdivisionFilter() VTK_OVERRIDE {}
+  ~vtkApproximatingSubdivisionFilter() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  virtual int GenerateSubdivisionPoints (vtkPolyData *inputDS,
-                                          vtkIntArray *edgeData,
-                                          vtkPoints *outputPts,
-                                          vtkPointData *outputPD) = 0;
-  void GenerateSubdivisionCells (vtkPolyData *inputDS, vtkIntArray *edgeData,
-                                 vtkCellArray *outputPolys,
-                                 vtkCellData *outputCD);
-  int FindEdge (vtkPolyData *mesh, vtkIdType cellId, vtkIdType p1,
-                vtkIdType p2, vtkIntArray *edgeData, vtkIdList *cellIds);
-  vtkIdType InterpolatePosition (vtkPoints *inputPts, vtkPoints *outputPts,
-                                 vtkIdList *stencil, double *weights);
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  virtual int GenerateSubdivisionPoints(
+    vtkPolyData* inputDS, vtkIntArray* edgeData, vtkPoints* outputPts, vtkPointData* outputPD) = 0;
+  void GenerateSubdivisionCells(
+    vtkPolyData* inputDS, vtkIntArray* edgeData, vtkCellArray* outputPolys, vtkCellData* outputCD);
+  int FindEdge(vtkPolyData* mesh, vtkIdType cellId, vtkIdType p1, vtkIdType p2,
+    vtkIntArray* edgeData, vtkIdList* cellIds);
+  vtkIdType InterpolatePosition(
+    vtkPoints* inputPts, vtkPoints* outputPts, vtkIdList* stencil, double* weights);
+
 private:
-  vtkApproximatingSubdivisionFilter(const vtkApproximatingSubdivisionFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkApproximatingSubdivisionFilter&) VTK_DELETE_FUNCTION;
+  vtkApproximatingSubdivisionFilter(const vtkApproximatingSubdivisionFilter&) = delete;
+  void operator=(const vtkApproximatingSubdivisionFilter&) = delete;
 };
 
 #endif

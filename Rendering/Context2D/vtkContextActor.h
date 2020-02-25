@@ -19,15 +19,15 @@
  * This object provides the entry point for the vtkContextScene to be rendered
  * in a vtkRenderer. Uses the RenderOverlay pass to render the 2D
  * vtkContextScene.
-*/
+ */
 
 #ifndef vtkContextActor_h
 #define vtkContextActor_h
 
-#include "vtkRenderingContext2DModule.h" // For export macro
+#include "vtkNew.h" // For ivars
 #include "vtkProp.h"
-#include "vtkNew.h"          // For ivars
-#include "vtkSmartPointer.h" // For ivars
+#include "vtkRenderingContext2DModule.h" // For export macro
+#include "vtkSmartPointer.h"             // For ivars
 
 class vtkContext2D;
 class vtkContext3D;
@@ -37,15 +37,15 @@ class vtkContextScene;
 class VTKRENDERINGCONTEXT2D_EXPORT vtkContextActor : public vtkProp
 {
 public:
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  vtkTypeMacro(vtkContextActor,vtkProp);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  vtkTypeMacro(vtkContextActor, vtkProp);
 
   static vtkContextActor* New();
 
   /**
    * We only render in the overlay for the context scene.
    */
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
+  int RenderOverlay(vtkViewport* viewport) override;
 
   //@{
   /**
@@ -57,20 +57,20 @@ public:
   /**
    * Get the chart object for the actor.
    */
-  vtkContextScene * GetScene();
+  vtkContextScene* GetScene();
 
   /**
    * Set the scene for the actor.
    */
-  void SetScene(vtkContextScene *scene);
+  void SetScene(vtkContextScene* scene);
 
   /**
    * Force rendering to a specific device. If left NULL, a default
    * device will be created.
    * @{
    */
-  void SetForceDevice(vtkContextDevice2D *dev);
-  vtkGetObjectMacro(ForceDevice, vtkContextDevice2D)
+  void SetForceDevice(vtkContextDevice2D* dev);
+  vtkGetObjectMacro(ForceDevice, vtkContextDevice2D);
   /**@}*/
 
   /**
@@ -78,11 +78,11 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *window) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* window) override;
 
 protected:
   vtkContextActor();
-  ~vtkContextActor() VTK_OVERRIDE;
+  ~vtkContextActor() override;
 
   /**
    * Initialize the actor - right now we just decide which device to initialize.
@@ -92,12 +92,12 @@ protected:
   vtkSmartPointer<vtkContextScene> Scene;
   vtkNew<vtkContext2D> Context;
   vtkNew<vtkContext3D> Context3D;
-  vtkContextDevice2D *ForceDevice;
+  vtkContextDevice2D* ForceDevice;
   bool Initialized;
 
 private:
-  vtkContextActor(const vtkContextActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContextActor&) VTK_DELETE_FUNCTION;
+  vtkContextActor(const vtkContextActor&) = delete;
+  void operator=(const vtkContextActor&) = delete;
 };
 
 #endif

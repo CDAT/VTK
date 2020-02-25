@@ -17,7 +17,7 @@
  * @brief   interpreter for interactive shells.
  *
  * vtkPythonInteractiveInterpreter provides an interpreter that can be used in
- * interactive shells. It mimicks the behaviour of the interactive
+ * interactive shells. It mimics the behaviour of the interactive
  * console (much like the default Python shell) providing the "read-eval-print"
  * loops. It also handles incomplete statements correctly. It uses "code"
  * module provided by Python standard library to achieve this.
@@ -31,7 +31,7 @@
  * vtkPythonInterpreter instance include vtkCommand::EnterEvent,
  * vtkCommand::ExitEvent, vtkCommand::UpdateEvent, vtkCommand::ErrorEvent and
  * vtkCommand::SetOutputEvent.
-*/
+ */
 
 #ifndef vtkPythonInteractiveInterpreter_h
 #define vtkPythonInteractiveInterpreter_h
@@ -46,7 +46,7 @@ class VTKPYTHONINTERPRETER_EXPORT vtkPythonInteractiveInterpreter : public vtkOb
 public:
   static vtkPythonInteractiveInterpreter* New();
   vtkTypeMacro(vtkPythonInteractiveInterpreter, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Push a line of code. It should have have trailing newlines. It can have
@@ -87,17 +87,16 @@ public:
 
 protected:
   vtkPythonInteractiveInterpreter();
-  ~vtkPythonInteractiveInterpreter();
+  ~vtkPythonInteractiveInterpreter() override;
 
   void HandleEvents(vtkObject* caller, unsigned long eventid, void* calldata);
 
 private:
-  vtkPythonInteractiveInterpreter(const vtkPythonInteractiveInterpreter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPythonInteractiveInterpreter&) VTK_DELETE_FUNCTION;
+  vtkPythonInteractiveInterpreter(const vtkPythonInteractiveInterpreter&) = delete;
+  void operator=(const vtkPythonInteractiveInterpreter&) = delete;
 
   class vtkInternals;
   vtkInternals* Internals;
-
 };
 
 #endif

@@ -13,18 +13,18 @@
 =========================================================================*/
 #include "vtkOpenGLCamera.h"
 
-#include "vtkMatrix4x4.h"
 #include "vtkMatrix3x3.h"
+#include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
-#include "vtkRenderer.h"
-#include "vtkOutputWindow.h"
-#include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLError.h"
+#include "vtkOpenGLRenderWindow.h"
+#include "vtkOpenGLState.h"
+#include "vtkOutputWindow.h"
+#include "vtkRenderer.h"
 
 #include <cmath>
 
 vtkStandardNewMacro(vtkOpenGLCamera);
-
 
 vtkOpenGLCamera::vtkOpenGLCamera()
 {
@@ -44,106 +44,34 @@ vtkOpenGLCamera::~vtkOpenGLCamera()
 }
 
 // Implement base class method.
-void vtkOpenGLCamera::Render(vtkRenderer *ren)
+void vtkOpenGLCamera::Render(vtkRenderer* ren)
 {
   vtkOpenGLClearErrorMacro();
 
   int lowerLeft[2];
   int usize, vsize;
 
-  vtkOpenGLRenderWindow *win = vtkOpenGLRenderWindow::SafeDownCast(ren->GetRenderWindow());
+  vtkOpenGLRenderWindow* win = vtkOpenGLRenderWindow::SafeDownCast(ren->GetRenderWindow());
+  vtkOpenGLState* ostate = win->GetState();
 
   // find out if we should stereo render
   this->Stereo = (ren->GetRenderWindow())->GetStereoRender();
-  ren->GetTiledSizeAndOrigin(&usize, &vsize, lowerLeft, lowerLeft+1);
+  ren->GetTiledSizeAndOrigin(&usize, &vsize, lowerLeft, lowerLeft + 1);
 
-  // if were on a stereo renderer draw to special parts of screen
-  if (this->Stereo)
-  {
-    unsigned int dfbo = win->GetDefaultFrameBufferId();
-    if (dfbo)
-    {
-      // If the render window is using an FBO to render into, we ensure that
-      // it's selected.
-      glBindFramebuffer(GL_FRAMEBUFFER, dfbo);
-    }
-    switch ((ren->GetRenderWindow())->GetStereoType())
-    {
-      case VTK_STEREO_CRYSTAL_EYES:
-        if (this->LeftEye)
-        {
-          if (ren->GetRenderWindow()->GetDoubleBuffer())
-          {
-            glDrawBuffer(static_cast<GLenum>(win->GetBackLeftBuffer()));
-            glReadBuffer(static_cast<GLenum>(win->GetBackLeftBuffer()));
-          }
-          else
-          {
-            glDrawBuffer(static_cast<GLenum>(win->GetFrontLeftBuffer()));
-            glReadBuffer(static_cast<GLenum>(win->GetFrontLeftBuffer()));
-          }
-        }
-        else
-        {
-           if (ren->GetRenderWindow()->GetDoubleBuffer())
-           {
-            glDrawBuffer(static_cast<GLenum>(win->GetBackRightBuffer()));
-            glReadBuffer(static_cast<GLenum>(win->GetBackRightBuffer()));
-           }
-          else
-          {
-            glDrawBuffer(static_cast<GLenum>(win->GetFrontRightBuffer()));
-            glReadBuffer(static_cast<GLenum>(win->GetFrontRightBuffer()));
-          }
-        }
-        break;
-      case VTK_STEREO_LEFT:
-        this->LeftEye = 1;
-        break;
-      case VTK_STEREO_RIGHT:
-        this->LeftEye = 0;
-        break;
-      default:
-        break;
-    }
-  }
-  else
-  {
-    if (ren->GetRenderWindow()->GetDoubleBuffer())
-    {
-      glDrawBuffer(static_cast<GLenum>(win->GetBackBuffer()));
-
-      // Reading back buffer means back left. see OpenGL spec.
-      // because one can write to two buffers at a time but can only read from
-      // one buffer at a time.
-      glReadBuffer(static_cast<GLenum>(win->GetBackBuffer()));
-    }
-    else
-    {
-      glDrawBuffer(static_cast<GLenum>(win->GetFrontBuffer()));
-
-      // Reading front buffer means front left. see OpenGL spec.
-      // because one can write to two buffers at a time but can only read from
-      // one buffer at a time.
-      glReadBuffer(static_cast<GLenum>(win->GetFrontBuffer()));
-    }
-  }
-
-  glViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
-  glEnable(GL_SCISSOR_TEST);
+  ostate->vtkglViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
+  ostate->vtkglEnable(GL_SCISSOR_TEST);
   if (this->UseScissor)
   {
-    glScissor(this->ScissorRect.GetX(),this->ScissorRect.GetY(),
-              this->ScissorRect.GetWidth(), this->ScissorRect.GetHeight());
+    ostate->vtkglScissor(this->ScissorRect.GetX(), this->ScissorRect.GetY(),
+      this->ScissorRect.GetWidth(), this->ScissorRect.GetHeight());
     this->UseScissor = false;
   }
   else
   {
-    glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
+    ostate->vtkglScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
   }
 
-  if ((ren->GetRenderWindow())->GetErase() && ren->GetErase()
-      && !ren->GetIsPicking())
+  if ((ren->GetRenderWindow())->GetErase() && ren->GetErase())
   {
     ren->Clear();
   }
@@ -152,25 +80,27 @@ void vtkOpenGLCamera::Render(vtkRenderer *ren)
 }
 
 //----------------------------------------------------------------------------
-void vtkOpenGLCamera::UpdateViewport(vtkRenderer *ren)
+void vtkOpenGLCamera::UpdateViewport(vtkRenderer* ren)
 {
   vtkOpenGLClearErrorMacro();
+  vtkOpenGLRenderWindow* win = vtkOpenGLRenderWindow::SafeDownCast(ren->GetRenderWindow());
+  vtkOpenGLState* ostate = win->GetState();
 
   int lowerLeft[2];
   int usize, vsize;
-  ren->GetTiledSizeAndOrigin(&usize, &vsize, lowerLeft, lowerLeft+1);
+  ren->GetTiledSizeAndOrigin(&usize, &vsize, lowerLeft, lowerLeft + 1);
 
-  glViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
-  glEnable(GL_SCISSOR_TEST);
+  ostate->vtkglViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
+  ostate->vtkglEnable(GL_SCISSOR_TEST);
   if (this->UseScissor)
   {
-    glScissor(this->ScissorRect.GetX(),this->ScissorRect.GetY(),
-              this->ScissorRect.GetWidth(), this->ScissorRect.GetHeight());
+    ostate->vtkglScissor(this->ScissorRect.GetX(), this->ScissorRect.GetY(),
+      this->ScissorRect.GetWidth(), this->ScissorRect.GetHeight());
     this->UseScissor = false;
   }
   else
   {
-    glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
+    ostate->vtkglScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
   }
 
   vtkOpenGLCheckErrorMacro("failed after UpdateViewport");
@@ -179,20 +109,19 @@ void vtkOpenGLCamera::UpdateViewport(vtkRenderer *ren)
 //----------------------------------------------------------------------------
 void vtkOpenGLCamera::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
-void vtkOpenGLCamera::GetKeyMatrices(vtkRenderer *ren, vtkMatrix4x4 *&wcvc,
-        vtkMatrix3x3 *&normMat, vtkMatrix4x4 *&vcdc, vtkMatrix4x4 *&wcdc)
+void vtkOpenGLCamera::GetKeyMatrices(vtkRenderer* ren, vtkMatrix4x4*& wcvc, vtkMatrix3x3*& normMat,
+  vtkMatrix4x4*& vcdc, vtkMatrix4x4*& wcdc)
 {
   // has the camera changed?
-  if (ren != this->LastRenderer ||
-      this->MTime > this->KeyMatrixTime ||
-      ren->GetMTime() > this->KeyMatrixTime)
+  if (ren != this->LastRenderer || this->MTime > this->KeyMatrixTime ||
+    ren->GetMTime() > this->KeyMatrixTime)
   {
     this->WCVCMatrix->DeepCopy(this->GetModelViewTransformMatrix());
 
-    for(int i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; ++i)
     {
       for (int j = 0; j < 3; ++j)
       {
@@ -203,24 +132,9 @@ void vtkOpenGLCamera::GetKeyMatrices(vtkRenderer *ren, vtkMatrix4x4 *&wcvc,
 
     this->WCVCMatrix->Transpose();
 
-    double aspect[2];
-    int  lowerLeft[2];
-    int usize, vsize;
-    ren->GetTiledSizeAndOrigin(&usize, &vsize, lowerLeft, lowerLeft+1);
-
-    ren->ComputeAspect();
-    ren->GetAspect(aspect);
-    double aspect2[2];
-    ren->vtkViewport::ComputeAspect();
-    ren->vtkViewport::GetAspect(aspect2);
-    double aspectModification = aspect[0] * aspect2[1] / (aspect[1] * aspect2[0]);
-
-    if (usize && vsize)
-    {
-      this->VCDCMatrix->DeepCopy(this->GetProjectionTransformMatrix(
-                         aspectModification * usize / vsize, -1, 1));
-      this->VCDCMatrix->Transpose();
-    }
+    this->VCDCMatrix->DeepCopy(
+      this->GetProjectionTransformMatrix(ren->GetTiledAspectRatio(), -1, 1));
+    this->VCDCMatrix->Transpose();
 
     vtkMatrix4x4::Multiply4x4(this->WCVCMatrix, this->VCDCMatrix, this->WCDCMatrix);
 

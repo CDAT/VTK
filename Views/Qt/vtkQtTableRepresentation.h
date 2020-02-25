@@ -47,13 +47,13 @@
  * Call SetInputConnection with a table connection
  * BEFORE the representation is added to a view or strange things
  * may happen, including segfaults.
-*/
+ */
 
 #ifndef vtkQtTableRepresentation_h
 #define vtkQtTableRepresentation_h
 
-#include "vtkViewsQtModule.h" // For export macro
 #include "vtkDataRepresentation.h"
+#include "vtkViewsQtModule.h" // For export macro
 
 class vtkDoubleArray;
 class vtkLookupTable;
@@ -65,14 +65,14 @@ class VTKVIEWSQT_EXPORT vtkQtTableRepresentation : public vtkDataRepresentation
 {
 public:
   vtkTypeMacro(vtkQtTableRepresentation, vtkDataRepresentation);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/get the lookup table that will be used to determine colors
    * for each series.  The table's range should be [0, 1).
    */
-  void SetColorTable(vtkLookupTable *t);
+  void SetColorTable(vtkLookupTable* t);
   vtkGetObjectMacro(ColorTable, vtkLookupTable);
   //@}
 
@@ -103,9 +103,9 @@ public:
   vtkGetStringMacro(LastDataColumn);
   //@}
 
- protected:
+protected:
   vtkQtTableRepresentation();
-  ~vtkQtTableRepresentation() VTK_OVERRIDE;
+  ~vtkQtTableRepresentation() override;
 
   /**
    * Update the table representation
@@ -116,19 +116,18 @@ public:
   vtkGetStringMacro(KeyColumnInternal);
 
   // ----------------------------------------------------------------------
-  vtkQtTableModelAdapter *ModelAdapter;
-  vtkLookupTable *ColorTable;
-  vtkDoubleArray *SeriesColors;
-  char *KeyColumnInternal;
-  char *FirstDataColumn;
-  char *LastDataColumn;
+  vtkQtTableModelAdapter* ModelAdapter;
+  vtkLookupTable* ColorTable;
+  vtkDoubleArray* SeriesColors;
+  char* KeyColumnInternal;
+  char* FirstDataColumn;
+  char* LastDataColumn;
 
   /**
    * Prepare the input connections to this representation.
    */
-  int RequestData(vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   virtual void ResetModel();
   virtual void CreateSeriesColors();
@@ -137,12 +136,11 @@ public:
    * This should set the model type to DATA, METADATA or FULL
    * depending on what you want.
    */
-  virtual void SetModelType() { };
+  virtual void SetModelType() {}
 
 private:
-  vtkQtTableRepresentation(const vtkQtTableRepresentation &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtTableRepresentation &) VTK_DELETE_FUNCTION;
-
+  vtkQtTableRepresentation(const vtkQtTableRepresentation&) = delete;
+  void operator=(const vtkQtTableRepresentation&) = delete;
 };
 
 #endif

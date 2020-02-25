@@ -14,23 +14,18 @@
 =========================================================================*/
 #include "vtkXMLPUnstructuredDataWriter.h"
 
+#include "vtkErrorCode.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
-#include "vtkErrorCode.h"
 #include "vtkPointSet.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkXMLUnstructuredDataWriter.h"
 
+//----------------------------------------------------------------------------
+vtkXMLPUnstructuredDataWriter::vtkXMLPUnstructuredDataWriter() = default;
 
 //----------------------------------------------------------------------------
-vtkXMLPUnstructuredDataWriter::vtkXMLPUnstructuredDataWriter()
-{
-}
-
-//----------------------------------------------------------------------------
-vtkXMLPUnstructuredDataWriter::~vtkXMLPUnstructuredDataWriter()
-{
-}
+vtkXMLPUnstructuredDataWriter::~vtkXMLPUnstructuredDataWriter() = default;
 
 //----------------------------------------------------------------------------
 void vtkXMLPUnstructuredDataWriter::PrintSelf(ostream& os, vtkIndent indent)

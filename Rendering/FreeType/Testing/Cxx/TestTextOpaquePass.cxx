@@ -30,10 +30,10 @@
 
 #include <string>
 
-namespace {
+namespace
+{
 template <typename T>
-void configureTextArray(vtkNew<T> objs[2][2][3],
-                        const std::string &prefix)
+void configureTextArray(vtkNew<T> objs[2][2][3], const std::string& prefix)
 {
   // Text options: half / full opacity
   double tOpacity[2] = { 0.5, 1.0 };
@@ -53,8 +53,8 @@ void configureTextArray(vtkNew<T> objs[2][2][3],
     {
       for (size_t b = 0; b < 3; ++b)
       {
-        T *obj = objs[t][e][b].Get();
-        vtkTextProperty *tprop = obj->GetTextProperty();
+        T* obj = objs[t][e][b];
+        vtkTextProperty* tprop = obj->GetTextProperty();
 
         tprop->SetJustificationToCentered();
         tprop->SetVerticalJustificationToCentered();
@@ -80,7 +80,7 @@ void configureTextArray(vtkNew<T> objs[2][2][3],
 //------------------------------------------------------------------------------
 // This test ensures that text rendered with
 // vtkTextProperty::ForceOpaqueTextures is handled by the opaque render pass.
-int TestTextOpaquePass(int, char *[])
+int TestTextOpaquePass(int, char*[])
 {
   // Create combinations of opacities/features [text][border][background]
   // Text has two values, half or full opacity.
@@ -100,8 +100,8 @@ int TestTextOpaquePass(int, char *[])
   configureTextArray(textMapper, "vtkTextMapper");
   configureTextArray(billboardActor, "vtkBillboardTextActor3D");
 
-  int width = 600;
-  int height = 600;
+  const int width = 600;
+  const int height = 600;
 
   // Disable everything but opaque and overlay:
   vtkNew<vtkRenderStepsPass> pass;
@@ -109,24 +109,24 @@ int TestTextOpaquePass(int, char *[])
   pass->SetVolumetricPass(nullptr);
 
   vtkNew<vtkRenderer> ren;
-  ren->SetPass(pass.Get());
+  ren->SetPass(pass);
   ren->GradientBackgroundOn();
   ren->SetBackground(0., 0., 0.);
   ren->SetBackground2(1., 1., 1.);
 
   // To make things easier, setup the camera so that WC@Z=0 roughly match DC.
   ren->GetActiveCamera()->ParallelProjectionOn();
-  ren->GetActiveCamera()->SetPosition(width/2, height/2, 1.);
-  ren->GetActiveCamera()->SetFocalPoint(width/2, height/2, 0.);
+  ren->GetActiveCamera()->SetPosition(width / 2, height / 2, 1.);
+  ren->GetActiveCamera()->SetFocalPoint(width / 2, height / 2, 0.);
   ren->GetActiveCamera()->SetViewUp(0., 1., 0.);
-  ren->GetActiveCamera()->SetParallelScale(height/2);
+  ren->GetActiveCamera()->SetParallelScale(height / 2);
 
   vtkNew<vtkRenderWindow> win;
-  win->AddRenderer(ren.GetPointer());
+  win->AddRenderer(ren);
   win->SetSize(width, height);
   win->SetMultiSamples(0);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(win.GetPointer());
+  iren->SetRenderWindow(win);
 
   // Used for computing coordinates:
   double dx = width / 5.;
@@ -138,12 +138,12 @@ int TestTextOpaquePass(int, char *[])
     {
       for (size_t b = 0; b < 3; ++b)
       {
-        textMapperActor[t][e][b]->SetMapper(textMapper[t][e][b].Get());
+        textMapperActor[t][e][b]->SetMapper(textMapper[t][e][b]);
 
-        ren->AddViewProp(textActor[t][e][b].Get());
-        ren->AddViewProp(textActor3D[t][e][b].Get());
-        ren->AddViewProp(textMapperActor[t][e][b].Get());
-        ren->AddViewProp(billboardActor[t][e][b].Get());
+        ren->AddViewProp(textActor[t][e][b]);
+        ren->AddViewProp(textActor3D[t][e][b]);
+        ren->AddViewProp(textMapperActor[t][e][b]);
+        ren->AddViewProp(billboardActor[t][e][b]);
 
         // Convert TEB coordinates into a flat index:
         size_t idx = t * 6 + e * 3 + b;

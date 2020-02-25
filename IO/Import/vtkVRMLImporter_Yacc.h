@@ -123,8 +123,8 @@ public:
   typedef unsigned char YY_CHAR;
   typedef int yy_state_type;
 private:
-  vtkVRMLYaccData(const vtkVRMLYaccData&) VTK_DELETE_FUNCTION;
-  vtkVRMLYaccData& operator=(const vtkVRMLYaccData&) VTK_DELETE_FUNCTION;
+  vtkVRMLYaccData(const vtkVRMLYaccData&) = delete;
+  vtkVRMLYaccData& operator=(const vtkVRMLYaccData&) = delete;
 public:
   // Parser variables and functions:
   // Currently-being-define proto.  Prototypes may be nested, so a stack
@@ -1039,7 +1039,7 @@ int vtkVRMLYaccData::yyparse(vtkVRMLImporter* self)
   yylsp = yyls;
 #endif
 
-  /* Push a new state, which is found in  yystate  .  */
+  /* Push a new state, which is found in yystate  .  */
   /* In all cases, when you get here, the value and location stacks
      have just been pushed. so pushing a state here evens the stacks.  */
   yynewstate:
@@ -1277,7 +1277,7 @@ int vtkVRMLYaccData::yyparse(vtkVRMLImporter* self)
   { beginProto(yyvsp[0].string); ;
   break;}
   case 15:
-  { endProto();  //free(yyvsp[-7].string);;
+  { endProto();  //free(yyvsp[-7].string);
   break;}
   case 16:
   { beginProto(yyvsp[0].string); ;
@@ -1333,7 +1333,7 @@ int vtkVRMLYaccData::yyparse(vtkVRMLImporter* self)
   { self->enterNode(yyvsp[0].string); ;
   break;}
   case 35:
-  { self->exitNode(); //free(yyvsp[-4].string);;
+  { self->exitNode(); //free(yyvsp[-4].string);
   break;}
   case 38:
   { self->enterField(yyvsp[0].string); ;

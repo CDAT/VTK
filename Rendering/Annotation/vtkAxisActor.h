@@ -15,14 +15,14 @@ PURPOSE.  See the above copyright notice for more information.
  *
  * vtkAxisActor creates an axis with tick marks, labels, and/or a title,
  * depending on the particular instance variable settings. It is assumed that
- * the axes is part of a bounding box and is orthoganal to one of the
+ * the axes is part of a bounding box and is orthogonal to one of the
  * coordinate axes.  To use this class, you typically specify two points
  * defining the start and end points of the line (xyz definition using
  * vtkCoordinate class), the axis type (X, Y or Z), the axis location in
  * relation to the bounding box, the bounding box, the number of labels, and
  * the data range (min,max). You can also control what parts of the axis are
  * visible including the line, the tick marks, the labels, and the title. It
- * is also possible to control gridlines, and specifiy on which 'side' the
+ * is also possible to control gridlines, and specify on which 'side' the
  * tickmarks are drawn (again with respect to the underlying assumed
  * bounding box). You can also specify the label format (a printf style format).
  *
@@ -45,7 +45,7 @@ PURPOSE.  See the above copyright notice for more information.
  *
  * @sa
  * vtkActor vtkVectorText vtkPolyDataMapper vtkAxisActor2D vtkCoordinate
-*/
+ */
 
 #ifndef vtkAxisActor_h
 #define vtkAxisActor_h
@@ -72,7 +72,7 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
 {
 public:
   vtkTypeMacro(vtkAxisActor, vtkActor);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Instantiate object.
@@ -114,7 +114,7 @@ public:
    */
   void SetBounds(const double bounds[6]);
   void SetBounds(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
-  double* GetBounds(void) VTK_OVERRIDE;
+  double* GetBounds(void) VTK_SIZEHINT(6) override;
   void GetBounds(double bounds[6]);
   //@}
 
@@ -142,9 +142,9 @@ public:
   /**
    * Set/Get the flag that controls whether the minor ticks are visible.
    */
-  vtkSetMacro(MinorTicksVisible, int);
-  vtkGetMacro(MinorTicksVisible, int);
-  vtkBooleanMacro(MinorTicksVisible, int);
+  vtkSetMacro(MinorTicksVisible, vtkTypeBool);
+  vtkGetMacro(MinorTicksVisible, vtkTypeBool);
+  vtkBooleanMacro(MinorTicksVisible, vtkTypeBool);
   //@}
 
   //@{
@@ -196,44 +196,44 @@ public:
   vtkGetMacro(TickLocation, int);
   //@}
 
-  void SetTickLocationToInside(void) { this->SetTickLocation(VTK_TICKS_INSIDE); };
-  void SetTickLocationToOutside(void) { this->SetTickLocation(VTK_TICKS_OUTSIDE); };
-  void SetTickLocationToBoth(void) { this->SetTickLocation(VTK_TICKS_BOTH); };
+  void SetTickLocationToInside(void) { this->SetTickLocation(VTK_TICKS_INSIDE); }
+  void SetTickLocationToOutside(void) { this->SetTickLocation(VTK_TICKS_OUTSIDE); }
+  void SetTickLocationToBoth(void) { this->SetTickLocation(VTK_TICKS_BOTH); }
 
   //@{
   /**
    * Set/Get visibility of the axis line.
    */
-  vtkSetMacro(AxisVisibility, int);
-  vtkGetMacro(AxisVisibility, int);
-  vtkBooleanMacro(AxisVisibility, int);
+  vtkSetMacro(AxisVisibility, vtkTypeBool);
+  vtkGetMacro(AxisVisibility, vtkTypeBool);
+  vtkBooleanMacro(AxisVisibility, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set/Get visibility of the axis major tick marks.
    */
-  vtkSetMacro(TickVisibility, int);
-  vtkGetMacro(TickVisibility, int);
-  vtkBooleanMacro(TickVisibility, int);
+  vtkSetMacro(TickVisibility, vtkTypeBool);
+  vtkGetMacro(TickVisibility, vtkTypeBool);
+  vtkBooleanMacro(TickVisibility, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set/Get visibility of the axis labels.
    */
-  vtkSetMacro(LabelVisibility, int);
-  vtkGetMacro(LabelVisibility, int);
-  vtkBooleanMacro(LabelVisibility, int);
+  vtkSetMacro(LabelVisibility, vtkTypeBool);
+  vtkGetMacro(LabelVisibility, vtkTypeBool);
+  vtkBooleanMacro(LabelVisibility, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set/Get visibility of the axis title.
    */
-  vtkSetMacro(TitleVisibility, int);
-  vtkGetMacro(TitleVisibility, int);
-  vtkBooleanMacro(TitleVisibility, int);
+  vtkSetMacro(TitleVisibility, vtkTypeBool);
+  vtkGetMacro(TitleVisibility, vtkTypeBool);
+  vtkBooleanMacro(TitleVisibility, vtkTypeBool);
   //@}
 
   //@{
@@ -264,7 +264,7 @@ public:
 
   //@{
   /**
-   * Get/Set the alignement of the title related to the axis.
+   * Get/Set the alignment of the title related to the axis.
    * Possible Alignment: VTK_ALIGN_TOP, VTK_ALIGN_BOTTOM, VTK_ALIGN_POINT1, VTK_ALIGN_POINT2
    */
   virtual void SetTitleAlignLocation(int location);
@@ -356,9 +356,9 @@ public:
   /**
    * Set/Get whether gridlines should be drawn.
    */
-  vtkSetMacro(DrawGridlines, int);
-  vtkGetMacro(DrawGridlines, int);
-  vtkBooleanMacro(DrawGridlines, int);
+  vtkSetMacro(DrawGridlines, vtkTypeBool);
+  vtkGetMacro(DrawGridlines, vtkTypeBool);
+  vtkBooleanMacro(DrawGridlines, vtkTypeBool);
   //@}
 
   //@{
@@ -367,9 +367,9 @@ public:
    * This will only draw GridLines and will skip any other part of the rendering
    * such as Axis/Tick/Title/...
    */
-  vtkSetMacro(DrawGridlinesOnly, int);
-  vtkGetMacro(DrawGridlinesOnly, int);
-  vtkBooleanMacro(DrawGridlinesOnly, int);
+  vtkSetMacro(DrawGridlinesOnly, vtkTypeBool);
+  vtkGetMacro(DrawGridlinesOnly, vtkTypeBool);
+  vtkBooleanMacro(DrawGridlinesOnly, vtkTypeBool);
   //@}
 
   vtkSetMacro(DrawGridlinesLocation, int);
@@ -379,9 +379,9 @@ public:
   /**
    * Set/Get whether inner gridlines should be drawn.
    */
-  vtkSetMacro(DrawInnerGridlines, int);
-  vtkGetMacro(DrawInnerGridlines, int);
-  vtkBooleanMacro(DrawInnerGridlines, int);
+  vtkSetMacro(DrawInnerGridlines, vtkTypeBool);
+  vtkGetMacro(DrawInnerGridlines, vtkTypeBool);
+  vtkBooleanMacro(DrawInnerGridlines, vtkTypeBool);
   //@}
 
   //@{
@@ -400,9 +400,9 @@ public:
   /**
    * Set/Get whether gridpolys should be drawn.
    */
-  vtkSetMacro(DrawGridpolys, int);
-  vtkGetMacro(DrawGridpolys, int);
-  vtkBooleanMacro(DrawGridpolys, int);
+  vtkSetMacro(DrawGridpolys, vtkTypeBool);
+  vtkGetMacro(DrawGridpolys, vtkTypeBool);
+  vtkBooleanMacro(DrawGridpolys, vtkTypeBool);
   //@}
 
   enum AxisType
@@ -418,9 +418,9 @@ public:
    */
   vtkSetClampMacro(AxisType, int, VTK_AXIS_TYPE_X, VTK_AXIS_TYPE_Z);
   vtkGetMacro(AxisType, int);
-  void SetAxisTypeToX(void) { this->SetAxisType(VTK_AXIS_TYPE_X); };
-  void SetAxisTypeToY(void) { this->SetAxisType(VTK_AXIS_TYPE_Y); };
-  void SetAxisTypeToZ(void) { this->SetAxisType(VTK_AXIS_TYPE_Z); };
+  void SetAxisTypeToX(void) { this->SetAxisType(VTK_AXIS_TYPE_X); }
+  void SetAxisTypeToY(void) { this->SetAxisType(VTK_AXIS_TYPE_Y); }
+  void SetAxisTypeToZ(void) { this->SetAxisType(VTK_AXIS_TYPE_Z); }
   //@}
 
   enum AxisPosition
@@ -452,10 +452,10 @@ public:
   vtkGetMacro(AxisPosition, int);
   //@}
 
-  void SetAxisPositionToMinMin(void) { this->SetAxisPosition(VTK_AXIS_POS_MINMIN); };
-  void SetAxisPositionToMinMax(void) { this->SetAxisPosition(VTK_AXIS_POS_MINMAX); };
-  void SetAxisPositionToMaxMax(void) { this->SetAxisPosition(VTK_AXIS_POS_MAXMAX); };
-  void SetAxisPositionToMaxMin(void) { this->SetAxisPosition(VTK_AXIS_POS_MAXMIN); };
+  void SetAxisPositionToMinMin(void) { this->SetAxisPosition(VTK_AXIS_POS_MINMIN); }
+  void SetAxisPositionToMinMax(void) { this->SetAxisPosition(VTK_AXIS_POS_MINMAX); }
+  void SetAxisPositionToMaxMax(void) { this->SetAxisPosition(VTK_AXIS_POS_MAXMAX); }
+  void SetAxisPositionToMaxMin(void) { this->SetAxisPosition(VTK_AXIS_POS_MAXMIN); }
 
   //@{
   /**
@@ -470,11 +470,11 @@ public:
   /**
    * Draw the axis.
    */
-  int RenderOpaqueGeometry(vtkViewport* viewport) VTK_OVERRIDE;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
   virtual int RenderTranslucentGeometry(vtkViewport* viewport);
-  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport* viewport) VTK_OVERRIDE;
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) override;
+  int RenderOverlay(vtkViewport* viewport) override;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
   //@}
 
   /**
@@ -482,7 +482,7 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow*) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
   double ComputeMaxLabelLength(const double[3]);
   double ComputeTitleLength(const double[3]);
@@ -585,9 +585,9 @@ public:
    * Set/Get flag whether to calculate title offset.
    * Default is true.
    */
-  vtkSetMacro(CalculateTitleOffset, int);
-  vtkGetMacro(CalculateTitleOffset, int);
-  vtkBooleanMacro(CalculateTitleOffset, int);
+  vtkSetMacro(CalculateTitleOffset, vtkTypeBool);
+  vtkGetMacro(CalculateTitleOffset, vtkTypeBool);
+  vtkBooleanMacro(CalculateTitleOffset, vtkTypeBool);
   //@}
 
   //@{
@@ -595,9 +595,9 @@ public:
    * Set/Get flag whether to calculate label offset.
    * Default is true.
    */
-  vtkSetMacro(CalculateLabelOffset, int);
-  vtkGetMacro(CalculateLabelOffset, int);
-  vtkBooleanMacro(CalculateLabelOffset, int);
+  vtkSetMacro(CalculateLabelOffset, vtkTypeBool);
+  vtkGetMacro(CalculateLabelOffset, vtkTypeBool);
+  vtkBooleanMacro(CalculateLabelOffset, vtkTypeBool);
   //@}
 
   //@{
@@ -680,7 +680,7 @@ public:
 
 protected:
   vtkAxisActor();
-  ~vtkAxisActor() VTK_OVERRIDE;
+  ~vtkAxisActor() override;
 
   char* Title;
   char* Exponent;
@@ -689,7 +689,7 @@ protected:
   char* LabelFormat;
   int UseTextActor3D;
   int NumberOfLabelsBuilt;
-  int MinorTicksVisible;
+  vtkTypeBool MinorTicksVisible;
   int LastMinorTicksVisible;
 
   /**
@@ -700,19 +700,19 @@ protected:
   int TickLocation;
 
   /**
-   * Hold the alignement property of the title related to the axis.
+   * Hold the alignment property of the title related to the axis.
    * Possible Alignment: VTK_ALIGN_BOTTOM, VTK_ALIGN_TOP, VTK_ALIGN_POINT1, VTK_ALIGN_POINT2.
    */
   int TitleAlignLocation;
 
   /**
-   * Hold the alignement property of the exponent coming from the label values.
+   * Hold the alignment property of the exponent coming from the label values.
    * Possible Alignment: VTK_ALIGN_BOTTOM, VTK_ALIGN_TOP, VTK_ALIGN_POINT1, VTK_ALIGN_POINT2.
    */
   int ExponentLocation;
 
-  int DrawGridlines;
-  int DrawGridlinesOnly;
+  vtkTypeBool DrawGridlines;
+  vtkTypeBool DrawGridlinesOnly;
   int LastDrawGridlines;
   int DrawGridlinesLocation;     // 0: all | 1: closest | 2: farest
   int LastDrawGridlinesLocation; // 0: all | 1: closest | 2: farest
@@ -720,24 +720,23 @@ protected:
   double GridlineYLength;
   double GridlineZLength;
 
-  int DrawInnerGridlines;
+  vtkTypeBool DrawInnerGridlines;
   int LastDrawInnerGridlines;
 
-  int DrawGridpolys;
+  vtkTypeBool DrawGridpolys;
   int LastDrawGridpolys;
 
-  int AxisVisibility;
-  int TickVisibility;
+  vtkTypeBool AxisVisibility;
+  vtkTypeBool TickVisibility;
   int LastTickVisibility;
-  int LabelVisibility;
-  int TitleVisibility;
+  vtkTypeBool LabelVisibility;
+  vtkTypeBool TitleVisibility;
   bool ExponentVisibility;
   bool LastMajorTickPointCorrection;
 
   bool Log;
   int AxisType;
   int AxisPosition;
-  double Bounds[6];
 
   // coordinate system for axisAxtor, relative to world coordinates
   double AxisBaseForX[3];
@@ -745,8 +744,8 @@ protected:
   double AxisBaseForZ[3];
 
 private:
-  vtkAxisActor(const vtkAxisActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAxisActor&) VTK_DELETE_FUNCTION;
+  vtkAxisActor(const vtkAxisActor&) = delete;
+  void operator=(const vtkAxisActor&) = delete;
 
   void TransformBounds(vtkViewport*, double bnds[6]);
 
@@ -911,8 +910,8 @@ private:
 
   int AxisHasZeroLength;
 
-  int CalculateTitleOffset;
-  int CalculateLabelOffset;
+  vtkTypeBool CalculateTitleOffset;
+  vtkTypeBool CalculateLabelOffset;
 
   /**
    * Use xy-axis only when Use2DMode=1:

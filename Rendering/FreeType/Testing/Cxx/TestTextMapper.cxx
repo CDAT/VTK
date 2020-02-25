@@ -33,12 +33,11 @@
 
 #include <sstream>
 
-namespace vtkTestTextMapper {
-void setupTextMapper(vtkTextMapper *mapper,
-                     vtkActor2D *actor,
-                     vtkPolyData *anchor)
+namespace vtkTestTextMapper
 {
-  vtkTextProperty *p = mapper->GetTextProperty();
+void setupTextMapper(vtkTextMapper* mapper, vtkActor2D* actor, vtkPolyData* anchor)
+{
+  vtkTextProperty* p = mapper->GetTextProperty();
   std::ostringstream label;
   label << "TProp Angle: " << p->GetOrientation() << "\n"
         << "HAlign: " << p->GetJustificationAsString() << "\n"
@@ -46,36 +45,35 @@ void setupTextMapper(vtkTextMapper *mapper,
   mapper->SetInput(label.str().c_str());
 
   // Add the anchor point:
-  double *pos = actor->GetPosition();
-  double *col = p->GetColor();
+  double* pos = actor->GetPosition();
+  double* col = p->GetColor();
   vtkIdType ptId = anchor->GetPoints()->InsertNextPoint(pos[0], pos[1], 0.);
   anchor->GetVerts()->InsertNextCell(1, &ptId);
-  anchor->GetCellData()->GetScalars()->InsertNextTuple4(col[0] * 255,
-                                                        col[1] * 255,
-                                                        col[2] * 255, 255);
+  anchor->GetCellData()->GetScalars()->InsertNextTuple4(
+    col[0] * 255, col[1] * 255, col[2] * 255, 255);
 }
 } // end namespace vtkTestTextMapper
 
 //----------------------------------------------------------------------------
-int TestTextMapper(int, char *[])
+int TestTextMapper(int, char*[])
 {
   using namespace vtkTestTextMapper;
   vtkNew<vtkRenderer> ren;
 
   int width = 600;
   int height = 600;
-  int x[3] = {100, 300, 500};
-  int y[3] = {100, 300, 500};
+  int x[3] = { 100, 300, 500 };
+  int y[3] = { 100, 300, 500 };
 
   // Render the anchor points to check alignment:
   vtkNew<vtkPolyData> anchors;
   vtkNew<vtkPoints> points;
-  anchors->SetPoints(points.GetPointer());
+  anchors->SetPoints(points);
   vtkNew<vtkCellArray> verts;
-  anchors->SetVerts(verts.GetPointer());
+  anchors->SetVerts(verts);
   vtkNew<vtkUnsignedCharArray> colors;
   colors->SetNumberOfComponents(4);
-  anchors->GetCellData()->SetScalars(colors.GetPointer());
+  anchors->GetCellData()->SetScalars(colors);
 
   for (size_t row = 0; row < 3; ++row)
   {
@@ -110,24 +108,23 @@ int TestTextMapper(int, char *[])
       mapper->GetTextProperty()->SetColor(0.75, .2 + col * .26, .2 + row * .2);
       vtkNew<vtkActor2D> actor;
       actor->SetPosition(x[col], y[row]);
-      actor->SetMapper(mapper.GetPointer());
-      setupTextMapper(mapper.GetPointer(), actor.GetPointer(),
-                      anchors.GetPointer());
-      ren->AddActor2D(actor.GetPointer());
+      actor->SetMapper(mapper);
+      setupTextMapper(mapper, actor, anchors);
+      ren->AddActor2D(actor);
     }
   }
 
   vtkNew<vtkPolyDataMapper2D> anchorMapper;
-  anchorMapper->SetInputData(anchors.GetPointer());
+  anchorMapper->SetInputData(anchors);
   vtkNew<vtkActor2D> anchorActor;
-  anchorActor->SetMapper(anchorMapper.GetPointer());
+  anchorActor->SetMapper(anchorMapper);
   anchorActor->GetProperty()->SetPointSize(5);
-  ren->AddActor2D(anchorActor.GetPointer());
+  ren->AddActor2D(anchorActor);
 
   vtkNew<vtkRenderWindow> win;
-  win->AddRenderer(ren.GetPointer());
+  win->AddRenderer(ren);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(win.GetPointer());
+  iren->SetRenderWindow(win);
 
   ren->SetBackground(0.0, 0.0, 0.0);
   ren->GetActiveCamera()->SetPosition(0, 0, 400);

@@ -39,7 +39,7 @@
  * @par Thanks:
  *  Developed by David Feng and Philippe Pebay at Sandia National Laboratories
  *------------------------------------------------------------------------------
-*/
+ */
 
 #ifndef vtkPPairwiseExtractHistogram2D_h
 #define vtkPPairwiseExtractHistogram2D_h
@@ -50,30 +50,31 @@
 class vtkExtractHistogram2D;
 class vtkMultiProcessController;
 
-class VTKFILTERSPARALLELIMAGING_EXPORT vtkPPairwiseExtractHistogram2D : public vtkPairwiseExtractHistogram2D
+class VTKFILTERSPARALLELIMAGING_EXPORT vtkPPairwiseExtractHistogram2D
+  : public vtkPairwiseExtractHistogram2D
 {
 public:
   static vtkPPairwiseExtractHistogram2D* New();
   vtkTypeMacro(vtkPPairwiseExtractHistogram2D, vtkPairwiseExtractHistogram2D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   virtual void SetController(vtkMultiProcessController*);
-  vtkGetObjectMacro(Controller,vtkMultiProcessController);
+  vtkGetObjectMacro(Controller, vtkMultiProcessController);
 
 protected:
   vtkPPairwiseExtractHistogram2D();
-  ~vtkPPairwiseExtractHistogram2D() VTK_OVERRIDE;
+  ~vtkPPairwiseExtractHistogram2D() override;
 
   vtkMultiProcessController* Controller;
 
   /**
    * Generate a new histogram filter, but actually generate a parallel one this time.
    */
-  vtkExtractHistogram2D* NewHistogramFilter() VTK_OVERRIDE;
+  vtkExtractHistogram2D* NewHistogramFilter() override;
 
 private:
-  vtkPPairwiseExtractHistogram2D(const vtkPPairwiseExtractHistogram2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPPairwiseExtractHistogram2D&) VTK_DELETE_FUNCTION;
+  vtkPPairwiseExtractHistogram2D(const vtkPPairwiseExtractHistogram2D&) = delete;
+  void operator=(const vtkPPairwiseExtractHistogram2D&) = delete;
 };
 
 #endif

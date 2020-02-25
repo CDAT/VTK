@@ -5,9 +5,9 @@
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkMath.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 #include "vtkSphereSource.h"
 #include "vtkTimerLog.h"
@@ -24,9 +24,7 @@ int TestManyActors(int argc, char* argv[])
       interact = true;
       continue;
     }
-    if (!strcmp(argv[i], "-T") ||
-        !strcmp(argv[i], "-V") ||
-        !strcmp(argv[i], "-D"))
+    if (!strcmp(argv[i], "-T") || !strcmp(argv[i], "-V") || !strcmp(argv[i], "-D"))
     {
       ++i;
       continue;
@@ -46,29 +44,22 @@ int TestManyActors(int argc, char* argv[])
     cerr << argv[0] << " options:" << endl;
     cerr << " -N: Number of actors" << endl;
   }
-  vtkSmartPointer<vtkSphereSource> source =
-    vtkSmartPointer<vtkSphereSource>::New();
+  vtkSmartPointer<vtkSphereSource> source = vtkSmartPointer<vtkSphereSource>::New();
   source->Update();
-  vtkSmartPointer<vtkRenderer> ren =
-    vtkSmartPointer<vtkRenderer>::New();
-  int side1 = static_cast<int>(
-    vtkMath::Round(pow(static_cast<double>(numActors), 1.0/3.0)));
-  int side2 = static_cast<int>(
-    vtkMath::Round(sqrt(numActors/static_cast<double>(side1))));
-  int side3 = static_cast<int>(
-    ceil(static_cast<double>(numActors)/side1/side2));
+  vtkSmartPointer<vtkRenderer> ren = vtkSmartPointer<vtkRenderer>::New();
+  long side1 = std::lround(pow(static_cast<double>(numActors), 1.0 / 3.0));
+  long side2 = std::lround(sqrt(numActors / static_cast<double>(side1)));
+  long side3 = static_cast<long>(ceil(static_cast<double>(numActors) / side1 / side2));
   int actorId = 0;
-  for (int i = 0; i < side1; ++i)
+  for (long i = 0; i < side1; ++i)
   {
-    for (int j = 0; j < side2; ++j)
+    for (long j = 0; j < side2; ++j)
     {
-      for (int k = 0; k < side3; ++k)
+      for (long k = 0; k < side3; ++k)
       {
-        vtkSmartPointer<vtkPolyDataMapper> mapper =
-          vtkSmartPointer<vtkPolyDataMapper>::New();
+        vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
         mapper->StaticOn();
-        vtkSmartPointer<vtkActor> actor =
-          vtkSmartPointer<vtkActor>::New();
+        vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
         mapper->SetInputConnection(source->GetOutputPort());
         mapper->StaticOn();
         actor->SetMapper(mapper);
@@ -90,8 +81,7 @@ int TestManyActors(int argc, char* argv[])
       break;
     }
   }
-  vtkSmartPointer<vtkRenderWindow> win =
-    vtkSmartPointer<vtkRenderWindow>::New();
+  vtkSmartPointer<vtkRenderWindow> win = vtkSmartPointer<vtkRenderWindow>::New();
   vtkSmartPointer<vtkRenderWindowInteractor> iren =
     vtkSmartPointer<vtkRenderWindowInteractor>::New();
   vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =

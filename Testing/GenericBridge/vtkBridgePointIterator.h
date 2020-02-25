@@ -20,7 +20,7 @@
  * used for testing and evaluating the Generic framework.
  * @sa
  * vtkGenericPointIterator, vtkBridgeDataSet
-*/
+ */
 
 #ifndef vtkBridgePointIterator_h
 #define vtkBridgePointIterator_h
@@ -34,56 +34,55 @@ class vtkBridgePointIteratorOnDataSet;
 class vtkBridgePointIteratorOne;
 class vtkBridgePointIteratorOnCell;
 
-
 class VTKTESTINGGENERICBRIDGE_EXPORT vtkBridgePointIterator : public vtkGenericPointIterator
 {
 public:
-  static vtkBridgePointIterator *New();
-  vtkTypeMacro(vtkBridgePointIterator,vtkGenericPointIterator);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkBridgePointIterator* New();
+  vtkTypeMacro(vtkBridgePointIterator, vtkGenericPointIterator);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Move iterator to first position if any (loop initialization).
    */
-  void Begin() VTK_OVERRIDE;
+  void Begin() override;
 
   /**
    * Is there no point at iterator position? (exit condition).
    */
-  int IsAtEnd() VTK_OVERRIDE;
+  vtkTypeBool IsAtEnd() override;
 
   /**
    * Move iterator to next position. (loop progression).
    * \pre not_off: !IsAtEnd()
    */
-  void Next() VTK_OVERRIDE;
+  void Next() override;
 
   /**
    * Point at iterator position.
    * \pre not_off: !IsAtEnd()
    * \post result_exists: result!=0
    */
-  double *GetPosition() VTK_OVERRIDE;
+  double* GetPosition() override;
 
   /**
    * Point at iterator position.
    * \pre not_off: !IsAtEnd()
    * \pre x_exists: x!=0
    */
-  void GetPosition(double x[3]) VTK_OVERRIDE;
+  void GetPosition(double x[3]) override;
 
   /**
    * Unique identifier for the point, could be non-contiguous
    * \pre not_off: !IsAtEnd()
    */
-  vtkIdType GetId() VTK_OVERRIDE;
+  vtkIdType GetId() override;
 
   /**
    * Used internally by vtkBridgeDataSet.
    * Iterate over points of `ds'.
    * \pre ds_exists: ds!=0
    */
-  void InitWithDataSet(vtkBridgeDataSet *ds);
+  void InitWithDataSet(vtkBridgeDataSet* ds);
 
   /**
    * Used internally by vtkBridgeDataSet.
@@ -91,14 +90,13 @@ public:
    * \pre ds_can_be_null: ds!=0 || ds==0
    * \pre valid_id: vtkImplies(ds!=0,(id>=0)&&(id<=ds->GetNumberOfCells()))
    */
-  void InitWithOnePoint(vtkBridgeDataSet *ds,
-                        vtkIdType id);
+  void InitWithOnePoint(vtkBridgeDataSet* ds, vtkIdType id);
 
   /**
    * The iterator will iterate over the point of a cell
    * \pre cell_exists: cell!=0
    */
-  void InitWithCell(vtkBridgeCell *cell);
+  void InitWithCell(vtkBridgeCell* cell);
 
 protected:
   /**
@@ -109,16 +107,16 @@ protected:
   /**
    * Destructor.
    */
-  ~vtkBridgePointIterator() VTK_OVERRIDE;
+  ~vtkBridgePointIterator() override;
 
-  vtkGenericPointIterator *CurrentIterator;
-  vtkBridgePointIteratorOnDataSet *IteratorOnDataSet;
-  vtkBridgePointIteratorOne *IteratorOne;
-  vtkBridgePointIteratorOnCell *IteratorOnCell;
+  vtkGenericPointIterator* CurrentIterator;
+  vtkBridgePointIteratorOnDataSet* IteratorOnDataSet;
+  vtkBridgePointIteratorOne* IteratorOne;
+  vtkBridgePointIteratorOnCell* IteratorOnCell;
 
 private:
-  vtkBridgePointIterator(const vtkBridgePointIterator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBridgePointIterator&) VTK_DELETE_FUNCTION;
+  vtkBridgePointIterator(const vtkBridgePointIterator&) = delete;
+  void operator=(const vtkBridgePointIterator&) = delete;
 };
 
 #endif

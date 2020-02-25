@@ -26,7 +26,7 @@
  * The CheckRequirements function can be implemented if you wish to ensure
  * that the input graph has all of the properties that will be required
  * by the ComputeWeight function.
-*/
+ */
 
 #ifndef vtkGraphWeightFilter_h
 #define vtkGraphWeightFilter_h
@@ -40,15 +40,13 @@ class VTKFILTERSGENERAL_EXPORT vtkGraphWeightFilter : public vtkGraphAlgorithm
 {
 public:
   vtkTypeMacro(vtkGraphWeightFilter, vtkGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
-  vtkGraphWeightFilter(){}
-  ~vtkGraphWeightFilter() VTK_OVERRIDE {}
+  vtkGraphWeightFilter() {}
+  ~vtkGraphWeightFilter() override {}
 
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Compute the weight on the 'graph' for a particular 'edge'.
@@ -65,8 +63,8 @@ protected:
   virtual bool CheckRequirements(vtkGraph* const graph) const;
 
 private:
-  vtkGraphWeightFilter(const vtkGraphWeightFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGraphWeightFilter&) VTK_DELETE_FUNCTION;
+  vtkGraphWeightFilter(const vtkGraphWeightFilter&) = delete;
+  void operator=(const vtkGraphWeightFilter&) = delete;
 };
 
 #endif

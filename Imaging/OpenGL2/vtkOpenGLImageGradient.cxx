@@ -23,15 +23,15 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
-#include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkShaderProgram.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
 
 #include <algorithm> // for std::nth_element
 
 vtkStandardNewMacro(vtkOpenGLImageGradient);
 
 //-----------------------------------------------------------------------------
-// Construct an instance of vtkOpenGLImageGradient fitler.
+// Construct an instance of vtkOpenGLImageGradient filter.
 vtkOpenGLImageGradient::vtkOpenGLImageGradient()
 {
   // for GPU we do not want threading
@@ -50,7 +50,7 @@ vtkOpenGLImageGradient::~vtkOpenGLImageGradient()
   }
 }
 
-void vtkOpenGLImageGradient::SetRenderWindow(vtkRenderWindow *renWin)
+void vtkOpenGLImageGradient::SetRenderWindow(vtkRenderWindow* renWin)
 {
   this->Helper->SetRenderWindow(renWin);
 }
@@ -70,7 +70,7 @@ class vtkOpenGLGradientCB : public vtkOpenGLImageAlgorithmCallback
 {
 public:
   // initialize the spacing
-  virtual void InitializeShaderUniforms(vtkShaderProgram *program)
+  virtual void InitializeShaderUniforms(vtkShaderProgram* program)
   {
     float sp[3];
     sp[0] = this->Spacing[0];
@@ -80,53 +80,44 @@ public:
   }
 
   // no uniforms change on a per slice basis so empty
-  virtual void UpdateShaderUniforms(
-    vtkShaderProgram * /* program */, int /* zExtent */) {};
+  virtual void UpdateShaderUniforms(vtkShaderProgram* /* program */, int /* zExtent */) {}
 
-  double *Spacing;
-  vtkOpenGLGradientCB() {};
-  virtual ~vtkOpenGLGradientCB() {};
+  double* Spacing;
+  vtkOpenGLGradientCB() {}
+  virtual ~vtkOpenGLGradientCB() {}
+
 private:
-  vtkOpenGLGradientCB(const vtkOpenGLGradientCB&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLGradientCB&) VTK_DELETE_FUNCTION;
+  vtkOpenGLGradientCB(const vtkOpenGLGradientCB&) = delete;
+  void operator=(const vtkOpenGLGradientCB&) = delete;
 };
 
 //-----------------------------------------------------------------------------
 // This method contains the first switch statement that calls the correct
 // templated function for the input and output region types.
-void vtkOpenGLImageGradient::ThreadedRequestData(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **inputVector,
-  vtkInformationVector *vtkNotUsed(outputVector),
-  vtkImageData ***inData,
-  vtkImageData **outData,
-  int outExt[6], int vtkNotUsed(id))
+void vtkOpenGLImageGradient::ThreadedRequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* vtkNotUsed(outputVector),
+  vtkImageData*** inData, vtkImageData** outData, int outExt[6], int vtkNotUsed(id))
 {
-  void *inPtr;
-
-  vtkDataArray *inArray = this->GetInputArrayToProcess(0,inputVector);
+  vtkDataArray* inArray = this->GetInputArrayToProcess(0, inputVector);
   outData[0]->GetPointData()->GetScalars()->SetName(inArray->GetName());
 
-  inPtr = inArray->GetVoidPointer(0);
-
-  // The ouptut scalar type must be double to store proper gradients.
-  if(outData[0]->GetScalarType() != VTK_DOUBLE)
+  // The output scalar type must be double to store proper gradients.
+  if (outData[0]->GetScalarType() != VTK_DOUBLE)
   {
-    vtkErrorMacro("Execute: output ScalarType is "
-                  << outData[0]->GetScalarType() << "but must be double.");
+    vtkErrorMacro(
+      "Execute: output ScalarType is " << outData[0]->GetScalarType() << "but must be double.");
     return;
   }
 
   // Gradient makes sense only with one input component.  This is not
   // a Jacobian filter.
-  if(inArray->GetNumberOfComponents() != 1)
+  if (inArray->GetNumberOfComponents() != 1)
   {
-    vtkErrorMacro(
-      "Execute: input has more than one component. "
-      "The input to gradient should be a single component image. "
-      "Think about it. If you insist on using a color image then "
-      "run it though RGBToHSV then ExtractComponents to get the V "
-      "components. That's probably what you want anyhow.");
+    vtkErrorMacro("Execute: input has more than one component. "
+                  "The input to gradient should be a single component image. "
+                  "Think about it. If you insist on using a color image then "
+                  "run it though RGBToHSV then ExtractComponents to get the V "
+                  "components. That's probably what you want anyhow.");
     return;
   }
 
@@ -149,8 +140,7 @@ void vtkOpenGLImageGradient::ThreadedRequestData(
     "  dx = inputScale*0.5*dx/spacing.x;\n"
     "  float dy = textureOffset(inputTex1, vec3(tcoordVSOutput, zPos), ivec3(0,1,0)).r\n"
     "    - textureOffset(inputTex1, vec3(tcoordVSOutput, zPos), ivec3(0,-1,0)).r;\n"
-    "  dy = inputScale*0.5*dy/spacing.y;\n"
-    ;
+    "  dy = inputScale*0.5*dy/spacing.y;\n";
 
   if (this->Dimensionality == 3)
   {
@@ -163,15 +153,12 @@ void vtkOpenGLImageGradient::ThreadedRequestData(
   }
   else
   {
-    fragShader +=
-      "  gl_FragData[0] = vec4(dx, dy, 0.0, 1.0);\n"
-      "}\n";
+    fragShader += "  gl_FragData[0] = vec4(dx, dy, 0.0, 1.0);\n"
+                  "}\n";
   }
 
   // call the helper to execte this code
-  this->Helper->Execute(&cb,
-    inData[0][0], inArray,
-    outData[0], outExt,
+  this->Helper->Execute(&cb, inData[0][0], inArray, outData[0], outExt,
 
     "//VTK::System::Dec\n"
     "attribute vec4 vertexMC;\n"

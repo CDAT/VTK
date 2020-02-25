@@ -41,8 +41,7 @@
  * IMPORTANT: UniCam assumes there is an axis that makes sense as a "up"
  * vector for the world.  By default, this axis is defined to be the
  * vector <0,0,1>.  You can set it explicitly for the data you are
- * viewing with the 'SetWorldUpVector(..)' method in C++, or similarly
- * in Tcl/Tk (or other interpreted languages).
+ * viewing with the 'SetWorldUpVector(..)' method.
  *
  * 1. ROTATE:
  *
@@ -75,7 +74,7 @@
  * (NOTE: This implementation of Unicam assumes a perspective camera.  It
  * could be modified relatively easily to also support an orthographic
  * projection.)
-*/
+ */
 
 #ifndef vtkInteractorStyleUnicam_h
 #define vtkInteractorStyleUnicam_h
@@ -95,25 +94,25 @@ class vtkWorldPointPicker;
 // to have constants appear to do.
 //
 // buttons pressed
-#define VTK_UNICAM_NONE           0
-#define VTK_UNICAM_BUTTON_LEFT    1
-#define VTK_UNICAM_BUTTON_MIDDLE  2
-#define VTK_UNICAM_BUTTON_RIGHT   3
+#define VTK_UNICAM_NONE 0
+#define VTK_UNICAM_BUTTON_LEFT 1
+#define VTK_UNICAM_BUTTON_MIDDLE 2
+#define VTK_UNICAM_BUTTON_RIGHT 3
 //
 // camera modes
-#define VTK_UNICAM_CAM_INT_ROT    0
+#define VTK_UNICAM_CAM_INT_ROT 0
 #define VTK_UNICAM_CAM_INT_CHOOSE 1
-#define VTK_UNICAM_CAM_INT_PAN    2
-#define VTK_UNICAM_CAM_INT_DOLLY  3
+#define VTK_UNICAM_CAM_INT_PAN 2
+#define VTK_UNICAM_CAM_INT_DOLLY 3
 
 class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleUnicam : public vtkInteractorStyle
 {
 public:
-  static vtkInteractorStyleUnicam *New();
-  vtkTypeMacro(vtkInteractorStyleUnicam,vtkInteractorStyle);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkInteractorStyleUnicam* New();
+  vtkTypeMacro(vtkInteractorStyleUnicam, vtkInteractorStyle);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void SetWorldUpVector(double a[3]) {this->SetWorldUpVector(a[0],a[1],a[2]);}
+  void SetWorldUpVector(double a[3]) { this->SetWorldUpVector(a[0], a[1], a[2]); }
   void SetWorldUpVector(double x, double y, double z);
   vtkGetVectorMacro(WorldUpVector, double, 3);
 
@@ -121,9 +120,9 @@ public:
   /**
    * Concrete implementation of event bindings
    */
-  void OnMouseMove() VTK_OVERRIDE;
-  void OnLeftButtonDown() VTK_OVERRIDE;
-  void OnLeftButtonUp() VTK_OVERRIDE;
+  void OnMouseMove() override;
+  void OnLeftButtonDown() override;
+  void OnLeftButtonUp() override;
   virtual void OnLeftButtonMove();
   //@}
 
@@ -131,61 +130,57 @@ public:
    * OnTimer calls RotateCamera, RotateActor etc which should be overridden by
    * style subclasses.
    */
-  void OnTimer() VTK_OVERRIDE;
+  void OnTimer() override;
 
 protected:
   vtkInteractorStyleUnicam();
-  ~vtkInteractorStyleUnicam() VTK_OVERRIDE;
+  ~vtkInteractorStyleUnicam() override;
 
-  vtkWorldPointPicker *InteractionPicker;
+  vtkWorldPointPicker* InteractionPicker;
 
-  int      ButtonDown;   // which button is down
-  double   DTime;        // time mouse button was pressed
-  double   Dist;         // distance the mouse has moved since button press
-  double    StartPix[2]; // pixel mouse movement started at
-  double    LastPos[2];  // normalized position of mouse last frame
-  double    LastPix[2];  // pixel position of mouse last frame
-  double    DownPt[3];   // 3D point under cursor when mouse button pressed
-  double    Center [3];   // center of camera rotation
+  int ButtonDown;     // which button is down
+  double DTime;       // time mouse button was pressed
+  double Dist;        // distance the mouse has moved since button press
+  double StartPix[2]; // pixel mouse movement started at
+  double LastPos[2];  // normalized position of mouse last frame
+  double LastPix[2];  // pixel position of mouse last frame
+  double DownPt[3];   // 3D point under cursor when mouse button pressed
+  double Center[3];   // center of camera rotation
 
-  double    WorldUpVector[3]; // what the world thinks the 'up' vector is
+  double WorldUpVector[3]; // what the world thinks the 'up' vector is
 
-  vtkActor    *FocusSphere; // geometry for indicating center of rotation
-  int          IsDot;       // flag-- is the FocusSphere being displayed?
-  vtkRenderer *FocusSphereRenderer;  // renderer for 'FocusSphere'
+  vtkActor* FocusSphere;            // geometry for indicating center of rotation
+  int IsDot;                        // flag-- is the FocusSphere being displayed?
+  vtkRenderer* FocusSphereRenderer; // renderer for 'FocusSphere'
 
-  int state;                 // which navigation mode was selected?
+  int state; // which navigation mode was selected?
 
-  void ChooseXY( int X, int Y );  // method for choosing type of navigation
-  void RotateXY( int X, int Y );  // method for rotating
-  void DollyXY( int X, int Y );  // method for dollying
-  void PanXY( int X, int Y );  // method for panning
+  void ChooseXY(int X, int Y); // method for choosing type of navigation
+  void RotateXY(int X, int Y); // method for rotating
+  void DollyXY(int X, int Y);  // method for dollying
+  void PanXY(int X, int Y);    // method for panning
 
   // conveinence methods for translating & rotating the camera
-  void  MyTranslateCamera(double v[3]);
-  void  MyRotateCamera(double cx, double cy, double cz,
-                       double ax, double ay, double az,
-                       double angle);
+  void MyTranslateCamera(double v[3]);
+  void MyRotateCamera(
+    double cx, double cy, double cz, double ax, double ay, double az, double angle);
 
   // Given a 3D point & a vtkCamera, compute the vectors that extend
   // from the projection of the center of projection to the center of
   // the right-edge and the center of the top-edge onto the plane
   // containing the 3D point & with normal parallel to the camera's
   // projection plane.
-  void  GetRightVandUpV(double *p, vtkCamera *cam,
-                        double *rightV, double *upV);
+  void GetRightVandUpV(double* p, vtkCamera* cam, double* rightV, double* upV);
 
   // takes in pixels, returns normalized window coordinates
-  void  NormalizeMouseXY(int X, int Y, double *NX, double *NY);
+  void NormalizeMouseXY(int X, int Y, double* NX, double* NY);
 
   // return the aspect ratio of the current window
   double WindowAspect();
+
 private:
-  vtkInteractorStyleUnicam(const vtkInteractorStyleUnicam&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorStyleUnicam&) VTK_DELETE_FUNCTION;
+  vtkInteractorStyleUnicam(const vtkInteractorStyleUnicam&) = delete;
+  void operator=(const vtkInteractorStyleUnicam&) = delete;
 };
 
-#endif  // vtkInteractorStyleUnicam_h
-
-
-
+#endif // vtkInteractorStyleUnicam_h

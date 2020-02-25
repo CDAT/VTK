@@ -25,37 +25,37 @@
 #include "vtkCompositeRenderManager.h"
 #include "vtkLookupTable.h"
 #include "vtkMPIController.h"
-#include "vtkPolyDataMapper.h"
 #include "vtkPLSDynaReader.h"
+#include "vtkPolyDataMapper.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkTestUtilities.h"
 
-#include "vtkSmartPointer.h"
 #include "vtkNew.h"
+#include "vtkSmartPointer.h"
 
 struct TestArgs
 {
-  int *retval;
+  int* retval;
   int argc;
-  char **argv;
+  char** argv;
 };
 
 //=============================================================================
-void PLSDynaReader(vtkMultiProcessController *controller, void *_args)
+void PLSDynaReader(vtkMultiProcessController* controller, void* _args)
 {
-  TestArgs *args = reinterpret_cast<TestArgs *>(_args);
+  TestArgs* args = reinterpret_cast<TestArgs*>(_args);
   int argc = args->argc;
-  char **argv = args->argv;
+  char** argv = args->argv;
   *(args->retval) = 1;
 
   // Set up reader.
   vtkNew<vtkPLSDynaReader> reader;
 
-  char *meshFileName = vtkTestUtilities::ExpandDataFileName(argc, argv,
-                                  "Data/LSDyna/hemi.draw/hemi_draw.d3plot");
+  char* meshFileName =
+    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/LSDyna/hemi.draw/hemi_draw.d3plot");
   reader->SetFileName(meshFileName);
 
   // Extract geometry that we can render.
@@ -68,35 +68,35 @@ void PLSDynaReader(vtkMultiProcessController *controller, void *_args)
   mapper->SetScalarModeToUsePointFieldData();
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkCompositeRenderManager> prm;
 
   vtkSmartPointer<vtkRenderer> renderer;
   renderer.TakeReference(prm->MakeRenderer());
-  renderer->AddActor(actor.GetPointer());
+  renderer->AddActor(actor);
 
   vtkSmartPointer<vtkRenderWindow> renwin;
   renwin.TakeReference(prm->MakeRenderWindow());
   renwin->SetSize(300, 300);
-  renwin->SetPosition(0, 200*controller->GetLocalProcessId());
+  renwin->SetPosition(0, 200 * controller->GetLocalProcessId());
   renwin->AddRenderer(renderer);
 
-  prm->SetRenderWindow(renwin.GetPointer());
+  prm->SetRenderWindow(renwin);
   prm->SetController(controller);
   prm->InitializePieces();
-  prm->InitializeOffScreen();           // Mesa GL only
+  prm->InitializeOffScreen(); // Mesa GL only
 
   if (controller->GetLocalProcessId() == 0)
   {
     renwin->Render();
 
     // Do the test comparison.
-    int retval = vtkRegressionTestImage(renwin.GetPointer());
+    int retval = vtkRegressionTestImage(renwin);
     if (retval == vtkRegressionTester::DO_INTERACTOR)
     {
       vtkNew<vtkRenderWindowInteractor> iren;
-      iren->SetRenderWindow(renwin.GetPointer());
+      iren->SetRenderWindow(renwin);
       iren->Initialize();
       iren->Start();
       retval = vtkRegressionTester::PASSED;
@@ -115,14 +115,14 @@ void PLSDynaReader(vtkMultiProcessController *controller, void *_args)
 }
 
 //=============================================================================
-int PLSDynaReader(int argc, char *argv[])
+int PLSDynaReader(int argc, char* argv[])
 {
   int retval = 1;
 
   vtkNew<vtkMPIController> controller;
   controller->Initialize(&argc, &argv);
 
-  vtkMultiProcessController::SetGlobalController(controller.GetPointer());
+  vtkMultiProcessController::SetGlobalController(controller);
 
   TestArgs args;
   args.retval = &retval;

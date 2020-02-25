@@ -19,7 +19,7 @@
  * This interactor style allows the user to draw a polygon in the render
  * window using the left mouse button while mouse is moving.
  * When the mouse button is released, a SelectionChangedEvent will be fired.
-*/
+ */
 
 #ifndef vtkInteractorStyleDrawPolygon_h
 #define vtkInteractorStyleDrawPolygon_h
@@ -27,25 +27,25 @@
 #include "vtkInteractionStyleModule.h" // For export macro
 #include "vtkInteractorStyle.h"
 
-#include <vector>      // For returning Polygon Points
 #include "vtkVector.h" // For Polygon Points
+#include <vector>      // For returning Polygon Points
 
 class vtkUnsignedCharArray;
 
 class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleDrawPolygon : public vtkInteractorStyle
 {
 public:
-  static vtkInteractorStyleDrawPolygon *New();
+  static vtkInteractorStyleDrawPolygon* New();
   vtkTypeMacro(vtkInteractorStyleDrawPolygon, vtkInteractorStyle);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Event bindings
    */
-  void OnMouseMove() VTK_OVERRIDE;
-  void OnLeftButtonDown() VTK_OVERRIDE;
-  void OnLeftButtonUp() VTK_OVERRIDE;
+  void OnMouseMove() override;
+  void OnLeftButtonDown() override;
+  void OnLeftButtonUp() override;
   //@}
 
   //@{
@@ -64,7 +64,7 @@ public:
 
 protected:
   vtkInteractorStyleDrawPolygon();
-  ~vtkInteractorStyleDrawPolygon() VTK_OVERRIDE;
+  ~vtkInteractorStyleDrawPolygon() override;
 
   virtual void DrawPolygon();
 
@@ -74,11 +74,11 @@ protected:
 
   bool DrawPolygonPixels;
 
-  vtkUnsignedCharArray *PixelArray;
+  vtkUnsignedCharArray* PixelArray;
 
 private:
-  vtkInteractorStyleDrawPolygon(const vtkInteractorStyleDrawPolygon&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorStyleDrawPolygon&) VTK_DELETE_FUNCTION;
+  vtkInteractorStyleDrawPolygon(const vtkInteractorStyleDrawPolygon&) = delete;
+  void operator=(const vtkInteractorStyleDrawPolygon&) = delete;
 
   class vtkInternal;
   vtkInternal* Internal;

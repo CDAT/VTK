@@ -21,7 +21,7 @@
  *
  * @sa
  *  vtkOverlappingAMR, vtkAMRBox
-*/
+ */
 
 #ifndef vtkAMRUtilities_h
 #define vtkAMRUtilities_h
@@ -39,8 +39,8 @@ class VTKCOMMONDATAMODEL_EXPORT vtkAMRUtilities : public vtkObject
 {
 public:
   // Standard Routines
-  vtkTypeMacro(vtkAMRUtilities,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAMRUtilities, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * This method detects and strips partially overlapping cells from a
@@ -52,8 +52,7 @@ public:
    * 1) The ghosted AMR data must have complete metadata information.
    */
   static void StripGhostLayers(
-      vtkOverlappingAMR *ghostedAMRData,
-      vtkOverlappingAMR *strippedAMRData);
+    vtkOverlappingAMR* ghostedAMRData, vtkOverlappingAMR* strippedAMRData);
 
   /**
    * A quick test of whether partially overlapping ghost cells exist. This test
@@ -61,7 +60,7 @@ public:
    * overlapping cells. The code returns with true once partially overlapping
    * cells are detected. Otherwise, false is returned.
    */
-  static bool HasPartiallyOverlappingGhostCells(vtkOverlappingAMR *amr);
+  static bool HasPartiallyOverlappingGhostCells(vtkOverlappingAMR* amr);
 
   /**
    * Blank cells in overlapping AMR
@@ -70,23 +69,20 @@ public:
 
 protected:
   vtkAMRUtilities() {}
-  ~vtkAMRUtilities() VTK_OVERRIDE {}
+  ~vtkAMRUtilities() override {}
 
   /**
    * Given the real-extent w.r.t. the ghosted grid, this method copies the
    * field data (point/cell) data on the stripped grid.
    */
   static void CopyFieldsWithinRealExtent(
-      int realExtent[6],
-      vtkUniformGrid *ghostedGrid,
-      vtkUniformGrid *strippedGrid);
+    int realExtent[6], vtkUniformGrid* ghostedGrid, vtkUniformGrid* strippedGrid);
 
   /**
    * Copies the fields from the given source to the given target.
    */
   static void CopyFieldData(
-      vtkFieldData *target, vtkIdType targetIdx,
-      vtkFieldData *source, vtkIdType sourceIdx );
+    vtkFieldData* target, vtkIdType targetIdx, vtkFieldData* source, vtkIdType sourceIdx);
 
   /**
    * Strips ghost layers from the given grid according to the given ghost
@@ -95,15 +91,14 @@ protected:
    * of {0,2,0,2,0,0} would indicate that there exist 2 ghost cells on the
    * imax and jmax side.
    */
-  static vtkUniformGrid* StripGhostLayersFromGrid(
-      vtkUniformGrid* grid, int ghost[6]);
+  static vtkUniformGrid* StripGhostLayersFromGrid(vtkUniformGrid* grid, int ghost[6]);
 
   static void BlankGridsAtLevel(vtkOverlappingAMR* amr, int levelIdx,
-                          std::vector<std::vector<unsigned int> >& children,
-                          const std::vector<int>& processMap);
+    std::vector<std::vector<unsigned int> >& children, const std::vector<int>& processMap);
+
 private:
-  vtkAMRUtilities(const vtkAMRUtilities&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAMRUtilities&) VTK_DELETE_FUNCTION;
+  vtkAMRUtilities(const vtkAMRUtilities&) = delete;
+  void operator=(const vtkAMRUtilities&) = delete;
 };
 
 #endif /* vtkAMRUtilities_h */

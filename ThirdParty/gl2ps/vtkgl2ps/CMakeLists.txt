@@ -1,51 +1,31 @@
-project(VTKGL2PS)
+set(sources
+  gl2ps.c)
 
-# Dependency mask
-include_regular_expression(".*")
+set(headers
+  gl2ps.h
+  vtk_gl2ps_mangle.h)
 
-# Depend on OpenGL
-include(vtkOpenGL)
+vtk_module_add_module(VTK::gl2ps
+  SOURCES ${sources}
+  HEADERS ${headers}
+  HEADERS_SUBDIR "vtkgl2ps")
+set_target_properties(gl2ps
+  PROPERTIES
+    DEFINE_SYMBOL GL2PSDLL_EXPORTS)
 
-# Include paths
-include_directories(
-  ${VTKGL2PS_SOURCE_DIR}
-)
+if (BUILD_SHARED_LIBS)
+  target_compile_definitions(gl2ps
+    PRIVATE
+      GL2PSDLL)
+endif ()
 
-# Source files
-set(GL2PS_srcs
-  gl2ps.c
-)
+target_compile_definitions(gl2ps
+  PRIVATE
+    HAVE_ZLIB
+    HAVE_PNG)
 
-# Define the library (and install it)
-vtk_add_library(vtkgl2ps ${GL2PS_srcs})
-
-# Setup definitions
-if(WIN32)
-  set_source_files_properties(${GL2PS_srcs}
-    PROPERTIES
-      COMPILE_DEFINITIONS "GL2PSDLL;GL2PSDLL_EXPORTS")
-endif()
-
-set_property(TARGET vtkgl2ps
-   APPEND PROPERTY COMPILE_DEFINITIONS
-   HAVE_ZLIB HAVE_PNG
-)
-
-# Linking
-target_link_libraries(vtkgl2ps LINK_PRIVATE
-  ${vtkzlib_LIBRARIES}
-  ${vtkpng_LIBRARIES}
-)
-vtk_opengl_link(vtkgl2ps)
-
-if(UNIX)
-  target_link_libraries(vtkgl2ps LINK_PRIVATE m)
-endif()
-
-# Install headers
-if(NOT VTK_INSTALL_NO_DEVELOPMENT)
-  install(FILES
-    ${VTKGL2PS_SOURCE_DIR}/gl2ps.h
-    DESTINATION ${VTK_INSTALL_INCLUDE_DIR}/vtkgl2ps
-    COMPONENT Development)
-ENDIF()
+if (UNIX)
+  target_link_libraries(gl2ps
+    PRIVATE
+      m)
+endif ()

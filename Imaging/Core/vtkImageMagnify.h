@@ -21,7 +21,7 @@
  * magnification occurs via pixel replication, or if Interpolate is on,
  * by bilinear interpolation. Initially, interpolation is off and magnification
  * factors are set to 1 in all directions.
-*/
+ */
 
 #ifndef vtkImageMagnify_h
 #define vtkImageMagnify_h
@@ -32,17 +32,17 @@
 class VTKIMAGINGCORE_EXPORT vtkImageMagnify : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageMagnify *New();
-  vtkTypeMacro(vtkImageMagnify,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageMagnify* New();
+  vtkTypeMacro(vtkImageMagnify, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/Get the integer magnification factors in the i-j-k directions.
    * Initially, factors are set to 1 in all directions.
    */
-  vtkSetVector3Macro(MagnificationFactors,int);
-  vtkGetVector3Macro(MagnificationFactors,int);
+  vtkSetVector3Macro(MagnificationFactors, int);
+  vtkGetVector3Macro(MagnificationFactors, int);
   //@}
 
   //@{
@@ -50,41 +50,29 @@ public:
    * Turn interpolation on and off (pixel replication is used when off).
    * Initially, interpolation is off.
    */
-  vtkSetMacro(Interpolate,int);
-  vtkGetMacro(Interpolate,int);
-  vtkBooleanMacro(Interpolate,int);
+  vtkSetMacro(Interpolate, vtkTypeBool);
+  vtkGetMacro(Interpolate, vtkTypeBool);
+  vtkBooleanMacro(Interpolate, vtkTypeBool);
   //@}
 
 protected:
   vtkImageMagnify();
-  ~vtkImageMagnify()VTK_OVERRIDE {}
+  ~vtkImageMagnify() override {}
 
   int MagnificationFactors[3];
-  int Interpolate;
-  int RequestUpdateExtent(vtkInformation *,
-                                  vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *,
-                                 vtkInformationVector **,
-                                 vtkInformationVector *) VTK_OVERRIDE;
+  vtkTypeBool Interpolate;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void ThreadedRequestData(vtkInformation *request,
-                           vtkInformationVector **inputVector,
-                           vtkInformationVector *outputVector,
-                           vtkImageData ***inData,
-                           vtkImageData **outData,
-                           int outExt[6],
-                           int id) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData,
+    int outExt[6], int id) override;
 
-  void InternalRequestUpdateExtent(int *inExt, int *outExt);
+  void InternalRequestUpdateExtent(int* inExt, int* outExt);
 
 private:
-  vtkImageMagnify(const vtkImageMagnify&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageMagnify&) VTK_DELETE_FUNCTION;
+  vtkImageMagnify(const vtkImageMagnify&) = delete;
+  void operator=(const vtkImageMagnify&) = delete;
 };
 
 #endif
-
-
-
-

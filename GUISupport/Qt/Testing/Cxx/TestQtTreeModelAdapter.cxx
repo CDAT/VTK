@@ -27,8 +27,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkTree.h"
 
-#define VTK_CREATE(type, name) \
-  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+#define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 int TestQtTreeModelAdapter(int, char*[])
 {
@@ -54,7 +53,7 @@ int TestQtTreeModelAdapter(int, char*[])
   }
   tree->GetVertexData()->AddArray(intArr);
   tree->GetVertexData()->AddArray(doubleArr);
-  vtkQtTreeModelAdapter adapter(0, tree);
+  vtkQtTreeModelAdapter adapter(nullptr, tree);
   if (adapter.rowCount(QModelIndex()) != 1)
   {
     cerr << "ERROR: Wrong number of rows." << endl;
@@ -87,13 +86,13 @@ int TestQtTreeModelAdapter(int, char*[])
     }
     else if (i < 4)
     {
-      ind = adapter.index(i-1, 0, ind0);
+      ind = adapter.index(i - 1, 0, ind0);
       parent = ind0;
       rows = 0;
     }
     else
     {
-      ind = adapter.index(i-4, 0, ind1);
+      ind = adapter.index(i - 4, 0, ind1);
       parent = ind1;
       rows = 0;
     }
@@ -118,5 +117,3 @@ int TestQtTreeModelAdapter(int, char*[])
   }
   return errors;
 }
-
-

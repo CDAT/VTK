@@ -22,62 +22,62 @@
  * To be effective, one must register an observer for WindowMakeCurrentEvent,
  * WindowIsCurrentEvent and WindowFrameEvent.  When this class sends a WindowIsCurrentEvent,
  * the call data is an bool* which one can use to return whether the context is current.
-*/
+ */
 
 #ifndef vtkGenericOpenGLRenderWindow_h
 #define vtkGenericOpenGLRenderWindow_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkOpenGLRenderWindow.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
 
-class VTKRENDERINGOPENGL2_EXPORT vtkGenericOpenGLRenderWindow :
-  public vtkOpenGLRenderWindow
+class VTKRENDERINGOPENGL2_EXPORT vtkGenericOpenGLRenderWindow : public vtkOpenGLRenderWindow
 {
 public:
   static vtkGenericOpenGLRenderWindow* New();
   vtkTypeMacro(vtkGenericOpenGLRenderWindow, vtkOpenGLRenderWindow);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+
 protected:
   vtkGenericOpenGLRenderWindow();
-  ~vtkGenericOpenGLRenderWindow() VTK_OVERRIDE;
+  ~vtkGenericOpenGLRenderWindow() override;
 
 public:
-
   //! Cleans up graphics resources allocated in the context for this VTK scene.
-  void Finalize() VTK_OVERRIDE;
+  void Finalize() override;
 
   //! flush the pending drawing operations
   //! Class user may to watch for WindowFrameEvent and act on it
-  void Frame() VTK_OVERRIDE;
+  void Frame() override;
 
   //! Makes the context current.  It is the class user's
   //! responsibility to watch for WindowMakeCurrentEvent and set it current.
-  void MakeCurrent() VTK_OVERRIDE;
+  void MakeCurrent() override;
 
   //! Returns if the context is current.  It is the class user's
   //! responsibility to watch for WindowIsCurrentEvent and set the bool* flag
   //! passed through the call data parameter.
-  bool IsCurrent() VTK_OVERRIDE;
+  bool IsCurrent() override;
 
   //! Returns if OpenGL is supported.  It is the class user's
   //! responsibility to watch for WindowSupportsOpenGLEvent and set the int* flag
   //! passed through the call data parameter.
-  int SupportsOpenGL() VTK_OVERRIDE;
+  int SupportsOpenGL() override;
 
   //! Returns if the context is direct.  It is the class user's
   //! responsibility to watch for WindowIsDirectEvent and set the int* flag
   //! passed through the call data parameter.
-  int IsDirect() VTK_OVERRIDE;
+  int IsDirect() override;
 
   // {@
   //! set the drawing buffers to use
-  void SetFrontBuffer(unsigned int);
   void SetFrontLeftBuffer(unsigned int);
   void SetFrontRightBuffer(unsigned int);
-  void SetBackBuffer(unsigned int);
   void SetBackLeftBuffer(unsigned int);
   void SetBackRightBuffer(unsigned int);
   // }@
+
+  void SetDefaultFrameBufferId(unsigned int);
+  void SetOwnContext(int);
 
   //! no-op (for API compat with OpenGL1).
   void PushState() {}
@@ -86,27 +86,26 @@ public:
 
   // {@
   //! does nothing
-  void SetWindowId(void*) VTK_OVERRIDE;
-  void* GetGenericWindowId() VTK_OVERRIDE;
-  void SetDisplayId(void*) VTK_OVERRIDE;
-  void SetParentId(void*) VTK_OVERRIDE;
-  void* GetGenericDisplayId() VTK_OVERRIDE;
-  void* GetGenericParentId() VTK_OVERRIDE;
-  void* GetGenericContext() VTK_OVERRIDE;
-  void* GetGenericDrawable() VTK_OVERRIDE;
-  void SetWindowInfo(char*) VTK_OVERRIDE;
-  void SetParentInfo(char*) VTK_OVERRIDE;
-  int* GetScreenSize() VTK_OVERRIDE;
-  void Start() VTK_OVERRIDE;
-  void HideCursor() VTK_OVERRIDE;
-  void ShowCursor() VTK_OVERRIDE;
-  void SetFullScreen(int) VTK_OVERRIDE;
-  void WindowRemap() VTK_OVERRIDE;
-  int  GetEventPending() VTK_OVERRIDE;
-  void SetNextWindowId(void*) VTK_OVERRIDE;
-  void SetNextWindowInfo(char*) VTK_OVERRIDE;
-  void CreateAWindow() VTK_OVERRIDE;
-  void DestroyWindow() VTK_OVERRIDE;
+  void SetWindowId(void*) override;
+  void* GetGenericWindowId() override;
+  void SetDisplayId(void*) override;
+  void SetParentId(void*) override;
+  void* GetGenericDisplayId() override;
+  void* GetGenericParentId() override;
+  void* GetGenericContext() override;
+  void* GetGenericDrawable() override;
+  void SetWindowInfo(const char*) override;
+  void SetParentInfo(const char*) override;
+  int* GetScreenSize() VTK_SIZEHINT(2) override;
+  void HideCursor() override;
+  void ShowCursor() override;
+  void SetFullScreen(vtkTypeBool) override;
+  void WindowRemap() override;
+  int GetEventPending() override;
+  void SetNextWindowId(void*) override;
+  void SetNextWindowInfo(const char*) override;
+  void CreateAWindow() override;
+  void DestroyWindow() override;
   // }@
 
   //@{
@@ -126,16 +125,16 @@ public:
    * \sa vtkOpenGLRenderWindow::SaveGLState()
    * \sa vtkOpenGLRenderWindow::RestoreGLState()
    */
-  void Render() VTK_OVERRIDE;
+  void Render() override;
 
   /**
    * Overridden to pass explicitly specified MaximumHardwareLineWidth, if any.
    */
-  float GetMaximumHardwareLineWidth() VTK_OVERRIDE;
+  float GetMaximumHardwareLineWidth() override;
 
   //@{
   /**
-   * Specificy a non-zero line width to force the hardware line width determined
+   * Specify a non-zero line width to force the hardware line width determined
    * by the window.
    */
   vtkSetClampMacro(ForceMaximumHardwareLineWidth, float, 0, VTK_FLOAT_MAX);
@@ -154,15 +153,36 @@ public:
   /**
    * Set the size of the screen in pixels.
    */
-  vtkSetVector2Macro(ScreenSize,int);
+  vtkSetVector2Macro(ScreenSize, int);
 
   /**
-  * Overridden to invoke vtkCommand::StartPickEvent and
-  * vtkCommand::EndPickEvent.
-  */
-  void SetIsPicking(int isPicking) VTK_OVERRIDE;
+   * Overridden to invoke vtkCommand::CursorChangedEvent
+   */
+  void SetCurrentCursor(int cShape) override;
+
+  // since we are using an external context it must
+  // specify if the window is mapped or not.
+  vtkSetMacro(Mapped, vtkTypeBool);
+
+  /**
+   * Overridden to simply call `GetReadyForRendering`
+   */
+  bool IsDrawable() override { return this->ReadyForRendering; }
 
 protected:
+  /**
+   * Overridden to not attempt to read pixels if `this->ReadyForRendering` is
+   * false. In that case, this method will simply return `VTK_ERROR`. Otherwise,
+   * the superclass' implementation will be called.
+   */
+  int ReadPixels(
+    const vtkRecti& rect, int front, int glFormat, int glType, void* data, int right) override;
+
+  int SetRGBACharPixelData(
+    int x1, int y1, int x2, int y2, unsigned char* data, int front, int blend, int right) override;
+  int SetRGBACharPixelData(int x, int y, int x2, int y2, vtkUnsignedCharArray* data, int front,
+    int blend = 0, int right = 0) override;
+
   int DirectStatus;
   int SupportsOpenGLStatus;
   bool CurrentStatus;
@@ -171,8 +191,8 @@ protected:
   int ScreenSize[2];
 
 private:
-  vtkGenericOpenGLRenderWindow(const vtkGenericOpenGLRenderWindow&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericOpenGLRenderWindow&) VTK_DELETE_FUNCTION;
+  vtkGenericOpenGLRenderWindow(const vtkGenericOpenGLRenderWindow&) = delete;
+  void operator=(const vtkGenericOpenGLRenderWindow&) = delete;
 };
 
 #endif

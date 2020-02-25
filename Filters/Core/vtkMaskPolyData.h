@@ -22,7 +22,7 @@
  *
  * @sa
  * vtkMaskPoints
-*/
+ */
 
 #ifndef vtkMaskPolyData_h
 #define vtkMaskPolyData_h
@@ -33,37 +33,37 @@
 class VTKFILTERSCORE_EXPORT vtkMaskPolyData : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkMaskPolyData *New();
-  vtkTypeMacro(vtkMaskPolyData,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkMaskPolyData* New();
+  vtkTypeMacro(vtkMaskPolyData, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Turn on every nth entity (cell).
    */
-  vtkSetClampMacro(OnRatio,int,1,VTK_INT_MAX);
-  vtkGetMacro(OnRatio,int);
+  vtkSetClampMacro(OnRatio, int, 1, VTK_INT_MAX);
+  vtkGetMacro(OnRatio, int);
   //@}
 
   //@{
   /**
    * Start with this entity (cell).
    */
-  vtkSetClampMacro(Offset,vtkIdType,0,VTK_ID_MAX);
-  vtkGetMacro(Offset,vtkIdType);
+  vtkSetClampMacro(Offset, vtkIdType, 0, VTK_ID_MAX);
+  vtkGetMacro(Offset, vtkIdType);
   //@}
 
 protected:
   vtkMaskPolyData();
-  ~vtkMaskPolyData() VTK_OVERRIDE {}
+  ~vtkMaskPolyData() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int OnRatio; // every OnRatio entity is on; all others are off.
-  vtkIdType Offset;  // offset (or starting point id)
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int OnRatio;      // every OnRatio entity is on; all others are off.
+  vtkIdType Offset; // offset (or starting point id)
 
 private:
-  vtkMaskPolyData(const vtkMaskPolyData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMaskPolyData&) VTK_DELETE_FUNCTION;
+  vtkMaskPolyData(const vtkMaskPolyData&) = delete;
+  void operator=(const vtkMaskPolyData&) = delete;
 };
 
 #endif

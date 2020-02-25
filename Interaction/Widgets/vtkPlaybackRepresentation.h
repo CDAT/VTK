@@ -22,13 +22,13 @@
  *
  * @sa
  * vtkPlaybackWidget
-*/
+ */
 
 #ifndef vtkPlaybackRepresentation_h
 #define vtkPlaybackRepresentation_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkBorderRepresentation.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkRenderer;
 class vtkRenderWindowInteractor;
@@ -45,14 +45,14 @@ public:
   /**
    * Instantiate this class.
    */
-  static vtkPlaybackRepresentation *New();
+  static vtkPlaybackRepresentation* New();
 
   //@{
   /**
    * Standard VTK class methods.
    */
-  vtkTypeMacro(vtkPlaybackRepresentation,vtkBorderRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPlaybackRepresentation, vtkBorderRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -60,7 +60,7 @@ public:
    * By obtaining this property you can specify the properties of the
    * representation.
    */
-  vtkGetObjectMacro(Property,vtkProperty2D);
+  vtkGetObjectMacro(Property, vtkProperty2D);
   //@}
 
   /**
@@ -76,38 +76,41 @@ public:
   /**
    * Satisfy the superclasses' API.
    */
-  void BuildRepresentation() VTK_OVERRIDE;
-  void GetSize(double size[2]) VTK_OVERRIDE
-    {size[0]=12.0; size[1]=2.0;}
+  void BuildRepresentation() override;
+  void GetSize(double size[2]) override
+  {
+    size[0] = 12.0;
+    size[1] = 2.0;
+  }
 
   //@{
   /**
    * These methods are necessary to make this representation behave as
    * a vtkProp.
    */
-  void GetActors2D(vtkPropCollection*) VTK_OVERRIDE;
-  void ReleaseGraphicsResources(vtkWindow*) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport*) VTK_OVERRIDE;
-  int RenderOpaqueGeometry(vtkViewport*) VTK_OVERRIDE;
-  int RenderTranslucentPolygonalGeometry(vtkViewport*) VTK_OVERRIDE;
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  void GetActors2D(vtkPropCollection*) override;
+  void ReleaseGraphicsResources(vtkWindow*) override;
+  int RenderOverlay(vtkViewport*) override;
+  int RenderOpaqueGeometry(vtkViewport*) override;
+  int RenderTranslucentPolygonalGeometry(vtkViewport*) override;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
   //@}
 
 protected:
   vtkPlaybackRepresentation();
-  ~vtkPlaybackRepresentation() VTK_OVERRIDE;
+  ~vtkPlaybackRepresentation() override;
 
   // representation geometry
-  vtkPoints                  *Points;
-  vtkPolyData                *PolyData;
-  vtkTransformPolyDataFilter *TransformFilter;
-  vtkPolyDataMapper2D        *Mapper;
-  vtkProperty2D              *Property;
-  vtkActor2D                 *Actor;
+  vtkPoints* Points;
+  vtkPolyData* PolyData;
+  vtkTransformPolyDataFilter* TransformFilter;
+  vtkPolyDataMapper2D* Mapper;
+  vtkProperty2D* Property;
+  vtkActor2D* Actor;
 
 private:
-  vtkPlaybackRepresentation(const vtkPlaybackRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPlaybackRepresentation&) VTK_DELETE_FUNCTION;
+  vtkPlaybackRepresentation(const vtkPlaybackRepresentation&) = delete;
+  void operator=(const vtkPlaybackRepresentation&) = delete;
 };
 
 #endif

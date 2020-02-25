@@ -1,37 +1,37 @@
-set(Module_SRCS
-  vtkAdaptiveSubdivisionFilter.cxx
-  vtkBandedPolyDataContourFilter.cxx
-  vtkButterflySubdivisionFilter.cxx
-  vtkContourLoopExtraction.cxx
-  vtkCookieCutter.cxx
-  vtkDijkstraGraphGeodesicPath.cxx
-  vtkDijkstraImageGeodesicPath.cxx
-  vtkFillHolesFilter.cxx
-  vtkGeodesicPath.cxx
-  vtkGraphGeodesicPath.cxx
-  vtkLinearExtrusionFilter.cxx
-  vtkLinearSubdivisionFilter.cxx
-  vtkLoopSubdivisionFilter.cxx
-  vtkPolyDataPointSampler.cxx
-  vtkProjectedTexture.cxx
-  vtkQuadRotationalExtrusionFilter.cxx
-  vtkRibbonFilter.cxx
-  vtkRotationalExtrusionFilter.cxx
-  vtkRuledSurfaceFilter.cxx
-  vtkSelectEnclosedPoints.cxx
-  vtkSelectPolyData.cxx
-  vtkSpherePuzzleArrows.cxx
-  vtkSpherePuzzle.cxx
-  vtkSubdivideTetra.cxx
-  vtkOutlineFilter.cxx
-  vtkSectorSource.cxx
-  vtkVolumeOfRevolutionFilter.cxx
-  )
-
-set_source_files_properties(
+set(classes
+  vtkAdaptiveSubdivisionFilter
+  vtkBandedPolyDataContourFilter
+  vtkButterflySubdivisionFilter
+  vtkCollisionDetectionFilter
+  vtkContourLoopExtraction
+  vtkCookieCutter
+  vtkDijkstraGraphGeodesicPath
+  vtkDijkstraImageGeodesicPath
+  vtkFillHolesFilter
+  vtkFitToHeightMapFilter
   vtkGeodesicPath
   vtkGraphGeodesicPath
-  ABSTRACT
-  )
+  vtkHausdorffDistancePointSetFilter
+  vtkHyperTreeGridOutlineFilter
+  vtkLinearCellExtrusionFilter
+  vtkLinearExtrusionFilter
+  vtkLinearSubdivisionFilter
+  vtkLoopSubdivisionFilter
+  vtkOutlineFilter
+  vtkPolyDataPointSampler
+  vtkProjectedTexture
+  vtkQuadRotationalExtrusionFilter
+  vtkRibbonFilter
+  vtkRotationalExtrusionFilter
+  vtkRuledSurfaceFilter
+  vtkSectorSource
+  vtkSelectEnclosedPoints
+  vtkSelectPolyData
+  vtkSpherePuzzle
+  vtkSpherePuzzleArrows
+  vtkSubdivideTetra
+  vtkTrimmedExtrusionFilter
+  vtkVolumeOfRevolutionFilter)
 
-vtk_module_library(vtkFiltersModeling ${Module_SRCS})
+vtk_module_add_module(VTK::FiltersModeling
+  CLASSES ${classes})

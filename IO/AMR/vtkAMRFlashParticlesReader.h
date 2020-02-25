@@ -18,13 +18,13 @@
  *
  *  A concrete instance of vtkAMRBaseParticlesReader that implements
  *  functionality for reading flash particle datasets.
-*/
+ */
 
 #ifndef vtkAMRFlashParticlesReader_h
 #define vtkAMRFlashParticlesReader_h
 
-#include "vtkIOAMRModule.h" // For export macro
 #include "vtkAMRBaseParticlesReader.h"
+#include "vtkIOAMRModule.h" // For export macro
 
 class vtkIndent;
 class vtkPolyData;
@@ -32,48 +32,47 @@ class vtkPointData;
 class vtkIdList;
 class vtkFlashReaderInternal;
 
-class VTKIOAMR_EXPORT vtkAMRFlashParticlesReader :
-  public vtkAMRBaseParticlesReader
+class VTKIOAMR_EXPORT vtkAMRFlashParticlesReader : public vtkAMRBaseParticlesReader
 {
 public:
   static vtkAMRFlashParticlesReader* New();
-  vtkTypeMacro( vtkAMRFlashParticlesReader, vtkAMRBaseParticlesReader );
-  void PrintSelf(ostream &os, vtkIndent indent ) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAMRFlashParticlesReader, vtkAMRBaseParticlesReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * See vtkAMRBaseParticlesReader::GetTotalNumberOfParticles.
    */
-  int GetTotalNumberOfParticles() VTK_OVERRIDE;
+  int GetTotalNumberOfParticles() override;
 
 protected:
   vtkAMRFlashParticlesReader();
-  ~vtkAMRFlashParticlesReader() VTK_OVERRIDE;
+  ~vtkAMRFlashParticlesReader() override;
 
   /**
    * See vtkAMRBaseParticlesReader::ReadMetaData
    */
-  void ReadMetaData() VTK_OVERRIDE;
+  void ReadMetaData() override;
 
   /**
    * See vtkAMRBaseParticlesReader::SetupParticlesDataSelections
    */
-  void SetupParticleDataSelections() VTK_OVERRIDE;
+  void SetupParticleDataSelections() override;
 
   /**
    * See vtkAMRBaseParticlesReader::ReadParticles
    */
-  vtkPolyData* ReadParticles( const int blkidx ) VTK_OVERRIDE;
+  vtkPolyData* ReadParticles(const int blkidx) override;
 
   /**
    * Reads the particlles of the given block from the given file.
    */
-  vtkPolyData* GetParticles( const char* file, const int blkidx );
+  vtkPolyData* GetParticles(const char* file, const int blkidx);
 
-  vtkFlashReaderInternal *Internal;
+  vtkFlashReaderInternal* Internal;
 
 private:
-  vtkAMRFlashParticlesReader( const vtkAMRFlashParticlesReader& ) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAMRFlashParticlesReader& ) VTK_DELETE_FUNCTION;
+  vtkAMRFlashParticlesReader(const vtkAMRFlashParticlesReader&) = delete;
+  void operator=(const vtkAMRFlashParticlesReader&) = delete;
 };
 
 #endif /* vtkAMRFlashParticlesReader_h */

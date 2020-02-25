@@ -18,71 +18,43 @@
  *
  * vtkPolyLineSource is a source object that creates a poly line from
  * user-specified points. The output is a vtkPolyLine.
-*/
+ */
 
 #ifndef vtkPolyLineSource_h
 #define vtkPolyLineSource_h
 
 #include "vtkFiltersSourcesModule.h" // For export macro
-#include "vtkPolyDataAlgorithm.h"
+#include "vtkPolyPointSource.h"
 
 class vtkPoints;
 
-class VTKFILTERSSOURCES_EXPORT vtkPolyLineSource : public vtkPolyDataAlgorithm
+class VTKFILTERSSOURCES_EXPORT vtkPolyLineSource : public vtkPolyPointSource
 {
 public:
   static vtkPolyLineSource* New();
-  vtkTypeMacro(vtkPolyLineSource, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-
-  //@{
-  /**
-   * Set the number of points in the poly line.
-   */
-  void SetNumberOfPoints(vtkIdType numPoints);
-  vtkIdType GetNumberOfPoints();
-  //@}
-
-  /**
-   * Resize while preserving data.
-   */
-  void Resize(vtkIdType numPoints);
-
-  /**
-   * Set a point location.
-   */
-  void SetPoint(vtkIdType id, double x, double y, double z);
-
-  //@{
-  /**
-   * Get the points.
-   */
-  void SetPoints(vtkPoints* points);
-  vtkGetObjectMacro(Points, vtkPoints);
-  //@}
+  vtkTypeMacro(vtkPolyLineSource, vtkPolyPointSource);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set whether to close the poly line by connecting the last and first points.
    */
-  vtkSetMacro(Closed, int);
-  vtkGetMacro(Closed, int);
-  vtkBooleanMacro(Closed, int);
+  vtkSetMacro(Closed, vtkTypeBool);
+  vtkGetMacro(Closed, vtkTypeBool);
+  vtkBooleanMacro(Closed, vtkTypeBool);
   //@}
 
 protected:
   vtkPolyLineSource();
-  ~vtkPolyLineSource() VTK_OVERRIDE;
+  ~vtkPolyLineSource() override;
 
-  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  vtkPoints* Points;
-
-  int Closed;
+  vtkTypeBool Closed;
 
 private:
-  vtkPolyLineSource(const vtkPolyLineSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolyLineSource&) VTK_DELETE_FUNCTION;
+  vtkPolyLineSource(const vtkPolyLineSource&) = delete;
+  void operator=(const vtkPolyLineSource&) = delete;
 };
 
 #endif

@@ -1,12 +1,11 @@
-/* $Id$ */
-
 /*
  * Dummy function, just to be ensure that the library always will be created.
  */
 
+#include "../libtiff/vtk_tiff_mangle.h"
+
 void
-/* XXX(kitware): mangle symbols */
-vtk_libport_dummy_function()
+libport_dummy_function()
 {
         return;
 }

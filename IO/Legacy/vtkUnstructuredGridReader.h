@@ -26,49 +26,46 @@
  * Binary files written on one system may not be readable on other systems.
  * @sa
  * vtkUnstructuredGrid vtkDataReader
-*/
+ */
 
 #ifndef vtkUnstructuredGridReader_h
 #define vtkUnstructuredGridReader_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataReader.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkUnstructuredGrid;
 
 class VTKIOLEGACY_EXPORT vtkUnstructuredGridReader : public vtkDataReader
 {
 public:
-  static vtkUnstructuredGridReader *New();
-  vtkTypeMacro(vtkUnstructuredGridReader,vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkUnstructuredGridReader* New();
+  vtkTypeMacro(vtkUnstructuredGridReader, vtkDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the output of this reader.
    */
-  vtkUnstructuredGrid *GetOutput();
-  vtkUnstructuredGrid *GetOutput(int idx);
-  void SetOutput(vtkUnstructuredGrid *output);
+  vtkUnstructuredGrid* GetOutput();
+  vtkUnstructuredGrid* GetOutput(int idx);
+  void SetOutput(vtkUnstructuredGrid* output);
   //@}
+
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname, vtkDataObject* output) override;
 
 protected:
   vtkUnstructuredGridReader();
-  ~vtkUnstructuredGridReader() VTK_OVERRIDE;
+  ~vtkUnstructuredGridReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
-  // Since the Outputs[0] has the same UpdateExtent format
-  // as the generic DataObject we can copy the UpdateExtent
-  // as a default behavior.
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
-
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 private:
-  vtkUnstructuredGridReader(const vtkUnstructuredGridReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkUnstructuredGridReader&) VTK_DELETE_FUNCTION;
+  vtkUnstructuredGridReader(const vtkUnstructuredGridReader&) = delete;
+  void operator=(const vtkUnstructuredGridReader&) = delete;
 };
 
 #endif

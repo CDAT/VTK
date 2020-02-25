@@ -19,25 +19,24 @@
  * Use vtkEventForwarderCommand to forward an event to a new object.
  * This command will intercept the event, and use InvokeEvent
  * on a 'target' as if that object was the one that invoked the event instead
- * of the object this commmand was attached to using AddObserver.
+ * of the object this command was attached to using AddObserver.
  *
  * @sa
  * vtkCommand
-*/
+ */
 
 #ifndef vtkEventForwarderCommand_h
 #define vtkEventForwarderCommand_h
 
-#include "vtkCommonCoreModule.h" // For export macro
 #include "vtkCommand.h"
+#include "vtkCommonCoreModule.h" // For export macro
 
 class VTKCOMMONCORE_EXPORT vtkEventForwarderCommand : public vtkCommand
 {
 public:
-  vtkTypeMacro(vtkEventForwarderCommand,vtkCommand);
+  vtkTypeMacro(vtkEventForwarderCommand, vtkCommand);
 
-  static vtkEventForwarderCommand *New()
-    {return new vtkEventForwarderCommand;};
+  static vtkEventForwarderCommand* New() { return new vtkEventForwarderCommand; }
 
   /**
    * Satisfy the superclass API for callbacks. Recall that the caller is
@@ -45,25 +44,20 @@ public:
    * vtkCommand.h); and calldata is information sent when the callback
    * was invoked (e.g., progress value in the vtkCommand::ProgressEvent).
    */
-  void Execute(vtkObject *caller,
-               unsigned long eid,
-               void *callData) VTK_OVERRIDE;
+  void Execute(vtkObject* caller, unsigned long eid, void* callData) override;
 
   /**
    * Methods to set and get client and callback information, and the callback
    * function.
    */
-  virtual void SetTarget(vtkObject *obj)
-    { this->Target = obj; }
-  virtual void* GetTarget()
-    { return this->Target; }
+  virtual void SetTarget(vtkObject* obj) { this->Target = obj; }
+  virtual void* GetTarget() { return this->Target; }
 
 protected:
-
-  vtkObject *Target;
+  vtkObject* Target;
 
   vtkEventForwarderCommand();
-  ~vtkEventForwarderCommand() VTK_OVERRIDE {}
+  ~vtkEventForwarderCommand() override {}
 };
 
 #endif /* vtkEventForwarderCommand_h */

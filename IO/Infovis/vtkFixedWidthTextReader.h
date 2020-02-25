@@ -39,7 +39,7 @@
  * @par Thanks:
  * Thanks to Andy Wilson from Sandia National Laboratories for
  * implementing this class.
-*/
+ */
 
 #ifndef vtkFixedWidthTextReader_h
 #define vtkFixedWidthTextReader_h
@@ -54,8 +54,8 @@ class VTKIOINFOVIS_EXPORT vtkFixedWidthTextReader : public vtkTableAlgorithm
 {
 public:
   static vtkFixedWidthTextReader* New();
-  vtkTypeMacro(vtkFixedWidthTextReader,vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkFixedWidthTextReader, vtkTableAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   vtkGetStringMacro(FileName);
   vtkSetStringMacro(FileName);
@@ -82,8 +82,8 @@ public:
   /**
    * Set/get whether to treat the first line of the file as headers.
    */
-  vtkGetMacro(HaveHeaders,bool);
-  vtkSetMacro(HaveHeaders,bool);
+  vtkGetMacro(HaveHeaders, bool);
+  vtkSetMacro(HaveHeaders, bool);
   vtkBooleanMacro(HaveHeaders, bool);
   //@}
 
@@ -92,18 +92,15 @@ public:
    * Set/get the ErrorObserver for the internal vtkTable
    * This is useful for applications that want to catch error messages.
    */
-  void SetTableErrorObserver(vtkCommand *);
-  vtkGetObjectMacro(TableErrorObserver,vtkCommand);
+  void SetTableErrorObserver(vtkCommand*);
+  vtkGetObjectMacro(TableErrorObserver, vtkCommand);
   //@}
 
- protected:
+protected:
   vtkFixedWidthTextReader();
-  ~vtkFixedWidthTextReader() VTK_OVERRIDE;
+  ~vtkFixedWidthTextReader() override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   void OpenFile();
 
@@ -113,10 +110,9 @@ public:
   int FieldWidth;
 
 private:
-  vtkFixedWidthTextReader(const vtkFixedWidthTextReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFixedWidthTextReader&) VTK_DELETE_FUNCTION;
-  vtkCommand *TableErrorObserver;
+  vtkFixedWidthTextReader(const vtkFixedWidthTextReader&) = delete;
+  void operator=(const vtkFixedWidthTextReader&) = delete;
+  vtkCommand* TableErrorObserver;
 };
 
 #endif
-

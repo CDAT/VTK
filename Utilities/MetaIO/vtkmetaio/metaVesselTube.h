@@ -89,15 +89,15 @@ class METAIO_EXPORT MetaVesselTube : public MetaObject
 
     MetaVesselTube(unsigned int dim);
 
-    ~MetaVesselTube(void);
+    ~MetaVesselTube(void) override;
 
-    void PrintInfo(void) const;
+    void PrintInfo(void) const override;
 
-    void CopyInfo(const MetaObject * _object);
+    void CopyInfo(const MetaObject * _object) override;
 
     //    NPoints(...)
     //       Required Field
-    //       Number of points wich compose the VesselTube
+    //       Number of points which compose the VesselTube
     void  NPoints(int npnt);
     int   NPoints(void) const;
 
@@ -126,7 +126,7 @@ class METAIO_EXPORT MetaVesselTube : public MetaObject
     void  ParentPoint(int parentpoint);
     int   ParentPoint(void) const;
 
-    void  Clear(void);
+    void  Clear(void) override;
 
     PointListType &  GetPoints(void) {return m_PointList;}
     const PointListType &  GetPoints(void) const {return m_PointList;}
@@ -143,15 +143,15 @@ class METAIO_EXPORT MetaVesselTube : public MetaObject
 
     bool  m_ElementByteOrderMSB;
 
-    void  M_Destroy(void);
+    void  M_Destroy(void) override;
 
-    void  M_SetupReadFields(void);
+    void  M_SetupReadFields(void) override;
 
-    void  M_SetupWriteFields(void);
+    void  M_SetupWriteFields(void) override;
 
-    bool  M_Read(void);
+    bool  M_Read(void) override;
 
-    bool  M_Write(void);
+    bool  M_Write(void) override;
 
     int   m_ParentPoint;  // "ParentPoint = "     -1
 

@@ -27,13 +27,13 @@
  * This is mainly of use in ParaView with filters that use Qt in
  * their implementation - create an instance of vtkQtInitialization
  * prior to instantiating any filters that require Qt.
-*/
+ */
 
 #ifndef vtkQtInitialization_h
 #define vtkQtInitialization_h
 
-#include "vtkRenderingQtModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingQtModule.h" // For export macro
 
 class QApplication;
 
@@ -42,19 +42,17 @@ class VTKRENDERINGQT_EXPORT vtkQtInitialization : public vtkObject
 public:
   static vtkQtInitialization* New();
   vtkTypeMacro(vtkQtInitialization, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkQtInitialization();
-  ~vtkQtInitialization() VTK_OVERRIDE;
+  ~vtkQtInitialization() override;
 
 private:
-  vtkQtInitialization(const vtkQtInitialization &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtInitialization &) VTK_DELETE_FUNCTION;
+  vtkQtInitialization(const vtkQtInitialization&) = delete;
+  void operator=(const vtkQtInitialization&) = delete;
 
-  QApplication *Application;
-
+  QApplication* Application;
 };
 
 #endif // vtkQtInitialization_h
-

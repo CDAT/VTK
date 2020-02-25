@@ -211,14 +211,14 @@ public:
 
   MetaFEMObject(unsigned int dim);
 
-  ~MetaFEMObject(void);
+  ~MetaFEMObject(void) override;
 
-  void PrintInfo(void) const;
+  void PrintInfo(void) const override;
 
-  void CopyInfo(const MetaObject * _object);
+  void CopyInfo(const MetaObject * _object) override;
 
   /** Clear the MetaFEMObject */
-  void  Clear(void);
+  void  Clear(void) override;
 
   /** List of valid class name types from FEM namespace*/
   typedef METAIO_STL::list<std::string> ClassNameListType;
@@ -244,15 +244,15 @@ public:
 
 protected:
 
-  void  M_Destroy(void);
+  void  M_Destroy(void) override;
 
-  void  M_SetupReadFields(void);
+  void  M_SetupReadFields(void) override;
 
-  void  M_SetupWriteFields(void);
+  void  M_SetupWriteFields(void) override;
 
-  bool  M_Read(void);
+  bool  M_Read(void) override;
 
-  bool  M_Write(void);
+  bool  M_Write(void) override;
 
   /** For reading and writing in node details */
   bool  M_Read_Node();

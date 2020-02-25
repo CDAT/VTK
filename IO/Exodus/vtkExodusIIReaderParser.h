@@ -18,20 +18,20 @@
  *
  * vtkExodusIIReaderParser is an internal XML parser used by vtkExodusIIReader.
  * This is not for public use.
-*/
+ */
 
 #ifndef vtkExodusIIReaderParser_h
 #define vtkExodusIIReaderParser_h
 
 #include "vtkIOExodusModule.h" // For export macro
-#include "vtkXMLParser.h"
 #include "vtkSmartPointer.h"
+#include "vtkXMLParser.h"
 
-#include <sstream>
 #include <map>
-#include <vector>
 #include <set>
+#include <sstream>
 #include <string>
+#include <vector>
 
 class vtkMutableDirectedGraph;
 class vtkStringArray;
@@ -42,7 +42,7 @@ class VTKIOEXODUS_EXPORT vtkExodusIIReaderParser : public vtkXMLParser
 public:
   static vtkExodusIIReaderParser* New();
   vtkTypeMacro(vtkExodusIIReaderParser, vtkXMLParser);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -78,9 +78,7 @@ public:
   void GetBlockIds(std::set<int>& blockIdsSet)
   {
     std::map<int, vtkIdType>::iterator iter;
-    for (iter = this->BlockID_To_VertexID.begin();
-      iter != this->BlockID_To_VertexID.end();
-      ++iter)
+    for (iter = this->BlockID_To_VertexID.begin(); iter != this->BlockID_To_VertexID.end(); ++iter)
     {
       blockIdsSet.insert(iter->first);
     }
@@ -89,29 +87,29 @@ public:
 
 protected:
   vtkExodusIIReaderParser();
-  ~vtkExodusIIReaderParser() VTK_OVERRIDE;
+  ~vtkExodusIIReaderParser() override;
 
-  void StartElement( const char* tagName, const char** attrs) VTK_OVERRIDE;
-  void EndElement(const char* tagName) VTK_OVERRIDE;
+  void StartElement(const char* tagName, const char** attrs) override;
+  void EndElement(const char* tagName) override;
   void FinishedParsing();
 
-  const char* GetValue(const char* attr,const char** attrs)
+  const char* GetValue(const char* attr, const char** attrs)
   {
     int i;
-    for (i=0;attrs[i];i+=2)
+    for (i = 0; attrs[i]; i += 2)
     {
-      const char* name=strrchr(attrs[i],':');
+      const char* name = strrchr(attrs[i], ':');
       if (!name)
       {
-        name=attrs[i];
+        name = attrs[i];
       }
       else
       {
         name++;
       }
-      if (strcmp(attr,name)==0)
+      if (strcmp(attr, name) == 0)
       {
-        return attrs[i+1];
+        return attrs[i + 1];
       }
     }
     return nullptr;
@@ -132,7 +130,6 @@ protected:
   // For each of the blocks, this maps the "id" attribute in the XML to the
   // vertex id for the block in the SIL.
   std::map<int, vtkIdType> BlockID_To_VertexID;
-
 
   // Maps block "id"s to material names.
   std::map<int, std::string> BlockID_To_MaterialName;
@@ -172,9 +169,8 @@ protected:
   bool InMaterialAssignments;
 
 private:
-  vtkExodusIIReaderParser(const vtkExodusIIReaderParser&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExodusIIReaderParser&) VTK_DELETE_FUNCTION;
-
+  vtkExodusIIReaderParser(const vtkExodusIIReaderParser&) = delete;
+  void operator=(const vtkExodusIIReaderParser&) = delete;
 };
 
 #endif

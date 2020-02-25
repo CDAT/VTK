@@ -13,23 +13,23 @@
 
 =========================================================================*/
 
-#include "vtkRenderWindow.h"
-#include "vtkSmartPointer.h"
 #include "vtkChartXYZ.h"
+#include "vtkContextScene.h"
+#include "vtkContextView.h"
+#include "vtkFloatArray.h"
+#include "vtkNew.h"
 #include "vtkPen.h"
 #include "vtkPlotLine3D.h"
-#include "vtkTable.h"
-#include "vtkFloatArray.h"
-#include "vtkContextView.h"
-#include "vtkContextScene.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkNew.h"
+#include "vtkSmartPointer.h"
+#include "vtkTable.h"
 
 // Plot the solution to the Lorenz attractor.
 // http://en.wikipedia.org/wiki/Lorenz_system
 namespace
 {
-void lorenz(const float * varX, float * varXDerivative)
+void lorenz(const float* varX, float* varXDerivative)
 {
   const float sigma = 10.f;
   const float rho = 28.f;
@@ -42,19 +42,19 @@ void lorenz(const float * varX, float * varXDerivative)
 } // end anonymous namespace
 
 //----------------------------------------------------------------------------
-int TestLinePlot3D(int, char * [])
+int TestLinePlot3D(int, char*[])
 {
   // Create the data.
   vtkNew<vtkTable> varXSolution;
   vtkNew<vtkFloatArray> arrX0;
   arrX0->SetName("X");
-  varXSolution->AddColumn(arrX0.GetPointer());
+  varXSolution->AddColumn(arrX0);
   vtkNew<vtkFloatArray> arrX1;
   arrX1->SetName("Y");
-  varXSolution->AddColumn(arrX1.GetPointer());
+  varXSolution->AddColumn(arrX1);
   vtkNew<vtkFloatArray> arrX2;
   arrX2->SetName("Z");
-  varXSolution->AddColumn(arrX2.GetPointer());
+  varXSolution->AddColumn(arrX2);
   const unsigned int numberOfTimePoints = 1000;
   varXSolution->SetNumberOfRows(numberOfTimePoints);
   float varX[3];
@@ -79,13 +79,13 @@ int TestLinePlot3D(int, char * [])
   view->GetRenderWindow()->SetSize(400, 300);
   vtkNew<vtkChartXYZ> chart;
   chart->SetGeometry(vtkRectf(75.0, 20.0, 250, 260));
-  view->GetScene()->AddItem(chart.GetPointer());
+  view->GetScene()->AddItem(chart);
 
   // Add a line plot.
   vtkNew<vtkPlotLine3D> plot;
-  plot->SetInputData(varXSolution.GetPointer());
+  plot->SetInputData(varXSolution);
   plot->GetPen()->SetColorF(0.1, 0.2, 0.8, 1.0);
-  chart->AddPlot(plot.GetPointer());
+  chart->AddPlot(plot);
 
   // Finally render the scene and compare the image to a reference image.
   view->GetRenderWindow()->SetMultiSamples(0);

@@ -31,7 +31,7 @@
  * case-insensitive matches on Windows.
  * @sa
  * vtkDirectory
-*/
+ */
 
 #ifndef vtkGlobFileNames_h
 #define vtkGlobFileNames_h
@@ -48,18 +48,18 @@ public:
   /**
    * Return the class name as a string.
    */
-  vtkTypeMacro(vtkGlobFileNames,vtkObject);
+  vtkTypeMacro(vtkGlobFileNames, vtkObject);
   //@}
 
   /**
    * Create a new vtkGlobFileNames object.
    */
-  static vtkGlobFileNames *New();
+  static vtkGlobFileNames* New();
 
   /**
    * Print directory to stream.
    */
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Reset the glob by clearing the list of output filenames.
@@ -90,9 +90,9 @@ public:
   /**
    * Recurse into subdirectories.
    */
-  vtkSetMacro(Recurse, int);
-  vtkBooleanMacro(Recurse, int);
-  vtkGetMacro(Recurse, int);
+  vtkSetMacro(Recurse, vtkTypeBool);
+  vtkBooleanMacro(Recurse, vtkTypeBool);
+  vtkGetMacro(Recurse, vtkTypeBool);
   //@}
 
   /**
@@ -122,17 +122,17 @@ protected:
   //@}
 
   vtkGlobFileNames();
-  ~vtkGlobFileNames() VTK_OVERRIDE;
+  ~vtkGlobFileNames() override;
 
 private:
-  char* Directory;          // Directory for search.
-  char* Pattern;            // Wildcard pattern
-  int Recurse;              // Recurse into subdirectories
-  vtkStringArray *FileNames;    // VTK array of files
+  char* Directory;           // Directory for search.
+  char* Pattern;             // Wildcard pattern
+  vtkTypeBool Recurse;       // Recurse into subdirectories
+  vtkStringArray* FileNames; // VTK array of files
 
 private:
-  vtkGlobFileNames(const vtkGlobFileNames&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGlobFileNames&) VTK_DELETE_FUNCTION;
+  vtkGlobFileNames(const vtkGlobFileNames&) = delete;
+  void operator=(const vtkGlobFileNames&) = delete;
 };
 
 #endif

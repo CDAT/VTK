@@ -21,6 +21,7 @@
 
 #include "vtkCamera.h"
 #include "vtkColorTransferFunction.h"
+#include "vtkFloatArray.h"
 #include "vtkGPUVolumeRayCastMapper.h"
 #include "vtkImageData.h"
 #include "vtkInteractorStyleTrackballCamera.h"
@@ -29,24 +30,21 @@
 #include "vtkPiecewiseFunction.h"
 #include "vtkPointData.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkTestUtilities.h"
-#include "vtkFloatArray.h"
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
-
 
 typedef vtkSmartPointer<vtkImageData> Transfer2DPtr;
 Transfer2DPtr Create2DTransfer()
 {
-  int bins[2] = {256, 256};
+  int bins[2] = { 256, 256 };
   Transfer2DPtr image = Transfer2DPtr::New();
   image->SetDimensions(bins[0], bins[1], 1);
   image->AllocateScalars(VTK_FLOAT, 4);
-  vtkFloatArray* arr = vtkFloatArray::SafeDownCast(
-    image->GetPointData()->GetScalars());
+  vtkFloatArray* arr = vtkFloatArray::SafeDownCast(image->GetPointData()->GetScalars());
 
   // Initialize to zero
   void* dataPtr = arr->GetVoidPointer(0);
@@ -67,7 +65,7 @@ Transfer2DPtr Create2DTransfer()
         double const blue = jFactor * static_cast<double>(j) / bins[1];
         double const alpha = 0.25 * jFactor * static_cast<double>(j) / bins[0];
 
-        double color[4] = {red, green, blue, alpha};
+        double color[4] = { red, green, blue, alpha };
         arr->SetTuple(index, color);
       }
     }
@@ -81,8 +79,7 @@ int TestGPURayCastTransfer2D(int argc, char* argv[])
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
   // Load data
-  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv,
-    "Data/tooth.nhdr");
+  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/tooth.nhdr");
   vtkNew<vtkNrrdReader> reader;
   reader->SetFileName(fname);
   reader->Update();
@@ -110,12 +107,12 @@ int TestGPURayCastTransfer2D(int argc, char* argv[])
   pf->AddPoint(range[1], 0.4);
 
   vtkNew<vtkPiecewiseFunction> gf;
-  gf->AddPoint(0,   0.0);
+  gf->AddPoint(0, 0.0);
   gf->AddPoint(range[1] / 4.0, 1.0);
 
-  volumeProperty->SetScalarOpacity(pf.GetPointer());
-  volumeProperty->SetGradientOpacity(gf.GetPointer());
-  volumeProperty->SetColor(ctf.GetPointer());
+  volumeProperty->SetScalarOpacity(pf);
+  volumeProperty->SetGradientOpacity(gf);
+  volumeProperty->SetColor(ctf);
 
   // Prepare 2D Transfer Functions
   Transfer2DPtr tf2d = Create2DTransfer();
@@ -128,7 +125,7 @@ int TestGPURayCastTransfer2D(int argc, char* argv[])
   renWin->SetMultiSamples(0);
 
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
   ren->SetBackground(0.0, 0.0, 0.0);
 
   vtkNew<vtkGPUVolumeRayCastMapper> mapper;
@@ -136,9 +133,9 @@ int TestGPURayCastTransfer2D(int argc, char* argv[])
   mapper->SetUseJittering(1);
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
-  ren->AddVolume(volume.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(volumeProperty);
+  ren->AddVolume(volume);
 
   ren->ResetCamera();
   ren->GetActiveCamera()->Elevation(-90.0);
@@ -146,19 +143,22 @@ int TestGPURayCastTransfer2D(int argc, char* argv[])
 
   // Interactor
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
+  iren->SetInteractorStyle(style);
 
   renWin->Render();
 
-  int retVal = vtkTesting::Test(argc, argv, renWin.GetPointer(), 90);
-  if (retVal == vtkRegressionTester::DO_INTERACTOR)
-    {
-    iren->Start();
-    }
+  // Simulate modification of 2D transfer function to test for shader issues
+  tf2d->Modified();
+  renWin->Render();
 
-  return !((retVal == vtkTesting::PASSED) ||
-           (retVal == vtkTesting::DO_INTERACTOR));
+  int retVal = vtkTesting::Test(argc, argv, renWin, 90);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
+  {
+    iren->Start();
+  }
+
+  return !((retVal == vtkTesting::PASSED) || (retVal == vtkTesting::DO_INTERACTOR));
 }

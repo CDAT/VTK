@@ -34,6 +34,7 @@
 #include "vtkDataSetAttributes.h"
 #include "vtkNew.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkPointData.h"
 #include "vtkPointGaussianMapper.h"
 #include "vtkPointSource.h"
 #include "vtkProperty.h"
@@ -44,16 +45,16 @@
 #include "vtkSphereSource.h"
 #include "vtkTimerLog.h"
 
-#include "vtkTestUtilities.h"
 #include "vtkRegressionTestImage.h"
+#include "vtkTestUtilities.h"
 
-int TestPointGaussianMapperOpacity(int argc, char *argv[])
+int TestPointGaussianMapperOpacity(int argc, char* argv[])
 {
   int desiredPoints = 1.0e4;
 
   vtkNew<vtkPointSource> points;
   points->SetNumberOfPoints(desiredPoints);
-  points->SetRadius(pow(desiredPoints,0.33)*10.0);
+  points->SetRadius(pow(desiredPoints, 0.33) * 10.0);
   points->Update();
 
   vtkNew<vtkRandomAttributeGenerator> randomAttr;
@@ -66,19 +67,21 @@ int TestPointGaussianMapperOpacity(int argc, char *argv[])
   vtkNew<vtkRenderWindow> renderWindow;
   renderWindow->SetSize(300, 300);
   renderWindow->SetMultiSamples(0);
-  renderWindow->AddRenderer(renderer.Get());
-  vtkNew<vtkRenderWindowInteractor>  iren;
-  iren->SetRenderWindow(renderWindow.Get());
+  renderWindow->AddRenderer(renderer);
+  vtkNew<vtkRenderWindowInteractor> iren;
+  iren->SetRenderWindow(renderWindow);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.Get());
-  renderer->AddActor(actor.Get());
+  actor->SetMapper(mapper);
+  renderer->AddActor(actor);
 
   randomAttr->SetDataTypeToFloat();
   randomAttr->GeneratePointScalarsOn();
   randomAttr->GeneratePointVectorsOn();
   randomAttr->GeneratePointArrayOn();
   randomAttr->Update();
+  vtkDataSet* output = static_cast<vtkDataSet*>(randomAttr->GetOutput());
+  output->GetPointData()->SetScalars(output->GetPointData()->GetArray("RandomPointArray"));
 
   mapper->SetInputConnection(randomAttr->GetOutputPort());
   mapper->SetColorModeToMapScalars();
@@ -86,7 +89,9 @@ int TestPointGaussianMapperOpacity(int argc, char *argv[])
   mapper->SelectColorArray("RandomPointVectors");
   mapper->SetInterpolateScalarsBeforeMapping(0);
   mapper->SetScaleArray("RandomPointScalars");
+  mapper->SetScaleArrayComponent(1); // tests clamping to zero-th component
   mapper->SetOpacityArray("RandomPointArray");
+  mapper->SetOpacityArrayComponent(0);
   mapper->EmissiveOff();
 
   // show other shader examples
@@ -102,28 +107,28 @@ int TestPointGaussianMapperOpacity(int argc, char *argv[])
     // "  if (dist > 1.1) { discard; }\n"
     // "  if (dist < 0.5) { discard; }\n"
     // // apply a black edge around the circle
-    // "  if (dist > 1.0 || dist < 0.6) { diffuseColor = vec3(0,0,0); ambientColor = vec3(0,0,0); }\n"
+    // "  if (dist > 1.0 || dist < 0.6) { diffuseColor = vec3(0,0,0); ambientColor = vec3(0,0,0);
+    // }\n"
 
     // example for a square
     "  if (abs(offsetVCVSOutput.x) > 1.0 || abs(offsetVCVSOutput.y) > 1.0) { discard; }\n"
-    "  if (abs(offsetVCVSOutput.x) < 0.6 && abs(offsetVCVSOutput.y) < 0.6) { discard; }\n"
-    );
+    "  if (abs(offsetVCVSOutput.x) < 0.6 && abs(offsetVCVSOutput.y) < 0.6) { discard; }\n");
 
   // since this shader only uses a radus of sqrt(2) we will adjust the mapper
   // to render a smaller area than the default radius of 3.0
   mapper->SetTriangleScale(1.5);
 
   vtkNew<vtkColorTransferFunction> ctf;
-  ctf->AddHSVPoint(0.0,0.1,0.7,1.0);
-  ctf->AddHSVPoint(1.0,0.9,0.7,1.0);
+  ctf->AddHSVPoint(0.0, 0.1, 0.7, 1.0);
+  ctf->AddHSVPoint(1.0, 0.9, 0.7, 1.0);
   ctf->SetColorSpaceToHSV();
   ctf->HSVWrapOff();
-  mapper->SetLookupTable(ctf.Get());
+  mapper->SetLookupTable(ctf);
 
   vtkNew<vtkPiecewiseFunction> otf;
-  otf->AddPoint(0.0,0.3);
-  otf->AddPoint(1.0,1.0);
-  mapper->SetScalarOpacityFunction(otf.Get());
+  otf->AddPoint(0.0, 0.3);
+  otf->AddPoint(1.0, 1.0);
+  mapper->SetScalarOpacityFunction(otf);
 
   vtkNew<vtkTimerLog> timer;
   timer->StartTimer();
@@ -145,20 +150,20 @@ int TestPointGaussianMapperOpacity(int argc, char *argv[])
 
   int numPts = mapper->GetInput()->GetPoints()->GetNumberOfPoints();
   cerr << "interactive render time: " << elapsed / numRenders << endl;
-  cerr << "number of points: " <<  numPts << endl;
-  cerr << "points per second: " <<  numPts*(numRenders/elapsed) << endl;
+  cerr << "number of points: " << numPts << endl;
+  cerr << "points per second: " << numPts * (numRenders / elapsed) << endl;
 
-  renderer->GetActiveCamera()->SetPosition(0,0,1);
-  renderer->GetActiveCamera()->SetFocalPoint(0,0,0);
-  renderer->GetActiveCamera()->SetViewUp(0,1,0);
+  renderer->GetActiveCamera()->SetPosition(0, 0, 1);
+  renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
+  renderer->GetActiveCamera()->SetViewUp(0, 1, 0);
   renderer->ResetCamera();
   //  renderer->GetActiveCamera()->Print(cerr);
 
   renderer->GetActiveCamera()->Zoom(10.0);
   renderWindow->Render();
 
-  int retVal = vtkRegressionTestImage( renderWindow.Get() );
-  if ( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renderWindow);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

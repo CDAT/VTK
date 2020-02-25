@@ -24,7 +24,7 @@
  *
  * @sa
  * vtkGenericDataSet
-*/
+ */
 
 #ifndef vtkGenericOutlineFilter_h
 #define vtkGenericOutlineFilter_h
@@ -37,22 +37,22 @@ class vtkOutlineSource;
 class VTKFILTERSGENERIC_EXPORT vtkGenericOutlineFilter : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkGenericOutlineFilter *New();
-  vtkTypeMacro(vtkGenericOutlineFilter,vtkPolyDataAlgorithm);
+  static vtkGenericOutlineFilter* New();
+  vtkTypeMacro(vtkGenericOutlineFilter, vtkPolyDataAlgorithm);
 
 protected:
   vtkGenericOutlineFilter();
-  ~vtkGenericOutlineFilter() VTK_OVERRIDE;
+  ~vtkGenericOutlineFilter() override;
 
-  vtkOutlineSource *OutlineSource;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  vtkOutlineSource* OutlineSource;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
 private:
-  vtkGenericOutlineFilter(const vtkGenericOutlineFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericOutlineFilter&) VTK_DELETE_FUNCTION;
+  vtkGenericOutlineFilter(const vtkGenericOutlineFilter&) = delete;
+  void operator=(const vtkGenericOutlineFilter&) = delete;
 };
 
 #endif

@@ -10,14 +10,12 @@
 #include <string>
 #include <vector>
 
-#include <@KWSYS_NAMESPACE@/String.hxx>
-
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h>
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
-#include <unistd.h> // For access permissions for use with access()
+#  include <unistd.h> // For access permissions for use with access()
 #endif
 
 // Required for va_list
@@ -43,9 +41,7 @@ typedef @KWSYS_NAMESPACE@_VA_LIST::hack_va_list va_list;
 
 namespace @KWSYS_NAMESPACE@ {
 
-class SystemToolsTranslationMap;
-class SystemToolsPathCaseMap;
-class SystemToolsEnvMap;
+class SystemToolsStatic;
 
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
@@ -56,6 +52,9 @@ class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
 public:
   SystemToolsManager();
   ~SystemToolsManager();
+
+  SystemToolsManager(const SystemToolsManager&) = delete;
+  SystemToolsManager& operator=(const SystemToolsManager&) = delete;
 };
 
 // This instance will show up in any translation unit that uses
@@ -107,7 +106,7 @@ public:
   }
 
   /**
-   * Replace replace all occurences of the string in the source string.
+   * Replace replace all occurrences of the string in the source string.
    */
   static void ReplaceString(std::string& source, const char* replace,
                             const char* with);
@@ -175,7 +174,7 @@ public:
   static bool StringEndsWith(const std::string& str1, const char* str2);
 
   /**
-   * Returns a pointer to the last occurence of str2 in str1
+   * Returns a pointer to the last occurrence of str2 in str1
    */
   static const char* FindLastString(const char* str1, const char* str2);
 
@@ -197,20 +196,13 @@ public:
       s starts with a / then the first element of the returned array will
       be /, so /foo/bar will be [/, foo, bar]
   */
-  static std::vector<String> SplitString(const std::string& s,
-                                         char separator = '/',
-                                         bool isPath = false);
+  static std::vector<std::string> SplitString(const std::string& s,
+                                              char separator = '/',
+                                              bool isPath = false);
   /**
    * Perform a case-independent string comparison
    */
   static int Strucmp(const char* s1, const char* s2);
-
-  /**
-   * Convert a string in __DATE__ or __TIMESTAMP__ format into a time_t.
-   * Return false on error, true on success
-   */
-  static bool ConvertDateMacroString(const char* str, time_t* tmt);
-  static bool ConvertTimeStampMacroString(const char* str, time_t* tmt);
 
   /**
    * Split a string on its newlines into multiple lines
@@ -325,11 +317,11 @@ public:
  * Cross platform wrapper for stat struct
  */
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if defined(__BORLANDC__)
+#  if defined(__BORLANDC__)
   typedef struct stati64 Stat_t;
-#else
+#  else
   typedef struct _stat64 Stat_t;
-#endif
+#  endif
 #else
   typedef struct stat Stat_t;
 #endif
@@ -408,9 +400,10 @@ public:
    *  installPrefix is a possibly null pointer to the install directory.
    */
   static bool FindProgramPath(const char* argv0, std::string& pathOut,
-                              std::string& errorMsg, const char* exeName = 0,
-                              const char* buildDir = 0,
-                              const char* installPrefix = 0);
+                              std::string& errorMsg,
+                              const char* exeName = nullptr,
+                              const char* buildDir = nullptr,
+                              const char* installPrefix = nullptr);
 
   /**
    * Given a path to a file or directory, convert it to a full path.
@@ -428,11 +421,11 @@ public:
    * Get the real path for a given path, removing all symlinks.  In
    * the event of an error (non-existent path, permissions issue,
    * etc.) the original path is returned if errorMessage pointer is
-   * NULL.  Otherwise empty string is returned and errorMessage
+   * nullptr.  Otherwise empty string is returned and errorMessage
    * contains error description.
    */
   static std::string GetRealPath(const std::string& path,
-                                 std::string* errorMessage = 0);
+                                 std::string* errorMessage = nullptr);
 
   /**
    * Split a path name into its root component and the rest of the
@@ -450,7 +443,7 @@ public:
    * given.
    */
   static const char* SplitPathRootComponent(const std::string& p,
-                                            std::string* root = 0);
+                                            std::string* root = nullptr);
 
   /**
    * Split a path name into its basic components.  The first component
@@ -498,12 +491,6 @@ public:
   static std::string GetFilenameName(const std::string&);
 
   /**
-   * Split a program from its arguments and handle spaces in the paths
-   */
-  static void SplitProgramFromArgs(const std::string& path,
-                                   std::string& program, std::string& args);
-
-  /**
    * Return longest file extension of a full filename (dot included)
    */
   static std::string GetFilenameExtension(const std::string&);
@@ -536,14 +523,14 @@ public:
   static bool GetShortPath(const std::string& path, std::string& result);
 
   /**
-   * Read line from file. Make sure to get everything. Due to a buggy stream
-   * library on the HP and another on Mac OS X, we need this very carefully
-   * written version of getline. Returns true if any data were read before the
+   * Read line from file. Make sure to read a full line and truncates it if
+   * requested via sizeLimit. Returns true if any data were read before the
    * end-of-file was reached. If the has_newline argument is specified, it will
    * be true when the line read had a newline character.
    */
   static bool GetLineFromStream(std::istream& istr, std::string& line,
-                                bool* has_newline = 0, long sizeLimit = -1);
+                                bool* has_newline = nullptr,
+                                long sizeLimit = -1);
 
   /**
    * Get the parent directory of the directory or file
@@ -566,13 +553,21 @@ public:
    */
   static FILE* Fopen(const std::string& file, const char* mode);
 
+/**
+ * Visual C++ does not define mode_t (note that Borland does, however).
+ */
+#if defined(_MSC_VER)
+  typedef unsigned short mode_t;
+#endif
+
   /**
    * Make a new directory if it is not there.  This function
    * can make a full path even if none of the directories existed
    * prior to calling this function.
    */
-  static bool MakeDirectory(const char* path);
-  static bool MakeDirectory(const std::string& path);
+  static bool MakeDirectory(const char* path, const mode_t* mode = nullptr);
+  static bool MakeDirectory(const std::string& path,
+                            const mode_t* mode = nullptr);
 
   /**
    * Copy the source file to the destination file only
@@ -586,6 +581,13 @@ public:
    */
   static bool FilesDiffer(const std::string& source,
                           const std::string& destination);
+
+  /**
+   * Compare the contents of two files, ignoring line ending differences.
+   * Return true if different
+   */
+  static bool TextFilesDiffer(const std::string& path1,
+                              const std::string& path2);
 
   /**
    * Return true if the two files are the same file
@@ -762,13 +764,6 @@ public:
    */
   static long int CreationTime(const std::string& filename);
 
-/**
- * Visual C++ does not define mode_t (note that Borland does, however).
- */
-#if defined(_MSC_VER)
-  typedef unsigned short mode_t;
-#endif
-
   /**
    * Get and set permissions of the file.  If honor_umask is set, the umask
    * is queried and applied to the given permissions.  Returns false if
@@ -850,7 +845,8 @@ public:
    *  string vector passed in.  If env is set then the value
    *  of env will be used instead of PATH.
    */
-  static void GetPath(std::vector<std::string>& path, const char* env = 0);
+  static void GetPath(std::vector<std::string>& path,
+                      const char* env = nullptr);
 
   /**
    * Read an environment variable
@@ -894,11 +890,12 @@ public:
 
   /**
    * Get the width of the terminal window. The code may or may not work, so
-   * make sure you have some resonable defaults prepared if the code returns
+   * make sure you have some reasonable defaults prepared if the code returns
    * some bogus size.
    */
   static int GetTerminalWidth();
 
+#if @KWSYS_NAMESPACE@_SYSTEMTOOLS_USE_TRANSLATION_MAP
   /**
    * Add an entry in the path translation table.
    */
@@ -915,10 +912,11 @@ public:
    * Update path by going through the Path Translation table;
    */
   static void CheckTranslationPath(std::string& path);
+#endif
 
   /**
    * Delay the execution for a specified amount of time specified
-   * in miliseconds
+   * in milliseconds
    */
   static void Delay(unsigned int msec);
 
@@ -973,40 +971,8 @@ private:
     return &SystemToolsManagerInstance;
   }
 
-  /**
-   * Actual implementation of ReplaceString.
-   */
-  static void ReplaceString(std::string& source, const char* replace,
-                            size_t replaceSize, const std::string& with);
-
-  /**
-   * Actual implementation of FileIsFullPath.
-   */
-  static bool FileIsFullPath(const char*, size_t);
-
-  /**
-   * Find a filename (file or directory) in the system PATH, with
-   * optional extra paths.
-   */
-  static std::string FindName(
-    const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
-    bool no_system_path = false);
-
-  static const char* GetEnvImpl(const char* key);
-
-  /**
-   * Path translation table from dir to refdir
-   * Each time 'dir' will be found it will be replace by 'refdir'
-   */
-  static SystemToolsTranslationMap* TranslationMap;
-#ifdef _WIN32
-  static SystemToolsPathCaseMap* PathCaseMap;
-  static SystemToolsEnvMap* EnvMap;
-#endif
-#ifdef __CYGWIN__
-  static SystemToolsTranslationMap* Cyg2Win32Map;
-#endif
+  static SystemToolsStatic* Statics;
+  friend class SystemToolsStatic;
   friend class SystemToolsManager;
 };
 

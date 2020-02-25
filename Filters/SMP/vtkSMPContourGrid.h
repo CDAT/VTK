@@ -18,24 +18,24 @@
  * vtkSMPContourGrid performs the same functionaliy as vtkContourGrid but does
  * it using multiple threads. This will probably be merged with vtkContourGrid
  * in the future.
-*/
+ */
 
 #ifndef vtkSMPContourGrid_h
 #define vtkSMPContourGrid_h
 
-#include "vtkFiltersSMPModule.h" // For export macro
 #include "vtkContourGrid.h"
+#include "vtkFiltersSMPModule.h" // For export macro
 
 class VTKFILTERSSMP_EXPORT vtkSMPContourGrid : public vtkContourGrid
 {
 public:
-  vtkTypeMacro(vtkSMPContourGrid,vtkContourGrid);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSMPContourGrid, vtkContourGrid);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Constructor.
    */
-  static vtkSMPContourGrid *New();
+  static vtkSMPContourGrid* New();
 
   //@{
   /**
@@ -55,24 +55,23 @@ public:
   /**
    * Please see vtkAlgorithm for details.
    */
-  int ProcessRequest(vtkInformation*,
-                             vtkInformationVector**,
-                             vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
   vtkSMPContourGrid();
-  ~vtkSMPContourGrid() VTK_OVERRIDE;
+  ~vtkSMPContourGrid() override;
 
-  virtual int RequestDataObject(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  virtual int RequestDataObject(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   bool MergePieces;
 
 private:
-  vtkSMPContourGrid(const vtkSMPContourGrid&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSMPContourGrid&) VTK_DELETE_FUNCTION;
+  vtkSMPContourGrid(const vtkSMPContourGrid&) = delete;
+  void operator=(const vtkSMPContourGrid&) = delete;
 };
 
 #endif

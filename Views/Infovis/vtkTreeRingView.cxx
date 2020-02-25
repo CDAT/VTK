@@ -28,14 +28,10 @@
 
 vtkStandardNewMacro(vtkTreeRingView);
 //----------------------------------------------------------------------------
-vtkTreeRingView::vtkTreeRingView()
-{
-}
+vtkTreeRingView::vtkTreeRingView() = default;
 
 //----------------------------------------------------------------------------
-vtkTreeRingView::~vtkTreeRingView()
-{
-}
+vtkTreeRingView::~vtkTreeRingView() = default;
 
 //----------------------------------------------------------------------------
 void vtkTreeRingView::SetRootAngles(double start, double end)
@@ -144,6 +140,5 @@ double vtkTreeRingView::GetInteriorLogSpacingValue()
 //----------------------------------------------------------------------------
 void vtkTreeRingView::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
-

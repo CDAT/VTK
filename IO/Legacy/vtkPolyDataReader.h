@@ -26,50 +26,46 @@
  * Binary files written on one system may not be readable on other systems.
  * @sa
  * vtkPolyData vtkDataReader
-*/
+ */
 
 #ifndef vtkPolyDataReader_h
 #define vtkPolyDataReader_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataReader.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkPolyData;
 
 class VTKIOLEGACY_EXPORT vtkPolyDataReader : public vtkDataReader
 {
 public:
-  static vtkPolyDataReader *New();
-  vtkTypeMacro(vtkPolyDataReader,vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPolyDataReader* New();
+  vtkTypeMacro(vtkPolyDataReader, vtkDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the output of this reader.
    */
-  vtkPolyData *GetOutput();
-  vtkPolyData *GetOutput(int idx);
-  void SetOutput(vtkPolyData *output);
+  vtkPolyData* GetOutput();
+  vtkPolyData* GetOutput(int idx);
+  void SetOutput(vtkPolyData* output);
   //@}
+
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname, vtkDataObject* output) override;
 
 protected:
   vtkPolyDataReader();
-  ~vtkPolyDataReader() VTK_OVERRIDE;
+  ~vtkPolyDataReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
-
-  // Update extent of PolyData is specified in pieces.
-  // Since all DataObjects should be able to set UpdateExent as pieces,
-  // just copy output->UpdateExtent  all Inputs.
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
 private:
-  vtkPolyDataReader(const vtkPolyDataReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolyDataReader&) VTK_DELETE_FUNCTION;
+  vtkPolyDataReader(const vtkPolyDataReader&) = delete;
+  void operator=(const vtkPolyDataReader&) = delete;
 };
 
 #endif

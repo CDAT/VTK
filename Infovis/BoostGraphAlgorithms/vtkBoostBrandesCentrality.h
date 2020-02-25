@@ -30,22 +30,22 @@
  *
  * @sa
  * vtkGraph vtkBoostGraphAdapter
-*/
+ */
 
 #ifndef vtkBoostBrandesCentrality_h
 #define vtkBoostBrandesCentrality_h
 
 #include "vtkInfovisBoostGraphAlgorithmsModule.h" // For export macro
-#include "vtkVariant.h" // For variant type
+#include "vtkVariant.h"                           // For variant type
 
 #include "vtkGraphAlgorithm.h"
 
 class VTKINFOVISBOOSTGRAPHALGORITHMS_EXPORT vtkBoostBrandesCentrality : public vtkGraphAlgorithm
 {
 public:
-  static vtkBoostBrandesCentrality *New();
+  static vtkBoostBrandesCentrality* New();
   vtkTypeMacro(vtkBoostBrandesCentrality, vtkGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -70,20 +70,17 @@ public:
 
 protected:
   vtkBoostBrandesCentrality();
-  ~vtkBoostBrandesCentrality();
+  ~vtkBoostBrandesCentrality() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *);
-
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
+  bool UseEdgeWeightArray;
+  bool InvertEdgeWeightArray;
+  char* EdgeWeightArrayName;
 
-  bool        UseEdgeWeightArray;
-  bool        InvertEdgeWeightArray;
-  char*       EdgeWeightArrayName;
-
-  vtkBoostBrandesCentrality(const vtkBoostBrandesCentrality&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBoostBrandesCentrality&) VTK_DELETE_FUNCTION;
+  vtkBoostBrandesCentrality(const vtkBoostBrandesCentrality&) = delete;
+  void operator=(const vtkBoostBrandesCentrality&) = delete;
 };
 
 #endif

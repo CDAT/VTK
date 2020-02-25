@@ -21,35 +21,35 @@
  * This class allows vtkProp objects to be drawn inside a vtkContextScene.
  * This is especially useful for constructing layered scenes that need to ignore
  * depth testing.
-*/
+ */
 
 #ifndef vtkPropItem_h
 #define vtkPropItem_h
 
-#include "vtkRenderingContext2DModule.h" // For export macro
 #include "vtkAbstractContextItem.h"
+#include "vtkRenderingContext2DModule.h" // For export macro
 
 class vtkProp;
 
-class VTKRENDERINGCONTEXT2D_EXPORT vtkPropItem: public vtkAbstractContextItem
+class VTKRENDERINGCONTEXT2D_EXPORT vtkPropItem : public vtkAbstractContextItem
 {
 public:
-  static vtkPropItem *New();
-  vtkTypeMacro(vtkPropItem, vtkAbstractContextItem)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPropItem* New();
+  vtkTypeMacro(vtkPropItem, vtkAbstractContextItem);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  bool Paint(vtkContext2D *painter) VTK_OVERRIDE;
-  void ReleaseGraphicsResources() VTK_OVERRIDE;
+  bool Paint(vtkContext2D* painter) override;
+  void ReleaseGraphicsResources() override;
 
   /**
    * The actor to render.
    */
-  virtual void SetPropObject(vtkProp *PropObject);
-  vtkGetObjectMacro(PropObject, vtkProp)
+  virtual void SetPropObject(vtkProp* PropObject);
+  vtkGetObjectMacro(PropObject, vtkProp);
 
 protected:
   vtkPropItem();
-  ~vtkPropItem() VTK_OVERRIDE;
+  ~vtkPropItem() override;
 
   // Sync the active vtkCamera with the GL state set by the painter.
   virtual void UpdateTransforms();
@@ -58,10 +58,10 @@ protected:
   virtual void ResetTransforms();
 
 private:
-  vtkProp *PropObject;
+  vtkProp* PropObject;
 
-  vtkPropItem(const vtkPropItem &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPropItem &) VTK_DELETE_FUNCTION;
+  vtkPropItem(const vtkPropItem&) = delete;
+  void operator=(const vtkPropItem&) = delete;
 };
 
-#endif //vtkPropItem_h
+#endif // vtkPropItem_h

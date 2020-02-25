@@ -25,57 +25,49 @@
  *  prune == 1 will not leave traces on 135 degree angles, but will on 90.
  *  prune == 2 does not leave traces on any angles leaving only closed loops.
  * Prune defaults to zero. The output scalar type is the same as the input.
-*/
+ */
 
 #ifndef vtkImageSkeleton2D_h
 #define vtkImageSkeleton2D_h
 
-#include "vtkImagingMorphologicalModule.h" // For export macro
 #include "vtkImageIterateFilter.h"
+#include "vtkImagingMorphologicalModule.h" // For export macro
 
 class VTKIMAGINGMORPHOLOGICAL_EXPORT vtkImageSkeleton2D : public vtkImageIterateFilter
 {
 public:
-  static vtkImageSkeleton2D *New();
-  vtkTypeMacro(vtkImageSkeleton2D,vtkImageIterateFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageSkeleton2D* New();
+  vtkTypeMacro(vtkImageSkeleton2D, vtkImageIterateFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * When prune is on, only closed loops are left unchanged.
    */
-  vtkSetMacro(Prune,int);
-  vtkGetMacro(Prune,int);
-  vtkBooleanMacro(Prune,int);
+  vtkSetMacro(Prune, vtkTypeBool);
+  vtkGetMacro(Prune, vtkTypeBool);
+  vtkBooleanMacro(Prune, vtkTypeBool);
   //@}
 
   /**
    * Sets the number of cycles in the erosion.
    */
-  void SetNumberOfIterations(int num) VTK_OVERRIDE;
+  void SetNumberOfIterations(int num) override;
 
 protected:
   vtkImageSkeleton2D();
-  ~vtkImageSkeleton2D()VTK_OVERRIDE {}
+  ~vtkImageSkeleton2D() override {}
 
-  int Prune;
+  vtkTypeBool Prune;
 
-  int IterativeRequestUpdateExtent(vtkInformation* in,
-                                           vtkInformation* out) VTK_OVERRIDE;
-  void ThreadedRequestData(
-    vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector,
-    vtkImageData ***inDataV,
-    vtkImageData **outDataV,
-    int outExt[6],
-    int id) VTK_OVERRIDE;
+  int IterativeRequestUpdateExtent(vtkInformation* in, vtkInformation* out) override;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inDataV, vtkImageData** outDataV,
+    int outExt[6], int id) override;
+
 private:
-  vtkImageSkeleton2D(const vtkImageSkeleton2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageSkeleton2D&) VTK_DELETE_FUNCTION;
+  vtkImageSkeleton2D(const vtkImageSkeleton2D&) = delete;
+  void operator=(const vtkImageSkeleton2D&) = delete;
 };
 
 #endif
-
-
-

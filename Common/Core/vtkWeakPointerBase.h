@@ -20,7 +20,7 @@
  * instance, but it never affects the reference count of the vtkObjectBase. However,
  * when the vtkObjectBase referred to is destroyed, the pointer gets initialized to
  * nullptr, thus avoid dangling references.
-*/
+ */
 
 #ifndef vtkWeakPointerBase_h
 #define vtkWeakPointerBase_h
@@ -36,7 +36,7 @@ public:
   /**
    * Initialize smart pointer to nullptr.
    */
-  vtkWeakPointerBase() : Object(nullptr) {}
+  vtkWeakPointerBase() noexcept : Object(nullptr) {}
 
   /**
    * Initialize smart pointer to given object.
@@ -44,9 +44,14 @@ public:
   vtkWeakPointerBase(vtkObjectBase* r);
 
   /**
-   * Initialize weak pointer .
+   * Copy r's data object into the new weak pointer.
    */
   vtkWeakPointerBase(const vtkWeakPointerBase& r);
+
+  /**
+   * Move r's object into the new weak pointer, setting r to nullptr.
+   */
+  vtkWeakPointerBase(vtkWeakPointerBase&& r) noexcept;
 
   /**
    * Destroy smart pointer.
@@ -60,6 +65,7 @@ public:
    */
   vtkWeakPointerBase& operator=(vtkObjectBase* r);
   vtkWeakPointerBase& operator=(const vtkWeakPointerBase& r);
+  vtkWeakPointerBase& operator=(vtkWeakPointerBase&& r) noexcept;
   //@}
 
   /**
@@ -76,9 +82,10 @@ private:
   friend class vtkObjectBaseToWeakPointerBaseFriendship;
 
 protected:
-
   // Initialize weak pointer to given object.
-  class NoReference {};
+  class NoReference
+  {
+  };
   vtkWeakPointerBase(vtkObjectBase* r, const NoReference&);
 
   // Pointer to the actual object.
@@ -86,22 +93,18 @@ protected:
 };
 
 //----------------------------------------------------------------------------
-#define VTK_WEAK_POINTER_BASE_DEFINE_OPERATOR(op) \
-  inline bool \
-  operator op (const vtkWeakPointerBase& l, const vtkWeakPointerBase& r) \
-  { \
-    return (static_cast<void*>(l.GetPointer()) op \
-            static_cast<void*>(r.GetPointer())); \
-  } \
-  inline bool \
-  operator op (vtkObjectBase* l, const vtkWeakPointerBase& r) \
-  { \
-    return (static_cast<void*>(l) op static_cast<void*>(r.GetPointer())); \
-  } \
-  inline bool \
-  operator op (const vtkWeakPointerBase& l, vtkObjectBase* r) \
-  { \
-    return (static_cast<void*>(l.GetPointer()) op static_cast<void*>(r)); \
+#define VTK_WEAK_POINTER_BASE_DEFINE_OPERATOR(op)                                                  \
+  inline bool operator op(const vtkWeakPointerBase& l, const vtkWeakPointerBase& r)                \
+  {                                                                                                \
+    return (static_cast<void*>(l.GetPointer()) op static_cast<void*>(r.GetPointer()));             \
+  }                                                                                                \
+  inline bool operator op(vtkObjectBase* l, const vtkWeakPointerBase& r)                           \
+  {                                                                                                \
+    return (static_cast<void*>(l) op static_cast<void*>(r.GetPointer()));                          \
+  }                                                                                                \
+  inline bool operator op(const vtkWeakPointerBase& l, vtkObjectBase* r)                           \
+  {                                                                                                \
+    return (static_cast<void*>(l.GetPointer()) op static_cast<void*>(r));                          \
   }
 /**
  * Compare smart pointer values.
@@ -118,8 +121,7 @@ VTK_WEAK_POINTER_BASE_DEFINE_OPERATOR(>=)
 /**
  * Streaming operator to print smart pointer like regular pointers.
  */
-VTKCOMMONCORE_EXPORT ostream& operator << (ostream& os,
-                                        const vtkWeakPointerBase& p);
+VTKCOMMONCORE_EXPORT ostream& operator<<(ostream& os, const vtkWeakPointerBase& p);
 
 #endif
 // VTK-HeaderTest-Exclude: vtkWeakPointerBase.h

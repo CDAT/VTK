@@ -20,7 +20,7 @@
  *
  *
  *
-*/
+ */
 
 #ifndef vtkPlotLine_h
 #define vtkPlotLine_h
@@ -32,17 +32,17 @@ class VTKCHARTSCORE_EXPORT vtkPlotLine : public vtkPlotPoints
 {
 public:
   vtkTypeMacro(vtkPlotLine, vtkPlotPoints);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates a 2D Chart object.
    */
-  static vtkPlotLine *New();
+  static vtkPlotLine* New();
 
   /**
    * Paint event for the XY plot, called whenever the chart needs to be drawn.
    */
-  bool Paint(vtkContext2D *painter) VTK_OVERRIDE;
+  bool Paint(vtkContext2D* painter) override;
 
   /**
    * Paint legend event for the XY plot, called whenever the legend needs the
@@ -50,8 +50,7 @@ public:
    * corner of the rect (elements 0 and 1) and with width x height (elements 2
    * and 3). The plot can choose how to fill the space supplied.
    */
-  bool PaintLegend(vtkContext2D *painter, const vtkRectf& rect,
-                           int legendIndex) VTK_OVERRIDE;
+  bool PaintLegend(vtkContext2D* painter, const vtkRectf& rect, int legendIndex) override;
 
   //@{
   /**
@@ -61,14 +60,14 @@ public:
    * (e.g. [P1P2, P2P3, P3P4...].) If false, a segment is drawn for each pair
    * of points (e.g. [P1P2, P3P4,...].)
    */
-  vtkSetMacro(PolyLine,bool);
-  vtkGetMacro(PolyLine,bool);
-  vtkBooleanMacro(PolyLine,bool);
+  vtkSetMacro(PolyLine, bool);
+  vtkGetMacro(PolyLine, bool);
+  vtkBooleanMacro(PolyLine, bool);
   //@}
 
 protected:
   vtkPlotLine();
-  ~vtkPlotLine() VTK_OVERRIDE;
+  ~vtkPlotLine() override;
 
   /**
    * Poly line (true) or line segments(false).
@@ -76,9 +75,8 @@ protected:
   bool PolyLine;
 
 private:
-  vtkPlotLine(const vtkPlotLine &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPlotLine &) VTK_DELETE_FUNCTION;
-
+  vtkPlotLine(const vtkPlotLine&) = delete;
+  void operator=(const vtkPlotLine&) = delete;
 };
 
-#endif //vtkPlotLine_h
+#endif // vtkPlotLine_h

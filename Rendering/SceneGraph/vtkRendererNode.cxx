@@ -23,9 +23,9 @@
 #include "vtkLightCollection.h"
 #include "vtkLightNode.h"
 #include "vtkObjectFactory.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderer.h"
 #include "vtkRendererNode.h"
-#include "vtkRenderWindow.h"
 #include "vtkViewNodeCollection.h"
 
 //============================================================================
@@ -36,12 +36,16 @@ vtkRendererNode::vtkRendererNode()
 {
   this->Size[0] = 0;
   this->Size[1] = 0;
+  this->Viewport[0] = 0.0;
+  this->Viewport[1] = 0.0;
+  this->Viewport[2] = 1.0;
+  this->Viewport[3] = 1.0;
+  this->Scale[0] = 1;
+  this->Scale[1] = 1;
 }
 
 //----------------------------------------------------------------------------
-vtkRendererNode::~vtkRendererNode()
-{
-}
+vtkRendererNode::~vtkRendererNode() {}
 
 //----------------------------------------------------------------------------
 void vtkRendererNode::PrintSelf(ostream& os, vtkIndent indent)
@@ -50,29 +54,11 @@ void vtkRendererNode::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-void vtkRendererNode::Synchronize(bool prepass)
-{
-  if (prepass)
-  {
-    vtkRenderer *mine = vtkRenderer::SafeDownCast
-      (this->GetRenderable());
-    if (!mine)
-    {
-      return;
-    }
-    int *tmp = mine->GetSize();
-    this->Size[0] = tmp[0];
-    this->Size[1] = tmp[1];
-  }
-}
-
-//----------------------------------------------------------------------------
 void vtkRendererNode::Build(bool prepass)
 {
   if (prepass)
   {
-    vtkRenderer *mine = vtkRenderer::SafeDownCast
-      (this->GetRenderable());
+    vtkRenderer* mine = vtkRenderer::SafeDownCast(this->GetRenderable());
     if (!mine)
     {
       return;

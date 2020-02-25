@@ -26,7 +26,7 @@
  * stored in the files themselves (e.g DICOM).
  * @sa
  * vtkImageReader2
-*/
+ */
 
 #ifndef vtkSortFileNames_h
 #define vtkSortFileNames_h
@@ -42,10 +42,9 @@ class vtkStringArrayVector;
 class VTKIOCORE_EXPORT vtkSortFileNames : public vtkObject
 {
 public:
-
-  vtkTypeMacro(vtkSortFileNames,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkSortFileNames *New();
+  vtkTypeMacro(vtkSortFileNames, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkSortFileNames* New();
 
   //@{
   /**
@@ -55,9 +54,9 @@ public:
    * numbered series will be placed into different groups.  This is
    * off by default.
    */
-  vtkSetMacro(Grouping, int);
-  vtkGetMacro(Grouping, int);
-  vtkBooleanMacro(Grouping, int);
+  vtkSetMacro(Grouping, vtkTypeBool);
+  vtkGetMacro(Grouping, vtkTypeBool);
+  vtkBooleanMacro(Grouping, vtkTypeBool);
   //@}
 
   //@{
@@ -69,9 +68,9 @@ public:
    * ["file10.dat" "file8.dat", "file9.dat"].
    * NumericSort is off by default.
    */
-  vtkSetMacro(NumericSort, int);
-  vtkGetMacro(NumericSort, int);
-  vtkBooleanMacro(NumericSort, int);
+  vtkSetMacro(NumericSort, vtkTypeBool);
+  vtkGetMacro(NumericSort, vtkTypeBool);
+  vtkBooleanMacro(NumericSort, vtkTypeBool);
   //@}
 
   //@{
@@ -79,9 +78,9 @@ public:
    * Ignore case when sorting.  This flag is honored by both
    * the sorting and the grouping. This is off by default.
    */
-  vtkSetMacro(IgnoreCase, int);
-  vtkGetMacro(IgnoreCase, int);
-  vtkBooleanMacro(IgnoreCase, int);
+  vtkSetMacro(IgnoreCase, vtkTypeBool);
+  vtkGetMacro(IgnoreCase, vtkTypeBool);
+  vtkBooleanMacro(IgnoreCase, vtkTypeBool);
   //@}
 
   //@{
@@ -90,23 +89,23 @@ public:
    * is a directory rather than a file will not be included in
    * the output.  This is off by default.
    */
-  vtkSetMacro(SkipDirectories, int);
-  vtkGetMacro(SkipDirectories, int);
-  vtkBooleanMacro(SkipDirectories, int);
+  vtkSetMacro(SkipDirectories, vtkTypeBool);
+  vtkGetMacro(SkipDirectories, vtkTypeBool);
+  vtkBooleanMacro(SkipDirectories, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set a list of file names to group and sort.
    */
-  void SetInputFileNames(vtkStringArray *input);
+  void SetInputFileNames(vtkStringArray* input);
   vtkGetObjectMacro(InputFileNames, vtkStringArray);
   //@}
 
   /**
    * Get the full list of sorted filenames.
    */
-  virtual vtkStringArray *GetFileNames();
+  virtual vtkStringArray* GetFileNames();
 
   /**
    * Get the number of groups that the names were split into, if
@@ -122,7 +121,7 @@ public:
    * be used if grouping is on.  If grouping is off, it will always
    * return null.
    */
-  virtual vtkStringArray *GetNthGroup(int i);
+  virtual vtkStringArray* GetNthGroup(int i);
 
   /**
    * Update the output filenames from the input filenames.
@@ -133,18 +132,18 @@ public:
 
 protected:
   vtkSortFileNames();
-  ~vtkSortFileNames() VTK_OVERRIDE;
+  ~vtkSortFileNames() override;
 
-  int NumericSort;
-  int IgnoreCase;
-  int Grouping;
-  int SkipDirectories;
+  vtkTypeBool NumericSort;
+  vtkTypeBool IgnoreCase;
+  vtkTypeBool Grouping;
+  vtkTypeBool SkipDirectories;
 
   vtkTimeStamp UpdateTime;
 
-  vtkStringArray *InputFileNames;
-  vtkStringArray *FileNames;
-  vtkStringArrayVector *Groups;
+  vtkStringArray* InputFileNames;
+  vtkStringArray* FileNames;
+  vtkStringArrayVector* Groups;
 
   /**
    * Fill the output.
@@ -154,18 +153,16 @@ protected:
   /**
    * Sort the input string array, and append the results to the output.
    */
-  virtual void SortFileNames(vtkStringArray *input, vtkStringArray *output);
+  virtual void SortFileNames(vtkStringArray* input, vtkStringArray* output);
 
   /**
    * Separate a string array into groups and append them to the output.
    */
-  virtual void GroupFileNames(vtkStringArray *input,
-                              vtkStringArrayVector *output);
-
+  virtual void GroupFileNames(vtkStringArray* input, vtkStringArrayVector* output);
 
 private:
-  vtkSortFileNames(const vtkSortFileNames&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSortFileNames&) VTK_DELETE_FUNCTION;
+  vtkSortFileNames(const vtkSortFileNames&) = delete;
+  void operator=(const vtkSortFileNames&) = delete;
 };
 
 #endif

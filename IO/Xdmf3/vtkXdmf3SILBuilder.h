@@ -24,7 +24,7 @@
  *
  * This file is a helper for the vtkXdmf3Reader and vtkXdmf3Writer and
  * not intended to be part of VTK public API
-*/
+ */
 
 #ifndef vtkXdmf3SILBuilder_h
 #define vtkXdmf3SILBuilder_h
@@ -74,7 +74,8 @@ public:
 
   vtkXdmf3SILBuilder();
   ~vtkXdmf3SILBuilder();
+  vtkXdmf3SILBuilder(const vtkXdmf3SILBuilder&) = delete;
 };
 
-#endif //vtkXdmf3SILBuilder_h
+#endif // vtkXdmf3SILBuilder_h
 // VTK-HeaderTest-Exclude: vtkXdmf3SILBuilder.h

@@ -27,20 +27,20 @@
  *
  * @par Thanks:
  * Developed by Timothy M. Shead (tshead@sandia.gov) at Sandia National Laboratories.
-*/
+ */
 
 #ifndef vtkNormalizeMatrixVectors_h
 #define vtkNormalizeMatrixVectors_h
 
-#include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkArrayDataAlgorithm.h"
+#include "vtkFiltersGeneralModule.h" // For export macro
 
 class VTKFILTERSGENERAL_EXPORT vtkNormalizeMatrixVectors : public vtkArrayDataAlgorithm
 {
 public:
   static vtkNormalizeMatrixVectors* New();
   vtkTypeMacro(vtkNormalizeMatrixVectors, vtkArrayDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -60,20 +60,16 @@ public:
 
 protected:
   vtkNormalizeMatrixVectors();
-  ~vtkNormalizeMatrixVectors() VTK_OVERRIDE;
+  ~vtkNormalizeMatrixVectors() override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   int VectorDimension;
   double PValue;
 
 private:
-  vtkNormalizeMatrixVectors(const vtkNormalizeMatrixVectors&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkNormalizeMatrixVectors&) VTK_DELETE_FUNCTION;
+  vtkNormalizeMatrixVectors(const vtkNormalizeMatrixVectors&) = delete;
+  void operator=(const vtkNormalizeMatrixVectors&) = delete;
 };
 
 #endif
-

@@ -21,7 +21,7 @@
  *
  * @warning
  * vtkDirectory works with windows and unix only.
-*/
+ */
 
 #ifndef vtkDirectory_h
 #define vtkDirectory_h
@@ -38,18 +38,18 @@ public:
   /**
    * Return the class name as a string.
    */
-  vtkTypeMacro(vtkDirectory,vtkObject);
+  vtkTypeMacro(vtkDirectory, vtkObject);
   //@}
 
   /**
    * Create a new vtkDirectory object.
    */
-  static vtkDirectory *New();
+  static vtkDirectory* New();
 
   /**
    * Print directory to stream.
    */
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Open the specified directory and load the names of the files
@@ -74,7 +74,7 @@ public:
    * directory. If no directory has been opened, it is assumed to
    * be relative to the current working directory.
    */
-  int FileIsDirectory(const char *name);
+  int FileIsDirectory(const char* name);
 
   //@{
   /**
@@ -108,17 +108,17 @@ protected:
   // NumberOfFiles to 0
   void CleanUpFilesAndPath();
   vtkDirectory();
-  ~vtkDirectory() VTK_OVERRIDE;
+  ~vtkDirectory() override;
 
 private:
-  char* Path;           // Path to Open'ed directory
-  vtkStringArray *Files;    // VTK array of files
+  char* Path;            // Path to Open'ed directory
+  vtkStringArray* Files; // VTK array of files
 
   static int CreateDirectoryInternal(const char* dir);
 
 private:
-  vtkDirectory(const vtkDirectory&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDirectory&) VTK_DELETE_FUNCTION;
+  vtkDirectory(const vtkDirectory&) = delete;
+  void operator=(const vtkDirectory&) = delete;
 };
 
 #endif

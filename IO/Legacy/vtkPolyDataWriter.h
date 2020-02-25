@@ -20,22 +20,22 @@
  * polygonal data files in vtk format. See text for format details.
  * @warning
  * Binary files written on one system may not be readable on other systems.
-*/
+ */
 
 #ifndef vtkPolyDataWriter_h
 #define vtkPolyDataWriter_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataWriter.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkPolyData;
 
 class VTKIOLEGACY_EXPORT vtkPolyDataWriter : public vtkDataWriter
 {
 public:
-  static vtkPolyDataWriter *New();
-  vtkTypeMacro(vtkPolyDataWriter,vtkDataWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPolyDataWriter* New();
+  vtkTypeMacro(vtkPolyDataWriter, vtkDataWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -47,15 +47,15 @@ public:
 
 protected:
   vtkPolyDataWriter() {}
-  ~vtkPolyDataWriter() VTK_OVERRIDE {}
+  ~vtkPolyDataWriter() override {}
 
-  void WriteData() VTK_OVERRIDE;
+  void WriteData() override;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkPolyDataWriter(const vtkPolyDataWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolyDataWriter&) VTK_DELETE_FUNCTION;
+  vtkPolyDataWriter(const vtkPolyDataWriter&) = delete;
+  void operator=(const vtkPolyDataWriter&) = delete;
 };
 
 #endif

@@ -23,7 +23,7 @@
  * @sa
  * vtkPointInterpolator vtkInterpolationKernel vtkGeneralizedKernel
  * vtkGaussianKernel vtkLinearKernel vtkShepardKernel
-*/
+ */
 
 #ifndef vtkLinearKernel_h
 #define vtkLinearKernel_h
@@ -34,7 +34,6 @@
 class vtkIdList;
 class vtkDoubleArray;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkLinearKernel : public vtkGeneralizedKernel
 {
 public:
@@ -42,9 +41,9 @@ public:
   /**
    * Standard methods for instantiation, obtaining type information, and printing.
    */
-  static vtkLinearKernel *New();
-  vtkTypeMacro(vtkLinearKernel,vtkGeneralizedKernel);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkLinearKernel* New();
+  vtkTypeMacro(vtkLinearKernel, vtkGeneralizedKernel);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   // Re-use any superclass signatures that we don't override.
@@ -64,16 +63,16 @@ public:
    * are estimates of local confidence of weights. The prob may be nullptr in
    * which all probabilities are considered =1.
    */
-  vtkIdType ComputeWeights(double x[3], vtkIdList *pIds,
-                                   vtkDoubleArray *prob, vtkDoubleArray *weights) VTK_OVERRIDE;
+  vtkIdType ComputeWeights(
+    double x[3], vtkIdList* pIds, vtkDoubleArray* prob, vtkDoubleArray* weights) override;
 
 protected:
   vtkLinearKernel();
-  ~vtkLinearKernel() VTK_OVERRIDE;
+  ~vtkLinearKernel() override;
 
 private:
-  vtkLinearKernel(const vtkLinearKernel&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLinearKernel&) VTK_DELETE_FUNCTION;
+  vtkLinearKernel(const vtkLinearKernel&) = delete;
+  void operator=(const vtkLinearKernel&) = delete;
 };
 
 #endif

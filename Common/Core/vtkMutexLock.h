@@ -19,21 +19,15 @@
  * vtkMutexLock allows the locking of variables which are accessed
  * through different threads.  This header file also defines
  * vtkSimpleMutexLock which is not a subclass of vtkObject.
-*/
+ */
 
 #ifndef vtkMutexLock_h
 #define vtkMutexLock_h
 
-
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkObject.h"
 
-#ifdef VTK_USE_SPROC
-#include <abi_mutex.h> // Needed for SPROC implementation of mutex
-typedef abilock_t vtkMutexType;
-#endif
-
-#if defined(VTK_USE_PTHREADS) || defined(VTK_HP_PTHREADS)
+#if defined(VTK_USE_PTHREADS)
 #include <pthread.h> // Needed for PTHREAD implementation of mutex
 typedef pthread_mutex_t vtkMutexType;
 #endif
@@ -42,11 +36,9 @@ typedef pthread_mutex_t vtkMutexType;
 typedef vtkWindowsHANDLE vtkMutexType;
 #endif
 
-#ifndef VTK_USE_SPROC
 #ifndef VTK_USE_PTHREADS
 #ifndef VTK_USE_WIN32_THREADS
 typedef int vtkMutexType;
-#endif
 #endif
 #endif
 
@@ -58,65 +50,64 @@ public:
   vtkSimpleMutexLock();
   virtual ~vtkSimpleMutexLock();
 
-  static vtkSimpleMutexLock *New();
+  static vtkSimpleMutexLock* New();
 
-  void Delete() {delete this;}
+  void Delete() { delete this; }
 
   /**
    * Lock the vtkMutexLock
    */
-  void Lock( void );
+  void Lock(void);
 
   /**
    * Unlock the vtkMutexLock
    */
-  void Unlock( void );
+  void Unlock(void);
 
 protected:
   friend class vtkSimpleConditionVariable;
-  vtkMutexType   MutexLock;
+  vtkMutexType MutexLock;
 
 private:
-  vtkSimpleMutexLock(const vtkSimpleMutexLock& other) VTK_DELETE_FUNCTION;
-  vtkSimpleMutexLock& operator=(const vtkSimpleMutexLock& rhs) VTK_DELETE_FUNCTION;
+  vtkSimpleMutexLock(const vtkSimpleMutexLock& other) = delete;
+  vtkSimpleMutexLock& operator=(const vtkSimpleMutexLock& rhs) = delete;
 };
 
 class VTKCOMMONCORE_EXPORT vtkMutexLock : public vtkObject
 {
 public:
-  static vtkMutexLock *New();
+  static vtkMutexLock* New();
 
-  vtkTypeMacro(vtkMutexLock,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMutexLock, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Lock the vtkMutexLock
    */
-  void Lock( void );
+  void Lock(void);
 
   /**
    * Unlock the vtkMutexLock
    */
-  void Unlock( void );
+  void Unlock(void);
 
 protected:
-
   friend class vtkConditionVariable; // needs to get at SimpleMutexLock.
 
-  vtkSimpleMutexLock   SimpleMutexLock;
+  vtkSimpleMutexLock SimpleMutexLock;
   vtkMutexLock() {}
+
 private:
-  vtkMutexLock(const vtkMutexLock&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMutexLock&) VTK_DELETE_FUNCTION;
+  vtkMutexLock(const vtkMutexLock&) = delete;
+  void operator=(const vtkMutexLock&) = delete;
 };
 
-
-inline void vtkMutexLock::Lock( void )
+inline void vtkMutexLock::Lock(void)
 {
   this->SimpleMutexLock.Lock();
 }
 
-inline void vtkMutexLock::Unlock( void )
+inline void vtkMutexLock::Unlock(void)
 {
   this->SimpleMutexLock.Unlock();
 }

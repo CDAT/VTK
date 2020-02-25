@@ -34,7 +34,7 @@ PURPOSE.  See the above copyright notice for more information.
  * p1c1 p2c1 p3c1 ... pnc1 materialnum partnum
  * p1c2 p2c2 p3c2 ... pnc2 materialnum partnum
  * ...
-*/
+ */
 
 #ifndef vtkFacetWriter_h
 #define vtkFacetWriter_h
@@ -47,9 +47,9 @@ class vtkInformation;
 class VTKIOGEOMETRY_EXPORT vtkFacetWriter : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkFacetWriter *New();
-  vtkTypeMacro(vtkFacetWriter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkFacetWriter* New();
+  vtkTypeMacro(vtkFacetWriter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -68,25 +68,23 @@ public:
 
 protected:
   vtkFacetWriter();
-  ~vtkFacetWriter() VTK_OVERRIDE;
+  ~vtkFacetWriter() override;
 
   // This is called by the superclass.
   // This is the method you should override.
-  int RequestData(vtkInformation *request,
-                           vtkInformationVector** inputVector,
-                           vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int FillInputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
   int WriteDataToStream(ostream* ost, vtkPolyData* data);
 
-  char *FileName;
-  ostream *OutputStream;
+  char* FileName;
+  ostream* OutputStream;
 
 private:
-  vtkFacetWriter(const vtkFacetWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFacetWriter&) VTK_DELETE_FUNCTION;
+  vtkFacetWriter(const vtkFacetWriter&) = delete;
+  void operator=(const vtkFacetWriter&) = delete;
 };
 
 #endif
-

@@ -33,9 +33,9 @@
  *
  * @sa
  * vtkFiltersPointsFilter vtkRadiusOutlierRemoval vtkStatisticalOutlierRemoval
- * vtkThresholdPoints vtkImplicitFunction vtkExtractGeoemtry
+ * vtkThresholdPoints vtkImplicitFunction vtkExtractGeometry
  * vtkFitImplicitFunction
-*/
+ */
 
 #ifndef vtkExtractHierarchicalBins_h
 #define vtkExtractHierarchicalBins_h
@@ -46,7 +46,6 @@
 class vtkHierarchicalBinningFilter;
 class vtkPointSet;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkExtractHierarchicalBins : public vtkPointCloudFilter
 {
 public:
@@ -55,9 +54,9 @@ public:
    * Standard methods for instantiating, obtaining type information, and
    * printing information.
    */
-  static vtkExtractHierarchicalBins *New();
-  vtkTypeMacro(vtkExtractHierarchicalBins,vtkPointCloudFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkExtractHierarchicalBins* New();
+  vtkTypeMacro(vtkExtractHierarchicalBins, vtkPointCloudFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -65,11 +64,14 @@ public:
    * Specify the level to extract. If non-negative, with a negative bin
    * number, then all points at this level are extracted and sent to the
    * output. If negative, then the points from the specified bin are sent to
-   * the output. If both the level and bin number are negative values, then the
-   * input is sent to the output. By default the 0th level is extracted.
+   * the output. If both the level and bin number are negative values, then
+   * the input is sent to the output. By default the 0th level is
+   * extracted. Note that requesting a level greater than the associated
+   * vtkHierarchicalBinningFilter will clamp the level to the maximum
+   * possible level of the binning filter.
    */
-  vtkSetMacro(Level,int);
-  vtkGetMacro(Level,int);
+  vtkSetMacro(Level, int);
+  vtkGetMacro(Level, int);
   //@}
 
   //@{
@@ -77,45 +79,44 @@ public:
    * Specify the bin number to extract. If a non-negative value, then the
    * points from the bin number specified are extracted. If negative, then
    * entire levels of points are extacted (assuming the Level is
-   * non-negative). Note that the bin tree is flattened, a particular
-   * bin number may refer to a bin on any level.
+   * non-negative). Note that the bin tree is flattened, a particular bin
+   * number may refer to a bin on any level. Note that requesting a bin
+   * greater than the associated vtkHierarchicalBinningFilter will clamp the
+   * bin to the maximum possible bin of the binning filter.
    */
-  vtkSetMacro(Bin,int);
-  vtkGetMacro(Bin,int);
+  vtkSetMacro(Bin, int);
+  vtkGetMacro(Bin, int);
   //@}
 
   //@{
   /**
-   * Specify the vtkHierarchicalBinningFilter to query for relavant
+   * Specify the vtkHierarchicalBinningFilter to query for relevant
    * information. Make sure that this filter has executed prior to the execution of
    * this filter. (This is generally a safe bet if connected in a pipeline.)
    */
   virtual void SetBinningFilter(vtkHierarchicalBinningFilter*);
-  vtkGetObjectMacro(BinningFilter,vtkHierarchicalBinningFilter);
+  vtkGetObjectMacro(BinningFilter, vtkHierarchicalBinningFilter);
   //@}
-
 
 protected:
   vtkExtractHierarchicalBins();
-  ~vtkExtractHierarchicalBins() VTK_OVERRIDE;
+  ~vtkExtractHierarchicalBins() override;
 
   // Users can extract points from a particular level or bin.
   int Level;
   int Bin;
-  vtkHierarchicalBinningFilter *BinningFilter;
+  vtkHierarchicalBinningFilter* BinningFilter;
 
   // for the binning filter
-  void ReportReferences(vtkGarbageCollector*) VTK_OVERRIDE;
-
+  void ReportReferences(vtkGarbageCollector*) override;
 
   // All derived classes must implement this method. Note that a side effect of
   // the class is to populate the PointMap. Zero is returned if there is a failure.
-  int FilterPoints(vtkPointSet *input) VTK_OVERRIDE;
+  int FilterPoints(vtkPointSet* input) override;
 
 private:
-  vtkExtractHierarchicalBins(const vtkExtractHierarchicalBins&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractHierarchicalBins&) VTK_DELETE_FUNCTION;
-
+  vtkExtractHierarchicalBins(const vtkExtractHierarchicalBins&) = delete;
+  void operator=(const vtkExtractHierarchicalBins&) = delete;
 };
 
 #endif

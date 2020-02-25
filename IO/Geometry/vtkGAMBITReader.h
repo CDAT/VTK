@@ -27,7 +27,7 @@
  *
  * @sa
  * vtkAVSucdReader
-*/
+ */
 
 #ifndef vtkGAMBITReader_h
 #define vtkGAMBITReader_h
@@ -39,9 +39,9 @@ class vtkDoubleArray;
 class VTKIOGEOMETRY_EXPORT vtkGAMBITReader : public vtkUnstructuredGridAlgorithm
 {
 public:
-  static vtkGAMBITReader *New();
-  vtkTypeMacro(vtkGAMBITReader,vtkUnstructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkGAMBITReader* New();
+  vtkTypeMacro(vtkGAMBITReader, vtkUnstructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -56,7 +56,7 @@ public:
    * Get the total number of cells. The number of cells is only valid after a
    * successful read of the data file is performed.
    */
-  vtkGetMacro(NumberOfCells,int);
+  vtkGetMacro(NumberOfCells, int);
   //@}
 
   //@{
@@ -64,24 +64,24 @@ public:
    * Get the total number of nodes. The number of nodes is only valid after a
    * successful read of the data file is performed.
    */
-  vtkGetMacro(NumberOfNodes,int);
+  vtkGetMacro(NumberOfNodes, int);
   //@}
 
   //@{
   /**
    * Get the number of data components at the nodes and cells.
    */
-  vtkGetMacro(NumberOfNodeFields,int);
-  vtkGetMacro(NumberOfCellFields,int);
+  vtkGetMacro(NumberOfNodeFields, int);
+  vtkGetMacro(NumberOfCellFields, int);
   //@}
 
 protected:
   vtkGAMBITReader();
-  ~vtkGAMBITReader() VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  ~vtkGAMBITReader() override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  char *FileName;
+  char* FileName;
 
   int NumberOfNodes;
   int NumberOfCells;
@@ -91,33 +91,33 @@ protected:
   int NumberOfBoundaryConditionSets;
   int NumberOfCoordinateDirections;
   int NumberOfVelocityComponents;
-  ifstream *FileStream;
+  istream* FileStream;
 
   enum GAMBITCellType
   {
-    EDGE    = 1,
-    QUAD    = 2,
-    TRI     = 3,
-    BRICK   = 4,
-    PRISM   = 5,
-    TETRA   = 6,
+    EDGE = 1,
+    QUAD = 2,
+    TRI = 3,
+    BRICK = 4,
+    PRISM = 5,
+    TETRA = 6,
     PYRAMID = 7
   };
 
 private:
-  void ReadFile(vtkUnstructuredGrid *output);
-  void ReadGeometry(vtkUnstructuredGrid *output);
-  void ReadNodeData(vtkUnstructuredGrid *output);
-  void ReadCellData(vtkUnstructuredGrid *output);
+  void ReadFile(vtkUnstructuredGrid* output);
+  void ReadGeometry(vtkUnstructuredGrid* output);
+  void ReadNodeData(vtkUnstructuredGrid* output);
+  void ReadCellData(vtkUnstructuredGrid* output);
 
-  void ReadXYZCoords(vtkDoubleArray *coords);
+  void ReadXYZCoords(vtkDoubleArray* coords);
 
-  void ReadCellConnectivity(vtkUnstructuredGrid *output);
-  void ReadMaterialTypes(vtkUnstructuredGrid *output);
-  void ReadBoundaryConditionSets(vtkUnstructuredGrid *output);
+  void ReadCellConnectivity(vtkUnstructuredGrid* output);
+  void ReadMaterialTypes(vtkUnstructuredGrid* output);
+  void ReadBoundaryConditionSets(vtkUnstructuredGrid* output);
 
-  vtkGAMBITReader(const vtkGAMBITReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGAMBITReader&) VTK_DELETE_FUNCTION;
+  vtkGAMBITReader(const vtkGAMBITReader&) = delete;
+  void operator=(const vtkGAMBITReader&) = delete;
 };
 
 #endif

@@ -16,7 +16,6 @@
 #include "vtkCompositeDataSet.h"
 #include "vtkObjectFactory.h"
 
-
 //----------------------------------------------------------------------------
 vtkCompositeDataIterator::vtkCompositeDataIterator()
 {
@@ -35,7 +34,7 @@ vtkCompositeDataIterator::~vtkCompositeDataIterator()
 void vtkCompositeDataIterator::SetDataSet(vtkCompositeDataSet* ds)
 {
   vtkSetObjectBodyMacro(DataSet, vtkCompositeDataSet, ds);
-  if(ds)
+  if (ds)
   {
     this->GoToFirstItem();
   }
@@ -44,14 +43,14 @@ void vtkCompositeDataIterator::SetDataSet(vtkCompositeDataSet* ds)
 //----------------------------------------------------------------------------
 void vtkCompositeDataIterator::InitTraversal()
 {
-  this->Reverse = 0;
+  this->SetReverse(0);
   this->GoToFirstItem();
 }
 
 //----------------------------------------------------------------------------
 void vtkCompositeDataIterator::InitReverseTraversal()
 {
-  this->Reverse = 1;
+  this->SetReverse(1);
   this->GoToFirstItem();
 }
 
@@ -59,8 +58,6 @@ void vtkCompositeDataIterator::InitReverseTraversal()
 void vtkCompositeDataIterator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "Reverse: "
-    << (this->Reverse? "On" : "Off") << endl;
-  os << indent << "SkipEmptyNodes: "
-    << (this->SkipEmptyNodes? "On" : "Off") << endl;
+  os << indent << "Reverse: " << (this->Reverse ? "On" : "Off") << endl;
+  os << indent << "SkipEmptyNodes: " << (this->SkipEmptyNodes ? "On" : "Off") << endl;
 }

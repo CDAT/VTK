@@ -29,7 +29,7 @@
  * occur in 2D or 3D; the bounds in which the graph should lie (note that you
  * can just use automatic bounds computation); and modify the cool down
  * rate (controls the final process of simulated annealing).
-*/
+ */
 
 #ifndef vtkGraphLayoutFilter_h
 #define vtkGraphLayoutFilter_h
@@ -40,10 +40,10 @@
 class VTKFILTERSGENERAL_EXPORT vtkGraphLayoutFilter : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkGraphLayoutFilter *New();
+  static vtkGraphLayoutFilter* New();
 
-  vtkTypeMacro(vtkGraphLayoutFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkGraphLayoutFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -51,8 +51,8 @@ public:
    * The GraphBounds only affects the results if AutomaticBoundsComputation
    * is off.
    */
-  vtkSetVector6Macro(GraphBounds,double);
-  vtkGetVectorMacro(GraphBounds,double,6);
+  vtkSetVector6Macro(GraphBounds, double);
+  vtkGetVectorMacro(GraphBounds, double, 6);
   //@}
 
   //@{
@@ -61,9 +61,9 @@ public:
    * boolean is off, then the manually specified GraphBounds is used.
    * If on, then the input's bounds us used as the graph bounds.
    */
-  vtkSetMacro(AutomaticBoundsComputation, int);
-  vtkGetMacro(AutomaticBoundsComputation, int);
-  vtkBooleanMacro(AutomaticBoundsComputation, int);
+  vtkSetMacro(AutomaticBoundsComputation, vtkTypeBool);
+  vtkGetMacro(AutomaticBoundsComputation, vtkTypeBool);
+  vtkBooleanMacro(AutomaticBoundsComputation, vtkTypeBool);
   //@}
 
   //@{
@@ -89,24 +89,24 @@ public:
   // Turn on/off layout of graph in three dimensions. If off, graph
   // layout occurs in two dimensions. By default, three dimensional
   // layout is on.
-  vtkSetMacro(ThreeDimensionalLayout, int);
-  vtkGetMacro(ThreeDimensionalLayout, int);
-  vtkBooleanMacro(ThreeDimensionalLayout, int);
+  vtkSetMacro(ThreeDimensionalLayout, vtkTypeBool);
+  vtkGetMacro(ThreeDimensionalLayout, vtkTypeBool);
+  vtkBooleanMacro(ThreeDimensionalLayout, vtkTypeBool);
 
 protected:
   vtkGraphLayoutFilter();
-  ~vtkGraphLayoutFilter() VTK_OVERRIDE {}
+  ~vtkGraphLayoutFilter() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   double GraphBounds[6];
-  int   AutomaticBoundsComputation;  //Boolean controls automatic bounds calc.
-  int   MaxNumberOfIterations;  //Maximum number of iterations.
-  double CoolDownRate;  //Cool-down rate.  Note:  Higher # = Slower rate.
-  int   ThreeDimensionalLayout;  //Boolean for a third dimension.
+  vtkTypeBool AutomaticBoundsComputation; // Boolean controls automatic bounds calc.
+  int MaxNumberOfIterations;              // Maximum number of iterations.
+  double CoolDownRate;                    // Cool-down rate.  Note:  Higher # = Slower rate.
+  vtkTypeBool ThreeDimensionalLayout;     // Boolean for a third dimension.
 private:
-  vtkGraphLayoutFilter(const vtkGraphLayoutFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGraphLayoutFilter&) VTK_DELETE_FUNCTION;
+  vtkGraphLayoutFilter(const vtkGraphLayoutFilter&) = delete;
+  void operator=(const vtkGraphLayoutFilter&) = delete;
 };
 
 #endif

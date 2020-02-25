@@ -17,8 +17,8 @@
 
 #include "vtkBYUReader.h"
 #include "vtkCamera.h"
-#include "vtkLight.h"
 #include "vtkLODActor.h"
+#include "vtkLight.h"
 #include "vtkNew.h"
 #include "vtkOutlineFilter.h"
 #include "vtkPolarAxesActor.h"
@@ -26,9 +26,9 @@
 #include "vtkPolyDataNormals.h"
 #include "vtkProperty.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 #include "vtkTextProperty.h"
 
@@ -40,7 +40,7 @@ int TestPolarAxes(int argc, char* argv[])
   vtkNew<vtkBYUReader> reader;
   char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/teapot.g");
   reader->SetGeometryFileName(fname);
-  delete [] fname;
+  delete[] fname;
 
   vtkNew<vtkPolyDataNormals> normals;
   normals->SetInputConnection(reader->GetOutputPort());
@@ -49,7 +49,7 @@ int TestPolarAxes(int argc, char* argv[])
   readerMapper->SetInputConnection(normals->GetOutputPort());
 
   vtkNew<vtkLODActor> readerActor;
-  readerActor->SetMapper(readerMapper.GetPointer());
+  readerActor->SetMapper(readerMapper);
   readerActor->GetProperty()->SetDiffuseColor(.5, .8, .3);
 
   vtkNew<vtkOutlineFilter> outline;
@@ -59,7 +59,7 @@ int TestPolarAxes(int argc, char* argv[])
   mapOutline->SetInputConnection(outline->GetOutputPort());
 
   vtkNew<vtkActor> outlineActor;
-  outlineActor->SetMapper(mapOutline.GetPointer());
+  outlineActor->SetMapper(mapOutline);
   outlineActor->GetProperty()->SetColor(1., 1., 1.);
 
   vtkNew<vtkCamera> camera;
@@ -72,8 +72,8 @@ int TestPolarAxes(int argc, char* argv[])
   light->SetPosition(7., 7., 4.);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->SetActiveCamera(camera.GetPointer());
-  renderer->AddLight(light.GetPointer());
+  renderer->SetActiveCamera(camera);
+  renderer->AddLight(light);
 
   // Update normals in order to get correct bounds for polar axes
   normals->Update();
@@ -101,17 +101,17 @@ int TestPolarAxes(int argc, char* argv[])
 
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetMultiSamples(0);
-  renWin->AddRenderer(renderer.GetPointer());
+  renWin->AddRenderer(renderer);
   renWin->SetWindowName("VTK - Polar Axes");
   renWin->SetSize(600, 600);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   renderer->SetBackground(.8, .8, .8);
-  renderer->AddViewProp(readerActor.GetPointer());
-  renderer->AddViewProp(outlineActor.GetPointer());
-  renderer->AddViewProp(polaxes.GetPointer());
+  renderer->AddViewProp(readerActor);
+  renderer->AddViewProp(outlineActor);
+  renderer->AddViewProp(polaxes);
   renWin->Render();
 
   iren->Start();

@@ -17,20 +17,20 @@
  *
  * PolyDataMapper that uses imposters to draw cylinders/sticks
  * for ball/stick style molecular rendering. Supports picking.
-*/
+ */
 
 #ifndef vtkOpenGLStickMapper_h
 #define vtkOpenGLStickMapper_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkOpenGLPolyDataMapper.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLStickMapper : public vtkOpenGLPolyDataMapper
 {
 public:
   static vtkOpenGLStickMapper* New();
-  vtkTypeMacro(vtkOpenGLStickMapper, vtkOpenGLPolyDataMapper)
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOpenGLStickMapper, vtkOpenGLPolyDataMapper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -55,51 +55,49 @@ public:
 
 protected:
   vtkOpenGLStickMapper();
-  ~vtkOpenGLStickMapper() VTK_OVERRIDE;
+  ~vtkOpenGLStickMapper() override;
 
   /**
    * Create the basic shaders before replacement
    */
   void GetShaderTemplate(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act) override;
 
   /**
-   * Perform string replacments on the shader templates
+   * Perform string replacements on the shader templates
    */
   void ReplaceShaderValues(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act) override;
 
   /**
    * Set the shader parameters related to the Camera
    */
-  void SetCameraShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void SetCameraShaderParameters(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act) override;
 
   /**
    * Set the shader parameters related to the actor/mapper
    */
-  void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void SetMapperShaderParameters(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act) override;
 
-  const char *ScaleArray;
-  const char *OrientationArray;
-  const char *SelectionIdArray;
+  const char* ScaleArray;
+  const char* OrientationArray;
+  const char* SelectionIdArray;
 
   /**
    * Does the VBO/IBO need to be rebuilt
    */
-  bool GetNeedToRebuildBufferObjects(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  bool GetNeedToRebuildBufferObjects(vtkRenderer* ren, vtkActor* act) override;
 
   /**
    * Update the VBO to contain point based values
    */
-  void BuildBufferObjects(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void BuildBufferObjects(vtkRenderer* ren, vtkActor* act) override;
 
-  void RenderPieceDraw(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void RenderPieceDraw(vtkRenderer* ren, vtkActor* act) override;
 
 private:
-  vtkOpenGLStickMapper(const vtkOpenGLStickMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLStickMapper&) VTK_DELETE_FUNCTION;
+  vtkOpenGLStickMapper(const vtkOpenGLStickMapper&) = delete;
+  void operator=(const vtkOpenGLStickMapper&) = delete;
 };
 
 #endif

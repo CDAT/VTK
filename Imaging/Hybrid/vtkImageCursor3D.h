@@ -17,21 +17,20 @@
  * @brief   Paints a cursor on top of an image or volume.
  *
  * vtkImageCursor3D will draw a cursor on a 2d image or 3d volume.
-*/
+ */
 
 #ifndef vtkImageCursor3D_h
 #define vtkImageCursor3D_h
 
-#include "vtkImagingHybridModule.h" // For export macro
 #include "vtkImageInPlaceFilter.h"
+#include "vtkImagingHybridModule.h" // For export macro
 
 class VTKIMAGINGHYBRID_EXPORT vtkImageCursor3D : public vtkImageInPlaceFilter
 {
 public:
-  static vtkImageCursor3D *New();
-  vtkTypeMacro(vtkImageCursor3D,vtkImageInPlaceFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-
+  static vtkImageCursor3D* New();
+  vtkTypeMacro(vtkImageCursor3D, vtkImageInPlaceFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -58,27 +57,20 @@ public:
   vtkGetMacro(CursorRadius, int);
   //@}
 
-
 protected:
   vtkImageCursor3D();
-  ~vtkImageCursor3D() VTK_OVERRIDE {}
+  ~vtkImageCursor3D() override {}
 
   double CursorPosition[3];
   double CursorValue;
   int CursorRadius;
 
-  int RequestData(vtkInformation *request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
 private:
-  vtkImageCursor3D(const vtkImageCursor3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageCursor3D&) VTK_DELETE_FUNCTION;
+  vtkImageCursor3D(const vtkImageCursor3D&) = delete;
+  void operator=(const vtkImageCursor3D&) = delete;
 };
 
-
-
 #endif
-
-
-

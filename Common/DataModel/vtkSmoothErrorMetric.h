@@ -26,7 +26,7 @@
  *
  * @sa
  * vtkGenericCellTessellator vtkGenericSubdivisionErrorMetric
-*/
+ */
 
 #ifndef vtkSmoothErrorMetric_h
 #define vtkSmoothErrorMetric_h
@@ -43,14 +43,14 @@ public:
    * Construct the error metric with a default flatness threshold of 90.1
    * degrees.
    */
-  static vtkSmoothErrorMetric *New();
+  static vtkSmoothErrorMetric* New();
 
   //@{
   /**
    * Standard VTK type and error macros.
    */
-  vtkTypeMacro(vtkSmoothErrorMetric,vtkGenericSubdivisionErrorMetric);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSmoothErrorMetric, vtkGenericSubdivisionErrorMetric);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -63,7 +63,7 @@ public:
    * Set the flatness threshold with an angle in degrees. Internally
    * compute the cosine. value is supposed to be in ]90,180[, if not
    * it is clamped in [90.1,179.9].
-   * For instance 178  will give better result than 150.
+   * For instance 178 will give better result than 150.
    */
   void SetAngleTolerance(double value);
 
@@ -85,8 +85,8 @@ public:
    * \pre valid_size: sizeof(leftPoint)=sizeof(midPoint)=sizeof(rightPoint)
    * =GetAttributeCollection()->GetNumberOfPointCenteredComponents()+6
    */
-  int RequiresEdgeSubdivision(double *leftPoint, double *midPoint,
-                              double *rightPoint, double alpha) VTK_OVERRIDE;
+  int RequiresEdgeSubdivision(
+    double* leftPoint, double* midPoint, double* rightPoint, double alpha) override;
 
   /**
    * Return the error at the mid-point. It will return an error relative to
@@ -101,19 +101,18 @@ public:
    * =GetAttributeCollection()->GetNumberOfPointCenteredComponents()+6
    * \post positive_result: result>=0
    */
-  double GetError(double *leftPoint, double *midPoint, double *rightPoint,
-                  double alpha) VTK_OVERRIDE;
+  double GetError(double* leftPoint, double* midPoint, double* rightPoint, double alpha) override;
 
 protected:
   vtkSmoothErrorMetric();
-  ~vtkSmoothErrorMetric() VTK_OVERRIDE;
+  ~vtkSmoothErrorMetric() override;
 
   double AngleTolerance;
   double CosTolerance;
 
 private:
-  vtkSmoothErrorMetric(const vtkSmoothErrorMetric&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSmoothErrorMetric&) VTK_DELETE_FUNCTION;
+  vtkSmoothErrorMetric(const vtkSmoothErrorMetric&) = delete;
+  void operator=(const vtkSmoothErrorMetric&) = delete;
 };
 
 #endif

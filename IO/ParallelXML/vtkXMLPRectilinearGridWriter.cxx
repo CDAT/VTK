@@ -23,19 +23,15 @@
 vtkStandardNewMacro(vtkXMLPRectilinearGridWriter);
 
 //----------------------------------------------------------------------------
-vtkXMLPRectilinearGridWriter::vtkXMLPRectilinearGridWriter()
-{
-}
+vtkXMLPRectilinearGridWriter::vtkXMLPRectilinearGridWriter() = default;
 
 //----------------------------------------------------------------------------
-vtkXMLPRectilinearGridWriter::~vtkXMLPRectilinearGridWriter()
-{
-}
+vtkXMLPRectilinearGridWriter::~vtkXMLPRectilinearGridWriter() = default;
 
 //----------------------------------------------------------------------------
 void vtkXMLPRectilinearGridWriter::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
 //----------------------------------------------------------------------------
@@ -57,8 +53,7 @@ const char* vtkXMLPRectilinearGridWriter::GetDefaultFileExtension()
 }
 
 //----------------------------------------------------------------------------
-vtkXMLStructuredDataWriter*
-vtkXMLPRectilinearGridWriter::CreateStructuredPieceWriter()
+vtkXMLStructuredDataWriter* vtkXMLPRectilinearGridWriter::CreateStructuredPieceWriter()
 {
   // Create the writer for the piece.
   vtkXMLRectilinearGridWriter* pWriter = vtkXMLRectilinearGridWriter::New();
@@ -76,8 +71,8 @@ void vtkXMLPRectilinearGridWriter::WritePData(vtkIndent indent)
   }
 
   vtkRectilinearGrid* input = this->GetInput();
-  this->WritePCoordinates(input->GetXCoordinates(), input->GetYCoordinates(),
-                          input->GetZCoordinates(), indent);
+  this->WritePCoordinates(
+    input->GetXCoordinates(), input->GetYCoordinates(), input->GetZCoordinates(), indent);
 }
 
 int vtkXMLPRectilinearGridWriter::FillInputPortInformation(

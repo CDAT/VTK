@@ -24,13 +24,13 @@
  * Neurosciences, Foothills Medical Centre, Calgary, for providing this class.
  * @sa
  * vtkImage vtkImageProperty vtkImageResliceMapper vtkImageSliceMapper
-*/
+ */
 
 #ifndef vtkImageMapper3D_h
 #define vtkImageMapper3D_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkAbstractMapper3D.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkRenderer;
 class vtkProp3D;
@@ -48,28 +48,28 @@ class VTKRENDERINGCORE_EXPORT vtkImageMapper3D : public vtkAbstractMapper3D
 {
 public:
   vtkTypeMacro(vtkImageMapper3D, vtkAbstractMapper3D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * This should only be called by the renderer.
    */
-  virtual void Render(vtkRenderer *renderer, vtkImageSlice *prop) = 0;
+  virtual void Render(vtkRenderer* renderer, vtkImageSlice* prop) = 0;
 
   /**
    * Release any graphics resources that are being consumed by
    * this mapper.  The parameter window is used to determine
    * which graphic resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE = 0;
+  void ReleaseGraphicsResources(vtkWindow*) override = 0;
 
   //@{
   /**
    * The input data for this mapper.
    */
-  void SetInputData(vtkImageData *input);
-  vtkImageData *GetInput();
-  vtkDataSet *GetDataSetInput();
-  vtkDataObject *GetDataObjectInput();
+  void SetInputData(vtkImageData* input);
+  vtkImageData* GetInput();
+  vtkDataSet* GetDataSetInput();
+  vtkDataObject* GetDataObjectInput();
   //@}
 
   //@{
@@ -79,9 +79,9 @@ public:
    * Within this border, the image values will be extrapolated
    * rather than interpolated.
    */
-  vtkSetMacro(Border, int);
-  vtkBooleanMacro(Border, int);
-  vtkGetMacro(Border, int);
+  vtkSetMacro(Border, vtkTypeBool);
+  vtkBooleanMacro(Border, vtkTypeBool);
+  vtkGetMacro(Border, vtkTypeBool);
   //@}
 
   //@{
@@ -91,9 +91,9 @@ public:
    * background color will be the lowest color on the lookup
    * table that is being used for the image.
    */
-  vtkSetMacro(Background, int);
-  vtkBooleanMacro(Background, int);
-  vtkGetMacro(Background, int);
+  vtkSetMacro(Background, vtkTypeBool);
+  vtkBooleanMacro(Background, vtkTypeBool);
+  vtkGetMacro(Background, vtkTypeBool);
   //@}
 
   //@{
@@ -102,9 +102,9 @@ public:
    * This provides a convenient way to interact with the image, since
    * most Interactors directly control the camera.
    */
-  vtkSetMacro(SliceAtFocalPoint, int);
-  vtkBooleanMacro(SliceAtFocalPoint, int);
-  vtkGetMacro(SliceAtFocalPoint, int);
+  vtkSetMacro(SliceAtFocalPoint, vtkTypeBool);
+  vtkBooleanMacro(SliceAtFocalPoint, vtkTypeBool);
+  vtkGetMacro(SliceAtFocalPoint, vtkTypeBool);
   //@}
 
   //@{
@@ -113,9 +113,9 @@ public:
    * This provides a convenient way to interact with the image, since
    * most Interactors directly control the camera.
    */
-  vtkSetMacro(SliceFacesCamera, int);
-  vtkBooleanMacro(SliceFacesCamera, int);
-  vtkGetMacro(SliceFacesCamera, int);
+  vtkSetMacro(SliceFacesCamera, vtkTypeBool);
+  vtkBooleanMacro(SliceFacesCamera, vtkTypeBool);
+  vtkGetMacro(SliceFacesCamera, vtkTypeBool);
   //@}
 
   //@{
@@ -134,8 +134,7 @@ public:
    * equation coefficients.  The prop3D matrix must be provided so
    * that the plane can be converted to data coords.
    */
-  virtual void GetSlicePlaneInDataCoords(vtkMatrix4x4 *propMatrix,
-                                         double plane[4]);
+  virtual void GetSlicePlaneInDataCoords(vtkMatrix4x4* propMatrix, double plane[4]);
 
   //@{
   /**
@@ -155,54 +154,52 @@ public:
    * only when the input data changes.  The default behavior results in
    * much faster follow-up renders when the input data is static.
    */
-  vtkSetMacro(Streaming, int);
-  vtkGetMacro(Streaming, int);
-  vtkBooleanMacro(Streaming, int);
+  vtkSetMacro(Streaming, vtkTypeBool);
+  vtkGetMacro(Streaming, vtkTypeBool);
+  vtkBooleanMacro(Streaming, vtkTypeBool);
   //@}
+
+  // return the bounds in index space
+  virtual void GetIndexBounds(double extent[6]) = 0;
 
 protected:
   vtkImageMapper3D();
-  ~vtkImageMapper3D() VTK_OVERRIDE;
+  ~vtkImageMapper3D() override;
 
   //@{
   /**
    * See algorithm for more info
    */
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
   //@}
 
   /**
    * Handle requests from the pipeline executive.
    */
-  int ProcessRequest(vtkInformation* request,
-                             vtkInformationVector** inInfo,
-                             vtkInformationVector* outInfo) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo) override;
 
   /**
    * Checkerboard the alpha component of an RGBA image.  The origin and
    * spacing are in pixel units.
    */
-  static void CheckerboardRGBA(
-    unsigned char *data, int xsize, int ysize,
-    double originx, double originy, double spacingx, double spacingy);
+  static void CheckerboardRGBA(unsigned char* data, int xsize, int ysize, double originx,
+    double originy, double spacingx, double spacingy);
 
   /**
    * Perform window/level and color mapping operations to produce
    * unsigned char data that can be used as a texture.  See the
    * source file for more information.
    */
-  unsigned char *MakeTextureData(
-    vtkImageProperty *property, vtkImageData *input, int extent[6],
-    int &xsize, int &ysize, int &bytesPerPixel, bool &reuseTexture,
-    bool &reuseData);
+  unsigned char* MakeTextureData(vtkImageProperty* property, vtkImageData* input, int extent[6],
+    int& xsize, int& ysize, int& bytesPerPixel, bool& reuseTexture, bool& reuseData);
 
   /**
    * Compute the coordinates and texture coordinates for the image, given
    * an extent that describes a single slice.
    */
-  void MakeTextureGeometry(
-    const int extent[6], double coords[12], double tcoords[8]);
+  void MakeTextureGeometry(const int extent[6], double coords[12], double tcoords[8]);
 
   /**
    * Given an extent that describes a slice (it must have unit thickness
@@ -212,47 +209,47 @@ protected:
    * requires).
    */
   virtual void ComputeTextureSize(
-    const int extent[6], int &xdim, int &ydim,
-    int imageSize[2], int textureSize[2]);
+    const int extent[6], int& xdim, int& ydim, int imageSize[2], int textureSize[2]);
 
   /**
    * Get the renderer associated with this mapper, or zero if none.
    * This will raise an error if multiple renderers are found.
    */
-  vtkRenderer *GetCurrentRenderer();
+  vtkRenderer* GetCurrentRenderer();
 
   /**
    * Get the vtkImage prop associated with this mapper, or zero if none.
    */
-  vtkImageSlice *GetCurrentProp() { return this->CurrentProp; }
+  vtkImageSlice* GetCurrentProp() { return this->CurrentProp; }
 
   /**
    * Get the data-to-world matrix for this mapper, according to the
    * assembly path for its prop.
    */
-  vtkMatrix4x4 *GetDataToWorldMatrix();
+  vtkMatrix4x4* GetDataToWorldMatrix();
 
   /**
    * Get the background color, by using the first color in the
    * supplied lookup table, or black if there is no lookup table.
    */
-  void GetBackgroundColor(vtkImageProperty *property, double color[4]);
+  void GetBackgroundColor(vtkImageProperty* property, double color[4]);
 
-  int Border;
-  int Background;
-  vtkScalarsToColors *DefaultLookupTable;
-  vtkMultiThreader *Threader;
+  vtkTypeBool Border;
+  vtkTypeBool Background;
+  vtkScalarsToColors* DefaultLookupTable;
+  vtkMultiThreader* Threader;
   int NumberOfThreads;
-  int Streaming;
+  vtkTypeBool Streaming;
 
   // The slice.
-  vtkPlane *SlicePlane;
-  int SliceAtFocalPoint;
-  int SliceFacesCamera;
+  vtkPlane* SlicePlane;
+  vtkTypeBool SliceAtFocalPoint;
+  vtkTypeBool SliceFacesCamera;
 
   // Information about the image, updated by UpdateInformation
   double DataSpacing[3];
   double DataOrigin[3];
+  double DataDirection[9];
   int DataWholeExtent[6];
 
   // Set by vtkImageStack when doing multi-pass rendering
@@ -262,14 +259,14 @@ protected:
 
 private:
   // The prop this mapper is attached to, or zero if none.
-  vtkImageSlice *CurrentProp;
-  vtkRenderer *CurrentRenderer;
+  vtkImageSlice* CurrentProp;
+  vtkRenderer* CurrentRenderer;
 
   // The cached data-to-world matrix
-  vtkMatrix4x4 *DataToWorldMatrix;
+  vtkMatrix4x4* DataToWorldMatrix;
 
-  vtkImageMapper3D(const vtkImageMapper3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageMapper3D&) VTK_DELETE_FUNCTION;
+  vtkImageMapper3D(const vtkImageMapper3D&) = delete;
+  void operator=(const vtkImageMapper3D&) = delete;
 
   friend class vtkImageToImageMapper3DFriendship;
 };

@@ -27,7 +27,7 @@
  * the nodes, as the user constructs the contours. For instance, a sticky
  * contour widget may be implemented that moves nodes to nearby regions of
  * high gradient, to be used in contour-guided segmentation.
-*/
+ */
 
 #ifndef vtkContourLineInterpolator_h
 #define vtkContourLineInterpolator_h
@@ -46,8 +46,8 @@ public:
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkContourLineInterpolator,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkContourLineInterpolator, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -55,9 +55,8 @@ public:
    * For instance vtkBezierContourLineInterpolator adds nodes between idx1
    * and idx2, that allow the contour to adhere to a bezier curve.
    */
-  virtual int InterpolateLine( vtkRenderer *ren,
-                               vtkContourRepresentation *rep,
-                               int idx1, int idx2 ) = 0;
+  virtual int InterpolateLine(
+    vtkRenderer* ren, vtkContourRepresentation* rep, int idx1, int idx2) = 0;
 
   /**
    * The interpolator is given a chance to update the node. For instance, the
@@ -66,9 +65,8 @@ public:
    * constructs the contour.
    * Returns 0 if the node (world position) is unchanged.
    */
-  virtual int UpdateNode( vtkRenderer *,
-                          vtkContourRepresentation *,
-                          double * vtkNotUsed(node), int vtkNotUsed(idx) );
+  virtual int UpdateNode(
+    vtkRenderer*, vtkContourRepresentation*, double* vtkNotUsed(node), int vtkNotUsed(idx));
 
   /**
    * Span of the interpolator. ie. the number of control points its supposed
@@ -85,16 +83,15 @@ public:
    * have a span of 3 control points, it can be larger. See
    * vtkBezierContourLineInterpolator for instance.
    */
-  virtual void GetSpan( int nodeIndex, vtkIntArray *nodeIndices,
-                        vtkContourRepresentation *rep );
+  virtual void GetSpan(int nodeIndex, vtkIntArray* nodeIndices, vtkContourRepresentation* rep);
 
- protected:
+protected:
   vtkContourLineInterpolator();
-  ~vtkContourLineInterpolator() VTK_OVERRIDE;
+  ~vtkContourLineInterpolator() override;
 
 private:
-  vtkContourLineInterpolator(const vtkContourLineInterpolator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContourLineInterpolator&) VTK_DELETE_FUNCTION;
+  vtkContourLineInterpolator(const vtkContourLineInterpolator&) = delete;
+  void operator=(const vtkContourLineInterpolator&) = delete;
 };
 
 #endif

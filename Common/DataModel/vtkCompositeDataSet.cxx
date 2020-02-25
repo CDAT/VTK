@@ -14,36 +14,33 @@
 =========================================================================*/
 #include "vtkCompositeDataSet.h"
 
+#include "vtkBoundingBox.h"
 #include "vtkCompositeDataIterator.h"
 #include "vtkDataSet.h"
 #include "vtkInformation.h"
-#include "vtkInformationStringKey.h"
 #include "vtkInformationIntegerKey.h"
+#include "vtkInformationStringKey.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
+#include "vtkSmartPointer.h"
 
 vtkInformationKeyMacro(vtkCompositeDataSet, NAME, String);
 vtkInformationKeyMacro(vtkCompositeDataSet, CURRENT_PROCESS_CAN_LOAD_BLOCK, Integer);
 
 //----------------------------------------------------------------------------
-vtkCompositeDataSet::vtkCompositeDataSet()
-{
-}
+vtkCompositeDataSet::vtkCompositeDataSet() = default;
 
 //----------------------------------------------------------------------------
-vtkCompositeDataSet::~vtkCompositeDataSet()
-{
-}
+vtkCompositeDataSet::~vtkCompositeDataSet() = default;
 
 //----------------------------------------------------------------------------
 vtkCompositeDataSet* vtkCompositeDataSet::GetData(vtkInformation* info)
 {
-  return info? vtkCompositeDataSet::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
+  return info ? vtkCompositeDataSet::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
 }
 
 //----------------------------------------------------------------------------
-vtkCompositeDataSet* vtkCompositeDataSet::GetData(vtkInformationVector* v,
-                                                  int i)
+vtkCompositeDataSet* vtkCompositeDataSet::GetData(vtkInformationVector* v, int i)
 {
   return vtkCompositeDataSet::GetData(v->GetInformationObject(i));
 }
@@ -95,18 +92,49 @@ unsigned long vtkCompositeDataSet::GetActualMemorySize()
 //----------------------------------------------------------------------------
 vtkIdType vtkCompositeDataSet::GetNumberOfPoints()
 {
-  vtkIdType numPts = 0;
+  return this->GetNumberOfElements(vtkDataSet::POINT);
+}
+
+//----------------------------------------------------------------------------
+vtkIdType vtkCompositeDataSet::GetNumberOfCells()
+{
+  return this->GetNumberOfElements(vtkDataSet::CELL);
+}
+
+//----------------------------------------------------------------------------
+vtkIdType vtkCompositeDataSet::GetNumberOfElements(int type)
+{
+  vtkSmartPointer<vtkCompositeDataIterator> iter;
+  iter.TakeReference(this->NewIterator());
+  iter->SkipEmptyNodesOn();
+  vtkIdType numElements = 0;
+  for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
+  {
+    numElements += iter->GetCurrentDataObject()->GetNumberOfElements(type);
+  }
+
+  return numElements;
+}
+
+//----------------------------------------------------------------------------
+void vtkCompositeDataSet::GetBounds(double bounds[6])
+{
+  double bds[6];
+  vtkBoundingBox bbox;
   vtkCompositeDataIterator* iter = this->NewIterator();
+
   for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
   {
     vtkDataSet* ds = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
     if (ds)
     {
-      numPts += ds->GetNumberOfPoints();
+      ds->GetBounds(bds);
+      bbox.AddBounds(bds);
     }
   }
+
+  bbox.GetBounds(bounds);
   iter->Delete();
-  return numPts;
 }
 
 //----------------------------------------------------------------------------

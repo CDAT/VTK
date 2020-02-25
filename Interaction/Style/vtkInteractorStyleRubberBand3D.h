@@ -33,7 +33,7 @@
  * Shift + right mouse - Zoom.
  * Middle mouse - Pan.
  * Scroll wheel - Zoom.
-*/
+ */
 
 #ifndef vtkInteractorStyleRubberBand3D_h
 #define vtkInteractorStyleRubberBand3D_h
@@ -43,22 +43,23 @@
 
 class vtkUnsignedCharArray;
 
-class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleRubberBand3D : public vtkInteractorStyleTrackballCamera
+class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleRubberBand3D
+  : public vtkInteractorStyleTrackballCamera
 {
 public:
-  static vtkInteractorStyleRubberBand3D *New();
+  static vtkInteractorStyleRubberBand3D* New();
   vtkTypeMacro(vtkInteractorStyleRubberBand3D, vtkInteractorStyleTrackballCamera);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void OnLeftButtonDown() VTK_OVERRIDE;
-  void OnLeftButtonUp() VTK_OVERRIDE;
-  void OnMiddleButtonDown() VTK_OVERRIDE;
-  void OnMiddleButtonUp() VTK_OVERRIDE;
-  void OnRightButtonDown() VTK_OVERRIDE;
-  void OnRightButtonUp() VTK_OVERRIDE;
-  void OnMouseMove() VTK_OVERRIDE;
-  void OnMouseWheelForward() VTK_OVERRIDE;
-  void OnMouseWheelBackward() VTK_OVERRIDE;
+  void OnLeftButtonDown() override;
+  void OnLeftButtonUp() override;
+  void OnMiddleButtonDown() override;
+  void OnMiddleButtonUp() override;
+  void OnRightButtonDown() override;
+  void OnRightButtonUp() override;
+  void OnMouseMove() override;
+  void OnMouseWheelForward() override;
+  void OnMouseWheelBackward() override;
 
   //@{
   /**
@@ -100,13 +101,13 @@ public:
    * band pick area. This is a convenience method for the wrapped languages
    * since the event callData is lost when using those wrappings.
    */
-  vtkGetVector2Macro(StartPosition,int);
-  vtkGetVector2Macro(EndPosition,int);
+  vtkGetVector2Macro(StartPosition, int);
+  vtkGetVector2Macro(EndPosition, int);
   //@}
 
 protected:
   vtkInteractorStyleRubberBand3D();
-  ~vtkInteractorStyleRubberBand3D() VTK_OVERRIDE;
+  ~vtkInteractorStyleRubberBand3D() override;
 
   // The interaction mode
   int Interaction;
@@ -127,8 +128,8 @@ protected:
   bool RenderOnMouseMove;
 
 private:
-  vtkInteractorStyleRubberBand3D(const vtkInteractorStyleRubberBand3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorStyleRubberBand3D&) VTK_DELETE_FUNCTION;
+  vtkInteractorStyleRubberBand3D(const vtkInteractorStyleRubberBand3D&) = delete;
+  void operator=(const vtkInteractorStyleRubberBand3D&) = delete;
 };
 
 #endif

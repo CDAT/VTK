@@ -53,16 +53,15 @@
  *   vtkCommand::InteractionEvent (on vtkWidgetEvent::Move)
  * </pre>
  *
-*/
+ */
 
 #ifndef vtkAffineWidget_h
 #define vtkAffineWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkAffineRepresentation;
-
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkAffineWidget : public vtkAbstractWidget
 {
@@ -70,14 +69,14 @@ public:
   /**
    * Instantiate this class.
    */
-  static vtkAffineWidget *New();
+  static vtkAffineWidget* New();
 
   //@{
   /**
    * Standard VTK class macros.
    */
-  vtkTypeMacro(vtkAffineWidget,vtkAbstractWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAffineWidget, vtkAbstractWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -85,30 +84,34 @@ public:
    * widget in the scene. Note that the representation is a subclass of vtkProp
    * so it can be added to the renderer independent of the widget.
    */
-  void SetRepresentation(vtkAffineRepresentation *r)
-    {this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));}
+  void SetRepresentation(vtkAffineRepresentation* r)
+  {
+    this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));
+  }
 
   /**
    * Return the representation as a vtkAffineRepresentation.
    */
-  vtkAffineRepresentation *GetAffineRepresentation()
-    {return reinterpret_cast<vtkAffineRepresentation*>(this->WidgetRep);}
+  vtkAffineRepresentation* GetAffineRepresentation()
+  {
+    return reinterpret_cast<vtkAffineRepresentation*>(this->WidgetRep);
+  }
 
   /**
    * Create the default widget representation if one is not set.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
+  void CreateDefaultRepresentation() override;
 
   /**
    * Methods for activating this widget. This implementation extends the
    * superclasses' in order to resize the widget handles due to a render
    * start event.
    */
-  void SetEnabled(int) VTK_OVERRIDE;
+  void SetEnabled(int) override;
 
 protected:
   vtkAffineWidget();
-  ~vtkAffineWidget() VTK_OVERRIDE;
+  ~vtkAffineWidget() override;
 
   // These are the callbacks for this widget
   static void SelectAction(vtkAbstractWidget*);
@@ -117,13 +120,13 @@ protected:
   static void ModifyEventAction(vtkAbstractWidget*);
 
   // helper methods for cursor management
-  void SetCursor(int state) VTK_OVERRIDE;
+  void SetCursor(int state) override;
 
   // Manage the state of the widget
   int WidgetState;
   enum _WidgetState
   {
-    Start=0,
+    Start = 0,
     Active
   };
 
@@ -131,8 +134,8 @@ protected:
   int ModifierActive;
 
 private:
-  vtkAffineWidget(const vtkAffineWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAffineWidget&) VTK_DELETE_FUNCTION;
+  vtkAffineWidget(const vtkAffineWidget&) = delete;
+  void operator=(const vtkAffineWidget&) = delete;
 };
 
 #endif

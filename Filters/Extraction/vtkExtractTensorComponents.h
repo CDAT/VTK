@@ -38,13 +38,13 @@
  * effective stress of the tensor. These require that the ivar
  * ExtractScalars is on, and the appropriate scalar extraction mode is
  * set.
-*/
+ */
 
 #ifndef vtkExtractTensorComponents_h
 #define vtkExtractTensorComponents_h
 
-#include "vtkFiltersExtractionModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersExtractionModule.h" // For export macro
 
 #define VTK_EXTRACT_COMPONENT 0
 #define VTK_EXTRACT_EFFECTIVE_STRESS 1
@@ -53,39 +53,39 @@
 class VTKFILTERSEXTRACTION_EXPORT vtkExtractTensorComponents : public vtkDataSetAlgorithm
 {
 public:
-  vtkTypeMacro(vtkExtractTensorComponents,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkExtractTensorComponents, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object to extract nothing and to not pass tensor data
    * through the pipeline.
    */
-  static vtkExtractTensorComponents *New();
+  static vtkExtractTensorComponents* New();
 
   //@{
   /**
    * Boolean controls whether tensor data is passed through to output.
    */
-  vtkSetMacro(PassTensorsToOutput,int);
-  vtkGetMacro(PassTensorsToOutput,int);
-  vtkBooleanMacro(PassTensorsToOutput,int);
+  vtkSetMacro(PassTensorsToOutput, vtkTypeBool);
+  vtkGetMacro(PassTensorsToOutput, vtkTypeBool);
+  vtkBooleanMacro(PassTensorsToOutput, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Boolean controls whether scalar data is extracted from tensor.
    */
-  vtkSetMacro(ExtractScalars,int);
-  vtkGetMacro(ExtractScalars,int);
-  vtkBooleanMacro(ExtractScalars,int);
+  vtkSetMacro(ExtractScalars, vtkTypeBool);
+  vtkGetMacro(ExtractScalars, vtkTypeBool);
+  vtkBooleanMacro(ExtractScalars, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Specify the (row,column) tensor component to extract as a scalar.
    */
-  vtkSetVector2Macro(ScalarComponents,int);
-  vtkGetVectorMacro(ScalarComponents,int,2);
+  vtkSetVector2Macro(ScalarComponents, int);
+  vtkGetVectorMacro(ScalarComponents, int, 2);
   //@}
 
   //@{
@@ -95,29 +95,23 @@ public:
    * determinant of the tensor. If you extract a component make sure
    * that you set the ScalarComponents ivar.
    */
-  vtkSetMacro(ScalarMode,int);
-  vtkGetMacro(ScalarMode,int);
-  void SetScalarModeToComponent()
-    {this->SetScalarMode(VTK_EXTRACT_COMPONENT);};
-  void SetScalarModeToEffectiveStress()
-    {this->SetScalarMode(VTK_EXTRACT_EFFECTIVE_STRESS);};
-  void SetScalarModeToDeterminant()
-    {this->SetScalarMode(VTK_EXTRACT_DETERMINANT);};
-  void ScalarIsComponent()
-    {this->SetScalarMode(VTK_EXTRACT_COMPONENT);};
-  void ScalarIsEffectiveStress()
-    {this->SetScalarMode(VTK_EXTRACT_EFFECTIVE_STRESS);};
-  void ScalarIsDeterminant()
-    {this->SetScalarMode(VTK_EXTRACT_DETERMINANT);};
+  vtkSetMacro(ScalarMode, int);
+  vtkGetMacro(ScalarMode, int);
+  void SetScalarModeToComponent() { this->SetScalarMode(VTK_EXTRACT_COMPONENT); }
+  void SetScalarModeToEffectiveStress() { this->SetScalarMode(VTK_EXTRACT_EFFECTIVE_STRESS); }
+  void SetScalarModeToDeterminant() { this->SetScalarMode(VTK_EXTRACT_DETERMINANT); }
+  void ScalarIsComponent() { this->SetScalarMode(VTK_EXTRACT_COMPONENT); }
+  void ScalarIsEffectiveStress() { this->SetScalarMode(VTK_EXTRACT_EFFECTIVE_STRESS); }
+  void ScalarIsDeterminant() { this->SetScalarMode(VTK_EXTRACT_DETERMINANT); }
   //@}
 
   //@{
   /**
    * Boolean controls whether vector data is extracted from tensor.
    */
-  vtkSetMacro(ExtractVectors,int);
-  vtkGetMacro(ExtractVectors,int);
-  vtkBooleanMacro(ExtractVectors,int);
+  vtkSetMacro(ExtractVectors, vtkTypeBool);
+  vtkGetMacro(ExtractVectors, vtkTypeBool);
+  vtkBooleanMacro(ExtractVectors, vtkTypeBool);
   //@}
 
   //@{
@@ -125,18 +119,17 @@ public:
    * Specify the ((row,column)0,(row,column)1,(row,column)2) tensor
    * components to extract as a vector.
    */
-  vtkSetVector6Macro(VectorComponents,int);
-  vtkGetVectorMacro(VectorComponents,int,6);
+  vtkSetVector6Macro(VectorComponents, int);
+  vtkGetVectorMacro(VectorComponents, int, 6);
   //@}
-
 
   //@{
   /**
    * Boolean controls whether normal data is extracted from tensor.
    */
-  vtkSetMacro(ExtractNormals,int);
-  vtkGetMacro(ExtractNormals,int);
-  vtkBooleanMacro(ExtractNormals,int);
+  vtkSetMacro(ExtractNormals, vtkTypeBool);
+  vtkGetMacro(ExtractNormals, vtkTypeBool);
+  vtkBooleanMacro(ExtractNormals, vtkTypeBool);
   //@}
 
   //@{
@@ -144,9 +137,9 @@ public:
    * Boolean controls whether normal vector is converted to unit normal
    * after extraction.
    */
-  vtkSetMacro(NormalizeNormals,int);
-  vtkGetMacro(NormalizeNormals,int);
-  vtkBooleanMacro(NormalizeNormals,int);
+  vtkSetMacro(NormalizeNormals, vtkTypeBool);
+  vtkGetMacro(NormalizeNormals, vtkTypeBool);
+  vtkBooleanMacro(NormalizeNormals, vtkTypeBool);
   //@}
 
   //@{
@@ -154,25 +147,25 @@ public:
    * Specify the ((row,column)0,(row,column)1,(row,column)2) tensor
    * components to extract as a vector.
    */
-  vtkSetVector6Macro(NormalComponents,int);
-  vtkGetVectorMacro(NormalComponents,int,6);
+  vtkSetVector6Macro(NormalComponents, int);
+  vtkGetVectorMacro(NormalComponents, int, 6);
   //@}
 
   //@{
   /**
    * Boolean controls whether texture coordinates are extracted from tensor.
    */
-  vtkSetMacro(ExtractTCoords,int);
-  vtkGetMacro(ExtractTCoords,int);
-  vtkBooleanMacro(ExtractTCoords,int);
+  vtkSetMacro(ExtractTCoords, vtkTypeBool);
+  vtkGetMacro(ExtractTCoords, vtkTypeBool);
+  vtkBooleanMacro(ExtractTCoords, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set the dimension of the texture coordinates to extract.
    */
-  vtkSetClampMacro(NumberOfTCoords,int,1,3);
-  vtkGetMacro(NumberOfTCoords,int);
+  vtkSetClampMacro(NumberOfTCoords, int, 1, 3);
+  vtkGetMacro(NumberOfTCoords, int);
   //@}
 
   //@{
@@ -181,38 +174,37 @@ public:
    * components to extract as a vector. Up to NumberOfTCoords
    * components are extracted.
    */
-  vtkSetVector6Macro(TCoordComponents,int);
-  vtkGetVectorMacro(TCoordComponents,int,6);
+  vtkSetVector6Macro(TCoordComponents, int);
+  vtkGetVectorMacro(TCoordComponents, int, 6);
   //@}
 
 protected:
   vtkExtractTensorComponents();
-  ~vtkExtractTensorComponents()VTK_OVERRIDE {}
+  ~vtkExtractTensorComponents() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int PassTensorsToOutput;
+  vtkTypeBool PassTensorsToOutput;
 
-  int ExtractScalars;
-  int ExtractVectors;
-  int ExtractNormals;
-  int ExtractTCoords;
+  vtkTypeBool ExtractScalars;
+  vtkTypeBool ExtractVectors;
+  vtkTypeBool ExtractNormals;
+  vtkTypeBool ExtractTCoords;
 
   int ScalarMode;
   int ScalarComponents[2];
 
   int VectorComponents[6];
 
-  int NormalizeNormals;
+  vtkTypeBool NormalizeNormals;
   int NormalComponents[6];
 
   int NumberOfTCoords;
   int TCoordComponents[6];
 
 private:
-  vtkExtractTensorComponents(const vtkExtractTensorComponents&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractTensorComponents&) VTK_DELETE_FUNCTION;
+  vtkExtractTensorComponents(const vtkExtractTensorComponents&) = delete;
+  void operator=(const vtkExtractTensorComponents&) = delete;
 };
 
 #endif
-

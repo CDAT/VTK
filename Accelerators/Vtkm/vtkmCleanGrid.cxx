@@ -25,35 +25,29 @@
 
 #include "vtkmlib/ArrayConverters.h"
 #include "vtkmlib/DataSetConverters.h"
-#include "vtkmlib/Storage.h"
 #include "vtkmlib/UnstructuredGridConverter.h"
 
-#include "vtkmCellSetExplicit.h"
-#include "vtkmCellSetSingleType.h"
 #include "vtkmFilterPolicy.h"
 
 #include <vtkm/filter/CleanGrid.h>
+#include <vtkm/filter/CleanGrid.hxx>
 
-
-vtkStandardNewMacro(vtkmCleanGrid)
+vtkStandardNewMacro(vtkmCleanGrid);
 
 //------------------------------------------------------------------------------
 vtkmCleanGrid::vtkmCleanGrid()
-: CompactPoints(false)
+  : CompactPoints(false)
 {
 }
 
 //------------------------------------------------------------------------------
-vtkmCleanGrid::~vtkmCleanGrid()
-{
-}
+vtkmCleanGrid::~vtkmCleanGrid() {}
 
 //------------------------------------------------------------------------------
 void vtkmCleanGrid::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "CompactPoints: " << (this->CompactPoints ? "On" : "Off")
-     << "\n";
+  os << indent << "CompactPoints: " << (this->CompactPoints ? "On" : "Off") << "\n";
 }
 
 //------------------------------------------------------------------------------
@@ -64,65 +58,46 @@ int vtkmCleanGrid::FillInputPortInformation(int, vtkInformation* info)
 }
 
 //------------------------------------------------------------------------------
-int vtkmCleanGrid::RequestData(vtkInformation* request,
-                               vtkInformationVector** inputVector,
-                               vtkInformationVector* outputVector)
+int vtkmCleanGrid::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
-  vtkDataSet* input =
-    vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet* input = vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkUnstructuredGrid* output =
     vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  // convert the input dataset to a vtkm::cont::DataSet
-  vtkm::cont::DataSet in = tovtkm::Convert(input,
-                                           tovtkm::FieldsFlag::PointsAndCells);
-
-  if (in.GetNumberOfCoordinateSystems() <= 0 || in.GetNumberOfCellSets() <= 0)
+  try
   {
-    vtkErrorMacro(<< "Could not convert vtk dataset to vtkm dataset");
-    return 0;
-  }
+    // convert the input dataset to a vtkm::cont::DataSet
+    auto fieldsFlag = this->CompactPoints ? tovtkm::FieldsFlag::Points : tovtkm::FieldsFlag::None;
+    vtkm::cont::DataSet in = tovtkm::Convert(input, fieldsFlag);
 
+    // apply the filter
+    vtkmInputFilterPolicy policy;
+    vtkm::filter::CleanGrid filter;
+    filter.SetCompactPointFields(this->CompactPoints);
+    auto result = filter.Execute(in, policy);
 
-  // apply the filter
-  vtkmInputFilterPolicy policy;
-
-  vtkm::filter::CleanGrid filter;
-  filter.SetCompactPointFields(this->CompactPoints);
-  vtkm::filter::ResultDataSet result = filter.Execute(in, policy);
-  if (!result.IsValid())
-  {
-    vtkErrorMacro(<< "VTKm CleanGrid algorithm failed to run");
-    return 0;
-  }
-
-  // map fields
-  vtkm::Id numFields = static_cast<vtkm::Id>(in.GetNumberOfFields());
-  for (vtkm::Id fieldIdx = 0; fieldIdx < numFields; ++fieldIdx)
-  {
-    const vtkm::cont::Field &field = in.GetField(fieldIdx);
-    try
+    // convert back to vtkDataSet (vtkUnstructuredGrid)
+    if (!fromvtkm::Convert(result, output, input))
     {
-      filter.MapFieldOntoOutput(result, field, policy);
-    }
-    catch (vtkm::cont::Error &e)
-    {
-      vtkWarningMacro(<< "Unable to use VTKm to convert field( "
-                      << field.GetName() << " ) to the CleanGrid"
-                      << " output: " << e.what());
+      vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
+      return 0;
     }
   }
-
-  // convert back to vtkDataSet (vtkUnstructuredGrid)
-  if (!fromvtkm::Convert(result.GetDataSet(), output, input))
+  catch (const vtkm::cont::Error& e)
   {
-    vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
+    vtkErrorMacro(<< "VTK-m error: " << e.GetMessage());
     return 0;
   }
+
   // pass cell data
+  if (!this->CompactPoints)
+  {
+    output->GetPointData()->PassData(input->GetPointData());
+  }
   output->GetCellData()->PassData(input->GetCellData());
 
   return 1;

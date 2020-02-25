@@ -52,7 +52,7 @@
  * * at the widget level, the "ManagesPicking" variable can be changed
  * from the widget/representation class to tell
  * whether to use the manager or not.
- * * Directly disable the picking manager itself  with the boolean variable
+ * * Directly disable the picking manager itself with the boolean variable
  * \sa Enabled using vtkPickingManager::EnabledOn(), EnabledOff(),
  * SetEnabled(bool).
  * @par Important:
@@ -64,8 +64,8 @@
  * It is really important to note that a null object is different from one
  * to an other !!
  * This has been done to allow adding multiple times the same picker to the manager
- * by not passing the referenced object to not force the supression of all pickers
-*/
+ * by not passing the referenced object to not force the suppression of all pickers
+ */
 
 #ifndef vtkPickingManager_h
 #define vtkPickingManager_h
@@ -82,9 +82,9 @@ class vtkRenderWindowInteractor;
 class VTKRENDERINGCORE_EXPORT vtkPickingManager : public vtkObject
 {
 public:
-  static vtkPickingManager *New();
-  vtkTypeMacro(vtkPickingManager,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPickingManager* New();
+  vtkTypeMacro(vtkPickingManager, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -170,10 +170,8 @@ public:
    * Otherwise it simply proceeds to a pick using the given renderer and
    * returns the corresponding assembly path.
    */
-  vtkAssemblyPath* GetAssemblyPath(double X, double Y, double Z,
-                                   vtkAbstractPropPicker* picker,
-                                   vtkRenderer* renderer,
-                                   vtkObject* obj);
+  vtkAssemblyPath* GetAssemblyPath(double X, double Y, double Z, vtkAbstractPropPicker* picker,
+    vtkRenderer* renderer, vtkObject* obj);
 
   /**
    * Return the number of pickers registered.
@@ -190,7 +188,7 @@ public:
 
 protected:
   vtkPickingManager();
-  ~vtkPickingManager() VTK_OVERRIDE;
+  ~vtkPickingManager() override;
 
   // Used to associate the manager with the interactor
   vtkRenderWindowInteractor* Interactor;
@@ -198,8 +196,8 @@ protected:
   bool OptimizeOnInteractorEvents;
 
 private:
-  vtkPickingManager(const vtkPickingManager&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPickingManager&) VTK_DELETE_FUNCTION;
+  vtkPickingManager(const vtkPickingManager&) = delete;
+  void operator=(const vtkPickingManager&) = delete;
 
   class vtkInternal;
   vtkInternal* Internal;

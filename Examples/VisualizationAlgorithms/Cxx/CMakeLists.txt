@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.3...3.12 FATAL_ERROR)
 
 
 project (VisualizationAlgorithms)
@@ -10,7 +10,7 @@ vtk_module_config(VTK
   vtkFiltersModeling
   vtkIOXML
   vtkInteractionStyle
-  vtkRendering${VTK_RENDERING_BACKEND}
+  vtkRenderingOpenGL2
   vtkTestingRendering
 )
 include(${VTK_USE_FILE})

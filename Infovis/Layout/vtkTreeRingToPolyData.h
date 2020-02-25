@@ -27,7 +27,7 @@
  * been applied to the data in order to create the quadruple array
  * (start angle, end angle, inner radius, outer radius) of bounds
  * for each vertex of the tree.
-*/
+ */
 
 #ifndef vtkTreeRingToPolyData_h
 #define vtkTreeRingToPolyData_h
@@ -38,10 +38,10 @@
 class VTKINFOVISLAYOUT_EXPORT vtkTreeRingToPolyData : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkTreeRingToPolyData *New();
+  static vtkTreeRingToPolyData* New();
 
-  vtkTypeMacro(vtkTreeRingToPolyData,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkTreeRingToPolyData, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * The field containing quadruples of the form (start angle, end angle,
@@ -51,7 +51,9 @@ public:
    * This array must be set.
    */
   virtual void SetSectorsArrayName(const char* name)
-    { this->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_VERTICES, name); }
+  {
+    this->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_VERTICES, name);
+  }
 
   //@{
   /**
@@ -61,18 +63,19 @@ public:
   vtkGetMacro(ShrinkPercentage, double);
   //@}
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 protected:
   vtkTreeRingToPolyData();
-  ~vtkTreeRingToPolyData() VTK_OVERRIDE;
+  ~vtkTreeRingToPolyData() override;
 
   double ShrinkPercentage;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+
 private:
-  vtkTreeRingToPolyData(const vtkTreeRingToPolyData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTreeRingToPolyData&) VTK_DELETE_FUNCTION;
+  vtkTreeRingToPolyData(const vtkTreeRingToPolyData&) = delete;
+  void operator=(const vtkTreeRingToPolyData&) = delete;
 };
 
 #endif

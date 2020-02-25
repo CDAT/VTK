@@ -14,27 +14,6 @@
 =========================================================================*/
 #include "vtkCompositeSurfaceLICMapper.h"
 
-// #include "vtkBoundingBox.h"
-// #include "vtkCommand.h"
-// #include "vtkCompositeDataIterator.h"
-// #include "vtkCompositeDataPipeline.h"
-//#include "vtkCompositeDataSet.h"
-// #include "vtkCompositeDataDisplayAttributes.h"
-// #include "vtkGarbageCollector.h"
-//#include "vtkHardwareSelector.h"
-// #include "vtkInformation.h"
-// #include "vtkMath.h"
-//#include "vtkObjectFactory.h"
-// #include "vtkPolyData.h"
-// #include "vtkProperty.h"
-// #include "vtkRenderer.h"
-// #include "vtkRenderWindow.h"
-// #include "vtkScalarsToColors.h"
-// #include "vtkShaderProgram.h"
-// #include "vtkUnsignedCharArray.h"
-// #include "vtkMultiBlockDataSet.h"
-// #include "vtkMultiPieceDataSet.h"
-
 #include "vtk_glew.h"
 
 #include "vtkCellData.h"
@@ -56,6 +35,7 @@
 #include "vtkOpenGLIndexBufferObject.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLRenderer.h"
+#include "vtkOpenGLState.h"
 #include "vtkOpenGLTexture.h"
 #include "vtkOpenGLVertexArrayObject.h"
 #include "vtkOpenGLVertexBufferObject.h"
@@ -75,7 +55,7 @@
 
 #include "vtkCompositePolyDataMapper2Internal.h"
 
-typedef std::map<vtkPolyData *, vtkCompositeMapperHelperData *>::iterator dataIter;
+typedef std::map<vtkPolyData*, vtkCompositeMapperHelperData*>::iterator dataIter;
 
 class vtkCompositeLICHelper : public vtkCompositeMapperHelper2
 {
@@ -85,33 +65,29 @@ public:
 
 protected:
   vtkCompositeLICHelper();
-  ~vtkCompositeLICHelper();
+  ~vtkCompositeLICHelper() override;
 
   /**
    * Build the VBO/IBO, called by UpdateBufferObjects
    */
-  virtual void AppendOneBufferObject(vtkRenderer *ren,
-    vtkActor *act, vtkCompositeMapperHelperData *hdata,
-    unsigned int &flat_index,
-    std::vector<unsigned char> &colors,
-    std::vector<float> &norms) VTK_OVERRIDE;
+  void AppendOneBufferObject(vtkRenderer* ren, vtkActor* act, vtkCompositeMapperHelperData* hdata,
+    vtkIdType& flat_index, std::vector<unsigned char>& colors, std::vector<float>& norms) override;
 
 protected:
   /**
    * Set the shader parameteres related to the mapper/input data, called by UpdateShader
    */
-  virtual void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void SetMapperShaderParameters(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act) override;
 
   /**
-   * Perform string replacments on the shader templates
+   * Perform string replacements on the shader templates
    */
-  virtual void ReplaceShaderValues(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void ReplaceShaderValues(
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act) override;
 
 private:
-  vtkCompositeLICHelper(const vtkCompositeLICHelper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositeLICHelper&) VTK_DELETE_FUNCTION;
+  vtkCompositeLICHelper(const vtkCompositeLICHelper&) = delete;
+  void operator=(const vtkCompositeLICHelper&) = delete;
 };
 
 //----------------------------------------------------------------------------
@@ -120,51 +96,40 @@ vtkObjectFactoryNewMacro(vtkCompositeLICHelper);
 //----------------------------------------------------------------------------
 vtkCompositeLICHelper::vtkCompositeLICHelper()
 {
-  this->SetInputArrayToProcess(0,0,0,
-    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
-    vtkDataSetAttributes::VECTORS);
+  this->SetInputArrayToProcess(
+    0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS, vtkDataSetAttributes::VECTORS);
 }
 
 //----------------------------------------------------------------------------
-vtkCompositeLICHelper::~vtkCompositeLICHelper()
-{
-}
+vtkCompositeLICHelper::~vtkCompositeLICHelper() {}
 
 void vtkCompositeLICHelper::ReplaceShaderValues(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *actor)
+  std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* actor)
 {
   std::string VSSource = shaders[vtkShader::Vertex]->GetSource();
   std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
 
   // add some code to handle the LIC vectors and mask
-  vtkShaderProgram::Substitute(VSSource,
-    "//VTK::TCoord::Dec",
-    "attribute vec3 vecsMC;\n"
-    "varying vec3 tcoordVCVSOutput;\n"
-    );
+  vtkShaderProgram::Substitute(VSSource, "//VTK::TCoord::Dec",
+    "in vec3 vecsMC;\n"
+    "out vec3 tcoordVCVSOutput;\n");
 
-  vtkShaderProgram::Substitute(VSSource, "//VTK::TCoord::Impl",
-    "tcoordVCVSOutput = vecsMC;"
-    );
+  vtkShaderProgram::Substitute(VSSource, "//VTK::TCoord::Impl", "tcoordVCVSOutput = vecsMC;");
 
-  vtkShaderProgram::Substitute(FSSource,
-    "//VTK::TCoord::Dec",
+  vtkShaderProgram::Substitute(FSSource, "//VTK::TCoord::Dec",
     // 0/1, when 1 V is projected to surface for |V| computation.
     "uniform int uMaskOnSurface;\n"
     "uniform mat3 normalMatrix;\n"
-    "varying vec3 tcoordVCVSOutput;"
-    );
+    "in vec3 tcoordVCVSOutput;");
 
-  vtkShaderProgram::Substitute(FSSource,
-    "//VTK::TCoord::Impl",
+  vtkShaderProgram::Substitute(FSSource, "//VTK::TCoord::Impl",
     // projected vectors
     "  vec3 tcoordLIC = normalMatrix * tcoordVCVSOutput;\n"
     "  vec3 normN = normalize(normalVCVSOutput);\n"
     "  float k = dot(tcoordLIC, normN);\n"
     "  tcoordLIC = (tcoordLIC - k*normN);\n"
     "  gl_FragData[1] = vec4(tcoordLIC.x, tcoordLIC.y, 0.0 , gl_FragCoord.z);\n"
- //   "  gl_FragData[1] = vec4(tcoordVC.xyz, gl_FragCoord.z);\n"
+    //   "  gl_FragData[1] = vec4(tcoordVC.xyz, gl_FragCoord.z);\n"
     // vectors for fragment masking
     "  if (uMaskOnSurface == 0)\n"
     "    {\n"
@@ -174,44 +139,39 @@ void vtkCompositeLICHelper::ReplaceShaderValues(
     "    {\n"
     "    gl_FragData[2] = vec4(tcoordLIC.x, tcoordLIC.y, 0.0 , gl_FragCoord.z);\n"
     "    }\n"
- //   "  gl_FragData[2] = vec4(19.0, 19.0, tcoordVC.x, gl_FragCoord.z);\n"
-    , false);
+    //   "  gl_FragData[2] = vec4(19.0, 19.0, tcoordVC.x, gl_FragCoord.z);\n"
+    ,
+    false);
 
   shaders[vtkShader::Vertex]->SetSource(VSSource);
   shaders[vtkShader::Fragment]->SetSource(FSSource);
 
-  this->Superclass::ReplaceShaderValues(shaders,ren,actor);
+  this->Superclass::ReplaceShaderValues(shaders, ren, actor);
 }
 
 void vtkCompositeLICHelper::SetMapperShaderParameters(
-  vtkOpenGLHelper &cellBO,
-  vtkRenderer* ren, vtkActor *actor)
+  vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* actor)
 {
   this->Superclass::SetMapperShaderParameters(cellBO, ren, actor);
   cellBO.Program->SetUniformi("uMaskOnSurface",
     static_cast<vtkCompositeSurfaceLICMapper*>(this->Parent)
-      ->GetLICInterface()->GetMaskOnSurface());
+      ->GetLICInterface()
+      ->GetMaskOnSurface());
 }
 
 //-------------------------------------------------------------------------
-void vtkCompositeLICHelper::AppendOneBufferObject(
-  vtkRenderer *ren,
-  vtkActor *act,
-  vtkCompositeMapperHelperData *hdata,
-  unsigned int &voffset,
-  std::vector<unsigned char> &newColors,
-  std::vector<float> &newNorms
-  )
+void vtkCompositeLICHelper::AppendOneBufferObject(vtkRenderer* ren, vtkActor* act,
+  vtkCompositeMapperHelperData* hdata, vtkIdType& voffset, std::vector<unsigned char>& newColors,
+  std::vector<float>& newNorms)
 {
-  vtkPolyData *poly = hdata->Data;
-  vtkDataArray *vectors = this->GetInputArrayToProcess(0, poly);
+  vtkPolyData* poly = hdata->Data;
+  vtkDataArray* vectors = this->GetInputArrayToProcess(0, poly);
   if (vectors)
   {
     this->VBOs->AppendDataArray("vecsMC", vectors, VTK_FLOAT);
   }
 
-  this->Superclass::AppendOneBufferObject(
-    ren, act, hdata, voffset, newColors, newNorms);
+  this->Superclass::AppendOneBufferObject(ren, act, hdata, voffset, newColors, newNorms);
 }
 
 // #include <algorithm>
@@ -221,16 +181,12 @@ void vtkCompositeLICHelper::AppendOneBufferObject(
 
 vtkStandardNewMacro(vtkCompositeSurfaceLICMapper);
 //----------------------------------------------------------------------------
-vtkCompositeSurfaceLICMapper::vtkCompositeSurfaceLICMapper()
-{
-}
+vtkCompositeSurfaceLICMapper::vtkCompositeSurfaceLICMapper() {}
 
 //----------------------------------------------------------------------------
-vtkCompositeSurfaceLICMapper::~vtkCompositeSurfaceLICMapper()
-{
-}
+vtkCompositeSurfaceLICMapper::~vtkCompositeSurfaceLICMapper() {}
 
-vtkCompositeMapperHelper2 *vtkCompositeSurfaceLICMapper::CreateHelper()
+vtkCompositeMapperHelper2* vtkCompositeSurfaceLICMapper::CreateHelper()
 {
   return vtkCompositeLICHelper::New();
 }
@@ -241,12 +197,11 @@ void vtkCompositeSurfaceLICMapper::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 }
 
-void vtkCompositeSurfaceLICMapper::CopyMapperValuesToHelper(vtkCompositeMapperHelper2 *helper)
+void vtkCompositeSurfaceLICMapper::CopyMapperValuesToHelper(vtkCompositeMapperHelper2* helper)
 {
   this->Superclass::CopyMapperValuesToHelper(helper);
-  // static_cast<vtkCompositeLICHelper *>(helper)->SetLICInterface(this->LICInterface.Get());
-  helper->SetInputArrayToProcess(0,
-     this->GetInputArrayInformation(0));
+  // static_cast<vtkCompositeLICHelper *>(helper)->SetLICInterface(this->LICInterface);
+  helper->SetInputArrayToProcess(0, this->GetInputArrayInformation(0));
 }
 
 // ---------------------------------------------------------------------------
@@ -254,14 +209,13 @@ void vtkCompositeSurfaceLICMapper::CopyMapperValuesToHelper(vtkCompositeMapperHe
 // Method initiates the mapping process. Generally sent by the actor
 // as each frame is rendered.
 
-void vtkCompositeSurfaceLICMapper::Render(
-  vtkRenderer *ren, vtkActor *actor)
+void vtkCompositeSurfaceLICMapper::Render(vtkRenderer* ren, vtkActor* actor)
 {
   this->LICInterface->ValidateContext(ren);
 
   this->LICInterface->UpdateCommunicator(ren, actor, this->GetInputDataObject(0, 0));
 
-  vtkPainterCommunicator *comm = this->LICInterface->GetCommunicator();
+  vtkPainterCommunicator* comm = this->LICInterface->GetCommunicator();
 
   if (comm->GetIsNull())
   {
@@ -271,8 +225,7 @@ void vtkCompositeSurfaceLICMapper::Render(
   }
 
   // do we have vectors? Need a leaf node to know
-  vtkCompositeDataSet *input = vtkCompositeDataSet::SafeDownCast(
-    this->GetInputDataObject(0, 0));
+  vtkCompositeDataSet* input = vtkCompositeDataSet::SafeDownCast(this->GetInputDataObject(0, 0));
   bool haveVectors = true;
   if (input)
   {
@@ -281,11 +234,10 @@ void vtkCompositeSurfaceLICMapper::Render(
     iter->SetDataSet(input);
     iter->SkipEmptyNodesOn();
     iter->VisitOnlyLeavesOn();
-    for (iter->InitTraversal(); !iter->IsDoneWithTraversal();
-        iter->GoToNextItem())
+    for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
     {
-      vtkDataObject *dso = iter->GetCurrentDataObject();
-      vtkPolyData *pd = vtkPolyData::SafeDownCast(dso);
+      vtkDataObject* dso = iter->GetCurrentDataObject();
+      vtkPolyData* pd = vtkPolyData::SafeDownCast(dso);
       if (pd && pd->GetPoints())
       {
         haveVectors = haveVectors && (this->GetInputArrayToProcess(0, pd) != nullptr);
@@ -294,8 +246,7 @@ void vtkCompositeSurfaceLICMapper::Render(
   }
   else
   {
-    vtkPolyData *pd = vtkPolyData::SafeDownCast(
-      this->GetInputDataObject(0, 0));
+    vtkPolyData* pd = vtkPolyData::SafeDownCast(this->GetInputDataObject(0, 0));
     if (pd && pd->GetPoints())
     {
       haveVectors = (this->GetInputArrayToProcess(0, pd) != nullptr);
@@ -315,11 +266,13 @@ void vtkCompositeSurfaceLICMapper::Render(
 
   // Before start rendering LIC, capture some essential state so we can restore
   // it.
-  bool blendEnabled = (glIsEnabled(GL_BLEND) == GL_TRUE);
+  vtkOpenGLRenderWindow* rw = vtkOpenGLRenderWindow::SafeDownCast(ren->GetRenderWindow());
+  vtkOpenGLState* ostate = rw->GetState();
+  vtkOpenGLState::ScopedglEnableDisable bsaver(ostate, GL_BLEND);
 
   vtkNew<vtkOpenGLFramebufferObject> fbo;
   fbo->SetContext(vtkOpenGLRenderWindow::SafeDownCast(ren->GetRenderWindow()));
-  fbo->SaveCurrentBindingsAndBuffers();
+  ostate->PushFramebufferBindings();
 
   // allocate rendering resources, initialize or update
   // textures and shaders.
@@ -344,14 +297,5 @@ void vtkCompositeSurfaceLICMapper::Render(
   // ----------------------------------------------- depth test and copy to screen
   this->LICInterface->CopyToScreen();
 
-  fbo->RestorePreviousBindingsAndBuffers();
-
-  if (blendEnabled)
-  {
-    glEnable(GL_BLEND);
-  }
-  else
-  {
-    glDisable(GL_BLEND);
-  }
+  ostate->PopFramebufferBindings();
 }

@@ -17,13 +17,14 @@
 #include "vtkCompositePolyDataMapper2.h"
 #include "vtkCylinderSource.h"
 #include "vtkElevationFilter.h"
+#include "vtkMath.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkNew.h"
 #include "vtkProperty.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 #include "vtkSphereSource.h"
 
@@ -34,12 +35,10 @@
 // data array.
 int TestMultiBlockPartialArrayPointData(int argc, char* argv[])
 {
-  vtkSmartPointer<vtkRenderWindow> win =
-    vtkSmartPointer<vtkRenderWindow>::New();
+  vtkSmartPointer<vtkRenderWindow> win = vtkSmartPointer<vtkRenderWindow>::New();
   vtkSmartPointer<vtkRenderWindowInteractor> iren =
     vtkSmartPointer<vtkRenderWindowInteractor>::New();
-  vtkSmartPointer<vtkRenderer> ren =
-    vtkSmartPointer<vtkRenderer>::New();
+  vtkSmartPointer<vtkRenderer> ren = vtkSmartPointer<vtkRenderer>::New();
   win->AddRenderer(ren);
   win->SetInteractor(iren);
 
@@ -54,7 +53,7 @@ int TestMultiBlockPartialArrayPointData(int argc, char* argv[])
 
   vtkNew<vtkElevationFilter> elevationFilter;
   elevationFilter->SetLowPoint(-10.0, 0.0, 0.0);
-  elevationFilter->SetHighPoint( 10.0, 0.0, 0.0);
+  elevationFilter->SetHighPoint(10.0, 0.0, 0.0);
   elevationFilter->SetInputConnection(cylinderSource->GetOutputPort());
 
   // Set up the multiblock data set consisting of a ring of blocks
@@ -64,7 +63,7 @@ int TestMultiBlockPartialArrayPointData(int argc, char* argv[])
   data->SetNumberOfBlocks(numBlocks);
 
   double radius = 10.0;
-  double deltaTheta = 2.0*3.1415926 / numBlocks;
+  double deltaTheta = 2.0 * vtkMath::Pi() / numBlocks;
   for (int i = 0; i < numBlocks; ++i)
   {
     double theta = i * deltaTheta;
@@ -95,8 +94,7 @@ int TestMultiBlockPartialArrayPointData(int argc, char* argv[])
     vtkSmartPointer<vtkCompositePolyDataMapper2>::New();
   mapper->SetInputDataObject(data);
 
-  vtkSmartPointer<vtkActor> actor =
-    vtkSmartPointer<vtkActor>::New();
+  vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
   actor->SetMapper(mapper);
   actor->GetProperty()->SetColor(1.0, 0.67, 1.0);
 
@@ -107,8 +105,8 @@ int TestMultiBlockPartialArrayPointData(int argc, char* argv[])
 
   win->Render();
 
-  int retVal = vtkRegressionTestImageThreshold( win.GetPointer(),15);
-  if ( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImageThreshold(win, 15);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

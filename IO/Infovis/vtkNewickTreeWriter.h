@@ -18,13 +18,13 @@
  *
  * vtkNewickTreeWriter is writes a vtkTree to a Newick formatted file
  * or string.
-*/
+ */
 
 #ifndef vtkNewickTreeWriter_h
 #define vtkNewickTreeWriter_h
 
-#include "vtkIOInfovisModule.h" // For export macro
 #include "vtkDataWriter.h"
+#include "vtkIOInfovisModule.h" // For export macro
 #include "vtkStdString.h"       // For get/set ivars
 
 class vtkTree;
@@ -32,9 +32,9 @@ class vtkTree;
 class VTKIOINFOVIS_EXPORT vtkNewickTreeWriter : public vtkDataWriter
 {
 public:
-  static vtkNewickTreeWriter *New();
-  vtkTypeMacro(vtkNewickTreeWriter,vtkDataWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkNewickTreeWriter* New();
+  vtkTypeMacro(vtkNewickTreeWriter, vtkDataWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -70,27 +70,27 @@ public:
 
 protected:
   vtkNewickTreeWriter();
-  ~vtkNewickTreeWriter() VTK_OVERRIDE {}
+  ~vtkNewickTreeWriter() override {}
 
-  void WriteData() VTK_OVERRIDE;
+  void WriteData() override;
 
   /**
    * Write one vertex.  This function calls itself recursively for
    * any children of the input vertex.
    */
-  void WriteVertex(ostream *fp, vtkTree* const input, vtkIdType vertex);
+  void WriteVertex(ostream* fp, vtkTree* const input, vtkIdType vertex);
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   vtkStdString EdgeWeightArrayName;
   vtkStdString NodeNameArrayName;
 
-  vtkAbstractArray *EdgeWeightArray;
-  vtkAbstractArray *NodeNameArray;
+  vtkAbstractArray* EdgeWeightArray;
+  vtkAbstractArray* NodeNameArray;
 
 private:
-  vtkNewickTreeWriter(const vtkNewickTreeWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkNewickTreeWriter&) VTK_DELETE_FUNCTION;
+  vtkNewickTreeWriter(const vtkNewickTreeWriter&) = delete;
+  void operator=(const vtkNewickTreeWriter&) = delete;
 };
 
 #endif

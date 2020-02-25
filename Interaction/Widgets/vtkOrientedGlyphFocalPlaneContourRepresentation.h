@@ -19,20 +19,20 @@
  *
  *
  * This class is used to represent a contour drawn on the focal plane (usually
- * overlayed on top of an image or volume widget).
+ * overlaid on top of an image or volume widget).
  * The class was written in order to be able to draw contours on a volume widget
- * and have the contours overlayed on the focal plane in order to do contour
+ * and have the contours overlaid on the focal plane in order to do contour
  * segmentation.
  *
  * @sa
  * vtkOrientedGlyphContourRepresentation
-*/
+ */
 
 #ifndef vtkOrientedGlyphFocalPlaneContourRepresentation_h
 #define vtkOrientedGlyphFocalPlaneContourRepresentation_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkFocalPlaneContourRepresentation.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkProperty2D;
 class vtkActor2D;
@@ -42,32 +42,31 @@ class vtkGlyph2D;
 class vtkPoints;
 class vtkPolyData;
 
-class VTKINTERACTIONWIDGETS_EXPORT vtkOrientedGlyphFocalPlaneContourRepresentation :
-  public vtkFocalPlaneContourRepresentation
+class VTKINTERACTIONWIDGETS_EXPORT vtkOrientedGlyphFocalPlaneContourRepresentation
+  : public vtkFocalPlaneContourRepresentation
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkOrientedGlyphFocalPlaneContourRepresentation *New();
+  static vtkOrientedGlyphFocalPlaneContourRepresentation* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkOrientedGlyphFocalPlaneContourRepresentation,
-                                    vtkFocalPlaneContourRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOrientedGlyphFocalPlaneContourRepresentation, vtkFocalPlaneContourRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
   /**
    * Specify the cursor shape. Keep in mind that the shape will be
-   * aligned with the  constraining plane by orienting it such that
+   * aligned with the constraining plane by orienting it such that
    * the x axis of the geometry lies along the normal of the plane.
    */
-  void SetCursorShape(vtkPolyData *cursorShape);
-  vtkPolyData *GetCursorShape();
+  void SetCursorShape(vtkPolyData* cursorShape);
+  vtkPolyData* GetCursorShape();
   //@}
 
   //@{
@@ -76,8 +75,8 @@ public:
    * This is the geometry that will be used when the mouse is
    * close to the handle or if the user is manipulating the handle.
    */
-  void SetActiveCursorShape(vtkPolyData *activeShape);
-  vtkPolyData *GetActiveCursorShape();
+  void SetActiveCursorShape(vtkPolyData* activeShape);
+  vtkPolyData* GetActiveCursorShape();
   //@}
 
   //@{
@@ -85,7 +84,7 @@ public:
    * This is the property used when the handle is not active
    * (the mouse is not near the handle)
    */
-  vtkGetObjectMacro(Property,vtkProperty2D);
+  vtkGetObjectMacro(Property, vtkProperty2D);
   //@}
 
   //@{
@@ -93,45 +92,45 @@ public:
    * This is the property used when the user is interacting
    * with the handle.
    */
-  vtkGetObjectMacro(ActiveProperty,vtkProperty2D);
+  vtkGetObjectMacro(ActiveProperty, vtkProperty2D);
   //@}
 
   //@{
   /**
    * This is the property used by the lines.
    */
-  vtkGetObjectMacro(LinesProperty,vtkProperty2D);
+  vtkGetObjectMacro(LinesProperty, vtkProperty2D);
   //@}
 
   //@{
   /**
-   * Subclasses of vtkOrientedGlyphFocalPlaneContourRepresentation must implement these methods. These
-   * are the methods that the widget and its representation use to
-   * communicate with each other.
+   * Subclasses of vtkOrientedGlyphFocalPlaneContourRepresentation must implement these methods.
+   * These are the methods that the widget and its representation use to communicate with each
+   * other.
    */
-  void SetRenderer(vtkRenderer *ren) VTK_OVERRIDE;
-  void BuildRepresentation() VTK_OVERRIDE;
-  void StartWidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  void WidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  int ComputeInteractionState(int X, int Y, int modified=0) VTK_OVERRIDE;
+  void SetRenderer(vtkRenderer* ren) override;
+  void BuildRepresentation() override;
+  void StartWidgetInteraction(double eventPos[2]) override;
+  void WidgetInteraction(double eventPos[2]) override;
+  int ComputeInteractionState(int X, int Y, int modified = 0) override;
   //@}
 
   //@{
   /**
    * Methods to make this class behave as a vtkProp.
    */
-  void GetActors2D(vtkPropCollection *) VTK_OVERRIDE;
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderOpaqueGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int RenderTranslucentPolygonalGeometry(vtkViewport *viewport) VTK_OVERRIDE;
-  int HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
+  void GetActors2D(vtkPropCollection*) override;
+  void ReleaseGraphicsResources(vtkWindow*) override;
+  int RenderOverlay(vtkViewport* viewport) override;
+  int RenderOpaqueGeometry(vtkViewport* viewport) override;
+  int RenderTranslucentPolygonalGeometry(vtkViewport* viewport) override;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
   //@}
 
   /**
    * Get the points in this contour as a vtkPolyData.
    */
-  vtkPolyData * GetContourRepresentationAsPolyData() VTK_OVERRIDE;
+  vtkPolyData* GetContourRepresentationAsPolyData() override;
 
   /**
    * Direction cosines of the plane on which the contour lies
@@ -140,35 +139,35 @@ public:
    * passing through the contour points. The origin must be the origin of the
    * data under the contour.
    */
-  vtkMatrix4x4   *GetContourPlaneDirectionCosines(const double origin[3]);
+  vtkMatrix4x4* GetContourPlaneDirectionCosines(const double origin[3]);
 
 protected:
   vtkOrientedGlyphFocalPlaneContourRepresentation();
-  ~vtkOrientedGlyphFocalPlaneContourRepresentation() VTK_OVERRIDE;
+  ~vtkOrientedGlyphFocalPlaneContourRepresentation() override;
 
   // Render the cursor
-  vtkActor2D           *Actor;
-  vtkPolyDataMapper2D  *Mapper;
-  vtkGlyph2D           *Glypher;
-  vtkActor2D           *ActiveActor;
-  vtkPolyDataMapper2D  *ActiveMapper;
-  vtkGlyph2D           *ActiveGlypher;
-  vtkPolyData          *CursorShape;
-  vtkPolyData          *ActiveCursorShape;
-  vtkPolyData          *FocalData;
-  vtkPoints            *FocalPoint;
-  vtkPolyData          *ActiveFocalData;
-  vtkPoints            *ActiveFocalPoint;
+  vtkActor2D* Actor;
+  vtkPolyDataMapper2D* Mapper;
+  vtkGlyph2D* Glypher;
+  vtkActor2D* ActiveActor;
+  vtkPolyDataMapper2D* ActiveMapper;
+  vtkGlyph2D* ActiveGlypher;
+  vtkPolyData* CursorShape;
+  vtkPolyData* ActiveCursorShape;
+  vtkPolyData* FocalData;
+  vtkPoints* FocalPoint;
+  vtkPolyData* ActiveFocalData;
+  vtkPoints* ActiveFocalPoint;
 
   // The polydata represents the contour in display co-ordinates.
-  vtkPolyData          *Lines;
-  vtkPolyDataMapper2D  *LinesMapper;
-  vtkActor2D           *LinesActor;
+  vtkPolyData* Lines;
+  vtkPolyDataMapper2D* LinesMapper;
+  vtkActor2D* LinesActor;
 
   // The polydata represents the contour in world coordinates. It is updated
   // (kept in sync with Lines) every time the GetContourRepresentationAsPolyData()
   // method is called.
-  vtkPolyData          *LinesWorldCoordinates;
+  vtkPolyData* LinesWorldCoordinates;
 
   // Support picking
   double LastPickPosition[3];
@@ -184,24 +183,24 @@ protected:
 
   // Properties used to control the appearance of selected objects and
   // the manipulator in general.
-  vtkProperty2D *Property;
-  vtkProperty2D *ActiveProperty;
-  vtkProperty2D *LinesProperty;
+  vtkProperty2D* Property;
+  vtkProperty2D* ActiveProperty;
+  vtkProperty2D* LinesProperty;
 
-  vtkMatrix4x4  *ContourPlaneDirectionCosines;
+  vtkMatrix4x4* ContourPlaneDirectionCosines;
 
-  void           CreateDefaultProperties();
-
+  void CreateDefaultProperties();
 
   // Distance between where the mouse event happens and where the
   // widget is focused - maintain this distance during interaction.
   double InteractionOffset[2];
 
-  void BuildLines() VTK_OVERRIDE;
+  void BuildLines() override;
 
 private:
-  vtkOrientedGlyphFocalPlaneContourRepresentation(const vtkOrientedGlyphFocalPlaneContourRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOrientedGlyphFocalPlaneContourRepresentation&) VTK_DELETE_FUNCTION;
+  vtkOrientedGlyphFocalPlaneContourRepresentation(
+    const vtkOrientedGlyphFocalPlaneContourRepresentation&) = delete;
+  void operator=(const vtkOrientedGlyphFocalPlaneContourRepresentation&) = delete;
 };
 
 #endif

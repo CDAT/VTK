@@ -24,22 +24,21 @@
 
 =========================================================================*/
 
-/*========================================================================
- For general information about using VTK and Qt, see:
- http://www.trolltech.com/products/3rdparty/vtksupport.html
-=========================================================================*/
-
-// .NAME QVTKWidget - Display a vtkRenderWindow in a Qt's QWidget.
-// .SECTION Description
-// QVTKWidget provides a way to display VTK data in a Qt widget.
+/**
+ * @class QVTKWidget
+ * @brief - display a vtkRenderWindow in a Qt's QWidget.
+ *
+ * QVTKWidget provides a way to display VTK data in a Qt widget.
+ * @deprecated Please use QVTKOpenGLNativeWidget instead.
+ */
 
 #ifndef Q_VTK_WIDGET_H
 #define Q_VTK_WIDGET_H
 
-#include "vtkGUISupportQtModule.h" // For export macro
 #include "QVTKInteractor.h"
-#include <QWidget>
+#include "vtkGUISupportQtModule.h" // For export macro
 #include <QTimer>
+#include <QWidget>
 
 class QVTKInteractorAdapter;
 
@@ -54,36 +53,31 @@ class vtkTDxDevice;
 #endif
 
 #if defined(Q_WS_MAC)
-# if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
-#  define QVTK_USE_COCOA
-# elif defined(VTK_USE_COCOA)
-#  error "VTK configured to use Cocoa, but Qt configured to use Carbon"
-# endif
+#if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
+#define QVTK_USE_COCOA
+#elif defined(VTK_USE_COCOA)
+#error "VTK configured to use Cocoa, but Qt configured to use Carbon"
 #endif
-
+#endif
 
 #include "QVTKWin32Header.h"
 
-//! QVTKWidget displays a VTK window in a Qt window.
 class VTKGUISUPPORTQT_EXPORT QVTKWidget : public QWidget
 {
   Q_OBJECT
 
-  Q_PROPERTY(bool automaticImageCacheEnabled
-             READ isAutomaticImageCacheEnabled
-             WRITE setAutomaticImageCacheEnabled)
-  Q_PROPERTY(double maxRenderRateForImageCache
-             READ maxRenderRateForImageCache
-             WRITE setMaxRenderRateForImageCache)
-  Q_PROPERTY(bool deferRenderInPaintEvent
-             READ deferRenderInPaintEvent
-             WRITE setDeferRenderInPaintEvent)
+  Q_PROPERTY(bool automaticImageCacheEnabled READ isAutomaticImageCacheEnabled WRITE
+      setAutomaticImageCacheEnabled)
+  Q_PROPERTY(double maxRenderRateForImageCache READ maxRenderRateForImageCache WRITE
+      setMaxRenderRateForImageCache)
+  Q_PROPERTY(
+    bool deferRenderInPaintEvent READ deferRenderInPaintEvent WRITE setDeferRenderInPaintEvent)
 
 public:
   //! constructor
-  QVTKWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+  VTK_LEGACY(QVTKWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0));
   //! destructor
-  ~QVTKWidget() VTK_OVERRIDE;
+  ~QVTKWidget() override;
 
   // Description:
   // Set the vtk render window, if you wish to use your own vtkRenderWindow
@@ -133,9 +127,9 @@ public:
 
   // Description:
   // Handle showing of the Widget
-  void showEvent(QShowEvent*) VTK_OVERRIDE;
+  void showEvent(QShowEvent*) override;
 
-  QPaintEngine* paintEngine() const VTK_OVERRIDE;
+  QPaintEngine* paintEngine() const override;
 
   // Description:
   // Use a 3DConnexion device. Initial value is false.
@@ -193,7 +187,7 @@ public Q_SLOTS:
   // Receive notification of the creation of the TDxDevice.
   // Only relevant for Unix.
 #ifdef VTK_USE_TDX
-  void setDevice(vtkTDxDevice *device);
+  void setDevice(vtkTDxDevice* device);
 #endif
 
 protected Q_SLOTS:
@@ -209,47 +203,47 @@ protected Q_SLOTS:
 
 protected:
   // overloaded resize handler
-  void resizeEvent(QResizeEvent* event) VTK_OVERRIDE;
+  void resizeEvent(QResizeEvent* event) override;
   // overloaded move handler
-  void moveEvent(QMoveEvent* event) VTK_OVERRIDE;
+  void moveEvent(QMoveEvent* event) override;
   // overloaded paint handler
-  void paintEvent(QPaintEvent* event) VTK_OVERRIDE;
+  void paintEvent(QPaintEvent* event) override;
 
   // overloaded mouse press handler
-  void mousePressEvent(QMouseEvent* event) VTK_OVERRIDE;
+  void mousePressEvent(QMouseEvent* event) override;
   // overloaded mouse move handler
-  void mouseMoveEvent(QMouseEvent* event) VTK_OVERRIDE;
+  void mouseMoveEvent(QMouseEvent* event) override;
   // overloaded mouse release handler
-  void mouseReleaseEvent(QMouseEvent* event) VTK_OVERRIDE;
+  void mouseReleaseEvent(QMouseEvent* event) override;
   // overloaded key press handler
-  void keyPressEvent(QKeyEvent* event) VTK_OVERRIDE;
+  void keyPressEvent(QKeyEvent* event) override;
   // overloaded key release handler
-  void keyReleaseEvent(QKeyEvent* event) VTK_OVERRIDE;
+  void keyReleaseEvent(QKeyEvent* event) override;
   // overloaded enter event
-  void enterEvent(QEvent*) VTK_OVERRIDE;
+  void enterEvent(QEvent*) override;
   // overloaded leave event
-  void leaveEvent(QEvent*) VTK_OVERRIDE;
+  void leaveEvent(QEvent*) override;
 #ifndef QT_NO_WHEELEVENT
   // overload wheel mouse event
-  void wheelEvent(QWheelEvent*) VTK_OVERRIDE;
+  void wheelEvent(QWheelEvent*) override;
 #endif
   // overload focus event
-  void focusInEvent(QFocusEvent*) VTK_OVERRIDE;
+  void focusInEvent(QFocusEvent*) override;
   // overload focus event
-  void focusOutEvent(QFocusEvent*) VTK_OVERRIDE;
+  void focusOutEvent(QFocusEvent*) override;
   // overload Qt's event() to capture more keys
-  bool event( QEvent* e ) VTK_OVERRIDE;
+  bool event(QEvent* e) override;
 
   // overload context menu event
-  void contextMenuEvent(QContextMenuEvent*) VTK_OVERRIDE;
+  void contextMenuEvent(QContextMenuEvent*) override;
   // overload drag enter event
-  void dragEnterEvent(QDragEnterEvent*) VTK_OVERRIDE;
+  void dragEnterEvent(QDragEnterEvent*) override;
   // overload drag move event
-  void dragMoveEvent(QDragMoveEvent*) VTK_OVERRIDE;
+  void dragMoveEvent(QDragMoveEvent*) override;
   // overload drag leave event
-  void dragLeaveEvent(QDragLeaveEvent*) VTK_OVERRIDE;
+  void dragLeaveEvent(QDragLeaveEvent*) override;
   // overload drop event
-  void dropEvent(QDropEvent*) VTK_OVERRIDE;
+  void dropEvent(QDropEvent*) override;
 
   // method called in paintEvent() to render the image cache on to the device.
   // return false, if cache couldn;t be used for painting. In that case, the
@@ -270,9 +264,7 @@ protected:
 #if defined(Q_OS_WIN)
   bool winEvent(MSG* msg, long* result);
 
-#if QT_VERSION >= 0x050000
   bool nativeEvent(const QByteArray& eventType, void* message, long* result);
-#endif
 
 #endif
 
@@ -284,12 +276,9 @@ protected:
   QVTKInteractorAdapter* mIrenAdapter;
   bool mDeferRenderInPaintEvent;
 
-
 private:
-  //! unimplemented operator=
-  QVTKWidget const& operator=(QVTKWidget const&);
-  //! unimplemented copy
-  QVTKWidget(const QVTKWidget&);
+  QVTKWidget& operator=(QVTKWidget const&) = delete;
+  QVTKWidget(const QVTKWidget&) = delete;
 
   unsigned long renderEventCallbackObserverId;
 

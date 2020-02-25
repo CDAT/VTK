@@ -19,14 +19,16 @@
 
 #include <cassert>
 
-void vtkContextKeyEvent::SetInteractor(vtkRenderWindowInteractor *interactor)
+vtkContextKeyEvent::vtkContextKeyEvent() {}
+
+void vtkContextKeyEvent::SetInteractor(vtkRenderWindowInteractor* interactor)
 {
   this->Interactor = interactor;
 }
 
 vtkRenderWindowInteractor* vtkContextKeyEvent::GetInteractor() const
 {
-  return this->Interactor.GetPointer();
+  return this->Interactor;
 }
 
 char vtkContextKeyEvent::GetKeyCode() const

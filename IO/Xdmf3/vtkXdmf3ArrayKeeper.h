@@ -24,7 +24,7 @@
  *
  * This file is a helper for the vtkXdmf3Reader and not intended to be
  * part of VTK public API
-*/
+ */
 
 #ifndef vtkXdmf3ArrayKeeper_h
 #define vtkXdmf3ArrayKeeper_h
@@ -34,8 +34,11 @@
 
 class XdmfArray;
 
-class VTKIOXDMF3_EXPORT vtkXdmf3ArrayKeeper
-  : public std::map<XdmfArray *, unsigned int>
+#ifdef _MSC_VER
+#pragma warning(push)           // save
+#pragma warning(disable : 4251) // needs to have dll-interface to be used by clients of class
+#endif
+class VTKIOXDMF3_EXPORT vtkXdmf3ArrayKeeper : public std::map<XdmfArray*, unsigned int>
 {
 public:
   /**
@@ -56,7 +59,7 @@ public:
   /**
    * Call whenever you a new XDMF array is accessed.
    */
-  void Insert(XdmfArray *val);
+  void Insert(XdmfArray* val);
 
   /**
    * Call to free all open arrays that are currently open but not in use.
@@ -64,9 +67,14 @@ public:
    */
   void Release(bool force);
 
+  vtkXdmf3ArrayKeeper(const vtkXdmf3ArrayKeeper&) = delete;
+
 private:
   unsigned int generation;
 };
+#ifdef _MSC_VER
+#pragma warning(pop) // restore
+#endif
 
-#endif //vtkXdmf3ArrayKeeper_h
+#endif // vtkXdmf3ArrayKeeper_h
 // VTK-HeaderTest-Exclude: vtkXdmf3ArrayKeeper.h

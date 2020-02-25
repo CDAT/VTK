@@ -24,9 +24,8 @@
 #ifndef vtkPolyDataItem_h
 #define vtkPolyDataItem_h
 
-#include "vtkRenderingContext2DModule.h" // For export macro
 #include "vtkContextItem.h"
-
+#include "vtkRenderingContext2DModule.h" // For export macro
 
 class vtkPolyData;
 class vtkUnsignedCharArray;
@@ -35,14 +34,14 @@ class VTKRENDERINGCONTEXT2D_EXPORT vtkPolyDataItem : public vtkContextItem
 {
 public:
   vtkTypeMacro(vtkPolyDataItem, vtkContextItem);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkPolyDataItem *New();
+  static vtkPolyDataItem* New();
 
   /**
    * Paint event for the item.
    */
-  bool Paint(vtkContext2D* painter) VTK_OVERRIDE;
+  bool Paint(vtkContext2D* painter) override;
 
   /**
    * Set the PolyData of the item.
@@ -72,7 +71,10 @@ public:
 
 protected:
   vtkPolyDataItem();
-  ~vtkPolyDataItem() VTK_OVERRIDE;
+  ~vtkPolyDataItem() override;
+
+  class DrawHintsHelper;
+  DrawHintsHelper* HintHelper;
 
   float Position[2];
 
@@ -83,8 +85,8 @@ protected:
   int ScalarMode;
 
 private:
-  vtkPolyDataItem(const vtkPolyDataItem&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolyDataItem&) VTK_DELETE_FUNCTION;
+  vtkPolyDataItem(const vtkPolyDataItem&) = delete;
+  void operator=(const vtkPolyDataItem&) = delete;
 };
 
 #endif

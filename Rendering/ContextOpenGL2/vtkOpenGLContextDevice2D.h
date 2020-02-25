@@ -25,16 +25,16 @@
  *
  * @sa
  * vtkOpenGL2ContextDevice2D
-*/
+ */
 
 #ifndef vtkOpenGLContextDevice2D_h
 #define vtkOpenGLContextDevice2D_h
 
-#include "vtkRenderingContextOpenGL2Module.h" // For export macro
 #include "vtkContextDevice2D.h"
+#include "vtkRenderingContextOpenGL2Module.h" // For export macro
 
+#include <list>   // for std::list
 #include <vector> // STL Header
-#include <list> // for std::list
 
 class vtkMatrix4x4;
 class vtkOpenGLExtensionManager;
@@ -52,20 +52,19 @@ class VTKRENDERINGCONTEXTOPENGL2_EXPORT vtkOpenGLContextDevice2D : public vtkCon
 {
 public:
   vtkTypeMacro(vtkOpenGLContextDevice2D, vtkContextDevice2D);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates a 2D Painter object.
    */
-  static vtkOpenGLContextDevice2D *New();
+  static vtkOpenGLContextDevice2D* New();
 
   /**
    * Draw a poly line using the points - fastest code path due to memory
    * layout of the coordinates. The line will be colored by colors array
    * which has nc_comps components
    */
-  void DrawPoly(float *f, int n, unsigned char *colors = nullptr,
-                        int nc_comps = 0) VTK_OVERRIDE;
+  void DrawPoly(float* f, int n, unsigned char* colors = nullptr, int nc_comps = 0) override;
 
   /**
    * Draw lines using the points - memory layout is as follows:
@@ -73,16 +72,14 @@ public:
    * which has nc_comps components.
    * \sa DrawPoly()
    */
-  void DrawLines(float *f, int n, unsigned char *colors = nullptr,
-                         int nc_comps = 0) VTK_OVERRIDE;
+  void DrawLines(float* f, int n, unsigned char* colors = nullptr, int nc_comps = 0) override;
 
   /**
    * Draw a series of points - fastest code path due to memory
    * layout of the coordinates. Points are colored by colors array
    * which has nc_comps components
    */
-  void DrawPoints(float *points, int n, unsigned char* colors = nullptr,
-                          int nc_comps = 0) VTK_OVERRIDE;
+  void DrawPoints(float* points, int n, unsigned char* colors = nullptr, int nc_comps = 0) override;
 
   /**
    * Draw a series of point sprites, images centred at the points supplied.
@@ -90,8 +87,8 @@ public:
    * drawn and the size is set using SetPointSize. Points are colored by colors
    * array which has nc_comps components - this part is optional.
    */
-  void DrawPointSprites(vtkImageData *sprite, float *points, int n,
-                                unsigned char* colors = nullptr, int nc_comps = 0) VTK_OVERRIDE;
+  void DrawPointSprites(vtkImageData* sprite, float* points, int n, unsigned char* colors = nullptr,
+    int nc_comps = 0) override;
 
   /**
    * Draw a series of markers centered at the points supplied. The \a shape
@@ -104,8 +101,8 @@ public:
    * \param colors is an optional array of colors.
    * \param nc_comps is the number of components for the color.
    */
-  void DrawMarkers(int shape, bool highlight, float *points, int n,
-                           unsigned char *colors = nullptr, int nc_comps = 0) VTK_OVERRIDE;
+  void DrawMarkers(int shape, bool highlight, float* points, int n, unsigned char* colors = nullptr,
+    int nc_comps = 0) override;
 
   //@{
   /**
@@ -113,27 +110,26 @@ public:
    * sprites for each mark size/shape and uses DrawPointSprites to render them.
    * The number of cached markers can be accessed with this function.
    */
-  vtkSetMacro(MaximumMarkerCacheSize, int)
-  vtkGetMacro(MaximumMarkerCacheSize, int)
+  vtkSetMacro(MaximumMarkerCacheSize, int);
+  vtkGetMacro(MaximumMarkerCacheSize, int);
   //@}
 
   /**
    * Draws a rectangle
    */
-  void DrawQuad(float *points, int n) VTK_OVERRIDE;
+  void DrawQuad(float* points, int n) override;
 
   /**
    * Draws a rectangle
    */
-  void DrawQuadStrip(float *points, int n) VTK_OVERRIDE;
+  void DrawQuadStrip(float* points, int n) override;
 
   /**
    * Draw a polygon using the specified number of points.
    */
-  void DrawPolygon(float *, int) VTK_OVERRIDE;
-  void DrawColoredPolygon(float *points, int numPoints,
-                          unsigned char *colors = nullptr,
-                          int nc_comps = 0) VTK_OVERRIDE;
+  void DrawPolygon(float*, int) override;
+  void DrawColoredPolygon(
+    float* points, int numPoints, unsigned char* colors = nullptr, int nc_comps = 0) override;
 
   /**
    * Draw an elliptic wedge with center at x, y, outer radii outRx, outRy,
@@ -146,9 +142,8 @@ public:
    * \pre ordered_rx: inRx<=outRx
    * \pre ordered_ry: inRy<=outRy
    */
-  void DrawEllipseWedge(float x, float y, float outRx, float outRy,
-                                float inRx, float inRy, float startAngle,
-                                float stopAngle) VTK_OVERRIDE;
+  void DrawEllipseWedge(float x, float y, float outRx, float outRy, float inRx, float inRy,
+    float startAngle, float stopAngle) override;
 
   /**
    * Draw an elliptic arc with center at x,y with radii rX and rY between
@@ -156,14 +151,13 @@ public:
    * \pre positive_rX: rX>=0
    * \pre positive_rY: rY>=0
    */
-  void DrawEllipticArc(float x, float y, float rX, float rY,
-                               float startAngle, float stopAngle) VTK_OVERRIDE;
-
+  void DrawEllipticArc(
+    float x, float y, float rX, float rY, float startAngle, float stopAngle) override;
 
   /**
    * Draw some text to the screen!
    */
-  void DrawString(float *point, const vtkStdString &string) VTK_OVERRIDE;
+  void DrawString(float* point, const vtkStdString& string) override;
 
   /**
    * Compute the bounds of the supplied string. The bounds will be copied to the
@@ -173,13 +167,12 @@ public:
    * empty string or string with only characters that cannot be rendered.
    * NOTE: This function does not take account of the text rotation.
    */
-  void ComputeStringBounds(const vtkStdString &string,
-                                   float bounds[4]) VTK_OVERRIDE;
+  void ComputeStringBounds(const vtkStdString& string, float bounds[4]) override;
 
   /**
    * Draw some text to the screen.
    */
-  void DrawString(float *point, const vtkUnicodeString &string) VTK_OVERRIDE;
+  void DrawString(float* point, const vtkUnicodeString& string) override;
 
   /**
    * Compute the bounds of the supplied string. The bounds will be copied to the
@@ -189,46 +182,45 @@ public:
    * empty string or string with only characters that cannot be rendered.
    * NOTE: This function does not take account of the text rotation.
    */
-  void ComputeStringBounds(const vtkUnicodeString &string,
-                                   float bounds[4]) VTK_OVERRIDE;
+  void ComputeStringBounds(const vtkUnicodeString& string, float bounds[4]) override;
 
   /**
    * Compute the bounds of the supplied string while taking into account the
    * justification of the currently applied text property. Simple rotations
-   * (0, 90, 180, 270 degrees) are also propertly taken into account.
+   * (0, 90, 180, 270 degrees) are also properly taken into account.
    */
-  void ComputeJustifiedStringBounds(const char* string, float bounds[4]) VTK_OVERRIDE;
+  void ComputeJustifiedStringBounds(const char* string, float bounds[4]) override;
 
   /**
    * Draw text using MathText markup for mathematical equations. See
    * http://matplotlib.sourceforge.net/users/mathtext.html for more information.
    */
-  void DrawMathTextString(float point[2], const vtkStdString &string) VTK_OVERRIDE;
+  void DrawMathTextString(float point[2], const vtkStdString& string) override;
 
   /**
    * Draw the supplied image at the given x, y (p[0], p[1]) (bottom corner),
    * scaled by scale (1.0 would match the image).
    */
-  void DrawImage(float p[2], float scale, vtkImageData *image) VTK_OVERRIDE;
+  void DrawImage(float p[2], float scale, vtkImageData* image) override;
 
   /**
    * Draw the supplied image at the given position. The origin, width, and
    * height are specified by the supplied vtkRectf variable pos. The image
    * will be drawn scaled to that size.
    */
-  void DrawImage(const vtkRectf& pos, vtkImageData *image) VTK_OVERRIDE;
+  void DrawImage(const vtkRectf& pos, vtkImageData* image) override;
 
   /**
    * Draw the supplied PolyData at the given x, y (p[0], p[1]) (bottom corner),
    * scaled by scale (1.0 would match the actual dataset).
    */
-  void DrawPolyData(float p[2], float scale, vtkPolyData* polyData,
-    vtkUnsignedCharArray* colors, int scalarMode) VTK_OVERRIDE;
+  void DrawPolyData(float p[2], float scale, vtkPolyData* polyData, vtkUnsignedCharArray* colors,
+    int scalarMode) override;
 
   /**
    * Set the color for the device using unsigned char of length 4, RGBA.
    */
-  void SetColor4(unsigned char color[4]) VTK_OVERRIDE;
+  void SetColor4(unsigned char color[4]) override;
 
   /**
    * Set the color for the device using unsigned char of length 3, RGB.
@@ -238,68 +230,68 @@ public:
   /**
    * Set the texture for the device, it is used to fill the polygons
    */
-  void SetTexture(vtkImageData* image, int properties = 0) VTK_OVERRIDE;
+  void SetTexture(vtkImageData* image, int properties = 0) override;
 
   /**
    * Set the point size for glyphs/sprites.
    */
-  void SetPointSize(float size) VTK_OVERRIDE;
+  void SetPointSize(float size) override;
 
   /**
    * Set the line width for glyphs/sprites.
    */
-  void SetLineWidth(float width) VTK_OVERRIDE;
+  void SetLineWidth(float width) override;
 
   /**
    * Set the line type type (using anonymous enum in vtkPen).
    */
-  void SetLineType(int type) VTK_OVERRIDE;
+  void SetLineType(int type) override;
 
   /**
    * Multiply the current model view matrix by the supplied one.
    */
-  void MultiplyMatrix(vtkMatrix3x3 *m) VTK_OVERRIDE;
+  void MultiplyMatrix(vtkMatrix3x3* m) override;
 
   /**
    * Set the model view matrix for the display
    */
-  void SetMatrix(vtkMatrix3x3 *m) VTK_OVERRIDE;
+  void SetMatrix(vtkMatrix3x3* m) override;
 
   /**
    * Set the model view matrix for the display
    */
-  void GetMatrix(vtkMatrix3x3 *m) VTK_OVERRIDE;
+  void GetMatrix(vtkMatrix3x3* m) override;
 
   /**
    * Push the current matrix onto the stack.
    */
-  void PushMatrix() VTK_OVERRIDE;
+  void PushMatrix() override;
 
   /**
    * Pop the current matrix off of the stack.
    */
-  void PopMatrix() VTK_OVERRIDE;
+  void PopMatrix() override;
 
-  /**
-   * Supply an int array of length 4 with x1, y1, x2, y2 specifying clipping
-   * for the display.
+  /*
+   * Supply an int array of length 4 with x1, y1, width, height specifying
+   * clipping region for the device in pixels.
    */
-  void SetClipping(int *x) VTK_OVERRIDE;
+  void SetClipping(int* x) override;
 
   /**
    * Disable clipping of the display.
    */
-  void EnableClipping(bool enable) VTK_OVERRIDE;
+  void EnableClipping(bool enable) override;
 
   /**
    * Begin drawing, pass in the viewport to set up the view.
    */
-  void Begin(vtkViewport* viewport) VTK_OVERRIDE;
+  void Begin(vtkViewport* viewport) override;
 
   /**
    * End drawing, clean up the view.
    */
-  void End() VTK_OVERRIDE;
+  void End() override;
 
   /**
    * Start BufferId creation Mode.
@@ -308,7 +300,7 @@ public:
    * \pre bufferId_exists: bufferId!=0
    * \post started: GetBufferIdMode()
    */
-  void BufferIdModeBegin(vtkAbstractContextBufferId *bufferId) VTK_OVERRIDE;
+  void BufferIdModeBegin(vtkAbstractContextBufferId* bufferId) override;
 
   /**
    * Finalize BufferId creation Mode. It makes sure that the content of the
@@ -317,7 +309,7 @@ public:
    * \pre started: GetBufferIdMode()
    * \post done: !GetBufferIdMode()
    */
-  void BufferIdModeEnd() VTK_OVERRIDE;
+  void BufferIdModeEnd() override;
 
   /**
    * Force the use of the freetype based render strategy. If Qt is available
@@ -349,19 +341,19 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow *window);
+  virtual void ReleaseGraphicsResources(vtkWindow* window);
 
   //@{
   /**
    * Get the projection matrix this is needed
    */
-  vtkMatrix4x4 *GetProjectionMatrix();
-  vtkMatrix4x4 *GetModelMatrix();
+  vtkMatrix4x4* GetProjectionMatrix();
+  vtkMatrix4x4* GetModelMatrix();
   //@}
 
 protected:
   vtkOpenGLContextDevice2D();
-  ~vtkOpenGLContextDevice2D() VTK_OVERRIDE;
+  ~vtkOpenGLContextDevice2D() override;
 
   /**
    * Factorized code called by DrawEllipseWedge() and DrawEllipticArc()
@@ -370,20 +362,12 @@ protected:
    * \pre positive_rY: rY>=0.0f
    * \pre not_both_null: rX>0.0 || rY>0.0
    */
-  int GetNumberOfArcIterations(float rX,
-                               float rY,
-                               float startAngle,
-                               float stopAngle);
-
-  /**
-   * Store the width and height of the display devicen (in pixels).
-   */
-  int Geometry[2];
+  int GetNumberOfArcIterations(float rX, float rY, float startAngle, float stopAngle);
 
   /**
    * We need to store a pointer to the renderer for the text rendering
    */
-  vtkRenderer *Renderer;
+  vtkRenderer* Renderer;
 
   /**
    * Is the device currently rendering? Prevent multiple End() calls.
@@ -395,7 +379,7 @@ protected:
    * Private data pointer of the class
    */
   class Private;
-  Private *Storage;
+  Private* Storage;
 
   class CellArrayHelper;
   CellArrayHelper* PolyDataImpl;
@@ -406,28 +390,26 @@ protected:
    */
   vtkOpenGLRenderWindow* RenderWindow;
 
-  vtkOpenGLHelper *LinesCBO;  // vertex + color
+  vtkOpenGLHelper* LinesCBO; // vertex + color
   void ReadyLinesCBOProgram();
-  vtkOpenGLHelper *LinesBO;  // vertex
+  vtkOpenGLHelper* LinesBO; // vertex
   void ReadyLinesBOProgram();
-  vtkOpenGLHelper *VCBO;  // vertex + color
+  vtkOpenGLHelper* VCBO; // vertex + color
   void ReadyVCBOProgram();
-  vtkOpenGLHelper *VBO;  // vertex
+  vtkOpenGLHelper* VBO; // vertex
   void ReadyVBOProgram();
-  vtkOpenGLHelper *VTBO;  // vertex + tcoord
+  vtkOpenGLHelper* VTBO; // vertex + tcoord
   void ReadyVTBOProgram();
-  vtkOpenGLHelper *SCBO;  // sprite + color
+  vtkOpenGLHelper* SCBO; // sprite + color
   void ReadySCBOProgram();
-  vtkOpenGLHelper *SBO;  // sprite
+  vtkOpenGLHelper* SBO; // sprite
   void ReadySBOProgram();
 
-  void SetMatrices(vtkShaderProgram *prog);
-  void BuildVBO(vtkOpenGLHelper *cbo,
-    float *v, int nv,
-    unsigned char *coolors, int nc,
-    float *tcoords);
-  void CoreDrawTriangles(std::vector<float> &tverts, unsigned char* colors = nullptr,
-    int numComp = 0);
+  void SetMatrices(vtkShaderProgram* prog);
+  void BuildVBO(
+    vtkOpenGLHelper* cbo, float* v, int nv, unsigned char* coolors, int nc, float* tcoords);
+  void CoreDrawTriangles(
+    std::vector<float>& tverts, unsigned char* colors = nullptr, int numComp = 0);
   // used for stipples
   unsigned short LinePattern;
 
@@ -436,27 +418,27 @@ protected:
    * Draw the markers as paths/polydata instead of sprites for detailed GL2PS
    * capture.
    */
-  void DrawMarkersGL2PS(int shape, bool highlight, float *points, int n,
-                        unsigned char *colors, int nc_comps);
-  void DrawCrossMarkersGL2PS(bool highlight, float *points, int n,
-                             unsigned char *colors, int nc_comps);
-  void DrawPlusMarkersGL2PS(bool highlight, float *points, int n,
-                            unsigned char *colors, int nc_comps);
-  void DrawSquareMarkersGL2PS(bool highlight, float *points, int n,
-                              unsigned char *colors, int nc_comps);
-  void DrawCircleMarkersGL2PS(bool highlight, float *points, int n,
-                              unsigned char *colors, int nc_comps);
-  void DrawDiamondMarkersGL2PS(bool highlight, float *points, int n,
-                               unsigned char *colors, int nc_comps);
+  void DrawMarkersGL2PS(
+    int shape, bool highlight, float* points, int n, unsigned char* colors, int nc_comps);
+  void DrawCrossMarkersGL2PS(
+    bool highlight, float* points, int n, unsigned char* colors, int nc_comps);
+  void DrawPlusMarkersGL2PS(
+    bool highlight, float* points, int n, unsigned char* colors, int nc_comps);
+  void DrawSquareMarkersGL2PS(
+    bool highlight, float* points, int n, unsigned char* colors, int nc_comps);
+  void DrawCircleMarkersGL2PS(
+    bool highlight, float* points, int n, unsigned char* colors, int nc_comps);
+  void DrawDiamondMarkersGL2PS(
+    bool highlight, float* points, int n, unsigned char* colors, int nc_comps);
   //@}
 
   //@{
   /**
    * Embed an RGBA image in the GL2PS output at the supplied point.
    */
-  void DrawImageGL2PS(float p[2], vtkImageData *image);
-  void DrawImageGL2PS(float p[2], float scale, vtkImageData *image);
-  void DrawImageGL2PS(const vtkRectf &rect, vtkImageData *image);
+  void DrawImageGL2PS(float p[2], vtkImageData* image);
+  void DrawImageGL2PS(float p[2], float scale, vtkImageData* image);
+  void DrawImageGL2PS(const vtkRectf& rect, vtkImageData* image);
   //@}
 
   //@{
@@ -464,34 +446,32 @@ protected:
    * Inject smooth primitives into the GL2PS stream.
    */
   void DrawCircleGL2PS(float x, float y, float rX, float rY);
-  void DrawWedgeGL2PS(float x, float y, float outRx, float outRy,
-                      float inRx, float inRy);
+  void DrawWedgeGL2PS(float x, float y, float outRx, float outRy, float inRx, float inRy);
   //@}
 
   /**
    * Add an ellipse to a vtkPath. Used during GL2PS export.
    */
-  void AddEllipseToPath(vtkPath *path, float x, float y, float rx, float ry,
-                        bool reverse);
+  void AddEllipseToPath(vtkPath* path, float x, float y, float rx, float ry, bool reverse);
 
   /**
    * Transform the path using the current modelview matrix.
    */
-  void TransformPath(vtkPath *path) const;
+  void TransformPath(vtkPath* path) const;
 
   /**
    * Transform the 2D point using the current modelview matrix.
    */
-  void TransformPoint(float &x, float &y) const;
+  void TransformPoint(float& x, float& y) const;
 
   /**
    * Transform the width and height from pixels to data units.
    */
-  void TransformSize(float &dx, float &dy) const;
+  void TransformSize(float& dx, float& dy) const;
 
 private:
-  vtkOpenGLContextDevice2D(const vtkOpenGLContextDevice2D &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLContextDevice2D &) VTK_DELETE_FUNCTION;
+  vtkOpenGLContextDevice2D(const vtkOpenGLContextDevice2D&) = delete;
+  void operator=(const vtkOpenGLContextDevice2D&) = delete;
 
   /**
    * Retrieve a point sprite image for a given marker shape and size. The
@@ -499,24 +479,20 @@ private:
    * manages the lifetime of returned image data. Setting \a highlight to
    * true produces an alternate (usually thicker) version of the marker.
    */
-  vtkImageData *GetMarker(int shape, int size, bool highlight);
+  vtkImageData* GetMarker(int shape, int size, bool highlight);
 
   class vtkMarkerCacheObject
   {
   public:
     vtkTypeUInt64 Key;
-    vtkImageData *Value;
-    bool operator==(vtkTypeUInt64 key)
-    {
-      return this->Key == key;
-    }
+    vtkImageData* Value;
+    bool operator==(vtkTypeUInt64 key) { return this->Key == key; }
   };
 
-  void ComputeStringBoundsInternal(const vtkUnicodeString &string,
-                                   float bounds[4]);
+  void ComputeStringBoundsInternal(const vtkUnicodeString& string, float bounds[4]);
 
-  vtkTransform *ProjectionMatrix;
-  vtkTransform *ModelMatrix;
+  vtkTransform* ProjectionMatrix;
+  vtkTransform* ModelMatrix;
 
   std::list<vtkMarkerCacheObject> MarkerCache;
   int MaximumMarkerCacheSize;
@@ -525,8 +501,7 @@ private:
    * Generate the marker with the specified shape and size. This function should
    * not be used directly -- use GetMarker, which caches results, instead.
    */
-  vtkImageData * GenerateMarker(int shape, int size, bool highlight);
-
+  vtkImageData* GenerateMarker(int shape, int size, bool highlight);
 };
 
-#endif //vtkOpenGLContextDevice2D_h
+#endif // vtkOpenGLContextDevice2D_h

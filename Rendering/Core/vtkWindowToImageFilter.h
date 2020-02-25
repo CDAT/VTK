@@ -53,14 +53,14 @@
  * @sa
  * vtkRendererSource vtkRendererPointCloudSource vtkWindow
  * vtkRenderLargeImage
-*/
+ */
 
 #ifndef vtkWindowToImageFilter_h
 #define vtkWindowToImageFilter_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkAlgorithm.h"
-#include "vtkImageData.h" // makes things a bit easier
+#include "vtkImageData.h"           // makes things a bit easier
+#include "vtkRenderingCoreModule.h" // For export macro
 
 // VTK_RGB and VTK_RGBA are defined in system includes
 #define VTK_ZBUFFER 5
@@ -71,31 +71,22 @@ class vtkWTI2DHelperClass;
 class VTKRENDERINGCORE_EXPORT vtkWindowToImageFilter : public vtkAlgorithm
 {
 public:
-  static vtkWindowToImageFilter *New();
+  static vtkWindowToImageFilter* New();
 
-  vtkTypeMacro(vtkWindowToImageFilter,vtkAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkWindowToImageFilter, vtkAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Indicates what renderer to get the pixel data from. Initial value is 0.
    */
-  void SetInput(vtkWindow *input);
+  void SetInput(vtkWindow* input);
 
   //@{
   /**
    * Returns which renderer is being used as the source for the pixel data.
    * Initial value is 0.
    */
-  vtkGetObjectMacro(Input,vtkWindow);
-  //@}
-
-
-  //@{
-  /**
-   * @deprecated Replaced by SetScale/GetScale as of VTK 8.1.
-   */
-  VTK_LEGACY(void SetMagnification(int));
-  VTK_LEGACY(int GetMagnification());
+  vtkGetObjectMacro(Input, vtkWindow);
   //@}
 
   //@{
@@ -128,9 +119,9 @@ public:
    * Set/Get the flag that determines which buffer to read from.
    * The default is to read from the front buffer.
    */
-  vtkBooleanMacro(ReadFrontBuffer, int);
-  vtkGetMacro(ReadFrontBuffer, int);
-  vtkSetMacro(ReadFrontBuffer, int);
+  vtkBooleanMacro(ReadFrontBuffer, vtkTypeBool);
+  vtkGetMacro(ReadFrontBuffer, vtkTypeBool);
+  vtkSetMacro(ReadFrontBuffer, vtkTypeBool);
   //@}
 
   //@{
@@ -138,9 +129,9 @@ public:
    * Set/get whether to re-render the input window. Initial value is true.
    * (This option makes no difference if scale factor > 1.)
    */
-  vtkBooleanMacro(ShouldRerender, int);
-  vtkSetMacro(ShouldRerender, int);
-  vtkGetMacro(ShouldRerender, int);
+  vtkBooleanMacro(ShouldRerender, vtkTypeBool);
+  vtkSetMacro(ShouldRerender, vtkTypeBool);
+  vtkGetMacro(ShouldRerender, vtkTypeBool);
   //@}
 
   //@{
@@ -150,7 +141,7 @@ public:
    */
   void SetViewport(double, double, double, double);
   void SetViewport(double*);
-  vtkGetVectorMacro(Viewport,double,4);
+  vtkGetVectorMacro(Viewport, double, 4);
   //@}
 
   //@{
@@ -162,11 +153,10 @@ public:
    */
   vtkSetMacro(InputBufferType, int);
   vtkGetMacro(InputBufferType, int);
-  void SetInputBufferTypeToRGB() {this->SetInputBufferType(VTK_RGB);};
-  void SetInputBufferTypeToRGBA() {this->SetInputBufferType(VTK_RGBA);};
-  void SetInputBufferTypeToZBuffer() {this->SetInputBufferType(VTK_ZBUFFER);};
+  void SetInputBufferTypeToRGB() { this->SetInputBufferType(VTK_RGB); }
+  void SetInputBufferTypeToRGBA() { this->SetInputBufferType(VTK_RGBA); }
+  void SetInputBufferTypeToZBuffer() { this->SetInputBufferType(VTK_ZBUFFER); }
   //@}
-
 
   /**
    * Get the output data object for a port on this algorithm.
@@ -176,32 +166,28 @@ public:
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation*,
-                             vtkInformationVector**,
-                             vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
   vtkWindowToImageFilter();
-  ~vtkWindowToImageFilter() VTK_OVERRIDE;
+  ~vtkWindowToImageFilter() override;
 
   // vtkWindow is not a vtkDataObject, so we need our own ivar.
-  vtkWindow *Input;
+  vtkWindow* Input;
   int Scale[2];
-  int ReadFrontBuffer;
-  int ShouldRerender;
+  vtkTypeBool ReadFrontBuffer;
+  vtkTypeBool ShouldRerender;
   double Viewport[4];
   int InputBufferType;
   bool FixBoundary;
 
-  void RequestData(vtkInformation *,
-                   vtkInformationVector **, vtkInformationVector *);
+  void RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
-  virtual void RequestInformation (vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*);
+  virtual void RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
   // see algorithm for more info
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Allows subclasses to customize how a request for render is handled.
@@ -216,11 +202,11 @@ protected:
   void Rescale2DActors();
   void Shift2DActors(int x, int y);
   void Restore2DActors();
-  vtkWTI2DHelperClass *StoredData;
+  vtkWTI2DHelperClass* StoredData;
 
 private:
-  vtkWindowToImageFilter(const vtkWindowToImageFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWindowToImageFilter&) VTK_DELETE_FUNCTION;
+  vtkWindowToImageFilter(const vtkWindowToImageFilter&) = delete;
+  void operator=(const vtkWindowToImageFilter&) = delete;
 };
 
 #endif

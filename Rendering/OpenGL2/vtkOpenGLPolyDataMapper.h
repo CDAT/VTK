@@ -16,54 +16,57 @@
  * @brief   PolyDataMapper using OpenGL to render.
  *
  * PolyDataMapper that uses a OpenGL to do the actual rendering.
-*/
+ */
 
 #ifndef vtkOpenGLPolyDataMapper_h
 #define vtkOpenGLPolyDataMapper_h
 
-#include "vtkNew.h" // For vtkNew
-#include "vtkRenderingOpenGL2Module.h" // For export macro
-#include "vtkNew.h" // for ivars
-#include "vtkPolyDataMapper.h"
-#include "vtkShader.h" // for methods
+#include "vtkNew.h"          // For vtkNew
+#include "vtkNew.h"          // for ivars
 #include "vtkOpenGLHelper.h" // used for ivars
+#include "vtkPolyDataMapper.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
+#include "vtkShader.h"                 // for methods
+#include "vtkStateStorage.h"           // used for ivars
 
+#include <map>    //for methods
 #include <vector> //for ivars
-#include <map> //for methods
 
 class vtkCellArray;
 class vtkGenericOpenGLResourceFreeCallback;
 class vtkMatrix4x4;
 class vtkMatrix3x3;
+class vtkOpenGLCellToVTKCellMap;
 class vtkOpenGLRenderTimer;
 class vtkOpenGLTexture;
 class vtkOpenGLBufferObject;
 class vtkOpenGLVertexBufferObject;
 class vtkOpenGLVertexBufferObjectGroup;
 class vtkPoints;
+class vtkTexture;
 class vtkTextureObject;
 class vtkTransform;
-
+class vtkOpenGLShaderProperty;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLPolyDataMapper : public vtkPolyDataMapper
 {
 public:
   static vtkOpenGLPolyDataMapper* New();
-  vtkTypeMacro(vtkOpenGLPolyDataMapper, vtkPolyDataMapper)
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOpenGLPolyDataMapper, vtkPolyDataMapper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Implemented by sub classes. Actual rendering is done here.
    */
-  void RenderPiece(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void RenderPiece(vtkRenderer* ren, vtkActor* act) override;
 
   //@{
   /**
    * Implemented by sub classes. Actual rendering is done here.
    */
-  virtual void RenderPieceStart(vtkRenderer *ren, vtkActor *act);
-  virtual void RenderPieceDraw(vtkRenderer *ren, vtkActor *act);
-  virtual void RenderPieceFinish(vtkRenderer *ren, vtkActor *act);
+  virtual void RenderPieceStart(vtkRenderer* ren, vtkActor* act);
+  virtual void RenderPieceDraw(vtkRenderer* ren, vtkActor* act);
+  virtual void RenderPieceFinish(vtkRenderer* ren, vtkActor* act);
   //@}
 
   /**
@@ -71,10 +74,10 @@ public:
    * The parameter window could be used to determine which graphic
    * resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
-  vtkGetMacro(PopulateSelectionSettings,int);
-  void SetPopulateSelectionSettings(int v) { this->PopulateSelectionSettings = v; };
+  vtkGetMacro(PopulateSelectionSettings, int);
+  void SetPopulateSelectionSettings(int v) { this->PopulateSelectionSettings = v; }
 
   /**
    * WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
@@ -82,24 +85,12 @@ public:
    * Used by vtkHardwareSelector to determine if the prop supports hardware
    * selection.
    */
-  bool GetSupportsSelection() VTK_OVERRIDE { return true; }
-
-  /**
-   * Returns if the mapper does not expect to have translucent geometry. This
-   * may happen when using ScalarMode is set to not map scalars i.e. render the
-   * scalar array directly as colors and the scalar array has opacity i.e. alpha
-   * component. Note that even if this method returns true, an actor may treat
-   * the geometry as translucent since a constant translucency is set on the
-   * property, for example.
-   * Overridden to use the actual data and ScalarMode to determine if we have
-   * opaque geometry.
-   */
-  bool GetIsOpaque() VTK_OVERRIDE;
+  bool GetSupportsSelection() override { return true; }
 
   // used by RenderPiece and functions it calls to reduce
   // calls to get the input and allow for rendering of
   // other polydata (not the input)
-  vtkPolyData *CurrentInput;
+  vtkPolyData* CurrentInput;
 
   //@{
   /**
@@ -138,7 +129,7 @@ public:
   vtkGetStringMacro(CompositeIdArrayName);
   //@}
 
-
+#ifndef VTK_LEGACY_REMOVE
   //@{
   /**
    * This function enables you to apply your own substitutions
@@ -146,17 +137,18 @@ public:
    * is created by applying a bunch of string replacements to a
    * shader template. Using this function you can apply your
    * own string replacements to add features you desire.
+   *
+   * @deprecated Replaced By vtkShaderProperty::{Add,Clear,ClearAll}ShaderReplacements as of
+   * VTK 9.0.
    */
-  void AddShaderReplacement(
-    vtkShader::Type shaderType, // vertex, fragment, etc
+  VTK_LEGACY(void AddShaderReplacement(vtkShader::Type shaderType, // vertex, fragment, etc
     const std::string& originalValue,
-    bool replaceFirst,  // do this replacement before the default
-    const std::string& replacementValue,
-    bool replaceAll);
-  void ClearShaderReplacement(
-    vtkShader::Type shaderType, // vertex, fragment, etc
-    const std::string& originalValue,
-    bool replaceFirst);
+    bool replaceFirst, // do this replacement before the default
+    const std::string& replacementValue, bool replaceAll);)
+  VTK_LEGACY(void ClearShaderReplacement(vtkShader::Type shaderType, // vertex, fragment, etc
+    const std::string& originalValue, bool replaceFirst);)
+  VTK_LEGACY(void ClearAllShaderReplacements(vtkShader::Type shaderType);)
+  VTK_LEGACY(void ClearAllShaderReplacements();)
   //@}
 
   //@{
@@ -165,58 +157,33 @@ public:
    * instead of using the built in templates. Be aware, if
    * set, this template will be used for all cases,
    * primitive types, picking etc.
+   *
+   * @deprecated Replaced By vtkShaderProperty::Get*ShaderCode as of VTK 9.0.
    */
-  vtkSetStringMacro(VertexShaderCode);
-  vtkGetStringMacro(VertexShaderCode);
-  vtkSetStringMacro(FragmentShaderCode);
-  vtkGetStringMacro(FragmentShaderCode);
-  vtkSetStringMacro(GeometryShaderCode);
-  vtkGetStringMacro(GeometryShaderCode);
+  VTK_LEGACY(virtual void SetVertexShaderCode(const char* code);)
+  VTK_LEGACY(virtual char* GetVertexShaderCode();)
+  VTK_LEGACY(virtual void SetFragmentShaderCode(const char* code);)
+  VTK_LEGACY(virtual char* GetFragmentShaderCode();)
+  VTK_LEGACY(virtual void SetGeometryShaderCode(const char* code);)
+  VTK_LEGACY(virtual char* GetGeometryShaderCode();)
   //@}
-
-  // the following is all extra stuff to work around the
-  // fact that gl_PrimitiveID does not work correctly on
-  // Apple devices with AMD graphics hardware. See apple
-  // bug ID 20747550
-  static vtkPolyData *HandleAppleBug(
-    vtkPolyData *poly,
-    std::vector<float> &buffData);
+#endif
 
   /**
    * Make a shallow copy of this mapper.
    */
-  void ShallowCopy(vtkAbstractMapper *m);
-
-  //@{
-  /**
-   * Override the normal test for the apple bug
-   */
-  void ForceHaveAppleBugOff()
-  {
-    this->HaveAppleBugForce = 1;
-    this->Modified();
-  }
-  void ForceHaveAppleBugOn()
-  {
-    this->HaveAppleBugForce = 2;
-    this->Modified();
-  }
-  //@}
-
-  /**
-   * Get the value of HaveAppleBug
-   */
-  bool GetHaveAppleBug() { return this->HaveAppleBug; }
+  void ShallowCopy(vtkAbstractMapper* m) override;
 
   /// Return the mapper's vertex buffer objects.
   vtkGetObjectMacro(VBOs, vtkOpenGLVertexBufferObjectGroup);
 
   /**\brief A convenience method for enabling/disabling
-    *   the VBO's shift+scale transform.
-    */
+   *   the VBO's shift+scale transform.
+   */
   void SetVBOShiftScaleMethod(int m);
 
-  enum PrimitiveTypes {
+  enum PrimitiveTypes
+  {
     PrimitiveStart = 0,
     PrimitivePoints = 0,
     PrimitiveLines,
@@ -229,187 +196,206 @@ public:
   };
 
   /**
-   * Get access to the map of glprim to vtkcell ids
+   * Select a data array from the point/cell data
+   * and map it to a generic vertex attribute.
+   * vertexAttributeName is the name of the vertex attribute.
+   * dataArrayName is the name of the data array.
+   * fieldAssociation indicates when the data array is a point data array or
+   * cell data array (vtkDataObject::FIELD_ASSOCIATION_POINTS or
+   * (vtkDataObject::FIELD_ASSOCIATION_CELLS).
+   * componentno indicates which component from the data array must be passed as
+   * the attribute. If -1, then all components are passed.
    */
-  static void MakeCellCellMap(std::vector<vtkIdType> &CellCellMap,
-                              bool HaveAppleBug,
-                              vtkPolyData *poly,
-                              vtkCellArray **prims, int representation,
-                              vtkPoints *points);
+  void MapDataArrayToVertexAttribute(const char* vertexAttributeName, const char* dataArrayName,
+    int fieldAssociation, int componentno = -1) override;
+
+  // This method will Map the specified data array for use as
+  // a texture coordinate for texture tname. The actual
+  // attribute will be named tname_coord so as to not
+  // conflict with the texture sampler definition which will
+  // be tname.
+  void MapDataArrayToMultiTextureAttribute(const char* tname, const char* dataArrayName,
+    int fieldAssociation, int componentno = -1) override;
+
+  /**
+   * Remove a vertex attribute mapping.
+   */
+  void RemoveVertexAttributeMapping(const char* vertexAttributeName) override;
+
+  /**
+   * Remove all vertex attributes.
+   */
+  void RemoveAllVertexAttributeMappings() override;
+
+  /**
+   * allows a mapper to update a selections color buffers
+   * Called from a prop which in turn is called from the selector
+   */
+  void ProcessSelectorPixelBuffers(
+    vtkHardwareSelector* sel, std::vector<unsigned int>& pixeloffsets, vtkProp* prop) override;
 
 protected:
   vtkOpenGLPolyDataMapper();
-  ~vtkOpenGLPolyDataMapper() VTK_OVERRIDE;
+  ~vtkOpenGLPolyDataMapper() override;
 
-  vtkGenericOpenGLResourceFreeCallback *ResourceCallback;
+  vtkGenericOpenGLResourceFreeCallback* ResourceCallback;
 
-  // the following is all extra stuff to work around the
-  // fact that gl_PrimitiveID does not work correctly on
-  // Apple devices with AMD graphics hardware. See apple
-  // bug ID 20747550
-  bool HaveAppleBug;
-  int HaveAppleBugForce; // 0 = default 1 = 0ff 2 = on
-  std::vector<float> AppleBugPrimIDs;
-  vtkOpenGLBufferObject *AppleBugPrimIDBuffer;
+  void MapDataArray(const char* vertexAttributeName, const char* dataArrayName,
+    const char* texturename, int fieldAssociation, int componentno);
+
+  // what coordinate should be used for this texture
+  std::string GetTextureCoordinateName(const char* tname);
 
   /**
    * helper function to get the appropriate coincident params
    */
-  void GetCoincidentParameters(
-    vtkRenderer *ren, vtkActor *actor, float &factor, float &offset);
+  void GetCoincidentParameters(vtkRenderer* ren, vtkActor* actor, float& factor, float& offset);
 
   /**
    * Called in GetBounds(). When this method is called, the consider the input
    * to be updated depending on whether this->Static is set or not. This method
    * simply obtains the bounds from the data-object and returns it.
    */
-  void ComputeBounds() VTK_OVERRIDE;
+  void ComputeBounds() override;
 
   /**
    * Make sure appropriate shaders are defined, compiled and bound.  This method
    * orchistrates the process, much of the work is done in other methods
    */
-  virtual void UpdateShaders(
-    vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  virtual void UpdateShaders(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Does the shader source need to be recomputed
    */
-  virtual bool GetNeedToRebuildShaders(
-    vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  virtual bool GetNeedToRebuildShaders(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Build the shader source code, called by UpdateShader
    */
   virtual void BuildShaders(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Create the basic shaders before replacement
    */
   virtual void GetShaderTemplate(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
 
   /**
-   * Perform string replacments on the shader templates
+   * Perform string replacements on the shader templates
    */
   virtual void ReplaceShaderValues(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
 
   //@{
   /**
-   * Perform string replacments on the shader templates, called from
+   * Perform string replacements on the shader templates, called from
    * ReplaceShaderValues
    */
   virtual void ReplaceShaderRenderPass(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act, bool prePass);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act, bool prePass);
+  virtual void ReplaceShaderCustomUniforms(
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkActor* act);
   virtual void ReplaceShaderColor(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderLight(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderTCoord(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderPicking(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderPrimID(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderNormal(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderClip(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderPositionVC(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderCoincidentOffset(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   virtual void ReplaceShaderDepth(
-    std::map<vtkShader::Type, vtkShader *> shaders,
-    vtkRenderer *ren, vtkActor *act);
+    std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer* ren, vtkActor* act);
   //@}
+
+  /**
+   * Set the value of user-defined uniform variables, called by UpdateShader
+   */
+  virtual void SetCustomUniforms(vtkOpenGLHelper& cellBO, vtkActor* actor);
 
   /**
    * Set the shader parameters related to the mapper/input data, called by UpdateShader
    */
-  virtual void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  virtual void SetMapperShaderParameters(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Set the shader parameteres related to lighting, called by UpdateShader
    */
-  virtual void SetLightingShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  virtual void SetLightingShaderParameters(
+    vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Set the shader parameteres related to the Camera, called by UpdateShader
    */
-  virtual void SetCameraShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  virtual void SetCameraShaderParameters(vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Set the shader parameteres related to the property, called by UpdateShader
    */
-  virtual void SetPropertyShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
+  virtual void SetPropertyShaderParameters(
+    vtkOpenGLHelper& cellBO, vtkRenderer* ren, vtkActor* act);
 
   /**
    * Update the VBO/IBO to be current
    */
-  virtual void UpdateBufferObjects(vtkRenderer *ren, vtkActor *act);
+  virtual void UpdateBufferObjects(vtkRenderer* ren, vtkActor* act);
 
   /**
    * Does the VBO/IBO need to be rebuilt
    */
-  virtual bool GetNeedToRebuildBufferObjects(vtkRenderer *ren, vtkActor *act);
+  virtual bool GetNeedToRebuildBufferObjects(vtkRenderer* ren, vtkActor* act);
 
   /**
    * Build the VBO/IBO, called by UpdateBufferObjects
    */
-  virtual void BuildBufferObjects(vtkRenderer *ren, vtkActor *act);
+  virtual void BuildBufferObjects(vtkRenderer* ren, vtkActor* act);
 
   /**
    * Build the IBO, called by BuildBufferObjects
    */
-  virtual void BuildIBO(vtkRenderer *ren, vtkActor *act, vtkPolyData *poly);
+  virtual void BuildIBO(vtkRenderer* ren, vtkActor* act, vtkPolyData* poly);
 
   // The VBO and its layout.
-  vtkOpenGLVertexBufferObjectGroup *VBOs;
+  vtkOpenGLVertexBufferObjectGroup* VBOs;
 
   // Structures for the various cell types we render.
   vtkOpenGLHelper Primitives[PrimitiveEnd];
-  vtkOpenGLHelper *LastBoundBO;
+  vtkOpenGLHelper* LastBoundBO;
   bool DrawingEdgesOrVertices;
 
   // do we have wide lines that require special handling
-  virtual bool HaveWideLines(vtkRenderer *, vtkActor *);
+  virtual bool HaveWideLines(vtkRenderer*, vtkActor*);
 
   // do we have textures that require special handling
-  virtual bool HaveTextures(vtkActor *actor);
+  virtual bool HaveTextures(vtkActor* actor);
 
   // how many textures do we have
-  virtual unsigned int GetNumberOfTextures(vtkActor *actor);
+  virtual unsigned int GetNumberOfTextures(vtkActor* actor);
 
   // populate a vector with the textures we have
   // the order is always
   //  ColorInternalTexture
   //  Actors texture
-  //  Properies textures
-  virtual std::vector<vtkTexture *> GetTextures(vtkActor *actor);
+  //  Properties textures
+  virtual std::vector<std::pair<vtkTexture*, std::string> > GetTextures(vtkActor* actor);
 
   // do we have textures coordinates that require special handling
-  virtual bool HaveTCoords(vtkPolyData *poly);
+  virtual bool HaveTCoords(vtkPolyData* poly);
 
   // values we use to determine if we need to rebuild shaders
-  std::map<const vtkOpenGLHelper *, int> LastLightComplexity;
-  std::map<const vtkOpenGLHelper *, int> LastLightCount;
-  std::map<const vtkOpenGLHelper *, vtkTimeStamp> LightComplexityChanged;
+  std::map<const vtkOpenGLHelper*, int> LastLightComplexity;
+  std::map<const vtkOpenGLHelper*, int> LastLightCount;
+  std::map<const vtkOpenGLHelper*, vtkTimeStamp> LightComplexityChanged;
 
   int LastSelectionState;
   vtkTimeStamp SelectionStateChanged;
@@ -421,13 +407,14 @@ protected:
 
   // Check the renderpasses in actor's property keys to see if they've changed
   // render stages:
-  vtkMTimeType GetRenderPassStageMTime(vtkActor *actor);
+  vtkMTimeType GetRenderPassStageMTime(vtkActor* actor);
 
   bool UsingScalarColoring;
-  vtkTimeStamp VBOBuildTime; // When was the OpenGL VBO updated?
-  std::string VBOBuildString; // used for determining whento rebuild the VBO
-  std::string IBOBuildString; // used for determining whento rebuild the IBOs
-  std::string CellTextureBuildString;
+  vtkTimeStamp VBOBuildTime;     // When was the OpenGL VBO updated?
+  vtkStateStorage VBOBuildState; // used for determining when to rebuild the VBO
+  vtkStateStorage IBOBuildState; // used for determining whento rebuild the IBOs
+  vtkStateStorage CellTextureBuildState;
+  vtkStateStorage TempState; // can be used to avoid constant allocs/deallocs
   vtkOpenGLTexture* InternalColorTexture;
 
   int PopulateSelectionSettings;
@@ -442,89 +429,72 @@ protected:
   // if set to true, tcoords will be passed to the
   // VBO even if the mapper knows of no texture maps
   // normally tcoords are only added to the VBO if the
-  // mapper has indentified a texture map as well.
+  // mapper has identified a texture map as well.
   bool ForceTextureCoordinates;
 
-  void BuildCellTextures(
-    vtkRenderer *ren,
-    vtkActor *,
-    vtkCellArray *prims[4],
-    int representation);
+  virtual void BuildCellTextures(
+    vtkRenderer* ren, vtkActor*, vtkCellArray* prims[4], int representation);
 
-  void AppendCellTextures(
-    vtkRenderer *ren,
-    vtkActor *,
-    vtkCellArray *prims[4],
-    int representation,
-    std::vector<unsigned char> &colors,
-    std::vector<float> &normals,
-    vtkPolyData *pd);
+  void AppendCellTextures(vtkRenderer* ren, vtkActor*, vtkCellArray* prims[4], int representation,
+    std::vector<unsigned char>& colors, std::vector<float>& normals, vtkPolyData* pd,
+    vtkOpenGLCellToVTKCellMap* ccmap);
 
-  bool HavePickScalars;
-  vtkTextureObject *CellScalarTexture;
-  vtkOpenGLBufferObject *CellScalarBuffer;
+  vtkTextureObject* CellScalarTexture;
+  vtkOpenGLBufferObject* CellScalarBuffer;
   bool HaveCellScalars;
-  vtkTextureObject *CellNormalTexture;
-  vtkOpenGLBufferObject *CellNormalBuffer;
+  vtkTextureObject* CellNormalTexture;
+  vtkOpenGLBufferObject* CellNormalBuffer;
   bool HaveCellNormals;
 
-  // aditional picking indirection
+  // additional picking indirection
   char* PointIdArrayName;
   char* CellIdArrayName;
   char* ProcessIdArrayName;
   char* CompositeIdArrayName;
 
-  class ReplacementSpec
+  class ExtraAttributeValue
   {
-    public:
-      std::string OriginalValue;
-      vtkShader::Type ShaderType;
-      bool ReplaceFirst;
-      bool operator<(const ReplacementSpec &v1) const
-      {
-        if (this->OriginalValue != v1.OriginalValue) { return this->OriginalValue < v1.OriginalValue; }
-        if (this->ShaderType != v1.ShaderType) { return this->ShaderType < v1.ShaderType; }
-        return (this->ReplaceFirst < v1.ReplaceFirst);
-      }
-      bool operator>(const ReplacementSpec &v1) const
-      {
-        if (this->OriginalValue != v1.OriginalValue) { return this->OriginalValue > v1.OriginalValue; }
-        if (this->ShaderType != v1.ShaderType) { return this->ShaderType > v1.ShaderType; }
-        return (this->ReplaceFirst > v1.ReplaceFirst);
-      }
+  public:
+    std::string DataArrayName;
+    int FieldAssociation;
+    int ComponentNumber;
+    std::string TextureName;
   };
-  class ReplacementValue
-  {
-    public:
-      std::string Replacement;
-      bool ReplaceAll;
-  };
+  std::map<std::string, ExtraAttributeValue> ExtraAttributes;
 
-  std::map<const ReplacementSpec,ReplacementValue> UserShaderReplacements;
+  // Store shader properties on this class by legacy shader replacement functions
+  // This should disappear when the functions are deprecated
+#ifndef VTK_LEGACY_REMOVE
+  vtkOpenGLShaderProperty* GetLegacyShaderProperty();
+  vtkSmartPointer<vtkOpenGLShaderProperty> LegacyShaderProperty;
+#endif
 
-  char *VertexShaderCode;
-  char *FragmentShaderCode;
-  char *GeometryShaderCode;
-  vtkOpenGLRenderTimer *TimerQuery;
+  vtkOpenGLRenderTimer* TimerQuery;
 
   // are we currently drawing spheres/tubes
-  bool DrawingSpheres(vtkOpenGLHelper &cellBO, vtkActor *actor);
-  bool DrawingTubes(vtkOpenGLHelper &cellBO, vtkActor *actor);
-  bool DrawingTubesOrSpheres(vtkOpenGLHelper &cellBO, vtkActor *actor);
+  bool DrawingSpheres(vtkOpenGLHelper& cellBO, vtkActor* actor);
+  bool DrawingTubes(vtkOpenGLHelper& cellBO, vtkActor* actor);
+  bool DrawingTubesOrSpheres(vtkOpenGLHelper& cellBO, vtkActor* actor);
 
-  // get why opengl mode to use to draw the primitive
+  // get which opengl mode to use to draw the primitive
   int GetOpenGLMode(int representation, int primType);
 
   // get how big to make the points when doing point picking
   // typically 2 for points, 4 for lines, 6 for surface
   int GetPointPickingPrimitiveSize(int primType);
 
-  // a map from drawn triangles back to containing cell id
-  std::vector<unsigned int> CellCellMap;
+  // used to occasionally invoke timers
+  unsigned int TimerQueryCounter;
+
+  // stores the mapping from vtk cells to gl_PrimitiveId
+  vtkNew<vtkOpenGLCellToVTKCellMap> CellCellMap;
+
+  // compute and set the maximum point and cell ID used in selection
+  virtual void UpdateMaximumPointCellIds(vtkRenderer* ren, vtkActor* actor);
 
 private:
-  vtkOpenGLPolyDataMapper(const vtkOpenGLPolyDataMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLPolyDataMapper&) VTK_DELETE_FUNCTION;
+  vtkOpenGLPolyDataMapper(const vtkOpenGLPolyDataMapper&) = delete;
+  void operator=(const vtkOpenGLPolyDataMapper&) = delete;
 };
 
 #endif

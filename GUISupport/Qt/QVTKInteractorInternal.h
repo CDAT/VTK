@@ -32,8 +32,6 @@
 #ifndef Q_VTK_INTERACTOR_INTERNAL_H
 #define Q_VTK_INTERACTOR_INTERNAL_H
 
-#include "vtkConfigure.h" //for VTK_OVERRIDE
-
 #include <QtCore/QObject>
 
 #include <map>
@@ -47,15 +45,15 @@ class QVTKInteractorInternal : public QObject
   Q_OBJECT
 public:
   QVTKInteractorInternal(QVTKInteractor* p);
-  ~QVTKInteractorInternal() VTK_OVERRIDE;
+  ~QVTKInteractorInternal() override;
 public Q_SLOTS:
   void TimerEvent(int id);
+
 public:
   QSignalMapper* SignalMapper;
   typedef std::map<int, QTimer*> TimerMap;
   TimerMap Timers;
   QVTKInteractor* Parent;
 };
-
 
 #endif

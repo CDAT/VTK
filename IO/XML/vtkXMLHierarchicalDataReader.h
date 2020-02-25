@@ -24,7 +24,7 @@
  * for that level. If the number of sub-blocks is larger than the
  * number of processors, each processor will possibly have more than
  * 1 sub-block.
-*/
+ */
 
 #ifndef vtkXMLHierarchicalDataReader_h
 #define vtkXMLHierarchicalDataReader_h
@@ -38,22 +38,19 @@ class VTKIOXML_EXPORT vtkXMLHierarchicalDataReader : public vtkXMLMultiGroupData
 {
 public:
   static vtkXMLHierarchicalDataReader* New();
-  vtkTypeMacro(vtkXMLHierarchicalDataReader,vtkXMLMultiGroupDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkXMLHierarchicalDataReader, vtkXMLMultiGroupDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkXMLHierarchicalDataReader();
-  ~vtkXMLHierarchicalDataReader() VTK_OVERRIDE;
+  ~vtkXMLHierarchicalDataReader() override;
 
   // Get the name of the data set being read.
-  const char* GetDataSetName() VTK_OVERRIDE
-  {
-    return "vtkHierarchicalDataSet";
-  }
+  const char* GetDataSetName() override { return "vtkHierarchicalDataSet"; }
 
 private:
-  vtkXMLHierarchicalDataReader(const vtkXMLHierarchicalDataReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkXMLHierarchicalDataReader&) VTK_DELETE_FUNCTION;
+  vtkXMLHierarchicalDataReader(const vtkXMLHierarchicalDataReader&) = delete;
+  void operator=(const vtkXMLHierarchicalDataReader&) = delete;
 };
 
 #endif

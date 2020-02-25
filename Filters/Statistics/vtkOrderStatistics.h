@@ -38,7 +38,7 @@ PURPOSE.  See the above copyright notice for more information.
  * Thanks to Philippe Pebay and David Thompson from Sandia National Laboratories
  * for implementing this class.
  * Updated by Philippe Pebay, Kitware SAS 2012
-*/
+ */
 
 #ifndef vtkOrderStatistics_h
 #define vtkOrderStatistics_h
@@ -55,40 +55,41 @@ class VTKFILTERSSTATISTICS_EXPORT vtkOrderStatistics : public vtkStatisticsAlgor
 {
 public:
   vtkTypeMacro(vtkOrderStatistics, vtkStatisticsAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkOrderStatistics* New();
 
   /**
    * The type of quantile definition.
    */
-  enum QuantileDefinitionType {
-    InverseCDF              = 0, // Identical to method 1 of R
+  enum QuantileDefinitionType
+  {
+    InverseCDF = 0,              // Identical to method 1 of R
     InverseCDFAveragedSteps = 1, // Identical to method 2 of R, ignored for non-numeric types
-    NearestObservation      = 2  // Identical to method 3 of R
+    NearestObservation = 2       // Identical to method 3 of R
   };
 
   //@{
   /**
    * Set/Get the number of quantiles (with uniform spacing).
    */
-  vtkSetMacro( NumberOfIntervals, vtkIdType );
-  vtkGetMacro( NumberOfIntervals, vtkIdType );
+  vtkSetMacro(NumberOfIntervals, vtkIdType);
+  vtkGetMacro(NumberOfIntervals, vtkIdType);
   //@}
 
   //@{
   /**
    * Set the quantile definition.
    */
-  vtkSetMacro( QuantileDefinition, QuantileDefinitionType );
-  void SetQuantileDefinition ( int );
+  vtkSetMacro(QuantileDefinition, QuantileDefinitionType);
+  void SetQuantileDefinition(int);
   //@}
 
   //@{
   /**
    * Set/Get whether quantization will be allowed to enforce maximum histogram size.
    */
-  vtkSetMacro( Quantize, bool );
-  vtkGetMacro( Quantize, bool );
+  vtkSetMacro(Quantize, bool);
+  vtkGetMacro(Quantize, bool);
   //@}
 
   //@{
@@ -96,69 +97,60 @@ public:
    * Set/Get the maximum histogram size.
    * This maximum size is enforced only when Quantize is TRUE.
    */
-  vtkSetMacro( MaximumHistogramSize, vtkIdType );
-  vtkGetMacro( MaximumHistogramSize, vtkIdType );
+  vtkSetMacro(MaximumHistogramSize, vtkIdType);
+  vtkGetMacro(MaximumHistogramSize, vtkIdType);
   //@}
 
   /**
    * Get the quantile definition.
    */
-  vtkIdType GetQuantileDefinition() { return static_cast<vtkIdType>( this->QuantileDefinition ); }
+  vtkIdType GetQuantileDefinition() { return static_cast<vtkIdType>(this->QuantileDefinition); }
 
   /**
    * A convenience method (in particular for access from other applications) to
    * set parameter values.
-   * Return true if setting of requested parameter name was excuted, false otherwise.
+   * Return true if setting of requested parameter name was executed, false otherwise.
    */
-  bool SetParameter( const char* parameter,
-                     int index,
-                     vtkVariant value ) VTK_OVERRIDE;
+  bool SetParameter(const char* parameter, int index, vtkVariant value) override;
 
   /**
    * Given a collection of models, calculate aggregate model
    * NB: not implemented
    */
-  void Aggregate( vtkDataObjectCollection*,
-                          vtkMultiBlockDataSet* ) VTK_OVERRIDE { return; };
+  void Aggregate(vtkDataObjectCollection*, vtkMultiBlockDataSet*) override { return; }
 
 protected:
   vtkOrderStatistics();
-  ~vtkOrderStatistics() VTK_OVERRIDE;
+  ~vtkOrderStatistics() override;
 
   /**
    * Execute the calculations required by the Learn option.
    */
-  void Learn( vtkTable*,
-              vtkTable*,
-              vtkMultiBlockDataSet* ) VTK_OVERRIDE;
+  void Learn(vtkTable*, vtkTable*, vtkMultiBlockDataSet*) override;
 
   /**
    * Execute the calculations required by the Derive option.
    */
-  void Derive( vtkMultiBlockDataSet* ) VTK_OVERRIDE;
+  void Derive(vtkMultiBlockDataSet*) override;
 
   /**
    * Execute the calculations required by the Test option.
    */
-  void Test( vtkTable*,
-             vtkMultiBlockDataSet*,
-             vtkTable* ) VTK_OVERRIDE;
+  void Test(vtkTable*, vtkMultiBlockDataSet*, vtkTable*) override;
 
   /**
    * Execute the calculations required by the Assess option.
    */
-  void Assess( vtkTable* inData,
-               vtkMultiBlockDataSet* inMeta,
-               vtkTable* outData ) VTK_OVERRIDE
-  { this->Superclass::Assess( inData, inMeta, outData, 1 ); }
+  void Assess(vtkTable* inData, vtkMultiBlockDataSet* inMeta, vtkTable* outData) override
+  {
+    this->Superclass::Assess(inData, inMeta, outData, 1);
+  }
 
   /**
    * Provide the appropriate assessment functor.
    */
-  void SelectAssessFunctor( vtkTable* outData,
-                            vtkDataObject* inMeta,
-                            vtkStringArray* rowNames,
-                            AssessFunctor*& dfunc ) VTK_OVERRIDE;
+  void SelectAssessFunctor(vtkTable* outData, vtkDataObject* inMeta, vtkStringArray* rowNames,
+    AssessFunctor*& dfunc) override;
 
   vtkIdType NumberOfIntervals;
   QuantileDefinitionType QuantileDefinition;
@@ -166,8 +158,8 @@ protected:
   vtkIdType MaximumHistogramSize;
 
 private:
-  vtkOrderStatistics(const vtkOrderStatistics&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOrderStatistics&) VTK_DELETE_FUNCTION;
+  vtkOrderStatistics(const vtkOrderStatistics&) = delete;
+  void operator=(const vtkOrderStatistics&) = delete;
 };
 
 #endif

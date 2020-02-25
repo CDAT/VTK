@@ -20,20 +20,20 @@
  *
  * vtkMPIMultiBlockPLOT3DReader extends vtkMultiBlockPLOT3DReader to use MPI-IO
  * instead of POSIX IO to read file in parallel.
-*/
+ */
 
 #ifndef vtkMPIMultiBlockPLOT3DReader_h
 #define vtkMPIMultiBlockPLOT3DReader_h
 
-#include "vtkMultiBlockPLOT3DReader.h"
 #include "vtkIOMPIParallelModule.h" // For export macro
+#include "vtkMultiBlockPLOT3DReader.h"
 
 class VTKIOMPIPARALLEL_EXPORT vtkMPIMultiBlockPLOT3DReader : public vtkMultiBlockPLOT3DReader
 {
 public:
   static vtkMPIMultiBlockPLOT3DReader* New();
   vtkTypeMacro(vtkMPIMultiBlockPLOT3DReader, vtkMultiBlockPLOT3DReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -47,7 +47,7 @@ public:
 
 protected:
   vtkMPIMultiBlockPLOT3DReader();
-  ~vtkMPIMultiBlockPLOT3DReader();
+  ~vtkMPIMultiBlockPLOT3DReader() override;
 
   /**
    * Determines we should use MPI-IO for the current file. We don't use MPI-IO
@@ -55,28 +55,21 @@ protected:
    */
   bool CanUseMPIIO();
 
-  virtual int OpenFileForDataRead(void*& fp, const char* fname) VTK_OVERRIDE;
-  virtual void CloseFile(void* fp) VTK_OVERRIDE;
+  virtual int OpenFileForDataRead(void*& fp, const char* fname) override;
+  virtual void CloseFile(void* fp) override;
 
-  virtual int ReadIntScalar(
-    void* vfp,
-    int extent[6], int wextent[6],
-    vtkDataArray* scalar, vtkTypeUInt64 offset,
-    const vtkMultiBlockPLOT3DReaderRecord& currentRecord) VTK_OVERRIDE;
-  virtual int ReadScalar(
-    void* vfp,
-    int extent[6], int wextent[6],
-    vtkDataArray* scalar, vtkTypeUInt64 offset,
-    const vtkMultiBlockPLOT3DReaderRecord& currentRecord) VTK_OVERRIDE;
-  virtual int ReadVector(
-    void* vfp,
-    int extent[6], int wextent[6],
-    int numDims, vtkDataArray* vector, vtkTypeUInt64 offset,
-    const vtkMultiBlockPLOT3DReaderRecord& currentRecord) VTK_OVERRIDE;
+  virtual int ReadIntScalar(void* vfp, int extent[6], int wextent[6], vtkDataArray* scalar,
+    vtkTypeUInt64 offset, const vtkMultiBlockPLOT3DReaderRecord& currentRecord) override;
+  virtual int ReadScalar(void* vfp, int extent[6], int wextent[6], vtkDataArray* scalar,
+    vtkTypeUInt64 offset, const vtkMultiBlockPLOT3DReaderRecord& currentRecord) override;
+  virtual int ReadVector(void* vfp, int extent[6], int wextent[6], int numDims,
+    vtkDataArray* vector, vtkTypeUInt64 offset,
+    const vtkMultiBlockPLOT3DReaderRecord& currentRecord) override;
   bool UseMPIIO;
+
 private:
-  vtkMPIMultiBlockPLOT3DReader(const vtkMPIMultiBlockPLOT3DReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMPIMultiBlockPLOT3DReader&) VTK_DELETE_FUNCTION;
+  vtkMPIMultiBlockPLOT3DReader(const vtkMPIMultiBlockPLOT3DReader&) = delete;
+  void operator=(const vtkMPIMultiBlockPLOT3DReader&) = delete;
 };
 
 #endif

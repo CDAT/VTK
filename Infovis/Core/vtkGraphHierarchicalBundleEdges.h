@@ -50,21 +50,21 @@
  * Danny Holten. Hierarchical Edge Bundles: Visualization of Adjacency Relations
  * Relations in Hierarchical Data. IEEE Transactions on Visualization and
  * Computer Graphics, Vol. 12, No. 5, 2006. pp. 741-748.
-*/
+ */
 
 #ifndef vtkGraphHierarchicalBundleEdges_h
 #define vtkGraphHierarchicalBundleEdges_h
 
-#include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkGraphAlgorithm.h"
+#include "vtkInfovisCoreModule.h" // For export macro
 
 class VTKINFOVISCORE_EXPORT vtkGraphHierarchicalBundleEdges : public vtkGraphAlgorithm
 {
 public:
-  static vtkGraphHierarchicalBundleEdges *New();
+  static vtkGraphHierarchicalBundleEdges* New();
 
-  vtkTypeMacro(vtkGraphHierarchicalBundleEdges,vtkGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkGraphHierarchicalBundleEdges, vtkGraphAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -92,11 +92,11 @@ public:
   /**
    * Set the input type of the algorithm to vtkGraph.
    */
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 protected:
   vtkGraphHierarchicalBundleEdges();
-  ~vtkGraphHierarchicalBundleEdges()VTK_OVERRIDE {}
+  ~vtkGraphHierarchicalBundleEdges() override {}
 
   double BundlingStrength;
   bool DirectMapping;
@@ -104,11 +104,11 @@ protected:
   /**
    * Convert the vtkGraph into vtkPolyData.
    */
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkGraphHierarchicalBundleEdges(const vtkGraphHierarchicalBundleEdges&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGraphHierarchicalBundleEdges&) VTK_DELETE_FUNCTION;
+  vtkGraphHierarchicalBundleEdges(const vtkGraphHierarchicalBundleEdges&) = delete;
+  void operator=(const vtkGraphHierarchicalBundleEdges&) = delete;
 };
 
 #endif

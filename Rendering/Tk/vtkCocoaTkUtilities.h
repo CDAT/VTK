@@ -29,7 +29,7 @@ PURPOSE.  See the above copyright notice for more information.
  * This header must be in C++ only because it is included by .cxx files.
  * That means no Objective-C may be used. That's why some instance variables
  * are void* instead of what they really should be.
-*/
+ */
 
 #ifndef vtkCocoaTkUtilities_h
 #define vtkCocoaTkUtilities_h
@@ -41,23 +41,24 @@ struct Tk_Window_;
 class vtkCocoaTkUtilities : public vtkObject
 {
 public:
-  static vtkCocoaTkUtilities *New();
-  vtkTypeMacro(vtkCocoaTkUtilities,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkCocoaTkUtilities* New();
+  vtkTypeMacro(vtkCocoaTkUtilities, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Return the NSView for a Tk_Window.  It is returned as a void pointer
    * so that users of this function don't need to compile as Objective C.
    */
-  static void* GetDrawableView(Tk_Window_ *window);
+  static void* GetDrawableView(Tk_Window_* window);
 
 protected:
   vtkCocoaTkUtilities() {}
-  ~vtkCocoaTkUtilities() VTK_OVERRIDE {}
+  ~vtkCocoaTkUtilities() override {}
 
 private:
-  vtkCocoaTkUtilities(const vtkCocoaTkUtilities&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCocoaTkUtilities&) VTK_DELETE_FUNCTION;
+  vtkCocoaTkUtilities(const vtkCocoaTkUtilities&) = delete;
+  void operator=(const vtkCocoaTkUtilities&) = delete;
 };
 
 #endif
+// VTK-HeaderTest-Exclude: vtkCocoaTkUtilities.h

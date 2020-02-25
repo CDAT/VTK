@@ -30,35 +30,33 @@
 
 vtkStandardNewMacro(vtkDirectedAcyclicGraph);
 //----------------------------------------------------------------------------
-vtkDirectedAcyclicGraph::vtkDirectedAcyclicGraph()
+vtkDirectedAcyclicGraph::vtkDirectedAcyclicGraph() = default;
+
+//----------------------------------------------------------------------------
+vtkDirectedAcyclicGraph::~vtkDirectedAcyclicGraph() = default;
+
+//----------------------------------------------------------------------------
+vtkDirectedAcyclicGraph* vtkDirectedAcyclicGraph::GetData(vtkInformation* info)
 {
+  return info ? vtkDirectedAcyclicGraph::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
 }
 
 //----------------------------------------------------------------------------
-vtkDirectedAcyclicGraph::~vtkDirectedAcyclicGraph()
-{
-}
-
-//----------------------------------------------------------------------------
-vtkDirectedAcyclicGraph *vtkDirectedAcyclicGraph::GetData(vtkInformation *info)
-{
-  return info? vtkDirectedAcyclicGraph::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
-}
-
-//----------------------------------------------------------------------------
-vtkDirectedAcyclicGraph *vtkDirectedAcyclicGraph::GetData(vtkInformationVector *v, int i)
+vtkDirectedAcyclicGraph* vtkDirectedAcyclicGraph::GetData(vtkInformationVector* v, int i)
 {
   return vtkDirectedAcyclicGraph::GetData(v->GetInformationObject(i));
 }
 
-enum { DFS_WHITE, DFS_GRAY, DFS_BLACK };
+enum
+{
+  DFS_WHITE,
+  DFS_GRAY,
+  DFS_BLACK
+};
 
 //----------------------------------------------------------------------------
 static bool vtkDirectedAcyclicGraphDFSVisit(
-  vtkGraph *g,
-  vtkIdType u,
-  std::vector<int> color,
-  vtkOutEdgeIterator *adj)
+  vtkGraph* g, vtkIdType u, std::vector<int> color, vtkOutEdgeIterator* adj)
 {
   color[u] = DFS_GRAY;
   g->GetOutEdges(u, adj);
@@ -82,7 +80,7 @@ static bool vtkDirectedAcyclicGraphDFSVisit(
 }
 
 //----------------------------------------------------------------------------
-bool vtkDirectedAcyclicGraph::IsStructureValid(vtkGraph *g)
+bool vtkDirectedAcyclicGraph::IsStructureValid(vtkGraph* g)
 {
   if (!g)
   {
@@ -105,8 +103,7 @@ bool vtkDirectedAcyclicGraph::IsStructureValid(vtkGraph *g)
   // Cormen, Leiserson, Rivest, p. 486).
   vtkIdType numVerts = g->GetNumberOfVertices();
   std::vector<int> color(numVerts, DFS_WHITE);
-  vtkSmartPointer<vtkOutEdgeIterator> adj =
-    vtkSmartPointer<vtkOutEdgeIterator>::New();
+  vtkSmartPointer<vtkOutEdgeIterator> adj = vtkSmartPointer<vtkOutEdgeIterator>::New();
   for (vtkIdType s = 0; s < numVerts; ++s)
   {
     if (color[s] == DFS_WHITE)
@@ -123,5 +120,5 @@ bool vtkDirectedAcyclicGraph::IsStructureValid(vtkGraph *g)
 //----------------------------------------------------------------------------
 void vtkDirectedAcyclicGraph::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

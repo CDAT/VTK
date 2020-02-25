@@ -15,12 +15,13 @@
 
 #include "vtkPDBReader.h"
 
+#include "vtkIdTypeArray.h"
+#include "vtkIntArray.h"
 #include "vtkObjectFactory.h"
 #include "vtkPoints.h"
-#include "vtkIdTypeArray.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
-#include "vtkIntArray.h"
+#include "vtkUnsignedCharArray.h"
 
 #include <algorithm>
 
@@ -31,13 +32,9 @@ inline void StdStringToUpper(std::string& s)
 
 vtkStandardNewMacro(vtkPDBReader);
 
-vtkPDBReader::vtkPDBReader()
-{
-}
+vtkPDBReader::vtkPDBReader() = default;
 
-vtkPDBReader::~vtkPDBReader()
-{
-}
+vtkPDBReader::~vtkPDBReader() = default;
 
 void vtkPDBReader::ReadSpecificMolecule(FILE* fp)
 {
@@ -61,14 +58,12 @@ void vtkPDBReader::ReadSpecificMolecule(FILE* fp)
   Helix->SetNumberOfComponents(4);
   Helix->Allocate(50);
 
-  vtkDebugMacro( << "PDB File (" << this->HBScale
-    << ", " << this->BScale << ")");
-  while(fgets(linebuf, sizeof linebuf, fp) != nullptr &&
-    strncmp("END", linebuf, 3))
+  vtkDebugMacro(<< "PDB File (" << this->HBScale << ", " << this->BScale << ")");
+  while (fgets(linebuf, sizeof linebuf, fp) != nullptr && strncmp("END", linebuf, 3))
   {
     char elem[3] = { 0 };
     char c[7] = { 0 };
-    sscanf(&linebuf[0],"%6s", c);
+    sscanf(&linebuf[0], "%6s", c);
     std::string command = c;
     StdStringToUpper(command);
     if (command == "ATOM" || command == "HETATM")
@@ -77,7 +72,7 @@ void vtkPDBReader::ReadSpecificMolecule(FILE* fp)
       sscanf(&linebuf[17], "%3s", dum2);
       chain = linebuf[21];
       sscanf(&linebuf[22], "%d", &resi);
-      sscanf(&linebuf[30],"%8f%8f%8f", x, x+1, x+2);
+      sscanf(&linebuf[30], "%8f%8f%8f", x, x + 1, x + 2);
       if (strlen(linebuf) >= 78)
       {
         sscanf(&linebuf[76], "%2s", elem);
@@ -85,10 +80,12 @@ void vtkPDBReader::ReadSpecificMolecule(FILE* fp)
       if (elem[0] == '\0')
       {
         // if element symbol was not specified, just use the "Atom name".
-        strncpy(elem, dum1, 2);
+        elem[0] = dum1[0];
+        elem[1] = dum1[1];
+        elem[2] = '\0';
       }
 
-      if (!((elem[0]=='H' || elem[0]=='h') && elem[1]=='\0'))
+      if (!((elem[0] == 'H' || elem[0] == 'h') && elem[1] == '\0'))
       { /* skip hydrogen */
         this->Points->InsertNextPoint(x);
         this->Residue->InsertNextValue(resi);
@@ -140,24 +137,34 @@ void vtkPDBReader::ReadSpecificMolecule(FILE* fp)
     {
       int sheet[4];
       Sheets->GetTypedTuple(j, sheet);
-      if (this->Chain->GetValue(i) != sheet[0]) continue;
-      if (resi < sheet[1]) continue;
-      if (resi > sheet[3]) continue;
+      if (this->Chain->GetValue(i) != sheet[0])
+        continue;
+      if (resi < sheet[1])
+        continue;
+      if (resi > sheet[3])
+        continue;
       this->SecondaryStructures->SetValue(i, 's');
-      if (resi == sheet[1]) this->SecondaryStructuresBegin->SetValue(i, true);
-      if (resi == sheet[3]) this->SecondaryStructuresEnd->SetValue(i, true);
+      if (resi == sheet[1])
+        this->SecondaryStructuresBegin->SetValue(i, true);
+      if (resi == sheet[3])
+        this->SecondaryStructuresEnd->SetValue(i, true);
     }
 
     for (j = 0; j < Helix->GetNumberOfTuples(); j++)
     {
       int helix[4];
       Helix->GetTypedTuple(j, helix);
-      if (this->Chain->GetValue(i) != helix[0]) continue;
-      if (resi < helix[1]) continue;
-      if (resi > helix[3]) continue;
+      if (this->Chain->GetValue(i) != helix[0])
+        continue;
+      if (resi < helix[1])
+        continue;
+      if (resi > helix[3])
+        continue;
       this->SecondaryStructures->SetValue(i, 'h');
-      if (resi == helix[1]) this->SecondaryStructuresBegin->SetValue(i, true);
-      else if (resi == helix[3]) this->SecondaryStructuresEnd->SetValue(i, true);
+      if (resi == helix[1])
+        this->SecondaryStructuresBegin->SetValue(i, true);
+      else if (resi == helix[3])
+        this->SecondaryStructuresEnd->SetValue(i, true);
     }
   }
   Sheets->Delete();
@@ -166,5 +173,5 @@ void vtkPDBReader::ReadSpecificMolecule(FILE* fp)
 
 void vtkPDBReader::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

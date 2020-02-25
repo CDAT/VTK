@@ -27,40 +27,39 @@
  *
  * @sa
  * vtkPropPicker vtkPicker vtkCellPicker vtkPointPicker
-*/
+ */
 
 #ifndef vtkWorldPointPicker_h
 #define vtkWorldPointPicker_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkAbstractPicker.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class VTKRENDERINGCORE_EXPORT vtkWorldPointPicker : public vtkAbstractPicker
 {
 public:
-  static vtkWorldPointPicker *New();
-  vtkTypeMacro(vtkWorldPointPicker,vtkAbstractPicker);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkWorldPointPicker* New();
+  vtkTypeMacro(vtkWorldPointPicker, vtkAbstractPicker);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Perform the pick. (This method overload's the superclass.)
    */
-  int Pick(double selectionX, double selectionY, double selectionZ,
-           vtkRenderer *renderer) VTK_OVERRIDE;
-  int Pick(double selectionPt[3], vtkRenderer *renderer)
-    { return this->vtkAbstractPicker::Pick( selectionPt, renderer); };
+  int Pick(double selectionX, double selectionY, double selectionZ, vtkRenderer* renderer) override;
+  int Pick(double selectionPt[3], vtkRenderer* renderer)
+  {
+    return this->vtkAbstractPicker::Pick(selectionPt, renderer);
+  }
   //@}
 
 protected:
-  vtkWorldPointPicker ();
-  ~vtkWorldPointPicker() VTK_OVERRIDE {}
+  vtkWorldPointPicker();
+  ~vtkWorldPointPicker() override {}
 
 private:
-  vtkWorldPointPicker(const vtkWorldPointPicker&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWorldPointPicker&) VTK_DELETE_FUNCTION;
+  vtkWorldPointPicker(const vtkWorldPointPicker&) = delete;
+  void operator=(const vtkWorldPointPicker&) = delete;
 };
 
 #endif
-
-

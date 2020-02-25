@@ -29,13 +29,12 @@
 #include "vtkFiltersHybridModule.h" // For export macro
 #include "vtkMultiTimeStepAlgorithm.h"
 
-class VTKFILTERSHYBRID_EXPORT vtkTemporalArrayOperatorFilter :
-  public vtkMultiTimeStepAlgorithm
+class VTKFILTERSHYBRID_EXPORT vtkTemporalArrayOperatorFilter : public vtkMultiTimeStepAlgorithm
 {
 public:
   static vtkTemporalArrayOperatorFilter* New();
   vtkTypeMacro(vtkTemporalArrayOperatorFilter, vtkMultiTimeStepAlgorithm);
-  virtual void PrintSelf(ostream &OS, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& OS, vtkIndent indent) override;
 
   enum OperatorType
   {
@@ -72,7 +71,7 @@ public:
   //@{
   /**
    * @brief Set/Get the suffix to be append to the output array name.
-   * If not specified, ouput will be suffixed with '_' and the operation
+   * If not specified, output will be suffixed with '_' and the operation
    * type (eg. myarrayname_add).
    */
   vtkSetStringMacro(OutputArrayNameSuffix);
@@ -81,19 +80,15 @@ public:
 
 protected:
   vtkTemporalArrayOperatorFilter();
-  virtual ~vtkTemporalArrayOperatorFilter() VTK_OVERRIDE;
+  ~vtkTemporalArrayOperatorFilter() override;
 
-  virtual int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
-  virtual int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
-  virtual int RequestDataObject(vtkInformation*, vtkInformationVector**,
-                                vtkInformationVector*) VTK_OVERRIDE;
-  virtual int RequestInformation(vtkInformation*, vtkInformationVector**,
-                                 vtkInformationVector*) VTK_OVERRIDE;
-  virtual int RequestUpdateExtent(vtkInformation*, vtkInformationVector**,
-                                  vtkInformationVector*) VTK_OVERRIDE;
-  virtual int RequestData(vtkInformation*, vtkInformationVector**,
-                          vtkInformationVector*) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   int GetInputArrayAssociation();
   virtual vtkDataObject* Process(vtkDataObject*, vtkDataObject*);
@@ -107,8 +102,8 @@ protected:
   char* OutputArrayNameSuffix;
 
 private:
-  vtkTemporalArrayOperatorFilter(const vtkTemporalArrayOperatorFilter &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTemporalArrayOperatorFilter &) VTK_DELETE_FUNCTION;
+  vtkTemporalArrayOperatorFilter(const vtkTemporalArrayOperatorFilter&) = delete;
+  void operator=(const vtkTemporalArrayOperatorFilter&) = delete;
 };
 
 #endif

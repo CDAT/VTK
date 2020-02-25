@@ -13,20 +13,22 @@
 
 =========================================================================*/
 
+#include "vtkCompositeTransferFunctionItem.h"
+#include "vtkAxis.h"
 #include "vtkCallbackCommand.h"
+#include "vtkColorTransferFunction.h"
 #include "vtkCommand.h"
 #include "vtkImageData.h"
-#include "vtkPiecewiseFunction.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkCompositeTransferFunctionItem.h"
 #include "vtkObjectFactory.h"
 #include "vtkPen.h"
+#include "vtkPiecewiseFunction.h"
 #include "vtkPointData.h"
 #include "vtkPoints2D.h"
 
 // STD includes
 #include <algorithm>
 #include <cassert>
+#include <vector>
 
 //-----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkCompositeTransferFunctionItem);
@@ -50,7 +52,7 @@ vtkCompositeTransferFunctionItem::~vtkCompositeTransferFunctionItem()
 }
 
 //-----------------------------------------------------------------------------
-void vtkCompositeTransferFunctionItem::PrintSelf(ostream &os, vtkIndent indent)
+void vtkCompositeTransferFunctionItem::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
   os << indent << "CompositeTransferFunction: ";
@@ -71,9 +73,11 @@ void vtkCompositeTransferFunctionItem::ComputeBounds(double* bounds)
   this->Superclass::ComputeBounds(bounds);
   if (this->OpacityFunction)
   {
-    double* opacityRange = this->OpacityFunction->GetRange();
-    bounds[0] = std::min(bounds[0], opacityRange[0]);
-    bounds[1] = std::max(bounds[1], opacityRange[1]);
+    double unused;
+    double opacityRange[2];
+    this->OpacityFunction->GetRange(opacityRange);
+    this->TransformDataToScreen(opacityRange[0], 1, bounds[0], unused);
+    this->TransformDataToScreen(opacityRange[1], 1, bounds[1], unused);
   }
 }
 
@@ -100,10 +104,9 @@ void vtkCompositeTransferFunctionItem::SetOpacityFunction(vtkPiecewiseFunction* 
 void vtkCompositeTransferFunctionItem::ComputeTexture()
 {
   this->Superclass::ComputeTexture();
-  double bounds[4];
-  this->GetBounds(bounds);
-  if (bounds[0] == bounds[1]
-      || !this->OpacityFunction)
+  double screenBounds[4];
+  this->GetBounds(screenBounds);
+  if (screenBounds[0] == screenBounds[1] || !this->OpacityFunction)
   {
     return;
   }
@@ -112,26 +115,42 @@ void vtkCompositeTransferFunctionItem::ComputeTexture()
     this->Texture = vtkImageData::New();
   }
 
+  double dataBounds[4];
+  this->TransformScreenToData(screenBounds[0], screenBounds[2], dataBounds[0], dataBounds[2]);
+  this->TransformScreenToData(screenBounds[1], screenBounds[3], dataBounds[1], dataBounds[3]);
+
+  const bool logX = this->GetXAxis()->GetLogScaleActive();
+  const bool logY = this->GetYAxis()->GetLogScaleActive();
+
   const int dimension = this->GetTextureWidth();
-  double* values = new double[dimension];
-  this->OpacityFunction->GetTable(bounds[0], bounds[1], dimension, values);
-  unsigned char* ptr =
-    reinterpret_cast<unsigned char*>(this->Texture->GetScalarPointer(0,0,0));
+  std::vector<double> values(dimension);
+  this->OpacityFunction->GetTable(
+    dataBounds[0], dataBounds[1], dimension, values.data(), 1, logX ? 1 : 0);
+  unsigned char* ptr = reinterpret_cast<unsigned char*>(this->Texture->GetScalarPointer(0, 0, 0));
+
   // TBD: maybe the shape should be defined somewhere else...
   if (this->MaskAboveCurve || this->PolyLinePen->GetLineType() != vtkPen::SOLID_LINE)
   {
     this->Shape->SetNumberOfPoints(dimension);
-    double step = (bounds[1] - bounds[0]) / dimension;
+    const double step = (dataBounds[1] - dataBounds[0]) / dimension;
+
     for (int i = 0; i < dimension; ++i)
     {
-      ptr[3] = static_cast<unsigned char>(values[i] * this->Opacity * 255);
       if (values[i] < 0. || values[i] > 1.)
       {
-        vtkWarningMacro( << "Opacity at point " << i << " is " << values[i]
-                         << " which is outside the valid range of [0,1]");
+        vtkWarningMacro(<< "Opacity at point " << i << " is " << values[i]
+                        << " which is outside the valid range of [0,1]");
       }
-      this->Shape->SetPoint(i, bounds[0] + step * i, values[i]);
-      ptr+=4;
+      ptr[3] = static_cast<unsigned char>(values[i] * this->Opacity * 255);
+
+      double xValue = dataBounds[0] + step * i;
+      double yValue = values[i];
+      if (logY)
+      {
+        yValue = std::log10(yValue);
+      }
+      this->Shape->SetPoint(i, xValue, yValue);
+      ptr += 4;
     }
   }
   else
@@ -140,8 +159,7 @@ void vtkCompositeTransferFunctionItem::ComputeTexture()
     {
       ptr[3] = static_cast<unsigned char>(values[i] * this->Opacity * 255);
       assert(values[i] <= 1. && values[i] >= 0.);
-      ptr+=4;
+      ptr += 4;
     }
   }
-  delete [] values;
 }

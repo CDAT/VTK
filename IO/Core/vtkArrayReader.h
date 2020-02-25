@@ -34,21 +34,20 @@
  *
  * @par Thanks:
  * Developed by Timothy M. Shead (tshead@sandia.gov) at Sandia National Laboratories.
-*/
+ */
 
 #ifndef vtkArrayReader_h
 #define vtkArrayReader_h
 
-#include "vtkIOCoreModule.h" // For export macro
 #include "vtkArrayDataAlgorithm.h"
+#include "vtkIOCoreModule.h" // For export macro
 
-class VTKIOCORE_EXPORT vtkArrayReader :
-  public vtkArrayDataAlgorithm
+class VTKIOCORE_EXPORT vtkArrayReader : public vtkArrayDataAlgorithm
 {
 public:
   static vtkArrayReader* New();
   vtkTypeMacro(vtkArrayReader, vtkArrayDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -90,21 +89,17 @@ public:
 
 protected:
   vtkArrayReader();
-  ~vtkArrayReader() VTK_OVERRIDE;
+  ~vtkArrayReader() override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   char* FileName;
   vtkStdString InputString;
   bool ReadFromInputString;
 
 private:
-  vtkArrayReader(const vtkArrayReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkArrayReader&) VTK_DELETE_FUNCTION;
+  vtkArrayReader(const vtkArrayReader&) = delete;
+  void operator=(const vtkArrayReader&) = delete;
 };
 
 #endif
-

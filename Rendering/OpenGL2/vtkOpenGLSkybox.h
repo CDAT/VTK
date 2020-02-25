@@ -18,50 +18,46 @@
  *
  * vtkOpenGLSkybox is a concrete implementation of the abstract class vtkSkybox.
  * vtkOpenGLSkybox interfaces to the OpenGL rendering library.
-*/
+ */
 
 #ifndef vtkOpenGLSkybox_h
 #define vtkOpenGLSkybox_h
 
+#include "vtkNew.h"                    // for ivars
 #include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkSkybox.h"
-#include "vtkNew.h" // for ivars
 
+class vtkOpenGLActor;
 class vtkOpenGLPolyDataMapper;
-
-class vtkInformationIntegerKey;
-class vtkOpenGLRenderer;
-class vtkMatrix4x4;
-class vtkMatrix3x3;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLSkybox : public vtkSkybox
 {
 public:
-  static vtkOpenGLSkybox *New();
+  static vtkOpenGLSkybox* New();
   vtkTypeMacro(vtkOpenGLSkybox, vtkSkybox);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Actual Skybox render method.
    */
-  void Render(vtkRenderer *ren, vtkMapper *mapper) VTK_OVERRIDE;
-
-  void GetKeyMatrices(vtkMatrix4x4 *&WCVCMatrix, vtkMatrix3x3 *&normalMatrix);
+  void Render(vtkRenderer* ren, vtkMapper* mapper) override;
 
 protected:
   vtkOpenGLSkybox();
-  ~vtkOpenGLSkybox() VTK_OVERRIDE;
+  ~vtkOpenGLSkybox() override;
 
-  vtkMatrix4x4 *MCWCMatrix;
-  vtkMatrix3x3 *NormalMatrix;
-  vtkTransform *NormalTransform;
-  vtkTimeStamp KeyMatrixTime;
+  int LastProjection;
+  float LastCameraPosition[3];
+
+  void UpdateUniforms(vtkObject*, unsigned long, void*);
 
   vtkNew<vtkOpenGLPolyDataMapper> CubeMapper;
+  vtkNew<vtkOpenGLActor> OpenGLActor;
+  vtkRenderer* CurrentRenderer;
 
 private:
-  vtkOpenGLSkybox(const vtkOpenGLSkybox&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLSkybox&) VTK_DELETE_FUNCTION;
+  vtkOpenGLSkybox(const vtkOpenGLSkybox&) = delete;
+  void operator=(const vtkOpenGLSkybox&) = delete;
 };
 
 #endif

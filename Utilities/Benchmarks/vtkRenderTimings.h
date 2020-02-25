@@ -21,16 +21,15 @@
  */
 
 #include "vtkTimerLog.h"
-#include <vtksys/SystemInformation.hxx>
-#include <vtksys/RegularExpression.hxx>
-#include <vtksys/CommandLineArguments.hxx>
+#include "vtkUtilitiesBenchmarksModule.h"
 #include <map>
+#include <vtksys/CommandLineArguments.hxx>
 
 class vtkRTTestResult;
 class vtkRTTestSequence;
 class vtkRenderTimings;
 
-class vtkRTTest
+class VTKUTILITIESBENCHMARKS_EXPORT vtkRTTest
 {
 public:
   // what is the name of this test
@@ -38,11 +37,11 @@ public:
 
   // when reporting a summary result use this key to
   // determine the amount of triangles rendered
-  virtual const char *GetSecondSummaryResultName() = 0;
+  virtual const char* GetSecondSummaryResultName() = 0;
 
   // when reporting a summary result this is the
   // field that should be reported.
-  virtual const char *GetSummaryResultName() = 0;
+  virtual const char* GetSummaryResultName() = 0;
 
   // when reporting a summary result should we use the
   // largest value or smallest?
@@ -55,15 +54,19 @@ public:
   virtual void SetTargetTime(float tt) { this->TargetTime = tt; }
   virtual float GetTargetTime() { return this->TargetTime; }
 
-  void SetRenderSize(int width, int height) { this->RenderWidth = width; this->RenderHeight = height; }
+  void SetRenderSize(int width, int height)
+  {
+    this->RenderWidth = width;
+    this->RenderHeight = height;
+  }
   int GetRenderWidth() { return this->RenderWidth; }
   int GetRenderHeight() { return this->RenderHeight; }
 
   // run the test, argc and argv are extra arguments that the test might
   // use.
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats, int argc, char *argv[]) = 0;
+  virtual vtkRTTestResult Run(vtkRTTestSequence* ats, int argc, char* argv[]) = 0;
 
-  vtkRTTest(const char *name)
+  vtkRTTest(const char* name)
   {
     this->TargetTime = 1.0;
     this->Name = name;
@@ -78,29 +81,29 @@ protected:
   int RenderWidth, RenderHeight;
 };
 
-class vtkRTTestResult
+class VTKUTILITIESBENCHMARKS_EXPORT vtkRTTestResult
 {
 public:
-  std::map<std::string,double> Results;
+  std::map<std::string, double> Results;
   int SequenceNumber;
-  void ReportResults(vtkRTTest *test, ostream &ost)
+  void ReportResults(vtkRTTest* test, ostream& ost)
   {
     ost << test->GetName();
     std::map<std::string, double>::iterator rItr;
     for (rItr = this->Results.begin(); rItr != this->Results.end(); ++rItr)
-      {
+    {
       ost << ", " << rItr->first << ", " << rItr->second;
-      }
+    }
     ost << "\n";
   }
 };
 
-class vtkRTTestSequence
+class VTKUTILITIESBENCHMARKS_EXPORT vtkRTTestSequence
 {
 public:
   virtual void Run();
-  virtual void ReportSummaryResults(ostream &ost);
-  virtual void ReportDetailedResults(ostream &ost);
+  virtual void ReportSummaryResults(ostream& ost);
+  virtual void ReportDetailedResults(ostream& ost);
 
   // tests should use these functions to determine what resolution
   // to use in scaling their test. The functions will always return
@@ -109,37 +112,37 @@ public:
   // to determine what number to return. When the dimensions
   // are not equal, we guarantee that the larger dimensions
   // come first
-  void GetSequenceNumbers(int &xdim);
-  void GetSequenceNumbers(int &xdim, int &ydim);
-  void GetSequenceNumbers(int &xdim, int &ydim, int &zdim);
-  void GetSequenceNumbers(int &xdim, int &ydim, int &zdim, int &wdim);
+  void GetSequenceNumbers(int& xdim);
+  void GetSequenceNumbers(int& xdim, int& ydim);
+  void GetSequenceNumbers(int& xdim, int& ydim, int& zdim);
+  void GetSequenceNumbers(int& xdim, int& ydim, int& zdim, int& wdim);
 
   // display the results in realtime using VTK charting
   void SetChartResults(bool v) { this->ChartResults = v; }
 
-  vtkRTTest *Test;
+  vtkRTTest* Test;
   float TargetTime;
 
-  vtkRTTestSequence(vtkRenderTimings *rt)
-    {
+  vtkRTTestSequence(vtkRenderTimings* rt)
+  {
     this->Test = NULL;
     this->TargetTime = 10.0;
     this->RenderTimings = rt;
     this->ChartResults = true;
-    }
+  }
 
-virtual ~vtkRTTestSequence() {}
+  virtual ~vtkRTTestSequence() {}
 
 protected:
   std::vector<vtkRTTestResult> TestResults;
   int SequenceCount;
-  vtkRenderTimings *RenderTimings;
+  vtkRenderTimings* RenderTimings;
   bool ChartResults;
 };
 
 // a class to run a bunch of timing tests and
 // report the results
-class vtkRenderTimings
+class VTKUTILITIESBENCHMARKS_EXPORT vtkRenderTimings
 {
 public:
   vtkRenderTimings();
@@ -156,22 +159,22 @@ public:
   int GetRenderHeight() { return this->RenderHeight; }
 
   // parse and act on the command line arguments
-  int ParseCommandLineArguments(int argc, char *argv[]);
+  int ParseCommandLineArguments(int argc, char* argv[]);
 
   // get the arguments
-  vtksys::CommandLineArguments &GetArguments() { return this->Arguments; }
+  vtksys::CommandLineArguments& GetArguments() { return this->Arguments; }
 
   std::string GetSystemName() { return this->SystemName; }
 
-  std::vector<vtkRTTest *> TestsToRun;
-  std::vector<vtkRTTestSequence *> TestSequences;
+  std::vector<vtkRTTest*> TestsToRun;
+  std::vector<vtkRTTestSequence*> TestSequences;
 
 protected:
   int RunTests();
   void ReportResults();
 
 private:
-  std::string Regex; // regualr expression for tests
+  std::string Regex; // regular expression for tests
   double TargetTime;
   std::string SystemName;
   vtksys::CommandLineArguments Arguments;
@@ -187,3 +190,4 @@ private:
 };
 
 #endif
+// VTK-HeaderTest-Exclude: vtkRenderTimings.h

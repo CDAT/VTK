@@ -25,30 +25,29 @@
 #include "vtkImageData.h"
 #include "vtkImageMapper3D.h"
 #include "vtkNew.h"
-#include "vtkOpenGLGPUVolumeRayCastMapper.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkTesting.h"
+#include "vtkRenderer.h"
 #include "vtkTestUtilities.h"
+#include "vtkTesting.h"
 #include "vtkVolume16Reader.h"
 #include "vtkVolumeProperty.h"
 
-int TestGPURayCastRenderToTexture(int argc, char *argv[])
+int TestGPURayCastRenderToTexture(int argc, char* argv[])
 {
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
   char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/headsq/quarter");
 
   vtkNew<vtkVolume16Reader> reader;
-  reader->SetDataDimensions( 64, 64);
+  reader->SetDataDimensions(64, 64);
   reader->SetDataByteOrderToLittleEndian();
-  reader->SetImageRange( 1, 93);
-  reader->SetDataSpacing( 3.2, 3.2, 1.5);
-  reader->SetFilePrefix( fname );
-  reader->SetDataMask( 0x7fff);
+  reader->SetImageRange(1, 93);
+  reader->SetDataSpacing(3.2, 3.2, 1.5);
+  reader->SetFilePrefix(fname);
+  reader->SetDataMask(0x7fff);
 
   delete[] fname;
 
@@ -57,7 +56,7 @@ int TestGPURayCastRenderToTexture(int argc, char *argv[])
   volumeMapper->RenderToImageOn();
 
   vtkNew<vtkColorTransferFunction> colorFunction;
-  colorFunction->AddRGBPoint(900.0, 198/255.0, 134/255.0, 66/255.0);
+  colorFunction->AddRGBPoint(900.0, 198 / 255.0, 134 / 255.0, 66 / 255.0);
 
   vtkNew<vtkPiecewiseFunction> scalarOpacity;
   scalarOpacity->AddPoint(0, 0.0);
@@ -71,13 +70,13 @@ int TestGPURayCastRenderToTexture(int argc, char *argv[])
   vtkNew<vtkVolumeProperty> volumeProperty;
   volumeProperty->ShadeOn();
   volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
-  volumeProperty->SetColor(colorFunction.GetPointer());
-  volumeProperty->SetScalarOpacity(scalarOpacity.GetPointer());
+  volumeProperty->SetColor(colorFunction);
+  volumeProperty->SetScalarOpacity(scalarOpacity);
 
   // Setup volume actor
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(volumeMapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
+  volume->SetMapper(volumeMapper);
+  volume->SetProperty(volumeProperty);
 
   // Testing prefers image comparison with small images
   vtkNew<vtkRenderWindow> renWin;
@@ -85,12 +84,12 @@ int TestGPURayCastRenderToTexture(int argc, char *argv[])
   renWin->SetSize(401, 399);
 
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
-  ren->AddVolume(volume.GetPointer());
+  ren->AddVolume(volume);
   ren->GetActiveCamera()->Azimuth(90);
   ren->GetActiveCamera()->Roll(90);
   ren->GetActiveCamera()->Azimuth(-90);
@@ -101,13 +100,13 @@ int TestGPURayCastRenderToTexture(int argc, char *argv[])
   vtkNew<vtkImageData> im;
 
   // Get color texture as image
-  volumeMapper->GetColorImage(im.GetPointer());
+  volumeMapper->GetColorImage(im);
 
-  ren->RemoveVolume(volume.GetPointer());
+  ren->RemoveVolume(volume);
 
   vtkNew<vtkImageActor> ia;
-  ia->GetMapper()->SetInputData(im.GetPointer());
-  ren->AddActor(ia.GetPointer());
+  ia->GetMapper()->SetInputData(im);
+  ren->AddActor(ia);
   ren->GetActiveCamera()->SetPosition(0, 0, -1);
   ren->GetActiveCamera()->SetFocalPoint(0, 0, 1);
   ren->GetActiveCamera()->SetViewUp(0, 1, 0);
@@ -115,8 +114,8 @@ int TestGPURayCastRenderToTexture(int argc, char *argv[])
   renWin->Render();
   iren->Initialize();
 
-  int retVal = vtkRegressionTestImage( renWin.GetPointer() );
-  if( retVal == vtkRegressionTester::DO_INTERACTOR)
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();
   }

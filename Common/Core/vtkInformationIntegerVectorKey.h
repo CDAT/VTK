@@ -18,7 +18,7 @@
  *
  * vtkInformationIntegerVectorKey is used to represent keys for integer
  * vector values in vtkInformation.h
-*/
+ */
 
 #ifndef vtkInformationIntegerVectorKey_h
 #define vtkInformationIntegerVectorKey_h
@@ -31,20 +31,19 @@
 class VTKCOMMONCORE_EXPORT vtkInformationIntegerVectorKey : public vtkInformationKey
 {
 public:
-  vtkTypeMacro(vtkInformationIntegerVectorKey,vtkInformationKey);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkInformationIntegerVectorKey, vtkInformationKey);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  vtkInformationIntegerVectorKey(const char* name, const char* location,
-                                 int length=-1);
-  ~vtkInformationIntegerVectorKey() VTK_OVERRIDE;
+  vtkInformationIntegerVectorKey(const char* name, const char* location, int length = -1);
+  ~vtkInformationIntegerVectorKey() override;
 
   /**
    * This method simply returns a new vtkInformationIntegerVectorKey, given a
    * name, a location and a required length. This method is provided for
    * wrappers. Use the constructor directly from C++ instead.
    */
-  static vtkInformationIntegerVectorKey* MakeKey(const char* name, const char* location,
-    int length=-1)
+  static vtkInformationIntegerVectorKey* MakeKey(
+    const char* name, const char* location, int length = -1)
   {
     return new vtkInformationIntegerVectorKey(name, location, length);
   }
@@ -58,7 +57,7 @@ public:
   void Set(vtkInformation* info, const int* value, int length);
   void Set(vtkInformation* info);
   int* Get(vtkInformation* info);
-  int  Get(vtkInformation* info, int idx);
+  int Get(vtkInformation* info, int idx);
   void Get(vtkInformation* info, int* value);
   int Length(vtkInformation* info);
   //@}
@@ -68,12 +67,12 @@ public:
    * object to another.  If there is no entry in the first information
    * object for this key, the value is removed from the second.
    */
-  void ShallowCopy(vtkInformation* from, vtkInformation* to) VTK_OVERRIDE;
+  void ShallowCopy(vtkInformation* from, vtkInformation* to) override;
 
   /**
    * Print the key's value in an information object to a stream.
    */
-  void Print(ostream& os, vtkInformation* info) VTK_OVERRIDE;
+  void Print(ostream& os, vtkInformation* info) override;
 
 protected:
   // The required length of the vector value (-1 is no restriction).
@@ -87,8 +86,8 @@ protected:
   int* GetWatchAddress(vtkInformation* info);
 
 private:
-  vtkInformationIntegerVectorKey(const vtkInformationIntegerVectorKey&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInformationIntegerVectorKey&) VTK_DELETE_FUNCTION;
+  vtkInformationIntegerVectorKey(const vtkInformationIntegerVectorKey&) = delete;
+  void operator=(const vtkInformationIntegerVectorKey&) = delete;
 };
 
 #endif

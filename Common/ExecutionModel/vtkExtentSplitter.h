@@ -24,7 +24,7 @@
  * sub-extents according to priority, availability, and amount of
  * overlap of the source extents.  This can be used by parallel data
  * readers to read as few piece files as possible.
-*/
+ */
 
 #ifndef vtkExtentSplitter_h
 #define vtkExtentSplitter_h
@@ -37,9 +37,9 @@ class vtkExtentSplitterInternals;
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkExtentSplitter : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkExtentSplitter,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkExtentSplitter *New();
+  vtkTypeMacro(vtkExtentSplitter, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkExtentSplitter* New();
 
   //@{
   /**
@@ -47,8 +47,7 @@ public:
    * higher priority numbers are favored.  Source id numbers and
    * priorities must be non-negative.
    */
-  void AddExtentSource(int id, int priority, int x0, int x1,
-                       int y0, int y1, int z0, int z1);
+  void AddExtentSource(int id, int priority, int x0, int x1, int y0, int y1, int z0, int z1);
   void AddExtentSource(int id, int priority, int* extent);
   void RemoveExtentSource(int id);
   void RemoveAllExtentSources();
@@ -85,7 +84,7 @@ public:
    * sub-extent should be read.  Valid after a call to
    * ComputeSubExtents.
    */
-  int* GetSubExtent(int index);
+  int* GetSubExtent(int index) VTK_SIZEHINT(6);
   void GetSubExtent(int index, int* extent);
   //@}
 
@@ -104,14 +103,14 @@ public:
    * point data are stored in a planar slice per piece with no cell
    * data.  The default is OFF.
    */
-  vtkGetMacro(PointMode, int);
-  vtkSetMacro(PointMode, int);
-  vtkBooleanMacro(PointMode, int);
+  vtkGetMacro(PointMode, vtkTypeBool);
+  vtkSetMacro(PointMode, vtkTypeBool);
+  vtkBooleanMacro(PointMode, vtkTypeBool);
   //@}
 
 protected:
   vtkExtentSplitter();
-  ~vtkExtentSplitter() VTK_OVERRIDE;
+  ~vtkExtentSplitter() override;
 
   // Internal utility methods.
   void SplitExtent(int* extent, int* subextent);
@@ -125,11 +124,11 @@ protected:
   // On if reading only all points (but not always all cells) is
   // necessary.  Used for reading volumes of planar slices storing
   // only point data.
-  int PointMode;
+  vtkTypeBool PointMode;
 
 private:
-  vtkExtentSplitter(const vtkExtentSplitter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtentSplitter&) VTK_DELETE_FUNCTION;
+  vtkExtentSplitter(const vtkExtentSplitter&) = delete;
+  void operator=(const vtkExtentSplitter&) = delete;
 };
 
 #endif

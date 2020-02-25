@@ -23,36 +23,30 @@ class vtkPiecewiseFunction;
 
 // Description:
 // vtkPlot::Color and vtkPlot::Brush have no effect here.
-class VTKCHARTSCORE_EXPORT vtkCompositeTransferFunctionItem: public vtkColorTransferFunctionItem
+class VTKCHARTSCORE_EXPORT vtkCompositeTransferFunctionItem : public vtkColorTransferFunctionItem
 {
 public:
   static vtkCompositeTransferFunctionItem* New();
   vtkTypeMacro(vtkCompositeTransferFunctionItem, vtkColorTransferFunctionItem);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void SetOpacityFunction(vtkPiecewiseFunction* opacity);
   vtkGetObjectMacro(OpacityFunction, vtkPiecewiseFunction);
 
 protected:
   vtkCompositeTransferFunctionItem();
-  ~vtkCompositeTransferFunctionItem() VTK_OVERRIDE;
-
-  // Description:
-  // Returns true if we are rendering in log space.
-  // Since vtkPiecewiseFunction doesn't support log, we show this transfer
-  // function in non-log space always.
-  bool UsingLogScale()VTK_OVERRIDE { return false; }
+  ~vtkCompositeTransferFunctionItem() override;
 
   // Description:
   // Reimplemented to return the range of the piecewise function
-  void ComputeBounds(double bounds[4]) VTK_OVERRIDE;
+  void ComputeBounds(double bounds[4]) override;
 
-  void ComputeTexture() VTK_OVERRIDE;
+  void ComputeTexture() override;
   vtkPiecewiseFunction* OpacityFunction;
 
 private:
-  vtkCompositeTransferFunctionItem(const vtkCompositeTransferFunctionItem&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositeTransferFunctionItem&) VTK_DELETE_FUNCTION;
+  vtkCompositeTransferFunctionItem(const vtkCompositeTransferFunctionItem&) = delete;
+  void operator=(const vtkCompositeTransferFunctionItem&) = delete;
 };
 
 #endif

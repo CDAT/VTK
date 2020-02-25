@@ -37,13 +37,13 @@
  *
  * @sa
  * vtkGenericProbeFilter vtkProbeFilter vtkGenericDataSet
-*/
+ */
 
 #ifndef vtkGenericProbeFilter_h
 #define vtkGenericProbeFilter_h
 
-#include "vtkFiltersGenericModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersGenericModule.h" // For export macro
 
 class vtkIdTypeArray;
 class vtkGenericDataSet;
@@ -51,17 +51,17 @@ class vtkGenericDataSet;
 class VTKFILTERSGENERIC_EXPORT vtkGenericProbeFilter : public vtkDataSetAlgorithm
 {
 public:
-  static vtkGenericProbeFilter *New();
-  vtkTypeMacro(vtkGenericProbeFilter,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkGenericProbeFilter* New();
+  vtkTypeMacro(vtkGenericProbeFilter, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Specify the point locations used to probe input. A generic dataset
    * type is assumed.
    */
-  void SetSourceData(vtkGenericDataSet *source);
-  vtkGenericDataSet *GetSource();
+  void SetSourceData(vtkGenericDataSet* source);
+  vtkGenericDataSet* GetSource();
   //@}
 
   //@{
@@ -74,18 +74,18 @@ public:
 
 protected:
   vtkGenericProbeFilter();
-  ~vtkGenericProbeFilter() VTK_OVERRIDE;
+  ~vtkGenericProbeFilter() override;
 
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
-  vtkIdTypeArray *ValidPoints;
+  vtkIdTypeArray* ValidPoints;
 
 private:
-  vtkGenericProbeFilter(const vtkGenericProbeFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericProbeFilter&) VTK_DELETE_FUNCTION;
+  vtkGenericProbeFilter(const vtkGenericProbeFilter&) = delete;
+  void operator=(const vtkGenericProbeFilter&) = delete;
 };
 
 #endif

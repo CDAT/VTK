@@ -27,51 +27,56 @@ class vtkOpenGLRenderTimer;
 /**
  * @brief OpenGL2 override for vtkRenderTimerLog.
  */
-class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLRenderTimerLog
-    : public vtkRenderTimerLog
+class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLRenderTimerLog : public vtkRenderTimerLog
 {
 public:
   struct OGLEvent
   {
-    OGLEvent() : Timer(nullptr) {}
+    OGLEvent()
+      : Timer(nullptr)
+    {
+    }
 
     std::string Name;
-    vtkOpenGLRenderTimer *Timer;
+    vtkOpenGLRenderTimer* Timer;
     std::vector<OGLEvent> Events;
   };
 
   struct OGLFrame
   {
-    OGLFrame() : ChildCount(0) {}
+    OGLFrame()
+      : ChildCount(0)
+    {
+    }
 
     unsigned int ChildCount;
     std::vector<OGLEvent> Events;
   };
 
   static vtkOpenGLRenderTimerLog* New();
-  vtkTypeMacro(vtkOpenGLRenderTimerLog, vtkRenderTimerLog)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOpenGLRenderTimerLog, vtkRenderTimerLog);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  bool IsSupported() VTK_OVERRIDE;
+  bool IsSupported() override;
 
   /**
    * Overridden to do support check before returning.
    */
-  bool GetLoggingEnabled() VTK_OVERRIDE { return this->DoLogging(); }
+  bool GetLoggingEnabled() override { return this->DoLogging(); }
 
-  void MarkFrame() VTK_OVERRIDE;
+  void MarkFrame() override;
 
-  void MarkStartEvent(const std::string &name) VTK_OVERRIDE;
-  void MarkEndEvent() VTK_OVERRIDE;
+  void MarkStartEvent(const std::string& name) override;
+  void MarkEndEvent() override;
 
-  bool FrameReady() VTK_OVERRIDE;
+  bool FrameReady() override;
 
-  Frame PopFirstReadyFrame() VTK_OVERRIDE;
+  Frame PopFirstReadyFrame() override;
 
   /**
    * Releases any resources allocated on the graphics device.
    */
-  void ReleaseGraphicsResources() VTK_OVERRIDE;
+  void ReleaseGraphicsResources() override;
 
   /**
    * This implementations keeps a pool of vtkRenderTimers around, recycling them
@@ -83,8 +88,8 @@ public:
    *
    * Default value is 32, but can be adjusted for specific use cases.
    */
-  vtkSetMacro(MinTimerPoolSize, size_t)
-  vtkGetMacro(MinTimerPoolSize, size_t)
+  vtkSetMacro(MinTimerPoolSize, size_t);
+  vtkGetMacro(MinTimerPoolSize, size_t);
 
 protected:
   OGLFrame CurrentFrame;
@@ -101,31 +106,31 @@ protected:
 
   bool DoLogging();
 
-  Frame Convert(const OGLFrame &oglFrame);
-  Event Convert(const OGLEvent &oglEvent);
+  Frame Convert(const OGLFrame& oglFrame);
+  Event Convert(const OGLEvent& oglEvent);
 
   OGLEvent& NewEvent();
   OGLEvent* DeepestOpenEvent();
-  OGLEvent& WalkOpenEvents(OGLEvent &event);
+  OGLEvent& WalkOpenEvents(OGLEvent& event);
 
   vtkOpenGLRenderTimer* NewTimer();
-  void ReleaseTimer(vtkOpenGLRenderTimer *timer);
+  void ReleaseTimer(vtkOpenGLRenderTimer* timer);
 
-  void ReleaseOGLFrame(OGLFrame &frame);
-  void ReleaseOGLEvent(OGLEvent &event);
+  void ReleaseOGLFrame(OGLFrame& frame);
+  void ReleaseOGLEvent(OGLEvent& event);
 
   void TrimTimerPool();
 
   void CheckPendingFrames();
-  bool IsFrameReady(OGLFrame &frame);
-  bool IsEventReady(OGLEvent &event);
+  bool IsFrameReady(OGLFrame& frame);
+  bool IsEventReady(OGLEvent& event);
 
-  void ForceCloseFrame(OGLFrame &frame);
-  void ForceCloseEvent(OGLEvent &event);
+  void ForceCloseFrame(OGLFrame& frame);
+  void ForceCloseEvent(OGLEvent& event);
 
 private:
-  vtkOpenGLRenderTimerLog(const vtkOpenGLRenderTimerLog&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLRenderTimerLog&) VTK_DELETE_FUNCTION;
+  vtkOpenGLRenderTimerLog(const vtkOpenGLRenderTimerLog&) = delete;
+  void operator=(const vtkOpenGLRenderTimerLog&) = delete;
 };
 
 #endif // vtkOpenGLRenderTimerLog_h

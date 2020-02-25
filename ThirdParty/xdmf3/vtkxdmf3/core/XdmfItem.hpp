@@ -37,18 +37,17 @@ class XdmfVisitor;
 
 // Includes
 #include <loki/Visitor.h>
-#define vtk_libxml2_reference reference // Reversing VTK name mangling
-#include <libxml/xmlexports.h>
-#include <libxml/tree.h>
-#include <libxml/uri.h>
-#include <libxml/xpointer.h>
-#include <libxml/xmlreader.h>
+#include "vtk_libxml2.h"
+#include VTKLIBXML2_HEADER(xmlexports.h)
+#include VTKLIBXML2_HEADER(tree.h)
+#include VTKLIBXML2_HEADER(uri.h)
+#include VTKLIBXML2_HEADER(xpointer.h)
+#include VTKLIBXML2_HEADER(xmlreader.h)
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 #include "XdmfSharedPtr.hpp"
-
 
 // Macro that allows children XdmfItems to be attached to a parent XdmfItem.
 // -- For Header File
@@ -290,7 +289,6 @@ public :
  * can be visited and traversed by an XdmfVisitor and have its
  * contents written to an Xdmf file.
  */
-
 class XDMFCORE_EXPORT XdmfItem : public Loki::BaseVisitable<void> {
 
 public:
@@ -458,7 +456,8 @@ XDMFCORE_EXPORT char * XdmfItemGetItemTag(XDMFITEM * item);
 #define XDMF_ITEM_C_CHILD_DECLARE(ClassName, CClassName, Level)                                                       \
                                                                                                                       \
 Level##_EXPORT void ClassName##Accept ( CClassName * item, XDMFVISITOR * visitor, int * status);                      \
-XDMFCORE_EXPORT void ClassName##Free(void * item);                                                                    \
+Level##_EXPORT CClassName * ClassName##Cast ( XDMFITEM * item);                                                       \
+Level##_EXPORT void ClassName##Free(void * item);                                                                    \
 Level##_EXPORT XDMFINFORMATION * ClassName##GetInformation( CClassName * item, unsigned int index);                   \
 Level##_EXPORT XDMFINFORMATION * ClassName##GetInformationByKey( CClassName * item, char * key);                      \
 Level##_EXPORT unsigned int ClassName##GetNumberInformations( CClassName * item);                                     \

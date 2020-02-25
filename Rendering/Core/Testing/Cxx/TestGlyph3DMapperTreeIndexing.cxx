@@ -20,17 +20,17 @@
 #include "vtkIntArray.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkNew.h"
-#include "vtkPoints.h"
 #include "vtkPointData.h"
+#include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "vtkProperty.h"
 #include "vtkRegressionTestImage.h"
 #include "vtkRenderWindow.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkSphereSource.h"
 
-int TestGlyph3DMapperTreeIndexing(int argc, char *argv[])
+int TestGlyph3DMapperTreeIndexing(int argc, char* argv[])
 {
   // The points to glyph:
   vtkNew<vtkPolyData> input;
@@ -46,8 +46,8 @@ int TestGlyph3DMapperTreeIndexing(int argc, char *argv[])
     }
   }
 
-  input->SetPoints(points.Get());
-  input->GetPointData()->AddArray(indexArray.Get());
+  input->SetPoints(points);
+  input->GetPointData()->AddArray(indexArray);
   indexArray->SetName("GlyphIndex");
 
   // The glyph sources:
@@ -66,33 +66,43 @@ int TestGlyph3DMapperTreeIndexing(int argc, char *argv[])
   glyphTree->SetBlock(2, s2->GetOutputDataObject(0));
 
   vtkNew<vtkGlyph3DMapper> mapper;
-  mapper->SetInputData(input.Get());
-  mapper->SetSourceTableTree(glyphTree.Get());
+  mapper->SetInputData(input);
+  mapper->SetSourceTableTree(glyphTree);
   mapper->SetRange(0, 2);
   mapper->SetUseSourceTableTree(true);
   mapper->SetSourceIndexing(true);
   mapper->SetSourceIndexArray("GlyphIndex");
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.Get());
+  actor->SetMapper(mapper);
   actor->GetProperty()->SetColor(1., 0., 0.);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.Get());
+  renderer->AddActor(actor);
   renderer->SetBackground(0., 0., 0.);
   renderer->ResetCamera();
   renderer->ResetCameraClippingRange();
+  renderer->AutomaticLightCreationOff();
+  renderer->RemoveAllLights();
 
   vtkNew<vtkRenderWindowInteractor> iren;
   vtkNew<vtkRenderWindow> renWin;
-  iren->SetRenderWindow(renWin.Get());
-  renWin->AddRenderer(renderer.Get());
+  iren->SetRenderWindow(renWin);
+  renWin->AddRenderer(renderer);
   renWin->SetMultiSamples(0);
   renWin->SetSize(300, 300);
 
+  // Ensure the mapper works when no lights are available
+  renderer->AutomaticLightCreationOff();
+  renderer->RemoveAllLights();
+
   renWin->Render();
 
-  int retVal = vtkRegressionTestImage(renWin.Get());
+  renderer->AutomaticLightCreationOn();
+
+  renWin->Render();
+
+  int retVal = vtkRegressionTestImage(renWin);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

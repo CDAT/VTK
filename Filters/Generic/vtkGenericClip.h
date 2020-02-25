@@ -56,7 +56,7 @@
  * @sa
  * vtkClipDataSet vtkClipPolyData vtkClipVolume vtkImplicitFunction
  * vtkGenericDataSet
-*/
+ */
 
 #ifndef vtkGenericClip_h
 #define vtkGenericClip_h
@@ -73,14 +73,14 @@ class vtkIncrementalPointLocator;
 class VTKFILTERSGENERIC_EXPORT vtkGenericClip : public vtkUnstructuredGridAlgorithm
 {
 public:
-  vtkTypeMacro(vtkGenericClip,vtkUnstructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkGenericClip, vtkUnstructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct with user-specified implicit function; InsideOut turned off;
    * value set to 0.0; and generate clip scalars turned off.
    */
-  static vtkGenericClip *New();
+  static vtkGenericClip* New();
 
   //@{
   /**
@@ -88,8 +88,8 @@ public:
    * implicit function) or scalar value (if clipping with
    * scalars). The default value is 0.0.
    */
-  vtkSetMacro(Value,double);
-  vtkGetMacro(Value,double);
+  vtkSetMacro(Value, double);
+  vtkGetMacro(Value, double);
   //@}
 
   //@{
@@ -101,9 +101,9 @@ public:
    * value is less than or equal to the Value ivar.  InsideOut is off
    * by default.
    */
-  vtkSetMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, vtkTypeBool);
+  vtkGetMacro(InsideOut, vtkTypeBool);
+  vtkBooleanMacro(InsideOut, vtkTypeBool);
   //@}
 
   //@{
@@ -113,7 +113,7 @@ public:
    * then the selected input scalar data will be used for clipping.
    */
   virtual void SetClipFunction(vtkImplicitFunction*);
-  vtkGetObjectMacro(ClipFunction,vtkImplicitFunction);
+  vtkGetObjectMacro(ClipFunction, vtkImplicitFunction);
   //@}
 
   //@{
@@ -123,9 +123,9 @@ public:
    * input scalar data. If you enable this flag but do not provide an
    * implicit function an error will be reported.
    */
-  vtkSetMacro(GenerateClipScalars,int);
-  vtkGetMacro(GenerateClipScalars,int);
-  vtkBooleanMacro(GenerateClipScalars,int);
+  vtkSetMacro(GenerateClipScalars, vtkTypeBool);
+  vtkGetMacro(GenerateClipScalars, vtkTypeBool);
+  vtkBooleanMacro(GenerateClipScalars, vtkTypeBool);
   //@}
 
   //@{
@@ -133,9 +133,9 @@ public:
    * Control whether a second output is generated. The second output
    * contains the polygonal data that's been clipped away.
    */
-  vtkSetMacro(GenerateClippedOutput,int);
-  vtkGetMacro(GenerateClippedOutput,int);
-  vtkBooleanMacro(GenerateClippedOutput,int);
+  vtkSetMacro(GenerateClippedOutput, vtkTypeBool);
+  vtkGetMacro(GenerateClippedOutput, vtkTypeBool);
+  vtkBooleanMacro(GenerateClippedOutput, vtkTypeBool);
   //@}
 
   //@{
@@ -145,15 +145,15 @@ public:
    * of degenerate primitives. Note that only 3D cells actually use this
    * instance variable.
    */
-  vtkSetClampMacro(MergeTolerance,double,0.0001,0.25);
-  vtkGetMacro(MergeTolerance,double);
+  vtkSetClampMacro(MergeTolerance, double, 0.0001, 0.25);
+  vtkGetMacro(MergeTolerance, double);
   //@}
 
   //@{
   /**
    * Return the Clipped output.
    */
-  vtkUnstructuredGrid *GetClippedOutput();
+  vtkUnstructuredGrid* GetClippedOutput();
   virtual int GetNumberOfOutputs();
   //@}
 
@@ -162,8 +162,8 @@ public:
    * Specify a spatial locator for merging points. By default, an
    * instance of vtkMergePoints is used.
    */
-  void SetLocator(vtkIncrementalPointLocator *locator);
-  vtkGetObjectMacro(Locator,vtkIncrementalPointLocator);
+  void SetLocator(vtkIncrementalPointLocator* locator);
+  vtkGetObjectMacro(Locator, vtkIncrementalPointLocator);
   //@}
 
   /**
@@ -175,7 +175,7 @@ public:
   /**
    * Return the mtime also considering the locator and clip function.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -183,38 +183,37 @@ public:
    * By default this in nullptr and the filter will use the active scalar array.
    */
   vtkGetStringMacro(InputScalarsSelection);
-  void SelectInputScalars(const char *fieldName)
-    {this->SetInputScalarsSelection(fieldName);}
+  void SelectInputScalars(const char* fieldName) { this->SetInputScalarsSelection(fieldName); }
   //@}
 
 protected:
-  vtkGenericClip(vtkImplicitFunction *cf=nullptr);
-  ~vtkGenericClip() VTK_OVERRIDE;
+  vtkGenericClip(vtkImplicitFunction* cf = nullptr);
+  ~vtkGenericClip() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
-  vtkImplicitFunction *ClipFunction;
+  vtkImplicitFunction* ClipFunction;
 
-  vtkIncrementalPointLocator *Locator;
-  int InsideOut;
+  vtkIncrementalPointLocator* Locator;
+  vtkTypeBool InsideOut;
   double Value;
-  int GenerateClipScalars;
+  vtkTypeBool GenerateClipScalars;
 
-  int GenerateClippedOutput;
+  vtkTypeBool GenerateClippedOutput;
   double MergeTolerance;
 
-  char *InputScalarsSelection;
+  char* InputScalarsSelection;
   vtkSetStringMacro(InputScalarsSelection);
 
   // Used internal by vtkGenericAdaptorCell::Clip()
-  vtkPointData *InternalPD;
-  vtkPointData *SecondaryPD;
-  vtkCellData  *SecondaryCD;
+  vtkPointData* InternalPD;
+  vtkPointData* SecondaryPD;
+  vtkCellData* SecondaryCD;
 
 private:
-  vtkGenericClip(const vtkGenericClip&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGenericClip&) VTK_DELETE_FUNCTION;
+  vtkGenericClip(const vtkGenericClip&) = delete;
+  void operator=(const vtkGenericClip&) = delete;
 };
 
 #endif

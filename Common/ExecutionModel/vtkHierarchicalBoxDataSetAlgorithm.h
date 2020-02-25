@@ -20,13 +20,13 @@
  * Algorithms that take any type of data object (including composite dataset)
  * and produce a vtkHierarchicalBoxDataSet in the output can subclass from this
  * class.
-*/
+ */
 
 #ifndef vtkHierarchicalBoxDataSetAlgorithm_h
 #define vtkHierarchicalBoxDataSetAlgorithm_h
 
-#include "vtkCommonExecutionModelModule.h" // For export macro
 #include "vtkAlgorithm.h"
+#include "vtkCommonExecutionModelModule.h" // For export macro
 
 class vtkHierarchicalBoxDataSet;
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkHierarchicalBoxDataSetAlgorithm : public vtkAlgorithm
@@ -34,7 +34,7 @@ class VTKCOMMONEXECUTIONMODEL_EXPORT vtkHierarchicalBoxDataSetAlgorithm : public
 public:
   static vtkHierarchicalBoxDataSetAlgorithm* New();
   vtkTypeMacro(vtkHierarchicalBoxDataSetAlgorithm, vtkAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -57,66 +57,63 @@ public:
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation* request,
-                             vtkInformationVector** inputVector,
-                             vtkInformationVector* outputVector) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
 protected:
   vtkHierarchicalBoxDataSetAlgorithm();
-  ~vtkHierarchicalBoxDataSetAlgorithm() VTK_OVERRIDE;
+  ~vtkHierarchicalBoxDataSetAlgorithm() override;
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestDataObject(vtkInformation*,
-                                vtkInformationVector**,
-                                vtkInformationVector*) {return 1;};
+  virtual int RequestDataObject(vtkInformation*, vtkInformationVector**, vtkInformationVector*)
+  {
+    return 1;
+  }
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestInformation(vtkInformation*,
-                                 vtkInformationVector**,
-                                 vtkInformationVector*) {return 1;};
+  virtual int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*)
+  {
+    return 1;
+  }
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestData(vtkInformation*,
-                          vtkInformationVector**,
-                          vtkInformationVector*) {return 1;};
+  virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*)
+  {
+    return 1;
+  }
 
   //@{
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestUpdateExtent(vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*)
+  virtual int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*)
   {
-      return 1;
-  };
+    return 1;
+  }
   //@}
 
   // Create a default executive.
-  vtkExecutive* CreateDefaultExecutive() VTK_OVERRIDE;
+  vtkExecutive* CreateDefaultExecutive() override;
 
   // see algorithm for more info
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  vtkDataObject *GetInput(int port);
+  vtkDataObject* GetInput(int port);
 
 private:
-  vtkHierarchicalBoxDataSetAlgorithm(const vtkHierarchicalBoxDataSetAlgorithm&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHierarchicalBoxDataSetAlgorithm&) VTK_DELETE_FUNCTION;
-
+  vtkHierarchicalBoxDataSetAlgorithm(const vtkHierarchicalBoxDataSetAlgorithm&) = delete;
+  void operator=(const vtkHierarchicalBoxDataSetAlgorithm&) = delete;
 };
 
 #endif
-
-

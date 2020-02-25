@@ -18,64 +18,69 @@
  * @brief  Creates and manages the volume texture rendered by
  * vtkOpenGLGPUVolumeRayCastMapper.
  *
- * Wraps a vtkTextureObject for which it selects the appropriate format (depending
- * on the input vtkDataArray type, number of components, etc.) and loads input data.
- * The class maintains a set of members of interest to the parent mapper, such as:
+ * Wraps a vtkTextureObject for which it selects the appropriate format
+ * (depending on the input vtkDataArray type, number of components, etc.) and
+ * loads input data. The class maintains a set of members of interest to the
+ * parent mapper, such as:
  *
  * * Active vtkDataArray scalar range.
  * * Volume's scale and bias (pixel transfer functions).
  * * HandleLargeDataType flag.
+ * * Texture to data transformations.
+ * * Block extents
+ * * Block loaded bounds
  *
- * This class supports streaming the volume data in separate blocks to make it fit
- * in graphics memory (sometimes referred to as bricking). The data is split into
- * a user-defined number of blocks in such a way that a single sub-block (brick) fits
- * completely into GPU memory.  A stride is passed to OpenGL so that it can access
- * the underlying vtkDataArray adequately for each of the blocks to be streamed
- * into GPU memory (back-to-front for correct composition).
- * Streaming the volume as separate texture bricks certainly imposes a performance
- * trade-off but acts as a graphics memory expansion scheme for devices that would
- * not be able to render higher resoulution volumes otherwise.
+ * This class supports streaming the volume data in separate blocks to make it
+ * fit in graphics memory (sometimes referred to as bricking). The data is split
+ * into a user-defined number of blocks in such a way that a single sub-block
+ * (brick) fits completely into GPU memory.  A stride is passed to OpenGL so
+ * that it can access the underlying vtkDataArray adequately for each of the
+ * blocks to be streamed into GPU memory (back-to-front for correct
+ * composition).
  *
- * @warning There are certain caveats when texture streaming is enabled, given the
- * locality constraint that rendering a single block imposes.
+ * Streaming the volume as separate texture bricks certainly imposes a
+ * performance trade-off but acts as a graphics memory expansion scheme for
+ * devices that would not be able to render higher resoulution volumes
+ * otherwise.
  *
- * - Quality might suffer near the block seams with ShadeOn() (gradient computation at
- * the boundaries needs adjustment).
+ * @warning There are certain caveats when texture streaming is enabled, given
+ * the locality constraint that rendering a single block imposes.
  *
- * - Not all of the features supported by the mapper currently work correctly. This
- * is a list of known issues:
- *   -# Volume masks are currently not being streamed. They need to use a vtkVolumeTexture
- *      object instead. This will be fixed in a future commit.
- *   -# Blending modes such as average and additive might compute a different value near
- *      the edges.
+ * - Quality might suffer near the block seams with ShadeOn() (gradient
+ * computation at the boundaries needs adjustment).
+ *
+ * - Not all of the features supported by the mapper currently work correctly.
+ * This is a list of known issues:
+ *   -# Blending modes such as average and additive might compute a different
+ *      value near the edges.
  *
  *  - Future work will extend the API to be able to compute an ideal number of
  *  partitions and extents based on the platform capabilities.
  *
- * @warning This is an internal class of vtkOpenGLGPUVolumeRayCastMapper. It assumes
- * there is an active OpenGL context in each of its methods involving GL calls
- * (MakeCurrent() is expected to be called in the mapper before any member calls
- * involving gl functions).
+ * @warning This is an internal class of vtkOpenGLGPUVolumeRayCastMapper. It
+ * assumes there is an active OpenGL context in methods involving GL calls
+ * (MakeCurrent() is expected to be called in the mapper beforehand).
  */
-
 
 #ifndef vtkVolumeTexture_h
 #define vtkVolumeTexture_h
+#include <map>    // For ImageDataBlockMap
+#include <vector> // For ImageDataBlocks
 
-#include <map>                               // For ImageDataBlockMap
-#include <vector>                            // For ImageDataBlocks
-
-#include "vtkRenderingVolumeOpenGL2Module.h" // For export macro
+#include "vtkMatrix4x4.h" // For vtkMatrix4
+#include "vtkNew.h"       // For vtkNew
 #include "vtkObject.h"
+#include "vtkRenderingVolumeOpenGL2Module.h" // For export macro
+#include "vtkSmartPointer.h"                 // For SmartPointer
 #include "vtkTimeStamp.h"                    // For UploadTime
 #include "vtkTuple.h"                        // For Size6 and Size3
 
-
 class vtkDataArray;
 class vtkImageData;
-class vtkOpenGLGPUVolumeRayCastMapper;
+class vtkVolumeProperty;
 class vtkRenderer;
 class vtkTextureObject;
+class vtkWindow;
 
 class VTKRENDERINGVOLUMEOPENGL2_EXPORT vtkVolumeTexture : public vtkObject
 {
@@ -94,26 +99,43 @@ public:
       TextureObject = tex;
       TextureSize = texSize;
       TupleIndex = 0;
+
+      this->Extents[0] = VTK_INT_MAX;
+      this->Extents[1] = VTK_INT_MIN;
+      this->Extents[2] = VTK_INT_MAX;
+      this->Extents[3] = VTK_INT_MIN;
+      this->Extents[4] = VTK_INT_MAX;
+      this->Extents[5] = VTK_INT_MIN;
     }
 
     vtkImageData* ImageData;
     vtkTextureObject* TextureObject;
     Size3 TextureSize;
     vtkIdType TupleIndex;
+    vtkNew<vtkMatrix4x4> TextureToDataset;
+    vtkNew<vtkMatrix4x4> TextureToDatasetInv;
+
+    float CellStep[3];
+    double DatasetStepSize[3];
+
+    /**
+     * LoadedBounds are corrected for cell-data (if that is the case). So they
+     * are not equivalent to vtkImageData::GetBounds().
+     */
+    double LoadedBounds[6];
+    double LoadedBoundsAA[6];
+    double VolumeGeometry[24];
+    int Extents[6];
   };
 
   vtkTypeMacro(vtkVolumeTexture, vtkObject);
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
-
-  /**
-   * Set the parent volume mapper and initialize internals.
-   */
-  void SetMapper(vtkOpenGLGPUVolumeRayCastMapper* mapper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    *  Set a number of blocks per axis.
    */
-  void SetPartitions(int const x, int const y, int const z);
+  void SetPartitions(int const i, int const j, int const k);
+  const Size3& GetPartitions();
 
   /**
    * Loads the data array into the texture in the case only a single block is
@@ -121,43 +143,66 @@ public:
    * (in which case they will be loaded into GPU memory by GetNextBlock()).
    * Requires an active OpenGL context.
    */
-  bool LoadVolume(vtkRenderer* ren, vtkImageData* data, vtkDataArray* scalars,
+  bool LoadVolume(vtkRenderer* ren, vtkImageData* data, vtkDataArray* scalars, int const isCell,
     int const interpolation);
 
-  void UpdateInterpolationType(int const interpolation);
+  /**
+   * It currently only calls SetInterpolation internally. Requires an active OpenGL
+   * context.
+   */
+  void UpdateVolume(vtkVolumeProperty* property);
 
   /**
    * If streaming the data array as separate blocks, sort them back to front.
    * This method does nothing if there is a single block.
    */
-  void SortBlocksBackToFront(vtkRenderer *ren, vtkMatrix4x4* volumeMat);
+  void SortBlocksBackToFront(vtkRenderer* ren, vtkMatrix4x4* volumeMat);
 
   /**
-   * Return the next volume block to be rendered. When streaming is active (number
-   * of blocks > 1), this method will upload and release graphics resources of
-   * each block.
+   * Return the next volume block to be rendered and load its data.  If the
+   * current block is the last one, it will return nullptr.
    */
   VolumeBlock* GetNextBlock();
+  /**
+   * Return the currently loaded block.
+   */
+  VolumeBlock* GetCurrentBlock();
 
   /**
    * Clean-up acquired graphics resources.
    */
   void ReleaseGraphicsResources(vtkWindow* win);
 
-  //----------------------------------------------------------------------------
+  /**
+   * Get the scale and bias values given a VTK scalar type and a finite range.
+   * The scale and bias values computed using this method can be useful for
+   * custom shader code. For example, when looking up color values through the
+   * transfer function texture, the scalar value must be scaled and offset.
+   */
+  static void GetScaleAndBias(const int scalarType, float* scalarRange, float& scale, float& bias);
+  vtkDataArray* GetLoadedScalars();
 
   bool HandleLargeDataTypes;
   float Scale[4];
   float Bias[4];
-  double ScalarRange[4][2];
+  float ScalarRange[4][2];
+  float CellSpacing[3];
   int InterpolationType;
   vtkTimeStamp UploadTime;
 
+  int IsCellData = 0;
+  vtkNew<vtkMatrix4x4> CellToPointMatrix;
+  float AdjustedTexMin[4];
+  float AdjustedTexMax[4];
+
 protected:
   vtkVolumeTexture();
-  ~vtkVolumeTexture() VTK_OVERRIDE;
+  ~vtkVolumeTexture() override;
 
 private:
+  vtkVolumeTexture(const vtkVolumeTexture&) = delete;
+  void operator=(const vtkVolumeTexture&) = delete;
+
   /**
    * Load an image block as defined in volBlock into GPU memory.
    * Requires an active OpenGL context.
@@ -167,15 +212,9 @@ private:
   /**
    * Divide the image data in NxMxO user-defined blocks.
    */
-  void SplitVolume(vtkImageData* imageData, Size3 const & part);
+  void SplitVolume(vtkImageData* imageData, Size3 const& part);
 
-  /**
-   * Requires an active OpenGL context.
-   */
-  void SetInterpolation(int const interpolation);
-
-  void CreateBlocks(unsigned int const format, unsigned int const internalFormat,
-    int const type);
+  void CreateBlocks(unsigned int const format, unsigned int const internalFormat, int const type);
 
   void AdjustExtentForCell(Size6& extent);
   Size3 ComputeBlockSize(int* extent);
@@ -184,16 +223,40 @@ private:
    * Defines OpenGL's texture type, format and internal format based on the
    * vtkDataArray type (scalarType) and the number of array components.
    */
-  void SelectTextureFormat(unsigned int& format, unsigned int& internalFormat,
-    int& type, int const scalarType, int const noOfComponents);
+  void SelectTextureFormat(unsigned int& format, unsigned int& internalFormat, int& type,
+    int const scalarType, int const noOfComponents);
 
   /**
    * Clean-up any acquired host side resources (image blocks, etc.).
    */
   void ClearBlocks();
 
-  vtkVolumeTexture(const vtkVolumeTexture&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkVolumeTexture&) VTK_DELETE_FUNCTION;
+  /**
+   * Computes loaded bounds in data-coordinates.
+   */
+  // can be combined into one call
+  void ComputeBounds(VolumeBlock* block);
+  void UpdateTextureToDataMatrix(VolumeBlock* block);
+
+  /**
+   *  Compute transformation from cell texture-coordinates to point texture-coords
+   *  (CTP). Cell data maps correctly to OpenGL cells, point data does not (VTK
+   *  defines points at the cell corners). To set the point data in the center of the
+   *  OpenGL texels, a translation of 0.5 texels is applied, and the range is rescaled
+   *  to the point range.
+   *
+   *  delta = TextureExtentsMax - TextureExtentsMin;
+   *  min   = vec3(0.5) / delta;
+   *  max   = (delta - vec3(0.5)) / delta;
+   *  range = max - min
+   *
+   *  CTP = translation * Scale
+   *  CTP = range.x,        0,        0,  min.x
+   *              0,  range.y,        0,  min.y
+   *              0,        0,  range.z,  min.z
+   *              0,        0,        0,    1.0
+   */
+  void ComputeCellToPointMatrix(int extents[6]);
 
   //@{
   /**
@@ -204,15 +267,20 @@ private:
    * a volume would not fit in the GPU (due to MAX_TEXTURE_SIZE limitations,
    * memory availability, etc.).
    */
-  bool AreDimensionsValid(vtkTextureObject* texture, int const width,
-    int const height, int const depth);
+  bool AreDimensionsValid(
+    vtkTextureObject* texture, int const width, int const height, int const depth);
 
-  bool SafeLoadTexture(vtkTextureObject* texture, int const width,
-    int const height, int const depth, int numComps, int dataType, void* dataPtr);
+  bool SafeLoadTexture(vtkTextureObject* texture, int const width, int const height,
+    int const depth, int numComps, int dataType, void* dataPtr);
   //@}
 
+  void UpdateInterpolationType(int const interpolation);
+  void SetInterpolation(int const interpolation);
+
   //----------------------------------------------------------------------------
-  vtkTextureObject* Texture;
+  vtkTimeStamp UpdateTime;
+
+  vtkSmartPointer<vtkTextureObject> Texture;
   std::vector<vtkImageData*> ImageDataBlocks;
   std::map<vtkImageData*, VolumeBlock*> ImageDataBlockMap;
   std::vector<VolumeBlock*> SortedVolumeBlocks;
@@ -222,11 +290,9 @@ private:
   std::vector<Size3> TextureSizes;
   Size6 FullExtent;
   Size3 FullSize;
-  Size3 FullSizeAdjusted; /* Cell Adjusted */
   Size3 Partitions;
 
   vtkDataArray* Scalars;
-  vtkOpenGLGPUVolumeRayCastMapper* Mapper;
 };
 
-#endif //vtkVolumeTexture_h
+#endif // vtkVolumeTexture_h

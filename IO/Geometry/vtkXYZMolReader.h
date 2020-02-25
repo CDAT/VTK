@@ -21,7 +21,7 @@
  *
  * @par Thanks:
  * Dr. Jean M. Favre who developed and contributed this class
-*/
+ */
 
 #ifndef vtkXYZMolReader_h
 #define vtkXYZMolReader_h
@@ -29,14 +29,13 @@
 #include "vtkIOGeometryModule.h" // For export macro
 #include "vtkMoleculeReaderBase.h"
 
-
 class VTKIOGEOMETRY_EXPORT vtkXYZMolReader : public vtkMoleculeReaderBase
 {
 public:
-  vtkTypeMacro(vtkXYZMolReader,vtkMoleculeReaderBase);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkXYZMolReader, vtkMoleculeReaderBase);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkXYZMolReader *New();
+  static vtkXYZMolReader* New();
 
   /**
    * Test whether the file with the given name can be read by this
@@ -62,9 +61,9 @@ public:
 
 protected:
   vtkXYZMolReader();
-  ~vtkXYZMolReader() VTK_OVERRIDE;
+  ~vtkXYZMolReader() override;
 
-  void ReadSpecificMolecule(FILE* fp) VTK_OVERRIDE;
+  void ReadSpecificMolecule(FILE* fp) override;
 
   /**
    * Get next line that is not a comment. It returns the beginning of data on
@@ -72,11 +71,11 @@ protected:
    */
   char* GetNextLine(FILE* fp, char* line, int maxlen);
 
-  int GetLine1(const char* line, int *cnt);
-  int GetLine2(const char* line, char *name);
-  int GetAtom(const char* line, char* atom, float *x);
+  int GetLine1(const char* line, int* cnt);
+  int GetLine2(const char* line, char* name);
+  int GetAtom(const char* line, char* atom, float* x);
 
-  void InsertAtom(const char* atom, float *pos);
+  void InsertAtom(const char* atom, float* pos);
 
   vtkSetMacro(MaxTimeStep, int);
 
@@ -84,8 +83,8 @@ protected:
   int MaxTimeStep;
 
 private:
-  vtkXYZMolReader(const vtkXYZMolReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkXYZMolReader&) VTK_DELETE_FUNCTION;
+  vtkXYZMolReader(const vtkXYZMolReader&) = delete;
+  void operator=(const vtkXYZMolReader&) = delete;
 };
 
 #endif

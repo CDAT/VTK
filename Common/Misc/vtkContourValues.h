@@ -22,7 +22,7 @@
  *
  * @sa
  * vtkContourFilter
-*/
+ */
 
 #ifndef vtkContourValues_h
 #define vtkContourValues_h
@@ -38,10 +38,10 @@ public:
   /**
    * Construct object with a single contour value at 0.0.
    */
-  static vtkContourValues *New();
+  static vtkContourValues* New();
 
-  vtkTypeMacro(vtkContourValues,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkContourValues, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Set the ith contour value.
@@ -58,13 +58,13 @@ public:
    * Return a pointer to a list of contour values. The contents of the
    * list will be garbage if the number of contours <= 0.
    */
-  double *GetValues();
+  double* GetValues();
 
   /**
    * Fill a supplied list with contour values. Make sure you've
    * allocated memory of size GetNumberOfContours().
    */
-  void GetValues(double *contourValues);
+  void GetValues(double* contourValues);
 
   /**
    * Set the number of contours to place into the list. You only really
@@ -90,16 +90,20 @@ public:
    */
   void GenerateValues(int numContours, double rangeStart, double rangeEnd);
 
+  /**
+   * Copy contours.
+   */
+  void DeepCopy(vtkContourValues* other);
 
 protected:
   vtkContourValues();
-  ~vtkContourValues() VTK_OVERRIDE;
+  ~vtkContourValues() override;
 
-  vtkDoubleArray *Contours;
+  vtkDoubleArray* Contours;
 
 private:
-  vtkContourValues(const vtkContourValues&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContourValues&) VTK_DELETE_FUNCTION;
+  vtkContourValues(const vtkContourValues&) = delete;
+  void operator=(const vtkContourValues&) = delete;
 };
 
 #endif

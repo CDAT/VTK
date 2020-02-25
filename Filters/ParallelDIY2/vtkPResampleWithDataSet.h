@@ -20,7 +20,7 @@
  * filter
  * @sa
  * vtkResampleWithDataSet vtkPResampleToImage
-*/
+ */
 
 #ifndef vtkPResampleWithDataSet_h
 #define vtkPResampleWithDataSet_h
@@ -28,20 +28,19 @@
 #include "vtkFiltersParallelDIY2Module.h" // For export macro
 #include "vtkResampleWithDataSet.h"
 
-
 class vtkMultiProcessController;
 
 class VTKFILTERSPARALLELDIY2_EXPORT vtkPResampleWithDataSet : public vtkResampleWithDataSet
 {
 public:
   vtkTypeMacro(vtkPResampleWithDataSet, vtkResampleWithDataSet);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkPResampleWithDataSet *New();
+  static vtkPResampleWithDataSet* New();
 
   //@{
   /**
-   * By defualt this filter uses the global controller,
+   * By default this filter uses the global controller,
    * but this method can be used to set another instead.
    */
   virtual void SetController(vtkMultiProcessController*);
@@ -69,19 +68,17 @@ public:
 
 protected:
   vtkPResampleWithDataSet();
-  ~vtkPResampleWithDataSet();
+  ~vtkPResampleWithDataSet() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  vtkMultiProcessController *Controller;
+  vtkMultiProcessController* Controller;
   bool UseBalancedPartitionForPointsLookup;
 
 private:
-  vtkPResampleWithDataSet(const vtkPResampleWithDataSet&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPResampleWithDataSet&) VTK_DELETE_FUNCTION;
+  vtkPResampleWithDataSet(const vtkPResampleWithDataSet&) = delete;
+  void operator=(const vtkPResampleWithDataSet&) = delete;
 };
 
 #endif // vtkPResampleWithDataSet_h

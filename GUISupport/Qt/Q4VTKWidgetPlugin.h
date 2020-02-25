@@ -31,48 +31,48 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
-#include <QDesignerCustomWidgetInterface>
 #include <QDesignerCustomWidgetCollectionInterface>
+#include <QDesignerCustomWidgetInterface>
 #include <QObject>
-#include <QtPlugin>
 #include <QWidget>
-
-#include "vtkConfigure.h" //for VTK_OVERRIDE
-
+#include <QtPlugin>
 
 // implement Designer Custom Widget interface
 class QVTKWidgetPlugin : public QDesignerCustomWidgetInterface
 {
-  public:
-    QVTKWidgetPlugin();
-    ~QVTKWidgetPlugin() VTK_OVERRIDE;
+public:
+  QVTKWidgetPlugin();
+  ~QVTKWidgetPlugin() override;
 
-    QString name() const VTK_OVERRIDE;
-    QString domXml() const VTK_OVERRIDE;
-    QWidget* createWidget(QWidget* parent = 0) VTK_OVERRIDE;
-    QString group() const VTK_OVERRIDE;
-    QIcon icon() const VTK_OVERRIDE;
-    QString includeFile() const VTK_OVERRIDE;
-    QString toolTip() const VTK_OVERRIDE;
-    QString whatsThis() const VTK_OVERRIDE;
-    bool isContainer() const VTK_OVERRIDE;
+  QString name() const override;
+  QString domXml() const override;
+  QWidget* createWidget(QWidget* parent = 0) override;
+  QString group() const override;
+  QIcon icon() const override;
+  QString includeFile() const override;
+  QString toolTip() const override;
+  QString whatsThis() const override;
+  bool isContainer() const override;
 };
 
 // implement designer widget collection interface
-class QVTKPlugin : public QObject, public QDesignerCustomWidgetCollectionInterface
+class QVTKPlugin
+  : public QObject
+  , public QDesignerCustomWidgetCollectionInterface
 {
   Q_OBJECT
-  #if QT_VERSION >= 0x050000
+#if QT_VERSION >= 0x050000
   Q_PLUGIN_METADATA(IID "org.vtk.qvtkplugin")
-  #endif
+#endif
   Q_INTERFACES(QDesignerCustomWidgetCollectionInterface)
-  public:
+public:
   QVTKPlugin();
-  ~QVTKPlugin() VTK_OVERRIDE;
+  ~QVTKPlugin() override;
 
-  QList<QDesignerCustomWidgetInterface*> customWidgets() const VTK_OVERRIDE;
-  private:
-    QVTKWidgetPlugin* mQVTKWidgetPlugin;
+  QList<QDesignerCustomWidgetInterface*> customWidgets() const override;
+
+private:
+  QVTKWidgetPlugin* mQVTKWidgetPlugin;
 };
 
 // fake QVTKWidget class to satisfy the designer
@@ -80,7 +80,10 @@ class QVTKWidget : public QWidget
 {
   Q_OBJECT
 public:
-  QVTKWidget(QWidget* p) : QWidget(p) {}
+  QVTKWidget(QWidget* p)
+    : QWidget(p)
+  {
+  }
 };
 
 // Undo disabling of warning.
@@ -88,4 +91,4 @@ public:
 #pragma GCC diagnostic pop
 #endif
 
-#endif //QVTK_WIDGET_PLUGIN
+#endif // QVTK_WIDGET_PLUGIN

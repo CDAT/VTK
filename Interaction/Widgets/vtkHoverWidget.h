@@ -65,14 +65,13 @@
  *
  * @sa
  * vtkAbstractWidget
-*/
+ */
 
 #ifndef vtkHoverWidget_h
 #define vtkHoverWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractWidget.h"
-
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkHoverWidget : public vtkAbstractWidget
 {
@@ -80,14 +79,14 @@ public:
   /**
    * Instantiate this class.
    */
-  static vtkHoverWidget *New();
+  static vtkHoverWidget* New();
 
   //@{
   /**
    * Standard methods for a VTK class.
    */
-  vtkTypeMacro(vtkHoverWidget,vtkAbstractWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkHoverWidget, vtkAbstractWidget);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -96,31 +95,35 @@ public:
    * mouse the pointer stays over a vtkProp for this duration, then a
    * vtkTimerEvent::TimerEvent is invoked.
    */
-  vtkSetClampMacro(TimerDuration,int,1,100000);
-  vtkGetMacro(TimerDuration,int);
+  vtkSetClampMacro(TimerDuration, int, 1, 100000);
+  vtkGetMacro(TimerDuration, int);
   //@}
 
   /**
    * The method for activating and deactivating this widget. This method
    * must be overridden because it performs special timer-related operations.
    */
-  void SetEnabled(int) VTK_OVERRIDE;
+  void SetEnabled(int) override;
 
   /**
    * A default representation, of which there is none, is created. Note
    * that the superclasses vtkAbstractWidget::GetRepresentation()
-   * method returns NULL.
+   * method returns nullptr.
    */
-  void CreateDefaultRepresentation() VTK_OVERRIDE
-    {this->WidgetRep = nullptr;}
+  void CreateDefaultRepresentation() override { this->WidgetRep = nullptr; }
 
 protected:
   vtkHoverWidget();
-  ~vtkHoverWidget() VTK_OVERRIDE;
+  ~vtkHoverWidget() override;
 
   // The state of the widget
 
-  enum {Start=0,Timing,TimedOut};
+  enum
+  {
+    Start = 0,
+    Timing,
+    TimedOut
+  };
 
   int WidgetState;
 
@@ -131,9 +134,9 @@ protected:
 
   // Subclasses of this class invoke these methods. If a non-zero
   // value is returned, a subclass is handling the event.
-  virtual int SubclassHoverAction() {return 0;}
-  virtual int SubclassEndHoverAction() {return 0;}
-  virtual int SubclassSelectAction() {return 0;}
+  virtual int SubclassHoverAction() { return 0; }
+  virtual int SubclassEndHoverAction() { return 0; }
+  virtual int SubclassSelectAction() { return 0; }
 
   //@{
   /**
@@ -144,8 +147,8 @@ protected:
   //@}
 
 private:
-  vtkHoverWidget(const vtkHoverWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHoverWidget&) VTK_DELETE_FUNCTION;
+  vtkHoverWidget(const vtkHoverWidget&) = delete;
+  void operator=(const vtkHoverWidget&) = delete;
 };
 
 #endif

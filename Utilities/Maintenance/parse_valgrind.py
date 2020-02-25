@@ -25,11 +25,11 @@ The output will contain a list of proposed suppressions for all leaks that
 valgrind found along with the list of tests that exhibited each particular
 leak. For each bogus leak add the suppression to a file.
 
-4) Let ctest know about the supressions you want to use like so:
+4) Let ctest know about the suppressions you want to use like so:
 set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE
-"${CTEST_SCRIPT_DIRECTORY}/karego-at_vtk_valgrind_supression.txt")
+"${CTEST_SCRIPT_DIRECTORY}/karego-at_vtk_valgrind_suppression.txt")
 
-The output of the script also contains a list of the suppresions in use
+The output of the script also contains a list of the suppressions in use
 and the tests that use them. Use that to trim down the suppression
 file to a minimal set, removing all unused suppressions etc.
 """

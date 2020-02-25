@@ -45,7 +45,7 @@
  *
  * @sa
  * vtkPointOccupancyFilter vtkPointCloudFilter
-*/
+ */
 
 #ifndef vtkMaskPointsFilter_h
 #define vtkMaskPointsFilter_h
@@ -56,7 +56,6 @@
 class vtkImageData;
 class vtkPointSet;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkMaskPointsFilter : public vtkPointCloudFilter
 {
 public:
@@ -65,17 +64,17 @@ public:
    * Standard methods for instantiating, obtaining type information, and
    * printing information.
    */
-  static vtkMaskPointsFilter *New();
-  vtkTypeMacro(vtkMaskPointsFilter,vtkPointCloudFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkMaskPointsFilter* New();
+  vtkTypeMacro(vtkMaskPointsFilter, vtkPointCloudFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
   /**
    * Specify the masking image. It must be of type vtkImageData.
    */
-  void SetMaskData(vtkDataObject *source);
-  vtkDataObject *GetMask();
+  void SetMaskData(vtkDataObject* source);
+  vtkDataObject* GetMask();
   //@}
 
   /**
@@ -90,8 +89,8 @@ public:
    * empty is not selected for output. All other voxels with a value that is
    * not equal to the empty value are selected for output.
    */
-  vtkSetMacro(EmptyValue,unsigned char);
-  vtkGetMacro(EmptyValue,unsigned char);
+  vtkSetMacro(EmptyValue, unsigned char);
+  vtkGetMacro(EmptyValue, unsigned char);
   //@}
 
 protected:
@@ -102,22 +101,18 @@ protected:
 
   // All derived classes must implement this method. Note that a side effect of
   // the class is to populate the PointMap. Zero is returned if there is a failure.
-  int FilterPoints(vtkPointSet *input) VTK_OVERRIDE;
+  int FilterPoints(vtkPointSet* input) override;
 
   // Support second input
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  vtkImageData *Mask; //just a placeholder during execution
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  vtkImageData* Mask; // just a placeholder during execution
 
 private:
-  vtkMaskPointsFilter(const vtkMaskPointsFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMaskPointsFilter&) VTK_DELETE_FUNCTION;
-
+  vtkMaskPointsFilter(const vtkMaskPointsFilter&) = delete;
+  void operator=(const vtkMaskPointsFilter&) = delete;
 };
 
 #endif

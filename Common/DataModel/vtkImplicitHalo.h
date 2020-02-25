@@ -27,7 +27,7 @@
  * vtkShadowMapPass.
  * @warning
  * It does not implement the gradient.
-*/
+ */
 
 #ifndef vtkImplicitHalo_h
 #define vtkImplicitHalo_h
@@ -41,59 +41,59 @@ public:
   /**
    * Center=(0.0,0.0,0.0), Radius=1.0, FadeOut=0.01
    */
-  static vtkImplicitHalo *New();
+  static vtkImplicitHalo* New();
 
-  vtkTypeMacro(vtkImplicitHalo,vtkImplicitFunction);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImplicitHalo, vtkImplicitFunction);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Evaluate the equation.
    */
   using vtkImplicitFunction::EvaluateFunction;
-  double EvaluateFunction(double x[3]) VTK_OVERRIDE;
+  double EvaluateFunction(double x[3]) override;
   //@}
 
   /**
    * Evaluate normal. Not implemented.
    */
-  void EvaluateGradient(double x[3], double g[3]) VTK_OVERRIDE;
+  void EvaluateGradient(double x[3], double g[3]) override;
 
   //@{
   /**
    * Radius of the sphere.
    */
-  vtkSetMacro(Radius,double);
-  vtkGetMacro(Radius,double);
+  vtkSetMacro(Radius, double);
+  vtkGetMacro(Radius, double);
   //@}
 
   //@{
   /**
    * Center of the sphere.
    */
-  vtkSetVector3Macro(Center,double);
-  vtkGetVector3Macro(Center,double);
+  vtkSetVector3Macro(Center, double);
+  vtkGetVector3Macro(Center, double);
   //@}
 
   //@{
   /**
    * FadeOut ratio. Valid values are between 0.0 and 1.0.
    */
-  vtkSetMacro(FadeOut,double);
-  vtkGetMacro(FadeOut,double);
+  vtkSetMacro(FadeOut, double);
+  vtkGetMacro(FadeOut, double);
   //@}
 
 protected:
   vtkImplicitHalo();
-  ~vtkImplicitHalo() VTK_OVERRIDE;
+  ~vtkImplicitHalo() override;
 
   double Radius;
   double Center[3];
   double FadeOut;
 
 private:
-  vtkImplicitHalo(const vtkImplicitHalo&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImplicitHalo&) VTK_DELETE_FUNCTION;
+  vtkImplicitHalo(const vtkImplicitHalo&) = delete;
+  void operator=(const vtkImplicitHalo&) = delete;
 };
 
 #endif

@@ -14,10 +14,10 @@
 =========================================================================*/
 
 #include "vtkFloatArray.h"
+#include "vtkNew.h"
 #include "vtkTimerLog.h"
 #include "vtkTypedDataArray.h"
 #include "vtkTypedDataArrayIterator.h"
-#include "vtkNew.h"
 
 #include <cassert>
 #include <iostream>
@@ -30,39 +30,36 @@ namespace
 {
 class MyArray : public vtkTypedDataArray<float>
 {
-  vtkFloatArray *Data;
+  vtkFloatArray* Data;
+
 public:
-  vtkTypeMacro(MyArray, vtkTypedDataArray<float>)
-  static MyArray *New() { VTK_STANDARD_NEW_BODY(MyArray) }
-  void Init(vtkFloatArray *array)
+  static MyArray* New() { VTK_STANDARD_NEW_BODY(MyArray); }
+  void Init(vtkFloatArray* array)
   {
     this->Data = array;
     this->NumberOfComponents = array->GetNumberOfComponents();
     this->MaxId = array->GetMaxId();
   }
-  ValueType& GetValueReference(vtkIdType idx) VTK_OVERRIDE
-  {
-    return *this->Data->GetPointer(idx);
-  }
+  ValueType& GetValueReference(vtkIdType idx) override { return *this->Data->GetPointer(idx); }
 
   // These pure virtuals are no-op -- all we care about is GetValueReference
   // to test the iterator.
-  void SetTypedTuple(vtkIdType, const ValueType *) VTK_OVERRIDE {}
-  void InsertTypedTuple(vtkIdType, const ValueType *) VTK_OVERRIDE {}
-  vtkIdType InsertNextTypedTuple(const ValueType *) VTK_OVERRIDE { return 0; }
-  vtkIdType LookupTypedValue(ValueType) VTK_OVERRIDE { return 0; }
-  void LookupTypedValue(ValueType, vtkIdList*) VTK_OVERRIDE {}
-  ValueType GetValue(vtkIdType) const VTK_OVERRIDE { return 0; }
-  void SetValue(vtkIdType, ValueType) VTK_OVERRIDE {}
-  void GetTypedTuple(vtkIdType, ValueType*) const VTK_OVERRIDE {}
-  vtkIdType InsertNextValue(ValueType) VTK_OVERRIDE { return 0; }
-  void InsertValue(vtkIdType, ValueType) VTK_OVERRIDE {}
-  int Allocate(vtkIdType, vtkIdType) VTK_OVERRIDE { return 0; }
-  int Resize(vtkIdType) VTK_OVERRIDE { return 0; }
+  void SetTypedTuple(vtkIdType, const ValueType*) override {}
+  void InsertTypedTuple(vtkIdType, const ValueType*) override {}
+  vtkIdType InsertNextTypedTuple(const ValueType*) override { return 0; }
+  vtkIdType LookupTypedValue(ValueType) override { return 0; }
+  void LookupTypedValue(ValueType, vtkIdList*) override {}
+  ValueType GetValue(vtkIdType) const override { return 0; }
+  void SetValue(vtkIdType, ValueType) override {}
+  void GetTypedTuple(vtkIdType, ValueType*) const override {}
+  vtkIdType InsertNextValue(ValueType) override { return 0; }
+  void InsertValue(vtkIdType, ValueType) override {}
+  vtkTypeBool Allocate(vtkIdType, vtkIdType) override { return 0; }
+  vtkTypeBool Resize(vtkIdType) override { return 0; }
 };
 }
 
-int TestDataArrayIterators(int, char *[])
+int TestDataArrayIterators(int, char*[])
 {
   vtkIdType numComps = 4;
   vtkIdType numValues = 100000000; // 10 million
@@ -70,7 +67,7 @@ int TestDataArrayIterators(int, char *[])
   vtkIdType numTuples = numValues / numComps;
 
   vtkNew<vtkFloatArray> arrayContainer;
-  vtkFloatArray *array = arrayContainer.GetPointer();
+  vtkFloatArray* array = arrayContainer;
   array->SetNumberOfComponents(numComps);
   array->SetNumberOfTuples(numTuples);
   for (vtkIdType i = 0; i < numValues; ++i)
@@ -81,7 +78,7 @@ int TestDataArrayIterators(int, char *[])
 
   // Create the vtkTypedDataArray testing implementation:
   vtkNew<MyArray> tdaContainer;
-  MyArray *tda = tdaContainer.GetPointer();
+  MyArray* tda = tdaContainer;
   tda->Init(array);
 
   // should be vtkAOSDataArrayTemplate<float>::Iterator (float*):
@@ -95,9 +92,8 @@ int TestDataArrayIterators(int, char *[])
 
   // should be vtkTypedDataArrayIterator<float>:
   vtkTypedDataArray<float>::Iterator tdaBegin =
-      vtkTypedDataArray<float>::FastDownCast(tda)->Begin();
-  vtkTypedDataArray<float>::Iterator tdaIter =
-      vtkTypedDataArray<float>::FastDownCast(tda)->Begin();
+    vtkTypedDataArray<float>::FastDownCast(tda)->Begin();
+  vtkTypedDataArray<float>::Iterator tdaIter = vtkTypedDataArray<float>::FastDownCast(tda)->Begin();
   if (typeid(tdaBegin) != typeid(vtkTypedDataArrayIterator<float>))
   {
     std::cerr << "Error: vtkTypedDataArray<float>::Iterator is not a "
@@ -110,16 +106,12 @@ int TestDataArrayIterators(int, char *[])
   for (vtkIdType i = 0; i < numValues; ++i)
   {
     float lookup = array->GetValue(i);
-    if (lookup != datBegin[i] || lookup != tdaBegin[i] ||
-        lookup != *datIter    || lookup != *tdaIter)
+    if (lookup != datBegin[i] || lookup != tdaBegin[i] || lookup != *datIter || lookup != *tdaIter)
     {
       std::cerr << "Mismatch at " << i << ":"
-                << " GetValue(i)=" << lookup
-                << " datBegin[i]=" << datBegin[i]
-                << " tdaBegin[i]=" << tdaBegin[i]
-                << " *datIter=" << *datIter
-                << " *tdaIter=" << *tdaIter
-                << std::endl;
+                << " GetValue(i)=" << lookup << " datBegin[i]=" << datBegin[i]
+                << " tdaBegin[i]=" << tdaBegin[i] << " *datIter=" << *datIter
+                << " *tdaIter=" << *tdaIter << std::endl;
       return EXIT_FAILURE;
     }
     ++datIter;
@@ -162,12 +154,9 @@ int TestDataArrayIterators(int, char *[])
   timer->StopTimer();
   double tdaTime = timer->GetElapsedTime();
 
-  std::cout << "GetValue time, sum: "
-            << lookupTime << ", " << lookupSum << std::endl;
-  std::cout << "dat time, sum:      "
-            << datTime << ", " << datSum << std::endl;
-  std::cout << "tda time, sum:      "
-            << tdaTime << ", " << tdaSum << std::endl;
+  std::cout << "GetValue time, sum: " << lookupTime << ", " << lookupSum << std::endl;
+  std::cout << "dat time, sum:      " << datTime << ", " << datSum << std::endl;
+  std::cout << "tda time, sum:      " << tdaTime << ", " << tdaSum << std::endl;
 #endif
 
   return EXIT_SUCCESS;

@@ -39,12 +39,13 @@
  * Finally this class provides a mechanism to determine which attributes a
  * group of sources have in common, and to copy tuples from a source into
  * the destination, for only those attributes that are held by all.
-*/
+ */
 
 #ifndef vtkDataSetAttributes_h
 #define vtkDataSetAttributes_h
 
-#include "vtkCommonDataModelModule.h" // For export macro
+#include "vtkCommonDataModelModule.h"      // For export macro
+#include "vtkDataSetAttributesFieldList.h" // for vtkDataSetAttributesFieldList
 #include "vtkFieldData.h"
 
 class vtkLookupTable;
@@ -55,16 +56,16 @@ public:
   /**
    * Construct object with copying turned on for all data.
    */
-  static vtkDataSetAttributes *New();
+  static vtkDataSetAttributes* New();
 
-  vtkTypeMacro(vtkDataSetAttributes,vtkFieldData);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkDataSetAttributes, vtkFieldData);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Initialize all of the object's data to nullptr
    * Also, clear the copy flags.
    */
-  void Initialize() VTK_OVERRIDE;
+  void Initialize() override;
 
   /**
    * Attributes have a chance to bring themselves up to date; right
@@ -79,27 +80,30 @@ public:
    * copy from input data).
    * Ignores the copy flags but preserves them in the output.
    */
-  void DeepCopy(vtkFieldData *pd) VTK_OVERRIDE;
+  void DeepCopy(vtkFieldData* pd) override;
 
   /**
    * Shallow copy of data (i.e., use reference counting).
    * Ignores the copy flags but preserves them in the output.
    */
-  void ShallowCopy(vtkFieldData *pd) VTK_OVERRIDE;
+  void ShallowCopy(vtkFieldData* pd) override;
 
   // -- attribute types -----------------------------------------------------
 
   // Always keep NUM_ATTRIBUTES as the last entry
   enum AttributeTypes
   {
-    SCALARS=0,
-    VECTORS=1,
-    NORMALS=2,
-    TCOORDS=3,
-    TENSORS=4,
-    GLOBALIDS=5,
-    PEDIGREEIDS=6,
-    EDGEFLAG=7,
+    SCALARS = 0,
+    VECTORS = 1,
+    NORMALS = 2,
+    TCOORDS = 3,
+    TENSORS = 4,
+    GLOBALIDS = 5,
+    PEDIGREEIDS = 6,
+    EDGEFLAG = 7,
+    TANGENTS = 8,
+    RATIONALWEIGHTS = 9,
+    HIGHERORDERDEGREES = 10,
     NUM_ATTRIBUTES
   };
 
@@ -111,29 +115,31 @@ public:
   };
 
   // ----------- ghost points and ghost cells -------------------------------------------
-  //The following bit fields are consistent with VisIt ghost zones specification
-  //For details, see http://www.visitusers.org/index.php?title=Representing_ghost_data
+  // The following bit fields are consistent with VisIt ghost zones specification
+  // For details, see http://www.visitusers.org/index.php?title=Representing_ghost_data
 
   enum CellGhostTypes
   {
-    DUPLICATECELL           = 1,  //the cell is present on multiple processors
-    HIGHCONNECTIVITYCELL    = 2,  //the cell has more neighbors than in a regular mesh
-    LOWCONNECTIVITYCELL     = 4,  //the cell has less neighbors than in a regular mesh
-    REFINEDCELL             = 8,  //other cells are present that refines it.
-    EXTERIORCELL            = 16, //the cell is on the exterior of the data set
-    HIDDENCELL              = 32  //the cell is needed to maintain connectivity, but the data values should be ignored.
+    DUPLICATECELL = 1,        // the cell is present on multiple processors
+    HIGHCONNECTIVITYCELL = 2, // the cell has more neighbors than in a regular mesh
+    LOWCONNECTIVITYCELL = 4,  // the cell has less neighbors than in a regular mesh
+    REFINEDCELL = 8,          // other cells are present that refines it.
+    EXTERIORCELL = 16,        // the cell is on the exterior of the data set
+    HIDDENCELL =
+      32 // the cell is needed to maintain connectivity, but the data values should be ignored.
   };
 
   enum PointGhostTypes
   {
-    DUPLICATEPOINT          =1,   //the cell is present on multiple processors
-    HIDDENPOINT             =2    //the point is needed to maintain connectivity, but the data values should be ignored.
+    DUPLICATEPOINT = 1, // the cell is present on multiple processors
+    HIDDENPOINT =
+      2 // the point is needed to maintain connectivity, but the data values should be ignored.
   };
 
-  //A vtkDataArray with this name must be of type vtkUnsignedCharArray.
-  //Each value must be assigned according to the bit fields described in
-  //PointGhostTypes or CellGhostType
-  static const char* GhostArrayName()  { return "vtkGhostType";}
+  // A vtkDataArray with this name must be of type vtkUnsignedCharArray.
+  // Each value must be assigned according to the bit fields described in
+  // PointGhostTypes or CellGhostType
+  static const char* GhostArrayName() { return "vtkGhostType"; }
 
   //-----------------------------------------------------------------------------------
 
@@ -162,6 +168,15 @@ public:
   int SetNormals(vtkDataArray* da);
   int SetActiveNormals(const char* name);
   vtkDataArray* GetNormals();
+  //@}
+
+  //@{
+  /**
+   * Set/get the tangent data.
+   */
+  int SetTangents(vtkDataArray* da);
+  int SetActiveTangents(const char* name);
+  vtkDataArray* GetTangents();
   //@}
 
   //@{
@@ -202,6 +217,24 @@ public:
 
   //@{
   /**
+   * Set/Get the rational weights data.
+   */
+  int SetRationalWeights(vtkDataArray* da);
+  int SetActiveRationalWeights(const char* name);
+  vtkDataArray* GetRationalWeights();
+  //@}
+
+  //@{
+  /**
+   * Set/Get the rational degrees data.
+   */
+  int SetHigherOrderDegrees(vtkDataArray* da);
+  int SetActiveHigherOrderDegrees(const char* name);
+  vtkDataArray* GetHigherOrderDegrees();
+  //@}
+
+  //@{
+  /**
    * This will first look for an array with the correct name.
    * If one exists, it is returned. Otherwise, the name argument
    * is ignored, and the active attribute is returned.
@@ -209,10 +242,13 @@ public:
   vtkDataArray* GetScalars(const char* name);
   vtkDataArray* GetVectors(const char* name);
   vtkDataArray* GetNormals(const char* name);
+  vtkDataArray* GetTangents(const char* name);
   vtkDataArray* GetTCoords(const char* name);
   vtkDataArray* GetTensors(const char* name);
   vtkDataArray* GetGlobalIds(const char* name);
   vtkAbstractArray* GetPedigreeIds(const char* name);
+  vtkDataArray* GetRationalWeights(const char* name);
+  vtkDataArray* GetHigherOrderDegrees(const char* name);
   //@}
 
   /**
@@ -226,6 +262,7 @@ public:
    * vtkDataSetAttributes::GLOBALIDS = 5
    * vtkDataSetAttributes::PEDIGREEIDS = 6
    * vtkDataSetAttributes::EDGEFLAG = 7
+   * vtkDataSetAttributes::TANGENTS = 8
    * Returns the index of the array if successful, -1 if the array
    * is not in the list of arrays.
    */
@@ -296,9 +333,8 @@ public:
    * Remove an array (with the given name) from the list of arrays.
    */
   using vtkFieldData::RemoveArray;
-  void RemoveArray(int index) VTK_OVERRIDE;
+  void RemoveArray(int index) override;
   //@}
-
 
   //@{
   /**
@@ -313,10 +349,10 @@ public:
 
   enum AttributeCopyOperations
   {
-    COPYTUPLE=0,
-    INTERPOLATE=1,
-    PASSDATA=2,
-    ALLCOPY  //all of the above
+    COPYTUPLE = 0,
+    INTERPOLATE = 1,
+    PASSDATA = 2,
+    ALLCOPY // all of the above
   };
 
   /**
@@ -340,54 +376,69 @@ public:
    * 1: Weighted interpolation.
    * 2: Nearest neighbor interpolation.
    */
-  void SetCopyAttribute (int index, int value, int ctype=ALLCOPY);
+  void SetCopyAttribute(int index, int value, int ctype = ALLCOPY);
 
   /**
    * Get the attribute copy flag for copy operation <ctype> of attribute
    * <index>.
    */
-  int GetCopyAttribute (int index, int ctype);
+  int GetCopyAttribute(int index, int ctype);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyScalars(int i, int ctype=ALLCOPY);
-  int GetCopyScalars(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyScalars, int);
+  void SetCopyScalars(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyScalars(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyScalars, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyVectors(int i, int ctype=ALLCOPY);
-  int GetCopyVectors(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyVectors, int);
+  void SetCopyVectors(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyVectors(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyVectors, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyNormals(int i, int ctype=ALLCOPY);
-  int GetCopyNormals(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyNormals, int);
+  void SetCopyNormals(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyNormals(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyNormals, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyTCoords(int i, int ctype=ALLCOPY);
-  int GetCopyTCoords(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyTCoords, int);
+  void SetCopyTangents(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyTangents(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyTangents, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyTensors(int i, int ctype=ALLCOPY);
-  int GetCopyTensors(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyTensors, int);
+  void SetCopyTCoords(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyTCoords(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyTCoords, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyGlobalIds(int i, int ctype=ALLCOPY);
-  int GetCopyGlobalIds(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyGlobalIds, int);
+  void SetCopyTensors(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyTensors(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyTensors, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void SetCopyPedigreeIds(int i, int ctype=ALLCOPY);
-  int GetCopyPedigreeIds(int ctype=ALLCOPY);
-  vtkBooleanMacro(CopyPedigreeIds, int);
+  void SetCopyGlobalIds(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyGlobalIds(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyGlobalIds, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void CopyAllOn(int ctype=ALLCOPY) VTK_OVERRIDE;
+  void SetCopyPedigreeIds(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyPedigreeIds(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyPedigreeIds, vtkTypeBool);
 
   /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
-  void CopyAllOff(int ctype=ALLCOPY) VTK_OVERRIDE;
+  void SetCopyRationalWeights(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyRationalWeights(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyRationalWeights, vtkTypeBool);
+
+  /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
+  void SetCopyHigherOrderDegrees(vtkTypeBool i, int ctype = ALLCOPY);
+  vtkTypeBool GetCopyHigherOrderDegrees(int ctype = ALLCOPY);
+  vtkBooleanMacro(CopyHigherOrderDegrees, vtkTypeBool);
+
+  /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
+  void CopyAllOn(int ctype = ALLCOPY) override;
+
+  /// @copydoc vtkDataSetAttributes::SetCopyAttribute()
+  void CopyAllOff(int ctype = ALLCOPY) override;
 
   // -- passthrough operations ----------------------------------------------
 
@@ -400,7 +451,7 @@ public:
    * that field (on or off), obey the flag, ignore (3) 3) obey
    * CopyAllOn/Off
    */
-  void PassData(vtkFieldData* fd) VTK_OVERRIDE;
+  void PassData(vtkFieldData* fd) override;
 
   // -- copytuple operations ------------------------------------------------
 
@@ -416,24 +467,21 @@ public:
    * If shallowCopyArrays is true, input arrays are copied to the output
    * instead of new ones being allocated.
    */
-  void CopyAllocate(vtkDataSetAttributes* pd, vtkIdType sze=0,
-                    vtkIdType ext=1000)
+  void CopyAllocate(vtkDataSetAttributes* pd, vtkIdType sze = 0, vtkIdType ext = 1000)
   {
-      this->CopyAllocate(pd, sze, ext, 0);
+    this->CopyAllocate(pd, sze, ext, 0);
   }
-  void CopyAllocate(vtkDataSetAttributes* pd, vtkIdType sze,
-                    vtkIdType ext, int shallowCopyArrays);
+  void CopyAllocate(vtkDataSetAttributes* pd, vtkIdType sze, vtkIdType ext, int shallowCopyArrays);
   //@}
 
   /**
-  * Create a mapping between the input attributes and this object
-  * so that methods like CopyData() and CopyStructuredData()
-  * can be called. This method assumes that this object has the
-  * same arrays as the input and that they are ordered the same
-  * way (same array indices).
-  */
+   * Create a mapping between the input attributes and this object
+   * so that methods like CopyData() and CopyStructuredData()
+   * can be called. This method assumes that this object has the
+   * same arrays as the input and that they are ordered the same
+   * way (same array indices).
+   */
   void SetupForCopy(vtkDataSetAttributes* pd);
-
 
   /**
    * This method is used to copy data arrays in images.
@@ -443,10 +491,8 @@ public:
    * the output extent. This is required when CopyAllocate()
    * was used to setup output arrays.
    */
-  void CopyStructuredData(vtkDataSetAttributes *inDsa,
-                          const int *inExt,
-                          const int *outExt,
-                          bool setSize = true);
+  void CopyStructuredData(
+    vtkDataSetAttributes* inDsa, const int* inExt, const int* outExt, bool setSize = true);
 
   //@{
   /**
@@ -454,14 +500,13 @@ public:
    * has been invoked before using this method. When copying a field,
    * the following copying rules are
    * followed: 1) Check if a field is an attribute, if yes and if there
-   * is a COPYTUPLE copy flag for that attribute (on or off), obey the  flag
+   * is a COPYTUPLE copy flag for that attribute (on or off), obey the flag
    * for that attribute, ignore (2) and (3), 2) if there is a copy field for
    * that field (on or off), obey the flag, ignore (3) 3) obey
    * CopyAllOn/Off
    */
-  void CopyData(vtkDataSetAttributes *fromPd, vtkIdType fromId, vtkIdType toId);
-  void CopyData(vtkDataSetAttributes *fromPd,
-                vtkIdList *fromIds, vtkIdList *toIds);
+  void CopyData(vtkDataSetAttributes* fromPd, vtkIdType fromId, vtkIdType toId);
+  void CopyData(vtkDataSetAttributes* fromPd, vtkIdList* fromIds, vtkIdList* toIds);
   //@}
 
   /**
@@ -469,8 +514,7 @@ public:
    * container, starting at the dstStart location.
    * Note that memory allocation is performed as necessary to hold the data.
    */
-  void CopyData(vtkDataSetAttributes *fromPd, vtkIdType dstStart, vtkIdType n,
-                vtkIdType srcStart);
+  void CopyData(vtkDataSetAttributes* fromPd, vtkIdType dstStart, vtkIdType n, vtkIdType srcStart);
 
   //@{
   /**
@@ -479,14 +523,13 @@ public:
    * same type, and have the same number of components. This is true if you
    * invoke CopyAllocate() or InterpolateAllocate().
    */
-  void CopyTuple(vtkAbstractArray *fromData, vtkAbstractArray *toData,
-                 vtkIdType fromId, vtkIdType toId);
-  void CopyTuples(vtkAbstractArray *fromData, vtkAbstractArray *toData,
-                  vtkIdList *fromIds, vtkIdList *toIds);
-  void CopyTuples(vtkAbstractArray *fromData, vtkAbstractArray *toData,
-                  vtkIdType dstStart, vtkIdType n, vtkIdType srcStart);
+  void CopyTuple(
+    vtkAbstractArray* fromData, vtkAbstractArray* toData, vtkIdType fromId, vtkIdType toId);
+  void CopyTuples(
+    vtkAbstractArray* fromData, vtkAbstractArray* toData, vtkIdList* fromIds, vtkIdList* toIds);
+  void CopyTuples(vtkAbstractArray* fromData, vtkAbstractArray* toData, vtkIdType dstStart,
+    vtkIdType n, vtkIdType srcStart);
   //@}
-
 
   // -- interpolate operations ----------------------------------------------
 
@@ -499,13 +542,12 @@ public:
    * If shallowCopyArrays is true, input arrays are copied to the output
    * instead of new ones being allocated.
    */
-  void InterpolateAllocate(vtkDataSetAttributes* pd, vtkIdType sze=0,
-                           vtkIdType ext=1000)
+  void InterpolateAllocate(vtkDataSetAttributes* pd, vtkIdType sze = 0, vtkIdType ext = 1000)
   {
-      this->InterpolateAllocate(pd, sze, ext, 0);
+    this->InterpolateAllocate(pd, sze, ext, 0);
   }
-  void InterpolateAllocate(vtkDataSetAttributes* pd, vtkIdType sze,
-                           vtkIdType ext, int shallowCopyArrays);
+  void InterpolateAllocate(
+    vtkDataSetAttributes* pd, vtkIdType sze, vtkIdType ext, int shallowCopyArrays);
   //@}
 
   /**
@@ -515,8 +557,8 @@ public:
    * is prevented. If the flag is set to 1, weighted interpolation occurs.
    * If the flag is set to 2, nearest neighbor interpolation is used.
    */
-  void InterpolatePoint(vtkDataSetAttributes *fromPd, vtkIdType toId,
-                        vtkIdList *ids, double *weights);
+  void InterpolatePoint(
+    vtkDataSetAttributes* fromPd, vtkIdType toId, vtkIdList* ids, double* weights);
 
   /**
    * Interpolate data from the two points p1,p2 (forming an edge) and an
@@ -527,8 +569,8 @@ public:
    * is prevented. If the flag is set to 1, weighted interpolation occurs.
    * If the flag is set to 2, nearest neighbor interpolation is used.
    */
-  void InterpolateEdge(vtkDataSetAttributes *fromPd, vtkIdType toId,
-                       vtkIdType p1, vtkIdType p2, double t);
+  void InterpolateEdge(
+    vtkDataSetAttributes* fromPd, vtkIdType toId, vtkIdType p1, vtkIdType p2, double t);
 
   /**
    * Interpolate data from the same id (point or cell) at different points
@@ -542,11 +584,10 @@ public:
    * is prevented. If the flag is set to 1, weighted interpolation occurs.
    * If the flag is set to 2, nearest neighbor interpolation is used.
    */
-  void InterpolateTime(vtkDataSetAttributes *from1,
-                       vtkDataSetAttributes *from2,
-                       vtkIdType id, double t);
+  void InterpolateTime(
+    vtkDataSetAttributes* from1, vtkDataSetAttributes* from2, vtkIdType id, double t);
 
-  class FieldList;
+  using FieldList = vtkDataSetAttributesFieldList;
 
   // field list copy operations ------------------------------------------
 
@@ -554,8 +595,7 @@ public:
    * A special form of CopyAllocate() to be used with FieldLists. Use it
    * when you are copying data from a set of vtkDataSetAttributes.
    */
-  void CopyAllocate(vtkDataSetAttributes::FieldList& list, vtkIdType sze=0,
-                    vtkIdType ext=1000);
+  void CopyAllocate(vtkDataSetAttributes::FieldList& list, vtkIdType sze = 0, vtkIdType ext = 1000);
 
   /**
    * Special forms of CopyData() to be used with FieldLists. Use it when
@@ -563,12 +603,10 @@ public:
    * that you have called the special form of CopyAllocate that accepts
    * FieldLists.
    */
-  void CopyData(vtkDataSetAttributes::FieldList& list,
-                vtkDataSetAttributes* dsa, int idx, vtkIdType fromId,
-                vtkIdType toId);
-  void CopyData(vtkDataSetAttributes::FieldList& list,
-                vtkDataSetAttributes* dsa, int idx, vtkIdType dstStart,
-                vtkIdType n, vtkIdType srcStart);
+  void CopyData(vtkDataSetAttributes::FieldList& list, vtkDataSetAttributes* dsa, int idx,
+    vtkIdType fromId, vtkIdType toId);
+  void CopyData(vtkDataSetAttributes::FieldList& list, vtkDataSetAttributes* dsa, int idx,
+    vtkIdType dstStart, vtkIdType n, vtkIdType srcStart);
 
   /**
    * A special form of InterpolateAllocate() to be used with FieldLists. Use it
@@ -576,8 +614,8 @@ public:
    * \c Warning: This does not copy the Information object associated with
    * each data array. This behavior may change in the future.
    */
-  void InterpolateAllocate(vtkDataSetAttributes::FieldList& list, vtkIdType sze=0,
-                    vtkIdType ext=1000);
+  void InterpolateAllocate(
+    vtkDataSetAttributes::FieldList& list, vtkIdType sze = 0, vtkIdType ext = 1000);
 
   /**
    * Interpolate data set attributes from other data set attributes
@@ -585,37 +623,23 @@ public:
    * Make sure that special form of InterpolateAllocate() that accepts
    * FieldList has been used.
    */
-  void InterpolatePoint(
-    vtkDataSetAttributes::FieldList& list,
-    vtkDataSetAttributes *fromPd,
-    int idx, vtkIdType toId,
-    vtkIdList *ids, double *weights);
-
-  friend class vtkDataSetAttributes::FieldList;
+  void InterpolatePoint(vtkDataSetAttributes::FieldList& list, vtkDataSetAttributes* fromPd,
+    int idx, vtkIdType toId, vtkIdList* ids, double* weights);
 
 protected:
   vtkDataSetAttributes();
-  ~vtkDataSetAttributes() VTK_OVERRIDE;
+  ~vtkDataSetAttributes() override;
 
-  void InternalCopyAllocate(vtkDataSetAttributes* pd,
-                            int ctype,
-                            vtkIdType sze=0,
-                            vtkIdType ext=1000,
-                            int shallowCopyArrays=0,
-                            bool createNewArrays=true);
-
-  void InternalCopyAllocate(
-    vtkDataSetAttributes::FieldList& list,
-    int ctype,
-    vtkIdType sze, vtkIdType ext);
+  void InternalCopyAllocate(vtkDataSetAttributes* pd, int ctype, vtkIdType sze = 0,
+    vtkIdType ext = 1000, int shallowCopyArrays = 0, bool createNewArrays = true);
 
   /**
    * Initialize all of the object's data to nullptr
    */
-  void InitializeFields() VTK_OVERRIDE;
+  void InitializeFields() override;
 
-  int AttributeIndices[NUM_ATTRIBUTES]; //index to attribute array in field data
-  int CopyAttributeFlags[ALLCOPY][NUM_ATTRIBUTES]; //copy flag for attribute data
+  int AttributeIndices[NUM_ATTRIBUTES];            // index to attribute array in field data
+  int CopyAttributeFlags[ALLCOPY][NUM_ATTRIBUTES]; // copy flag for attribute data
 
   vtkFieldData::BasicIterator RequiredArrays;
 
@@ -623,91 +647,19 @@ protected:
 
   static const int NumberOfAttributeComponents[NUM_ATTRIBUTES];
   static const int AttributeLimits[NUM_ATTRIBUTES];
-  static const char AttributeNames[NUM_ATTRIBUTES][12];
-  static const char LongAttributeNames[NUM_ATTRIBUTES][35];
+  static const char AttributeNames[NUM_ATTRIBUTES][19];
+  static const char LongAttributeNames[NUM_ATTRIBUTES][42];
 
 private:
   static int CheckNumberOfComponents(vtkAbstractArray* da, int attributeType);
 
-  vtkFieldData::BasicIterator  ComputeRequiredArrays(vtkDataSetAttributes* pd, int ctype);
+  vtkFieldData::BasicIterator ComputeRequiredArrays(vtkDataSetAttributes* pd, int ctype);
 
 private:
-  vtkDataSetAttributes(const vtkDataSetAttributes&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDataSetAttributes&) VTK_DELETE_FUNCTION;
+  vtkDataSetAttributes(const vtkDataSetAttributes&) = delete;
+  void operator=(const vtkDataSetAttributes&) = delete;
 
-public:
-  // This public class is used to perform set operations, other misc.
-  // operations on fields. For example, vtkAppendFilter uses it to
-  // determine which attributes the input datasets share in common.
-  class vtkInternalComponentNames;
-  class VTKCOMMONDATAMODEL_EXPORT FieldList
-  {
-  public:
-    FieldList(int numInputs);
-    ~FieldList();
-    void PrintSelf(ostream &os, vtkIndent indent);
-
-    void InitializeFieldList(vtkDataSetAttributes* dsa);
-    void IntersectFieldList(vtkDataSetAttributes* dsa);
-
-    /**
-     * Similar to IntersectFieldList() except that it builds a union of the
-     * array list. To determine the active attributes, it still, however, takes
-     * an intersection.
-     * WARNING!!!-IntersectFieldList() and UnionFieldList() should not be
-     * intermixed.
-     */
-    void UnionFieldList(vtkDataSetAttributes* dsa);
-
-    //Determine whether data is available
-    int IsAttributePresent(int attrType); //true/false attributes specified
-
-    // Accessor methods.
-    int GetNumberOfFields() { return this->NumberOfFields; }
-    int GetFieldIndex(int i) { return this->FieldIndices[i]; }
-    const char* GetFieldName(int i) { return this->Fields[i]; }
-    int GetFieldComponents(int i) { return this->FieldComponents[i]; }
-    int GetDSAIndex(int index, int i) { return this->DSAIndices[index][i]; }
-
-    friend class vtkDataSetAttributes;
-
-  protected:
-    void SetFieldIndex(int i, int index)
-      { this->FieldIndices[i] = index; }
-  private:
-    FieldList(const FieldList&) VTK_DELETE_FUNCTION;
-    void operator=(const FieldList&) VTK_DELETE_FUNCTION;
-
-    void SetField(int index, vtkAbstractArray *da);
-    void RemoveField(const char *name);
-    void ClearFields();
-    void GrowBy(unsigned int delta);
-
-    int NumberOfFields; //the number of fields (including five named attributes)
-    // These keep track of what is common across datasets. The first
-    // six items are always named attributes.
-    char** Fields;                     // the names of the fields
-    int *FieldTypes;                   // the types of the fields
-    int *FieldComponents;              // the number of components in field
-    int *FieldIndices;                 // output data array index
-    vtkLookupTable **LUT;              // luts associated with each array
-    vtkInformation **FieldInformation; // Information map associated with each array
-
-    vtkInternalComponentNames **FieldComponentsNames;       // the name for each component in the field
-
-    vtkIdType NumberOfTuples; // a running total of values
-
-    //For every vtkDataSetAttributes that are processed, keep track of the
-    //indices into various things. The indices are organized so that the
-    //first NUM_ATTRIBUTES refer to attributes, the next refer to the
-    //non-attribute fields, for a total of NUM_ATTRIBUTES + NumberOfFields.
-    //CurrentInput is the current input being processed.
-    int **DSAIndices;
-    int NumberOfDSAIndices;
-    int CurrentInput;
-
-  };
-
+  friend class vtkDataSetAttributesFieldList;
 };
 
 #endif

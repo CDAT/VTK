@@ -23,11 +23,10 @@
  *
  * @sa
  * vtkImageGradient vtkImageMagnitude
-*/
+ */
 
 #ifndef vtkImageGradientMagnitude_h
 #define vtkImageGradientMagnitude_h
-
 
 #include "vtkImagingGeneralModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -35,50 +34,43 @@
 class VTKIMAGINGGENERAL_EXPORT vtkImageGradientMagnitude : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageGradientMagnitude *New();
-  vtkTypeMacro(vtkImageGradientMagnitude,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageGradientMagnitude* New();
+  vtkTypeMacro(vtkImageGradientMagnitude, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * If "HandleBoundariesOn" then boundary pixels are duplicated
    * So central differences can get values.
    */
-  vtkSetMacro(HandleBoundaries, int);
-  vtkGetMacro(HandleBoundaries, int);
-  vtkBooleanMacro(HandleBoundaries, int);
+  vtkSetMacro(HandleBoundaries, vtkTypeBool);
+  vtkGetMacro(HandleBoundaries, vtkTypeBool);
+  vtkBooleanMacro(HandleBoundaries, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Determines how the input is interpreted (set of 2d slices ...)
    */
-  vtkSetClampMacro(Dimensionality,int,2,3);
-  vtkGetMacro(Dimensionality,int);
+  vtkSetClampMacro(Dimensionality, int, 2, 3);
+  vtkGetMacro(Dimensionality, int);
   //@}
 
 protected:
   vtkImageGradientMagnitude();
-  ~vtkImageGradientMagnitude()VTK_OVERRIDE {}
+  ~vtkImageGradientMagnitude() override {}
 
-  int HandleBoundaries;
+  vtkTypeBool HandleBoundaries;
   int Dimensionality;
 
-  int RequestInformation (vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void ThreadedExecute (vtkImageData *inData, vtkImageData *outData,
-                       int extent[6], int id) VTK_OVERRIDE;
+  void ThreadedExecute(vtkImageData* inData, vtkImageData* outData, int extent[6], int id) override;
+
 private:
-  vtkImageGradientMagnitude(const vtkImageGradientMagnitude&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageGradientMagnitude&) VTK_DELETE_FUNCTION;
+  vtkImageGradientMagnitude(const vtkImageGradientMagnitude&) = delete;
+  void operator=(const vtkImageGradientMagnitude&) = delete;
 };
 
 #endif
-
-
-

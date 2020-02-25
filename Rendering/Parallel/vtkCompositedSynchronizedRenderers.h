@@ -16,8 +16,8 @@
  * @class   vtkCompositedSynchronizedRenderers
  *
  * vtkCompositedSynchronizedRenderers is vtkSynchronizedRenderers that uses
- * vtkCompositer to composite the images on  the root node.
-*/
+ * vtkCompositer to composite the images on the root node.
+ */
 
 #ifndef vtkCompositedSynchronizedRenderers_h
 #define vtkCompositedSynchronizedRenderers_h
@@ -28,12 +28,13 @@
 class vtkFloatArray;
 class vtkCompositer;
 
-class VTKRENDERINGPARALLEL_EXPORT vtkCompositedSynchronizedRenderers : public vtkSynchronizedRenderers
+class VTKRENDERINGPARALLEL_EXPORT vtkCompositedSynchronizedRenderers
+  : public vtkSynchronizedRenderers
 {
 public:
   static vtkCompositedSynchronizedRenderers* New();
   vtkTypeMacro(vtkCompositedSynchronizedRenderers, vtkSynchronizedRenderers);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -45,17 +46,17 @@ public:
 
 protected:
   vtkCompositedSynchronizedRenderers();
-  ~vtkCompositedSynchronizedRenderers();
+  ~vtkCompositedSynchronizedRenderers() override;
 
-  virtual void MasterEndRender() VTK_OVERRIDE;
-  virtual void SlaveEndRender() VTK_OVERRIDE;
+  void MasterEndRender() override;
+  void SlaveEndRender() override;
   void CaptureRenderedDepthBuffer(vtkFloatArray* depth_buffer);
 
   vtkCompositer* Compositer;
-private:
-  vtkCompositedSynchronizedRenderers(const vtkCompositedSynchronizedRenderers&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositedSynchronizedRenderers&) VTK_DELETE_FUNCTION;
 
+private:
+  vtkCompositedSynchronizedRenderers(const vtkCompositedSynchronizedRenderers&) = delete;
+  void operator=(const vtkCompositedSynchronizedRenderers&) = delete;
 };
 
 #endif

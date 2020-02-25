@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
@@ -314,6 +312,14 @@ _TIFFmalloc(tmsize_t s)
                 return ((void *) NULL);
 
 	return (malloc((size_t) s));
+}
+
+void* _TIFFcalloc(tmsize_t nmemb, tmsize_t siz)
+{
+    if( nmemb == 0 || siz == 0 )
+        return ((void *) NULL);
+
+    return calloc((size_t) nmemb, (size_t)siz);
 }
 
 void

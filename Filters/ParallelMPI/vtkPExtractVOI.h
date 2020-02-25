@@ -26,13 +26,13 @@
  *
  * @sa
  *  vtkExtractVOI
-*/
+ */
 
 #ifndef vtkPExtractVOI_h
 #define vtkPExtractVOI_h
 
-#include "vtkFiltersParallelMPIModule.h" // For export macro
 #include "vtkExtractVOI.h"
+#include "vtkFiltersParallelMPIModule.h" // For export macro
 
 // Forward Declarations
 class vtkInformation;
@@ -43,26 +43,25 @@ class VTKFILTERSPARALLELMPI_EXPORT vtkPExtractVOI : public vtkExtractVOI
 {
 public:
   static vtkPExtractVOI* New();
-  vtkTypeMacro(vtkPExtractVOI,vtkExtractVOI);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPExtractVOI, vtkExtractVOI);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkPExtractVOI();
-  virtual ~vtkPExtractVOI();
+  ~vtkPExtractVOI() override;
 
   // Standard VTK Pipeline methods
-  virtual int RequestData(
-      vtkInformation*, vtkInformationVector**,vtkInformationVector*) VTK_OVERRIDE;
+  virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   virtual int RequestInformation(
-      vtkInformation*, vtkInformationVector**, vtkInformationVector*) VTK_OVERRIDE;
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   virtual int RequestUpdateExtent(
-      vtkInformation*, vtkInformationVector**, vtkInformationVector*) VTK_OVERRIDE;
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   vtkMPIController* Controller;
 
 private:
-  vtkPExtractVOI(const vtkPExtractVOI&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPExtractVOI&) VTK_DELETE_FUNCTION;
+  vtkPExtractVOI(const vtkPExtractVOI&) = delete;
+  void operator=(const vtkPExtractVOI&) = delete;
 };
 
 #endif

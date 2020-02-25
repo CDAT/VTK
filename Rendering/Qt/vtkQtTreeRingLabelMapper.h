@@ -39,13 +39,13 @@
  * @par Thanks:
  * Thanks to Jason Shepherd from
  * Sandia National Laboratories for help in developing this class.
-*/
+ */
 
 #ifndef vtkQtTreeRingLabelMapper_h
 #define vtkQtTreeRingLabelMapper_h
 
-#include "vtkRenderingQtModule.h" // For export macro
 #include "vtkLabeledDataMapper.h"
+#include "vtkRenderingQtModule.h" // For export macro
 
 class QImage;
 
@@ -64,22 +64,22 @@ class vtkUnicodeStringArray;
 class VTKRENDERINGQT_EXPORT vtkQtTreeRingLabelMapper : public vtkLabeledDataMapper
 {
 public:
-  static vtkQtTreeRingLabelMapper *New();
-  vtkTypeMacro(vtkQtTreeRingLabelMapper,vtkLabeledDataMapper);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkQtTreeRingLabelMapper* New();
+  vtkTypeMacro(vtkQtTreeRingLabelMapper, vtkLabeledDataMapper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Draw the text to the screen at each input point.
    */
-  void RenderOpaqueGeometry(vtkViewport* viewport, vtkActor2D* actor) VTK_OVERRIDE;
-  void RenderOverlay(vtkViewport *viewport, vtkActor2D *actor) VTK_OVERRIDE;
+  void RenderOpaqueGeometry(vtkViewport* viewport, vtkActor2D* actor) override;
+  void RenderOverlay(vtkViewport* viewport, vtkActor2D* actor) override;
   //@}
 
   /**
    * The input to this filter.
    */
-  virtual vtkTree *GetInputTree();
+  virtual vtkTree* GetInputTree();
 
   /**
    * The name of the 4-tuple array used for
@@ -92,13 +92,16 @@ public:
    * (set with a second integer parameter) are not currently supported,
    * but are provided to avoid compiler warnings.
    */
-  void SetLabelTextProperty(vtkTextProperty *p) VTK_OVERRIDE;
-  vtkTextProperty* GetLabelTextProperty() VTK_OVERRIDE
-    { return this->LabelTextProperty; }
-  void SetLabelTextProperty(vtkTextProperty *p, int type) VTK_OVERRIDE
-    { this->Superclass::SetLabelTextProperty(p, type); }
-  vtkTextProperty* GetLabelTextProperty(int type) VTK_OVERRIDE
-    { return this->Superclass::GetLabelTextProperty(type); }
+  void SetLabelTextProperty(vtkTextProperty* p) override;
+  vtkTextProperty* GetLabelTextProperty() override { return this->LabelTextProperty; }
+  void SetLabelTextProperty(vtkTextProperty* p, int type) override
+  {
+    this->Superclass::SetLabelTextProperty(p, type);
+  }
+  vtkTextProperty* GetLabelTextProperty(int type) override
+  {
+    return this->Superclass::GetLabelTextProperty(type);
+  }
   //@}
 
   //@{
@@ -113,40 +116,38 @@ public:
    * Return the object's MTime. This is overridden to include
    * the timestamp of its internal class.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   void SetRenderer(vtkRenderer* ren)
   {
-      if (this->Renderer != ren)
-      {
-        this->Renderer = ren;
-        this->Modified();
-      }
+    if (this->Renderer != ren)
+    {
+      this->Renderer = ren;
+      this->Modified();
+    }
   }
   vtkRenderer* GetRenderer() { return this->Renderer; }
 
 protected:
   vtkQtTreeRingLabelMapper();
-  ~vtkQtTreeRingLabelMapper() VTK_OVERRIDE;
-  void LabelTree(vtkTree *tree, vtkDataArray *sectorInfo,
-                 vtkDataArray *numericData, vtkStringArray *stringData, vtkUnicodeStringArray *uStringData,
-                 int activeComp, int numComps, vtkViewport* viewport);
-  void GetVertexLabel(vtkIdType vertex, vtkDataArray *numericData,
-                      vtkStringArray *stringData,
-                      vtkUnicodeStringArray *uStringData,
-                      int activeComp, int numComps,
-                      char *string, size_t stringSize);
+  ~vtkQtTreeRingLabelMapper() override;
+  void LabelTree(vtkTree* tree, vtkDataArray* sectorInfo, vtkDataArray* numericData,
+    vtkStringArray* stringData, vtkUnicodeStringArray* uStringData, int activeComp, int numComps,
+    vtkViewport* viewport);
+  void GetVertexLabel(vtkIdType vertex, vtkDataArray* numericData, vtkStringArray* stringData,
+    vtkUnicodeStringArray* uStringData, int activeComp, int numComps, char* string,
+    size_t stringSize);
 
-  //Returns true if the center of the sector is in the window
+  // Returns true if the center of the sector is in the window
   // along with the pixel dimensions (width, height)  of the sector
-  bool PointInWindow(double *sinfo, double *newDim, double *textPosDC, vtkViewport *viewport);
+  bool PointInWindow(double* sinfo, double* newDim, double* textPosDC, vtkViewport* viewport);
 
-  vtkViewport *CurrentViewPort;
-  vtkCoordinate *VCoord;
+  vtkViewport* CurrentViewPort;
+  vtkCoordinate* VCoord;
   vtkQImageToImageSource* QtImageSource;
   vtkPlaneSource* PlaneSource;
   vtkRenderer* Renderer;
-  vtkTextProperty *LabelTextProperty;
+  vtkTextProperty* LabelTextProperty;
   vtkTexture* LabelTexture;
   vtkTextureMapToPlane* TextureMapToPlane;
   char* TextRotationArrayName;
@@ -155,9 +156,8 @@ protected:
   int WindowSize[2];
 
 private:
-  vtkQtTreeRingLabelMapper(const vtkQtTreeRingLabelMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtTreeRingLabelMapper&) VTK_DELETE_FUNCTION;
+  vtkQtTreeRingLabelMapper(const vtkQtTreeRingLabelMapper&) = delete;
+  void operator=(const vtkQtTreeRingLabelMapper&) = delete;
 };
-
 
 #endif

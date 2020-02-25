@@ -21,32 +21,32 @@
  *
  * @sa
  * vtkPParticleTracerBase has the details of the algorithms
-*/
+ */
 
 #ifndef vtkPParticleTracer_h
 #define vtkPParticleTracer_h
 
-#include "vtkSmartPointer.h" // For protected ivars.
 #include "vtkPParticleTracerBase.h"
+#include "vtkSmartPointer.h" // For protected ivars.
 
 #include "vtkFiltersParallelFlowPathsModule.h" // For export macro
 
-class  VTKFILTERSPARALLELFLOWPATHS_EXPORT vtkPParticleTracer: public vtkPParticleTracerBase
+class VTKFILTERSPARALLELFLOWPATHS_EXPORT vtkPParticleTracer : public vtkPParticleTracerBase
 {
- public:
-  vtkTypeMacro(vtkPParticleTracer,vtkPParticleTracerBase)
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+public:
+  vtkTypeMacro(vtkPParticleTracer, vtkPParticleTracerBase);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkPParticleTracer *New();
+  static vtkPParticleTracer* New();
 
- protected:
+protected:
   vtkPParticleTracer();
-  ~vtkPParticleTracer(){}
-  virtual int OutputParticles(vtkPolyData* poly) VTK_OVERRIDE;
-private:
-  vtkPParticleTracer(const vtkPParticleTracer&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPParticleTracer&) VTK_DELETE_FUNCTION;
-};
+  ~vtkPParticleTracer() {}
+  virtual int OutputParticles(vtkPolyData* poly) override;
 
+private:
+  vtkPParticleTracer(const vtkPParticleTracer&) = delete;
+  void operator=(const vtkPParticleTracer&) = delete;
+};
 
 #endif

@@ -41,8 +41,8 @@
  * threads.
  *
  * @sa
- * vtkSpanSpace
-*/
+ * vtkScalarTree vtkSpanSpace
+ */
 
 #ifndef vtkSimpleScalarTree_h
 #define vtkSimpleScalarTree_h
@@ -51,6 +51,7 @@
 #include "vtkScalarTree.h"
 
 class vtkScalarNode;
+class vtkSimpleScalarTree;
 
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkSimpleScalarTree : public vtkScalarTree
 {
@@ -59,15 +60,21 @@ public:
    * Instantiate scalar tree with maximum level of 20 and branching
    * factor of three.
    */
-  static vtkSimpleScalarTree *New();
+  static vtkSimpleScalarTree* New();
 
   //@{
   /**
    * Standard type related macros and PrintSelf() method.
    */
-  vtkTypeMacro(vtkSimpleScalarTree,vtkScalarTree);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSimpleScalarTree, vtkScalarTree);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
+
+  /**
+   * This method is used to copy data members when cloning an instance of the
+   * class. It does not copy heavy data.
+   */
+  void ShallowCopy(vtkScalarTree* stree) override;
 
   //@{
   /**
@@ -76,8 +83,8 @@ public:
    * trees and more memory overhead. Larger values mean shallower
    * trees, less memory usage, but worse performance.
    */
-  vtkSetClampMacro(BranchingFactor,int,2,VTK_INT_MAX);
-  vtkGetMacro(BranchingFactor,int);
+  vtkSetClampMacro(BranchingFactor, int, 2, VTK_INT_MAX);
+  vtkGetMacro(BranchingFactor, int);
   //@}
 
   //@{
@@ -85,33 +92,33 @@ public:
    * Get the level of the scalar tree. This value may change each time the
    * scalar tree is built and the branching factor changes.
    */
-  vtkGetMacro(Level,int);
+  vtkGetMacro(Level, int);
   //@}
 
   //@{
   /**
    * Set the maximum allowable level for the tree.
    */
-  vtkSetClampMacro(MaxLevel,int,1,VTK_INT_MAX);
-  vtkGetMacro(MaxLevel,int);
+  vtkSetClampMacro(MaxLevel, int, 1, VTK_INT_MAX);
+  vtkGetMacro(MaxLevel, int);
   //@}
 
   /**
    * Construct the scalar tree from the dataset provided. Checks build times
    * and modified time from input and reconstructs the tree if necessary.
    */
-  void BuildTree() VTK_OVERRIDE;
+  void BuildTree() override;
 
   /**
    * Initialize locator. Frees memory and resets object as appropriate.
    */
-  void Initialize() VTK_OVERRIDE;
+  void Initialize() override;
 
   /**
    * Begin to traverse the cells based on a scalar value. Returned cells
    * will likely have scalar values that span the scalar value specified.
    */
-  void InitTraversal(double scalarValue) VTK_OVERRIDE;
+  void InitTraversal(double scalarValue) override;
 
   /**
    * Return the next cell that may contain scalar value specified to
@@ -119,57 +126,51 @@ public:
    * exhausted. Make sure that InitTraversal() has been invoked first or
    * you'll get erratic behavior.
    */
-  vtkCell *GetNextCell(vtkIdType &cellId, vtkIdList* &ptIds,
-                               vtkDataArray *cellScalars) VTK_OVERRIDE;
+  vtkCell* GetNextCell(vtkIdType& cellId, vtkIdList*& ptIds, vtkDataArray* cellScalars) override;
 
-  // The following methods supports parallel (threaded)
-  // applications. Basically batches of cells (which represent a
-  // portion of the whole dataset) are available for processing in a
-  // parallel For() operation.
+  // The following methods supports parallel (threaded) traversal. Basically
+  // batches of cells (which are a portion of the whole dataset) are available for
+  // processing in a parallel For() operation.
 
   /**
-   * Get the number of cell batches available for processing. Note
-   * that this methods should be called after InitTraversal(). This is
-   * because the number of batches available is typically a function
-   * of the isocontour value. Note that the cells found in
-   * [0...(NumberOfCellBatches-1)] will contain all the cells
-   * potentially containing the isocontour.
+   * Get the number of cell batches available for processing as a function of
+   * the specified scalar value. Each batch contains a list of candidate
+   * cells that may contain the specified isocontour value.
    */
-  vtkIdType GetNumberOfCellBatches() VTK_OVERRIDE;
+  vtkIdType GetNumberOfCellBatches(double scalarValue) override;
 
   /**
    * Return the array of cell ids in the specified batch. The method
    * also returns the number of cell ids in the array. Make sure to
-   * call InitTraversal() beforehand.
+   * call GetNumberOfCellBatches() beforehand.
    */
-  const vtkIdType* GetCellBatch(vtkIdType batchNum,
-                                        vtkIdType& numCells) VTK_OVERRIDE;
+  const vtkIdType* GetCellBatch(vtkIdType batchNum, vtkIdType& numCells) override;
 
 protected:
   vtkSimpleScalarTree();
-  ~vtkSimpleScalarTree() VTK_OVERRIDE;
+  ~vtkSimpleScalarTree() override;
 
   int MaxLevel;
   int Level;
-  int BranchingFactor; //number of children per node
-  vtkScalarNode *Tree; //pointerless scalar range tree
-  int TreeSize; //allocated size of tree
-  vtkIdType LeafOffset; //offset to leaf nodes of tree
+  int BranchingFactor;  // number of children per node
+  vtkScalarNode* Tree;  // pointerless scalar range tree
+  int TreeSize;         // allocated size of tree
+  vtkIdType LeafOffset; // offset to leaf nodes of tree
 
 private:
-  vtkIdType NumCells; //the number of cells in this dataset
-  vtkIdType TreeIndex; //traversal location within tree
-  int       ChildNumber; //current child in traversal
-  vtkIdType CellId; //current cell id being examined
-  int       FindStartLeaf(vtkIdType index, int level);
-  int       FindNextLeaf(vtkIdType index,int level);
+  vtkIdType NumCells;  // the number of cells in this dataset
+  vtkIdType TreeIndex; // traversal location within tree
+  int ChildNumber;     // current child in traversal
+  vtkIdType CellId;    // current cell id being examined
+  int FindStartLeaf(vtkIdType index, int level);
+  int FindNextLeaf(vtkIdType index, int level);
 
-  vtkIdType *CandidateCells; //to support parallel computing
-  vtkIdType  NumCandidates;
+  vtkIdType* CandidateCells; // to support parallel computing
+  vtkIdType NumCandidates;
 
 private:
-  vtkSimpleScalarTree(const vtkSimpleScalarTree&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSimpleScalarTree&) VTK_DELETE_FUNCTION;
+  vtkSimpleScalarTree(const vtkSimpleScalarTree&) = delete;
+  void operator=(const vtkSimpleScalarTree&) = delete;
 };
 
 #endif

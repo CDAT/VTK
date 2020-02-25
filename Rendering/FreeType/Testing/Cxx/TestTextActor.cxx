@@ -33,10 +33,11 @@
 
 #include <sstream>
 
-namespace vtkTestTextActor {
-void setupTextActor(vtkTextActor *actor, vtkPolyData *anchor)
+namespace vtkTestTextActor
 {
-  vtkTextProperty *p = actor->GetTextProperty();
+void setupTextActor(vtkTextActor* actor, vtkPolyData* anchor)
+{
+  vtkTextProperty* p = actor->GetTextProperty();
   std::ostringstream label;
   label << "TProp Angle: " << p->GetOrientation() << "\n"
         << "Actor Angle: " << actor->GetOrientation() << "\n"
@@ -45,36 +46,35 @@ void setupTextActor(vtkTextActor *actor, vtkPolyData *anchor)
   actor->SetInput(label.str().c_str());
 
   // Add the anchor point:
-  double *pos = actor->GetPosition();
-  double *col = p->GetColor();
+  double* pos = actor->GetPosition();
+  double* col = p->GetColor();
   vtkIdType ptId = anchor->GetPoints()->InsertNextPoint(pos[0], pos[1], 0.);
   anchor->GetVerts()->InsertNextCell(1, &ptId);
-  anchor->GetCellData()->GetScalars()->InsertNextTuple4(col[0] * 255,
-                                                        col[1] * 255,
-                                                        col[2] * 255, 255);
+  anchor->GetCellData()->GetScalars()->InsertNextTuple4(
+    col[0] * 255, col[1] * 255, col[2] * 255, 255);
 }
 } // end namespace vtkTestTextActor
 
 //----------------------------------------------------------------------------
-int TestTextActor(int, char *[])
+int TestTextActor(int, char*[])
 {
   using namespace vtkTestTextActor;
   vtkNew<vtkRenderer> ren;
 
   int width = 600;
   int height = 600;
-  int x[3] = {100, 300, 500};
-  int y[4] = {100, 233, 366, 500};
+  int x[3] = { 100, 300, 500 };
+  int y[4] = { 100, 233, 366, 500 };
 
   // Render the anchor points to check alignment:
   vtkNew<vtkPolyData> anchors;
   vtkNew<vtkPoints> points;
-  anchors->SetPoints(points.GetPointer());
+  anchors->SetPoints(points);
   vtkNew<vtkCellArray> verts;
-  anchors->SetVerts(verts.GetPointer());
+  anchors->SetVerts(verts);
   vtkNew<vtkUnsignedCharArray> colors;
   colors->SetNumberOfComponents(4);
-  anchors->GetCellData()->SetScalars(colors.GetPointer());
+  anchors->GetCellData()->SetScalars(colors);
 
   for (size_t row = 0; row < 4; ++row)
   {
@@ -112,8 +112,7 @@ int TestTextActor(int, char *[])
           break;
       }
       actor->GetTextProperty()->SetColor(0.75, .2 + col * .26, .2 + row * .2);
-      actor->GetTextProperty()->SetBackgroundColor(0.25, 0.4 - col * .13,
-                                                   .5 - row * .1);
+      actor->GetTextProperty()->SetBackgroundColor(0.25, 0.4 - col * .13, .5 - row * .1);
       actor->GetTextProperty()->SetBackgroundOpacity(1.0);
 
       actor->SetPosition(x[col], y[row]);
@@ -123,43 +122,43 @@ int TestTextActor(int, char *[])
         col > 0 ? 1. : 0., col == 1 ? 1. : 0., col < 2 ? 1. : 0.);
       actor->GetTextProperty()->SetFrameWidth((row) % 3 + 1);
 
-      setupTextActor(actor.GetPointer(), anchors.GetPointer());
-      ren->AddActor2D(actor.GetPointer());
+      setupTextActor(actor, anchors);
+      ren->AddActor2D(actor);
     }
   }
 
   vtkNew<vtkPolyDataMapper2D> anchorMapper;
-  anchorMapper->SetInputData(anchors.GetPointer());
+  anchorMapper->SetInputData(anchors);
   vtkNew<vtkActor2D> anchorActor;
-  anchorActor->SetMapper(anchorMapper.GetPointer());
+  anchorActor->SetMapper(anchorMapper);
   anchorActor->GetProperty()->SetPointSize(5);
-  ren->AddActor2D(anchorActor.GetPointer());
+  ren->AddActor2D(anchorActor);
 
   // Add some various 'empty' actors to make sure there are no surprises:
   vtkNew<vtkTextActor> nullInputActor;
   nullInputActor->SetInput(nullptr);
-  ren->AddActor2D(nullInputActor.GetPointer());
+  ren->AddActor2D(nullInputActor);
 
   vtkNew<vtkTextActor> emptyInputActor;
   emptyInputActor->SetInput("");
-  ren->AddActor2D(emptyInputActor.GetPointer());
+  ren->AddActor2D(emptyInputActor);
 
   vtkNew<vtkTextActor> spaceActor;
   spaceActor->SetInput(" ");
-  ren->AddActor2D(spaceActor.GetPointer());
+  ren->AddActor2D(spaceActor);
 
   vtkNew<vtkTextActor> tabActor;
   tabActor->SetInput("\t");
-  ren->AddActor2D(tabActor.GetPointer());
+  ren->AddActor2D(tabActor);
 
   vtkNew<vtkTextActor> newlineActor;
   newlineActor->SetInput("\n");
-  ren->AddActor2D(newlineActor.GetPointer());
+  ren->AddActor2D(newlineActor);
 
   vtkNew<vtkRenderWindow> win;
-  win->AddRenderer(ren.GetPointer());
+  win->AddRenderer(ren);
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(win.GetPointer());
+  iren->SetRenderWindow(win);
 
   ren->SetBackground(0.0, 0.0, 0.0);
   ren->GetActiveCamera()->SetPosition(0, 0, 400);

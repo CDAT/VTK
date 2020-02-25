@@ -27,7 +27,7 @@
  * John Biddiscombe, Berk Geveci, Ken Martin, Kenneth Moreland, David Thompson,
  * "Time Dependent Processing in a Parallel Pipeline Architecture",
  * IEEE Visualization 2007.
-*/
+ */
 
 #ifndef vtkTemporalSnapToTimeStep_h
 #define vtkTemporalSnapToTimeStep_h
@@ -40,52 +40,49 @@
 class VTKFILTERSHYBRID_EXPORT vtkTemporalSnapToTimeStep : public vtkPassInputTypeAlgorithm
 {
 public:
-  static vtkTemporalSnapToTimeStep *New();
+  static vtkTemporalSnapToTimeStep* New();
   vtkTypeMacro(vtkTemporalSnapToTimeStep, vtkPassInputTypeAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  enum {
-    VTK_SNAP_NEAREST=0,
+  enum
+  {
+    VTK_SNAP_NEAREST = 0,
     VTK_SNAP_NEXTBELOW_OR_EQUAL,
     VTK_SNAP_NEXTABOVE_OR_EQUAL
   };
 
-  vtkSetMacro(SnapMode,int);
-  vtkGetMacro(SnapMode,int);
-  void SetSnapModeToNearest()          { this->SetSnapMode(VTK_SNAP_NEAREST); }
+  vtkSetMacro(SnapMode, int);
+  vtkGetMacro(SnapMode, int);
+  void SetSnapModeToNearest() { this->SetSnapMode(VTK_SNAP_NEAREST); }
   void SetSnapModeToNextBelowOrEqual() { this->SetSnapMode(VTK_SNAP_NEXTBELOW_OR_EQUAL); }
   void SetSnapModeToNextAboveOrEqual() { this->SetSnapMode(VTK_SNAP_NEXTABOVE_OR_EQUAL); }
 
 protected:
   vtkTemporalSnapToTimeStep();
-  ~vtkTemporalSnapToTimeStep() VTK_OVERRIDE;
+  ~vtkTemporalSnapToTimeStep() override;
 
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation* request,
-                     vtkInformationVector** inputVector,
-                     vtkInformationVector* outputVector) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestUpdateExtent(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestInformation(vtkInformation* request,
-                         vtkInformationVector** inputVector,
-                         vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestData(vtkInformation* request,
-                  vtkInformationVector** inputVector,
-                  vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   std::vector<double> InputTimeValues;
   int HasDiscrete;
   int SnapMode;
 
 private:
-  vtkTemporalSnapToTimeStep(const vtkTemporalSnapToTimeStep&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTemporalSnapToTimeStep&) VTK_DELETE_FUNCTION;
+  vtkTemporalSnapToTimeStep(const vtkTemporalSnapToTimeStep&) = delete;
+  void operator=(const vtkTemporalSnapToTimeStep&) = delete;
 };
 
 #endif

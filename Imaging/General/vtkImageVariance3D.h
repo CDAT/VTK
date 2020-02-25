@@ -22,23 +22,22 @@
  * The difference between the neighbor values and center value is computed
  * and squared for each neighbor.  These values are summed and divided by
  * the total number of neighbors to produce the output value.
-*/
+ */
 
 #ifndef vtkImageVariance3D_h
 #define vtkImageVariance3D_h
 
-
-#include "vtkImagingGeneralModule.h" // For export macro
 #include "vtkImageSpatialAlgorithm.h"
+#include "vtkImagingGeneralModule.h" // For export macro
 
 class vtkImageEllipsoidSource;
 
 class VTKIMAGINGGENERAL_EXPORT vtkImageVariance3D : public vtkImageSpatialAlgorithm
 {
 public:
-  static vtkImageVariance3D *New();
-  vtkTypeMacro(vtkImageVariance3D,vtkImageSpatialAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageVariance3D* New();
+  vtkTypeMacro(vtkImageVariance3D, vtkImageSpatialAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * This method sets the size of the neighborhood.  It also sets the default
@@ -48,26 +47,22 @@ public:
 
 protected:
   vtkImageVariance3D();
-  ~vtkImageVariance3D() VTK_OVERRIDE;
+  ~vtkImageVariance3D() override;
 
-  vtkImageEllipsoidSource *Ellipse;
+  vtkImageEllipsoidSource* Ellipse;
 
-  int RequestInformation (vtkInformation *request,
-                                  vtkInformationVector **inputVector,
-                                  vtkInformationVector *outputVector) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  void ThreadedRequestData(vtkInformation *request,
-                           vtkInformationVector **inputVector,
-                           vtkInformationVector *outputVector,
-                           vtkImageData ***inData, vtkImageData **outData,
-                           int extent[6], int id) VTK_OVERRIDE;
-  int RequestData(vtkInformation *request,
-                          vtkInformationVector **inputVector,
-                          vtkInformationVector *outputVector) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData,
+    int extent[6], int id) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
 private:
-  vtkImageVariance3D(const vtkImageVariance3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageVariance3D&) VTK_DELETE_FUNCTION;
+  vtkImageVariance3D(const vtkImageVariance3D&) = delete;
+  void operator=(const vtkImageVariance3D&) = delete;
 };
 
 #endif

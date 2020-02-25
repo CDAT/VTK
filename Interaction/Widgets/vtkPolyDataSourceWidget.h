@@ -32,27 +32,27 @@
  *
  * @sa
  * vtk3DWidget vtkLineWidget vtkPlaneWidget vtkSphereWidget
-*/
+ */
 
 #ifndef vtkPolyDataSourceWidget_h
 #define vtkPolyDataSourceWidget_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtk3DWidget.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkPolyDataAlgorithm;
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkPolyDataSourceWidget : public vtk3DWidget
 {
- public:
+public:
   vtkTypeMacro(vtkPolyDataSourceWidget, vtk3DWidget);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Overrides vtk3DWidget PlaceWidget() so that it doesn't complain if
    * there's no Input and no Prop3D.
    */
-  void PlaceWidget() VTK_OVERRIDE;
+  void PlaceWidget() override;
 
   /**
    * We have to redeclare this abstract, PlaceWidget() requires it.  You HAVE
@@ -60,14 +60,16 @@ class VTKINTERACTIONWIDGETS_EXPORT vtkPolyDataSourceWidget : public vtk3DWidget
    * and no Input, your PlaceWidget must make use of the underlying
    * PolyDataSource to do its work.
    */
-  void PlaceWidget(double bounds[6]) VTK_OVERRIDE = 0;
+  void PlaceWidget(double bounds[6]) override = 0;
 
   /**
    * Convenience method brought over from vtkPlaneWidget.
    */
-  void PlaceWidget(double xmin, double xmax, double ymin, double ymax,
-                   double zmin, double zmax) VTK_OVERRIDE
-    {this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax);}
+  void PlaceWidget(
+    double xmin, double xmax, double ymin, double ymax, double zmin, double zmax) override
+  {
+    this->Superclass::PlaceWidget(xmin, xmax, ymin, ymax, zmin, zmax);
+  }
 
   /**
    * Returns underlying vtkPolyDataAlgorithm that determines geometry.  This
@@ -97,8 +99,8 @@ private:
   // implemented so that any "accidental" invocation of a copy (pass by value)
   // or assignment will trigger linker errors; the class is not meant to
   // be used in these ways.  I couldn't resist adding this explanation. :)
-  vtkPolyDataSourceWidget(const vtkPolyDataSourceWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPolyDataSourceWidget&) VTK_DELETE_FUNCTION;
+  vtkPolyDataSourceWidget(const vtkPolyDataSourceWidget&) = delete;
+  void operator=(const vtkPolyDataSourceWidget&) = delete;
 };
 
 #endif

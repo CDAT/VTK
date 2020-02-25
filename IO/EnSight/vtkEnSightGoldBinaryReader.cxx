@@ -18,46 +18,50 @@
 #include "vtkCellData.h"
 #include "vtkCharArray.h"
 #include "vtkFloatArray.h"
-#include "vtkMultiBlockDataSet.h"
 #include "vtkIdList.h"
 #include "vtkImageData.h"
+#include "vtkMultiBlockDataSet.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkRectilinearGrid.h"
 #include "vtkStructuredGrid.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtksys/Encoding.hxx"
+#include "vtksys/FStream.hxx"
 
-#include <sys/stat.h>
 #include <cctype>
-#include <string>
-#include <vector>
 #include <map>
+#include <string>
+#include <sys/stat.h>
+#include <vector>
 
 #if defined(_WIN32)
-# define VTK_STAT_STRUCT struct _stat64
-# define VTK_STAT_FUNC _stat64
-#elif defined _DARWIN_FEATURE_64_BIT_INODE && !defined __FreeBSD__
-// FreeBSD and OSX now deprecate stat64
-# define VTK_STAT_STRUCT struct stat
-# define VTK_STAT_FUNC stat
+#define VTK_STAT_STRUCT struct _stat64
+#define VTK_STAT_FUNC _stat64
+#elif defined _DARWIN_FEATURE_64_BIT_INODE || defined __FreeBSD__ || defined __NetBSD__ ||         \
+  defined __OpenBSD__
+// The BSDs use stat().
+#define VTK_STAT_STRUCT struct stat
+#define VTK_STAT_FUNC stat
 #else
 // here, we're relying on _FILE_OFFSET_BITS defined in vtkWin32Header.h to help
 // us on POSIX without resorting to using stat64.
-# define VTK_STAT_STRUCT struct stat64
-# define VTK_STAT_FUNC stat64
+#define VTK_STAT_STRUCT struct stat64
+#define VTK_STAT_FUNC stat64
 #endif
 
 vtkStandardNewMacro(vtkEnSightGoldBinaryReader);
 class vtkEnSightGoldBinaryReader::FileOffsetMapInternal
 {
   typedef std::string MapKey;
-  typedef std::map<int,vtkTypeInt64> MapValue;
-  public:
-    typedef std::map<MapKey, MapValue>::const_iterator const_iterator;
-    typedef std::map<MapKey, MapValue>::value_type value_type;
+  typedef std::map<int, vtkTypeInt64> MapValue;
 
-    std::map<MapKey, MapValue> Map;
+public:
+  typedef std::map<MapKey, MapValue>::const_iterator const_iterator;
+  typedef std::map<MapKey, MapValue>::value_type value_type;
+
+  std::map<MapKey, MapValue> Map;
 };
 
 // This is half the precision of an int.
@@ -68,7 +72,7 @@ vtkEnSightGoldBinaryReader::vtkEnSightGoldBinaryReader()
 {
   this->FileOffsets = new vtkEnSightGoldBinaryReader::FileOffsetMapInternal;
 
-  this->IFile = nullptr;
+  this->GoldIFile = nullptr;
   this->FileSize = 0;
   this->SizeOfInt = sizeof(int);
   this->Fortran = 0;
@@ -80,13 +84,8 @@ vtkEnSightGoldBinaryReader::vtkEnSightGoldBinaryReader()
 vtkEnSightGoldBinaryReader::~vtkEnSightGoldBinaryReader()
 {
   delete this->FileOffsets;
-
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -94,63 +93,58 @@ int vtkEnSightGoldBinaryReader::OpenFile(const char* filename)
 {
   if (!filename)
   {
-    vtkErrorMacro(<<"Missing filename.");
+    vtkErrorMacro(<< "Missing filename.");
     return 0;
   }
 
-  // Close file from any previous image
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
 
   // Open the new file
   vtkDebugMacro(<< "Opening file " << filename);
   VTK_STAT_STRUCT fs;
-  if ( !VTK_STAT_FUNC( filename, &fs) )
+  if (!VTK_STAT_FUNC(filename, &fs))
   {
     // Find out how big the file is.
     this->FileSize = static_cast<vtkTypeUInt64>(fs.st_size);
 
+    std::ios_base::openmode mode = ios::in;
 #ifdef _WIN32
-    this->IFile = new ifstream(filename, ios::in | ios::binary);
-#else
-    this->IFile = new ifstream(filename, ios::in);
+    mode |= ios::binary;
 #endif
+    this->GoldIFile = new vtksys::ifstream(filename, mode);
   }
   else
   {
     vtkErrorMacro("stat failed.");
     return 0;
   }
-  if (! this->IFile || this->IFile->fail())
+  if (!this->GoldIFile || this->GoldIFile->fail())
   {
     vtkErrorMacro(<< "Could not open file " << filename);
     return 0;
   }
 
-  //we now need to check for Fortran and byte ordering
+  // we now need to check for Fortran and byte ordering
 
-  //we need to look at the first 4 bytes of the file, and the 84-87 bytes
-  //of the file to correctly determine what it is. If we only check the first
-  //4 bytes we can get incorrect detection if it is a property file named "P"
-  //we check the 84-87 bytes as that is the start of the next line on a fortran file
+  // we need to look at the first 4 bytes of the file, and the 84-87 bytes
+  // of the file to correctly determine what it is. If we only check the first
+  // 4 bytes we can get incorrect detection if it is a property file named "P"
+  // we check the 84-87 bytes as that is the start of the next line on a fortran file
 
   char result[88];
-  this->IFile->read(result, 88);
-  if ( this->IFile->eof() || this->IFile->fail() )
+  this->GoldIFile->read(result, 88);
+  if (this->GoldIFile->eof() || this->GoldIFile->fail())
   {
-    vtkErrorMacro(<<filename << " is missing header information");
+    vtkErrorMacro(<< filename << " is missing header information");
     return 0;
   }
-  this->IFile->seekg (0, ios::beg);  //reset the file to the start
+  this->GoldIFile->seekg(0, ios::beg); // reset the file to the start
 
   // if the first 4 bytes is the length, then this data is no doubt
   // a fortran data write!, copy the last 76 into the beginning
-  char le_len[4] = {0x50, 0x00, 0x00, 0x00};
-  char be_len[4] = {0x00, 0x00, 0x00, 0x50};
+  char le_len[4] = { 0x50, 0x00, 0x00, 0x00 };
+  char be_len[4] = { 0x00, 0x00, 0x00, 0x50 };
 
   // the fortran test here depends on the byte ordering. But if the user didn't
   // set any byte ordering then, we have to try both byte orderings. There was a
@@ -159,40 +153,38 @@ int vtkEnSightGoldBinaryReader::OpenFile(const char* filename)
   // bug.
   bool le_isFortran = true;
   bool be_isFortran = true;
-  for (int c=0; c<4; c++)
+  for (int c = 0; c < 4; c++)
   {
-    le_isFortran = le_isFortran && (result[c] == le_len[c])
-      && (result[c+84] == le_len[c]);
-    be_isFortran = be_isFortran && (result[c] == be_len[c])
-      && (result[c+84] == be_len[c]);
+    le_isFortran = le_isFortran && (result[c] == le_len[c]) && (result[c + 84] == le_len[c]);
+    be_isFortran = be_isFortran && (result[c] == be_len[c]) && (result[c + 84] == be_len[c]);
   }
 
   switch (this->ByteOrder)
   {
-  case FILE_BIG_ENDIAN:
-    this->Fortran = be_isFortran;
-    break;
+    case FILE_BIG_ENDIAN:
+      this->Fortran = be_isFortran;
+      break;
 
-  case FILE_LITTLE_ENDIAN:
-    this->Fortran = le_isFortran;
-    break;
+    case FILE_LITTLE_ENDIAN:
+      this->Fortran = le_isFortran;
+      break;
 
-  case FILE_UNKNOWN_ENDIAN:
-    if (le_isFortran)
-    {
-      this->Fortran = true;
-      this->ByteOrder = FILE_LITTLE_ENDIAN;
-    }
-    else if (be_isFortran)
-    {
-      this->Fortran = true;
-      this->ByteOrder = FILE_BIG_ENDIAN;
-    }
-    else
-    {
-      this->Fortran = false;
-    }
-    break;
+    case FILE_UNKNOWN_ENDIAN:
+      if (le_isFortran)
+      {
+        this->Fortran = true;
+        this->ByteOrder = FILE_LITTLE_ENDIAN;
+      }
+      else if (be_isFortran)
+      {
+        this->Fortran = true;
+        this->ByteOrder = FILE_BIG_ENDIAN;
+      }
+      else
+      {
+        this->Fortran = false;
+      }
+      break;
   }
   return 1;
 }
@@ -213,7 +205,7 @@ int vtkEnSightGoldBinaryReader::InitializeFile(const char* fileName)
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
@@ -233,20 +225,19 @@ int vtkEnSightGoldBinaryReader::InitializeFile(const char* fileName)
 
   line[0] = '\0';
   subLine[0] = '\0';
-  if ( this->ReadLine( line ) == 0 )
+  if (this->ReadLine(line) == 0)
   {
-    vtkErrorMacro( "Error with line reading upon file initialization" );
+    vtkErrorMacro("Error with line reading upon file initialization");
     return 0;
   }
 
-  if ( sscanf( line, " %*s %s", subLine ) != 1 )
+  if (sscanf(line, " %*s %s", subLine) != 1)
   {
-    vtkErrorMacro( "Error with subline extraction upon file initialization" );
+    vtkErrorMacro("Error with subline extraction upon file initialization");
     return 0;
   }
 
-  if (strncmp(subLine, "Binary", 6) != 0 &&
-    strncmp(subLine, "binary", 6) != 0)
+  if (strncmp(subLine, "Binary", 6) != 0 && strncmp(subLine, "binary", 6) != 0)
   {
     vtkErrorMacro("This is not a binary data set. Try "
       << "vtkEnSightGoldReader.");
@@ -256,8 +247,8 @@ int vtkEnSightGoldBinaryReader::InitializeFile(const char* fileName)
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeStep,
-  vtkMultiBlockDataSet *output)
+int vtkEnSightGoldBinaryReader::ReadGeometryFile(
+  const char* fileName, int timeStep, vtkMultiBlockDataSet* output)
 {
   char line[80], subLine[80], nameline[80];
   int partId, realId;
@@ -268,21 +259,21 @@ int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeS
     return 0;
   }
 
-  //this will close the file, so we need to reinitialize it
-  int numberOfTimeStepsInFile=this->CountTimeSteps();
+  // this will close the file, so we need to reinitialize it
+  int numberOfTimeStepsInFile = this->CountTimeSteps();
 
   if (!this->InitializeFile(fileName))
   {
-  return 0;
+    return 0;
   }
 
   if (this->UseFileSets)
   {
-    if (numberOfTimeStepsInFile>1)
+    if (numberOfTimeStepsInFile > 1)
     {
       this->AddFileIndexToCache(fileName);
 
-      i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+      i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
       // start w/ the number of TS we skipped, not the one we are at
       // if we are not at the appropriate time step yet, we keep searching
       for (; i < timeStep - 1; i++)
@@ -299,10 +290,9 @@ int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeS
     do
     {
       this->ReadLine(line);
-    }
-    while ( strncmp(line, "BEGIN TIME STEP", 15) != 0 );
+    } while (strncmp(line, "BEGIN TIME STEP", 15) != 0);
     // found a time step -> cache it
-    this->AddTimeStepToCache(fileName, timeStep-1, this->IFile->tellg());
+    this->AddTimeStepToCache(fileName, timeStep - 1, this->GoldIFile->tellg());
   }
 
   // Skip the 2 description lines.
@@ -344,7 +334,7 @@ int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeS
   if (strncmp(line, "extents", 7) == 0)
   {
     // Skipping the extents.
-    this->IFile->seekg(6*sizeof(float), ios::cur);
+    this->GoldIFile->seekg(6 * sizeof(float), ios::cur);
     lineRead = this->ReadLine(line); // "part"
   }
 
@@ -359,16 +349,16 @@ int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeS
     }
     realId = this->InsertNewPartId(partId);
 
-    // Increment the number of geoemtry parts such that the measured geomtry,
+    // Increment the number of geometry parts such that the measured geometry,
     // if any, can be properly combined into a vtkMultiBlockDataSet object.
     // --- fix to bug #7453
-    this->NumberOfGeometryParts ++;
+    this->NumberOfGeometryParts++;
 
     this->ReadLine(line); // part description line
 
     strncpy(nameline, line, 80); // 80 characters in line are allowed
-    nameline[79] = '\0'; // Ensure nullptr character at end of part name
-    char *name = strdup(nameline);
+    nameline[79] = '\0';         // Ensure nullptr character at end of part name
+    char* name = strdup(nameline);
 
     // fix to bug #0008237
     // The original "return 1" operation upon "strncmp(line, "interface", 9) == 0"
@@ -383,54 +373,42 @@ int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeS
         if (strncmp(subLine, "rectilinear", 11) == 0)
         {
           // block rectilinear
-          lineRead = this->CreateRectilinearGridOutput(realId, line, name,
-            output);
+          lineRead = this->CreateRectilinearGridOutput(realId, line, name, output);
         }
         else if (strncmp(subLine, "uniform", 7) == 0)
         {
           // block uniform
-          lineRead = this->CreateImageDataOutput(realId, line, name,
-            output);
+          lineRead = this->CreateImageDataOutput(realId, line, name, output);
         }
         else
         {
           // block iblanked
-          lineRead = this->CreateStructuredGridOutput(realId, line, name,
-            output);
+          lineRead = this->CreateStructuredGridOutput(realId, line, name, output);
         }
       }
       else
       {
         // block
-        lineRead = this->CreateStructuredGridOutput(realId, line, name,
-          output);
+        lineRead = this->CreateStructuredGridOutput(realId, line, name, output);
       }
     }
     else
     {
-      lineRead = this->CreateUnstructuredGridOutput(realId, line, name,
-        output);
+      lineRead = this->CreateUnstructuredGridOutput(realId, line, name, output);
       if (lineRead < 0)
       {
         free(name);
-        if (this->IFile)
-        {
-          this->IFile->close();
-          delete this->IFile;
-          this->IFile = nullptr;
-        }
+        delete this->GoldIFile;
+        this->GoldIFile = nullptr;
         return 0;
       }
     }
     free(name);
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
+
   if (lineRead < 0)
   {
     return 0;
@@ -442,10 +420,10 @@ int vtkEnSightGoldBinaryReader::ReadGeometryFile(const char* fileName, int timeS
 //----------------------------------------------------------------------------
 int vtkEnSightGoldBinaryReader::CountTimeSteps()
 {
-  int count=0;
-  while(1)
+  int count = 0;
+  while (1)
   {
-    int result=this->SkipTimeStep();
+    int result = this->SkipTimeStep();
     if (result)
     {
       count++;
@@ -480,8 +458,7 @@ int vtkEnSightGoldBinaryReader::SkipTimeStep()
   // Read the node id and element id lines.
   this->ReadLine(line);
   sscanf(line, " %*s %*s %s", subLine);
-  if (strncmp(subLine, "given", 5) == 0 ||
-    strncmp(subLine, "ignore", 6) == 0)
+  if (strncmp(subLine, "given", 5) == 0 || strncmp(subLine, "ignore", 6) == 0)
   {
     this->NodeIdsListed = 1;
   }
@@ -509,7 +486,7 @@ int vtkEnSightGoldBinaryReader::SkipTimeStep()
   if (strncmp(line, "extents", 7) == 0)
   {
     // Skipping the extents.
-    this->IFile->seekg(6*sizeof(float), ios::cur);
+    this->GoldIFile->seekg(6 * sizeof(float), ios::cur);
     lineRead = this->ReadLine(line); // "part"
   }
 
@@ -559,12 +536,8 @@ int vtkEnSightGoldBinaryReader::SkipTimeStep()
 
   if (lineRead < 0)
   {
-    if (this->IFile)
-    {
-      this->IFile->close();
-      delete this->IFile;
-      this->IFile = nullptr;
-    }
+    delete this->GoldIFile;
+    this->GoldIFile = nullptr;
     return 0;
   }
 
@@ -595,19 +568,19 @@ int vtkEnSightGoldBinaryReader::SkipStructuredGrid(char line[256])
     dimensions[1] < 0 ||
     static_cast<unsigned int>(dimensions[1] * this->SizeOfInt) > this->FileSize ||
     dimensions[2] < 0 ||
-    static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize ||
-    numPts < 0 || static_cast<unsigned int>(numPts*this->SizeOfInt) > this->FileSize)
+    static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize || numPts < 0 ||
+    static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
   {
     vtkErrorMacro("Invalid dimensions read; check that ByteOrder is set correctly.");
     return -1;
   }
 
   // Skip xCoords, yCoords and zCoords.
-  this->IFile->seekg(sizeof(float)*numPts*3, ios::cur);
+  this->GoldIFile->seekg(sizeof(float) * numPts * 3, ios::cur);
 
   if (iblanked)
   { // skip iblank array.
-    this->IFile->seekg(numPts*sizeof(int), ios::cur);
+    this->GoldIFile->seekg(numPts * sizeof(int), ios::cur);
   }
 
   // reading next line to check for EOF
@@ -623,7 +596,7 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
   int numElements;
   int cellType;
 
-  while(lineRead && strncmp(line, "part", 4) != 0)
+  while (lineRead && strncmp(line, "part", 4) != 0)
   {
     if (strncmp(line, "coordinates", 11) == 0)
     {
@@ -631,8 +604,7 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       int numPts;
 
       this->ReadInt(&numPts);
-      if (numPts < 0 ||
-        static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
+      if (numPts < 0 || static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
       {
         vtkErrorMacro("Invalid number of points; check that ByteOrder is set correctly.");
         return -1;
@@ -642,14 +614,13 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
 
       if (this->NodeIdsListed)
       { // skip node ids.
-        this->IFile->seekg(sizeof(int)*numPts, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numPts, ios::cur);
       }
 
       // Skip xCoords, yCoords and zCoords.
-      this->IFile->seekg(sizeof(float)*3*numPts, ios::cur);
+      this->GoldIFile->seekg(sizeof(float) * 3 * numPts, ios::cur);
     }
-    else if (strncmp(line, "point", 5) == 0 ||
-      strncmp(line, "g_point", 7) == 0)
+    else if (strncmp(line, "point", 5) == 0 || strncmp(line, "g_point", 7) == 0)
     {
       vtkDebugMacro("point");
 
@@ -662,14 +633,13 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       { // skip element ids.
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+      this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
     }
-    else if (strncmp(line, "bar2", 4) == 0 ||
-      strncmp(line, "g_bar2", 6) == 0)
+    else if (strncmp(line, "bar2", 4) == 0 || strncmp(line, "g_bar2", 6) == 0)
     {
       vtkDebugMacro("bar2");
 
@@ -682,14 +652,13 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*2*numElements, ios::cur);
+      this->GoldIFile->seekg(sizeof(int) * 2 * numElements, ios::cur);
     }
-    else if (strncmp(line, "bar3", 4) == 0 ||
-      strncmp(line, "g_bar3", 6) == 0)
+    else if (strncmp(line, "bar3", 4) == 0 || strncmp(line, "g_bar3", 6) == 0)
     {
       vtkDebugMacro("bar3");
 
@@ -703,20 +672,19 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*3*numElements, ios::cur);
+      this->GoldIFile->seekg(sizeof(int) * 3 * numElements, ios::cur);
     }
-    else if (strncmp(line, "nsided", 6) == 0 ||
-      strncmp(line, "g_nsided", 8) == 0)
+    else if (strncmp(line, "nsided", 6) == 0 || strncmp(line, "g_nsided", 8) == 0)
     {
       vtkDebugMacro("nsided");
-      int *numNodesPerElement;
+      int* numNodesPerElement;
       int numNodes = 0;
 
-      //cellType = vtkEnSightReader::NSIDED;
+      // cellType = vtkEnSightReader::NSIDED;
       this->ReadInt(&numElements);
       if (numElements < 0 ||
         static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
@@ -727,7 +695,7 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       numNodesPerElement = new int[numElements];
@@ -737,16 +705,13 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
         numNodes += numNodesPerElement[i];
       }
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*numNodes, ios::cur);
-      delete [] numNodesPerElement;
+      this->GoldIFile->seekg(sizeof(int) * numNodes, ios::cur);
+      delete[] numNodesPerElement;
     }
-    else if (strncmp(line, "tria3", 5) == 0 ||
-      strncmp(line, "tria6", 5) == 0 ||
-      strncmp(line, "g_tria3", 7) == 0 ||
-      strncmp(line, "g_tria6", 7) == 0)
+    else if (strncmp(line, "tria3", 5) == 0 || strncmp(line, "tria6", 5) == 0 ||
+      strncmp(line, "g_tria3", 7) == 0 || strncmp(line, "g_tria6", 7) == 0)
     {
-      if (strncmp(line, "tria6", 5) == 0 ||
-        strncmp(line, "g_tria6", 7) == 0)
+      if (strncmp(line, "tria6", 5) == 0 || strncmp(line, "g_tria6", 7) == 0)
       {
         vtkDebugMacro("tria6");
         cellType = vtkEnSightReader::TRIA6;
@@ -766,27 +731,24 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::TRIA6)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*6*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 6 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*3*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 3 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "quad4", 5) == 0 ||
-      strncmp(line, "quad8", 5) == 0 ||
-      strncmp(line, "g_quad4", 7) == 0 ||
-      strncmp(line, "g_quad8", 7) == 0)
+    else if (strncmp(line, "quad4", 5) == 0 || strncmp(line, "quad8", 5) == 0 ||
+      strncmp(line, "g_quad4", 7) == 0 || strncmp(line, "g_quad8", 7) == 0)
     {
-      if (strncmp(line, "quad8", 5) == 0 ||
-        strncmp(line, "g_quad8", 7) == 0)
+      if (strncmp(line, "quad8", 5) == 0 || strncmp(line, "g_quad8", 7) == 0)
       {
         vtkDebugMacro("quad8");
         cellType = vtkEnSightReader::QUAD8;
@@ -806,25 +768,25 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::QUAD8)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*8*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 8 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*4*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 4 * numElements, ios::cur);
       }
     }
     else if (strncmp(line, "nfaced", 6) == 0)
     {
       vtkDebugMacro("nfaced");
-      int *numFacesPerElement;
-      int *numNodesPerFace;
+      int* numFacesPerElement;
+      int* numNodesPerFace;
       int numFaces = 0;
       int numNodes = 0;
 
@@ -838,7 +800,7 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       numFacesPerElement = new int[numElements];
@@ -847,7 +809,7 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       {
         numFaces += numFacesPerElement[i];
       }
-      delete [] numFacesPerElement;
+      delete[] numFacesPerElement;
       numNodesPerFace = new int[numFaces];
       this->ReadIntArray(numNodesPerFace, numFaces);
       for (i = 0; i < numFaces; i++)
@@ -855,16 +817,13 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
         numNodes += numNodesPerFace[i];
       }
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*numNodes, ios::cur);
-      delete [] numNodesPerFace;
+      this->GoldIFile->seekg(sizeof(int) * numNodes, ios::cur);
+      delete[] numNodesPerFace;
     }
-    else if (strncmp(line, "tetra4", 6) == 0 ||
-      strncmp(line, "tetra10", 7) == 0 ||
-      strncmp(line, "g_tetra4", 8) == 0 ||
-      strncmp(line, "g_tetra10", 9) == 0)
+    else if (strncmp(line, "tetra4", 6) == 0 || strncmp(line, "tetra10", 7) == 0 ||
+      strncmp(line, "g_tetra4", 8) == 0 || strncmp(line, "g_tetra10", 9) == 0)
     {
-      if (strncmp(line, "tetra10", 7) == 0 ||
-        strncmp(line, "g_tetra10", 9) == 0)
+      if (strncmp(line, "tetra10", 7) == 0 || strncmp(line, "g_tetra10", 9) == 0)
       {
         vtkDebugMacro("tetra10");
         cellType = vtkEnSightReader::TETRA10;
@@ -879,32 +838,30 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       if (numElements < 0 ||
         static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
       {
-        vtkErrorMacro("Invalid number of tetrahedral cells; check that ByteOrder is set correctly.");
+        vtkErrorMacro(
+          "Invalid number of tetrahedral cells; check that ByteOrder is set correctly.");
         return -1;
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::TETRA10)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*10*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 10 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*4*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 4 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "pyramid5", 8) == 0 ||
-      strncmp(line, "pyramid13", 9) == 0 ||
-      strncmp(line, "g_pyramid5", 10) == 0 ||
-      strncmp(line, "g_pyramid13", 11) == 0)
+    else if (strncmp(line, "pyramid5", 8) == 0 || strncmp(line, "pyramid13", 9) == 0 ||
+      strncmp(line, "g_pyramid5", 10) == 0 || strncmp(line, "g_pyramid13", 11) == 0)
     {
-      if (strncmp(line, "pyramid13", 9) == 0 ||
-        strncmp(line, "g_pyramid13", 11) == 0)
+      if (strncmp(line, "pyramid13", 9) == 0 || strncmp(line, "g_pyramid13", 11) == 0)
       {
         vtkDebugMacro("pyramid13");
         cellType = vtkEnSightReader::PYRAMID13;
@@ -924,27 +881,24 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::PYRAMID13)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*13*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 13 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*5*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 5 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "hexa8", 5) == 0 ||
-      strncmp(line, "hexa20", 6) == 0 ||
-      strncmp(line, "g_hexa8", 7) == 0 ||
-      strncmp(line, "g_hexa20", 8) == 0)
+    else if (strncmp(line, "hexa8", 5) == 0 || strncmp(line, "hexa20", 6) == 0 ||
+      strncmp(line, "g_hexa8", 7) == 0 || strncmp(line, "g_hexa20", 8) == 0)
     {
-      if (strncmp(line, "hexa20", 6) == 0 ||
-        strncmp(line, "g_hexa20", 8) == 0)
+      if (strncmp(line, "hexa20", 6) == 0 || strncmp(line, "g_hexa20", 8) == 0)
       {
         vtkDebugMacro("hexa20");
         cellType = vtkEnSightReader::HEXA20;
@@ -964,27 +918,24 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::HEXA20)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*20*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 20 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*8*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 8 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "penta6", 6) == 0 ||
-      strncmp(line, "penta15", 7) == 0 ||
-      strncmp(line, "g_penta6", 8) == 0 ||
-      strncmp(line, "g_penta15", 9) == 0)
+    else if (strncmp(line, "penta6", 6) == 0 || strncmp(line, "penta15", 7) == 0 ||
+      strncmp(line, "g_penta6", 8) == 0 || strncmp(line, "g_penta15", 9) == 0)
     {
-      if (strncmp(line, "penta15", 7) == 0 ||
-        strncmp(line, "g_penta15", 9) == 0)
+      if (strncmp(line, "penta15", 7) == 0 || strncmp(line, "g_penta15", 9) == 0)
       {
         vtkDebugMacro("penta15");
         cellType = vtkEnSightReader::PENTA15;
@@ -1004,18 +955,18 @@ int vtkEnSightGoldBinaryReader::SkipUnstructuredGrid(char line[256])
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::PENTA15)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*15*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 15 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*6*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 6 * numElements, ios::cur);
       }
     }
     else if (strncmp(line, "END TIME STEP", 13) == 0)
@@ -1056,7 +1007,7 @@ int vtkEnSightGoldBinaryReader::SkipRectilinearGrid(char line[256])
     static_cast<unsigned int>(dimensions[1] * this->SizeOfInt) > this->FileSize ||
     dimensions[2] < 0 ||
     static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize ||
-    (dimensions[0]+dimensions[1]+dimensions[2]) < 0 ||
+    (dimensions[0] + dimensions[1] + dimensions[2]) < 0 ||
     static_cast<unsigned int>((dimensions[0] + dimensions[1] + dimensions[2]) * this->SizeOfInt) >
       this->FileSize)
   {
@@ -1067,16 +1018,16 @@ int vtkEnSightGoldBinaryReader::SkipRectilinearGrid(char line[256])
   numPts = dimensions[0] * dimensions[1] * dimensions[2];
 
   // Skip xCoords
-  this->IFile->seekg(sizeof(float)*dimensions[0], ios::cur);
+  this->GoldIFile->seekg(sizeof(float) * dimensions[0], ios::cur);
   // Skip yCoords
-  this->IFile->seekg(sizeof(float)*dimensions[1], ios::cur);
+  this->GoldIFile->seekg(sizeof(float) * dimensions[1], ios::cur);
   // Skip zCoords
-  this->IFile->seekg(sizeof(float)*dimensions[2], ios::cur);
+  this->GoldIFile->seekg(sizeof(float) * dimensions[2], ios::cur);
 
   if (iblanked)
   {
     vtkWarningMacro("VTK does not handle blanking for rectilinear grids.");
-    this->IFile->seekg(sizeof(int)*numPts, ios::cur);
+    this->GoldIFile->seekg(sizeof(int) * numPts, ios::cur);
   }
 
   // reading next line to check for EOF
@@ -1115,12 +1066,12 @@ int vtkEnSightGoldBinaryReader::SkipImageData(char line[256])
       dimensions[1] < 0 ||
       static_cast<unsigned int>(dimensions[1] * this->SizeOfInt) > this->FileSize ||
       dimensions[2] < 0 ||
-      static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize ||
-      numPts < 0 || static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
+      static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize || numPts < 0 ||
+      static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
     {
       return -1;
     }
-    this->IFile->seekg(sizeof(int)*numPts, ios::cur);
+    this->GoldIFile->seekg(sizeof(int) * numPts, ios::cur);
   }
 
   // reading next line to check for EOF
@@ -1129,16 +1080,15 @@ int vtkEnSightGoldBinaryReader::SkipImageData(char line[256])
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
-  int timeStep,
-  vtkMultiBlockDataSet *output)
+int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(
+  const char* fileName, int timeStep, vtkMultiBlockDataSet* output)
 {
   char line[80], subLine[80];
   vtkIdType i;
-  int *pointIds;
+  int* pointIds;
   float *xCoords, *yCoords, *zCoords;
-  vtkPoints *points = vtkPoints::New();
-  vtkPolyData *pd = vtkPolyData::New();
+  vtkPoints* points = vtkPoints::New();
+  vtkPolyData* pd = vtkPolyData::New();
 
   this->NumberOfNewOutputs++;
 
@@ -1153,13 +1103,12 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
     sfilename += fileName;
-    vtkDebugMacro("full path to measured geometry file: "
-      << sfilename.c_str());
+    vtkDebugMacro("full path to measured geometry file: " << sfilename.c_str());
   }
   else
   {
@@ -1185,7 +1134,7 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -1202,16 +1151,15 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
       this->ReadInt(&this->NumberOfMeasuredPoints);
 
       // Skip pointIds
-      //this->IFile->ignore(sizeof(int)*this->NumberOfMeasuredPoints);
+      // this->GoldIFile->ignore(sizeof(int)*this->NumberOfMeasuredPoints);
       // Skip xCoords
-      //this->IFile->ignore(sizeof(float)*this->NumberOfMeasuredPoints);
+      // this->GoldIFile->ignore(sizeof(float)*this->NumberOfMeasuredPoints);
       // Skip yCoords
-      //this->IFile->ignore(sizeof(float)*this->NumberOfMeasuredPoints);
+      // this->GoldIFile->ignore(sizeof(float)*this->NumberOfMeasuredPoints);
       // Skip zCoords
-      //this->IFile->ignore(sizeof(float)*this->NumberOfMeasuredPoints);
-      this->IFile->seekg(
-        (sizeof(float)*3 + sizeof(int))*this->NumberOfMeasuredPoints,
-        ios::cur);
+      // this->GoldIFile->ignore(sizeof(float)*this->NumberOfMeasuredPoints);
+      this->GoldIFile->seekg(
+        (sizeof(float) * 3 + sizeof(int)) * this->NumberOfMeasuredPoints, ios::cur);
       this->ReadLine(line); // END TIME STEP
     }
     while (strncmp(line, "BEGIN TIME STEP", 15) != 0)
@@ -1219,7 +1167,7 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
       this->ReadLine(line);
     }
     // found a time step -> cache it
-    this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+    this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
   }
 
   // Skip the description line.
@@ -1230,11 +1178,11 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
   this->ReadInt(&this->NumberOfMeasuredPoints);
 
   pointIds = new int[this->NumberOfMeasuredPoints];
-  xCoords = new float [this->NumberOfMeasuredPoints];
-  yCoords = new float [this->NumberOfMeasuredPoints];
-  zCoords = new float [this->NumberOfMeasuredPoints];
+  xCoords = new float[this->NumberOfMeasuredPoints];
+  yCoords = new float[this->NumberOfMeasuredPoints];
+  zCoords = new float[this->NumberOfMeasuredPoints];
   points->Allocate(this->NumberOfMeasuredPoints);
-  pd->Allocate(this->NumberOfMeasuredPoints);
+  pd->AllocateEstimate(this->NumberOfMeasuredPoints, 1);
 
   // Extract the array of point indices. Note EnSight Manual v8.2 (pp. 559,
   // http://www-vis.lbl.gov/NERSC/Software/ensight/docs82/UserManual.pdf)
@@ -1243,29 +1191,29 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
   // storage scheme. Specifically, point indices are stored in an array,
   // whereas 3D coordinates follow the array in a tuple-by-tuple manner.
   // The following code segment (20+ lines) serves as a fix to bug #9245.
-  this->ReadIntArray( pointIds, this->NumberOfMeasuredPoints );
+  this->ReadIntArray(pointIds, this->NumberOfMeasuredPoints);
 
   // Read point coordinates tuple by tuple while each tuple contains three
   // components: (x-cord, y-cord, z-cord)
-  int  floatSize = sizeof( float );
-  for ( i = 0; i < this->NumberOfMeasuredPoints; i ++ )
+  int floatSize = sizeof(float);
+  for (i = 0; i < this->NumberOfMeasuredPoints; i++)
   {
-    this->IFile->read(  ( char * )( xCoords + i ),  floatSize  );
-    this->IFile->read(  ( char * )( yCoords + i ),  floatSize  );
-    this->IFile->read(  ( char * )( zCoords + i ),  floatSize  );
+    this->GoldIFile->read((char*)(xCoords + i), floatSize);
+    this->GoldIFile->read((char*)(yCoords + i), floatSize);
+    this->GoldIFile->read((char*)(zCoords + i), floatSize);
   }
 
-  if ( this->ByteOrder == FILE_LITTLE_ENDIAN )
+  if (this->ByteOrder == FILE_LITTLE_ENDIAN)
   {
-    vtkByteSwap::Swap4LERange( xCoords, this->NumberOfMeasuredPoints );
-    vtkByteSwap::Swap4LERange( yCoords, this->NumberOfMeasuredPoints );
-    vtkByteSwap::Swap4LERange( zCoords, this->NumberOfMeasuredPoints );
+    vtkByteSwap::Swap4LERange(xCoords, this->NumberOfMeasuredPoints);
+    vtkByteSwap::Swap4LERange(yCoords, this->NumberOfMeasuredPoints);
+    vtkByteSwap::Swap4LERange(zCoords, this->NumberOfMeasuredPoints);
   }
   else
   {
-    vtkByteSwap::Swap4BERange( xCoords, this->NumberOfMeasuredPoints );
-    vtkByteSwap::Swap4BERange( yCoords, this->NumberOfMeasuredPoints );
-    vtkByteSwap::Swap4BERange( zCoords, this->NumberOfMeasuredPoints );
+    vtkByteSwap::Swap4BERange(xCoords, this->NumberOfMeasuredPoints);
+    vtkByteSwap::Swap4BERange(yCoords, this->NumberOfMeasuredPoints);
+    vtkByteSwap::Swap4BERange(zCoords, this->NumberOfMeasuredPoints);
   }
 
   // NOTE: EnSight always employs a 1-based indexing scheme and therefore
@@ -1283,31 +1231,27 @@ int vtkEnSightGoldBinaryReader::ReadMeasuredGeometryFile(const char* fileName,
 
   points->Delete();
   pd->Delete();
-  delete [] pointIds;
-  delete [] xCoords;
-  delete [] yCoords;
-  delete [] zCoords;
+  delete[] pointIds;
+  delete[] xCoords;
+  delete[] yCoords;
+  delete[] zCoords;
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
+
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
-  const char* fileName, const char* description, int timeStep,
-  vtkMultiBlockDataSet *compositeOutput, int measured,
-  int numberOfComponents, int component)
+int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(const char* fileName, const char* description,
+  int timeStep, vtkMultiBlockDataSet* compositeOutput, int measured, int numberOfComponents,
+  int component)
 {
   char line[80];
   int partId, realId, numPts, i, lineRead;
-  vtkFloatArray *scalars;
+  vtkFloatArray* scalars;
   float* scalarsRead;
-  vtkDataSet *output;
+  vtkDataSet* output;
 
   // Initialize
   //
@@ -1320,7 +1264,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
@@ -1342,7 +1286,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -1353,7 +1297,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
         this->ReadLine(line);
       }
       // found a time step -> cache it
-      this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+      this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
 
       this->ReadLine(line); // skip the description line
 
@@ -1366,24 +1310,22 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
         {
           this->ReadLine(line);
           // Skip sclalars
-          this->IFile->seekg(sizeof(float)*numPts, ios::cur);
+          this->GoldIFile->seekg(sizeof(float) * numPts, ios::cur);
         }
       }
 
-      while (this->ReadLine(line) &&
-        strncmp(line, "part", 4) == 0)
+      while (this->ReadLine(line) && strncmp(line, "part", 4) == 0)
       {
         this->ReadPartId(&partId);
         partId--; // EnSight starts #ing with 1.
         realId = this->InsertNewPartId(partId);
-        output = static_cast<vtkDataSet*>(
-          this->GetDataSetFromBlock(compositeOutput, realId));
+        output = static_cast<vtkDataSet*>(this->GetDataSetFromBlock(compositeOutput, realId));
         numPts = output->GetNumberOfPoints();
         if (numPts)
         {
           this->ReadLine(line); // "coordinates" or "block"
           // Skip sclalars
-          this->IFile->seekg(sizeof(float)*numPts, ios::cur);
+          this->GoldIFile->seekg(sizeof(float) * numPts, ios::cur);
         }
       }
     }
@@ -1409,7 +1351,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
       scalars = vtkFloatArray::New();
       scalars->SetNumberOfComponents(numberOfComponents);
       scalars->SetNumberOfTuples(numPts);
-      scalarsRead = new float [numPts];
+      scalarsRead = new float[numPts];
       this->ReadFloatArray(scalarsRead, numPts);
       // Why are we setting only one component here?
       // Only one component is set because scalars are single-component arrays.
@@ -1427,14 +1369,12 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
         output->GetPointData()->SetScalars(scalars);
       }
       scalars->Delete();
-      delete [] scalarsRead;
+      delete[] scalarsRead;
     }
-    if (this->IFile)
-    {
-      this->IFile->close();
-      delete this->IFile;
-      this->IFile = nullptr;
-    }
+
+    delete this->GoldIFile;
+    this->GoldIFile = nullptr;
+
     return 1;
   }
 
@@ -1446,11 +1386,25 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
     realId = this->InsertNewPartId(partId);
     output = this->GetDataSetFromBlock(compositeOutput, realId);
     numPts = output->GetNumberOfPoints();
-    // If the part has no points, then only the part number is listed in
-    // the variable file.
-    if (numPts)
+    // If the part has points, part number is followed by "coordinates" or
+    // "block" and list of values.
+    // If the part has no points, only part number is given, which may be
+    // optionally followed by "coordinates" or "block", without any values.
+
+    lineRead = this->ReadLine(line); // "coordinates", "block" or next part
+
+    if (!numPts)
     {
-      this->ReadLine(line); // "coordinates" or "block"
+      if (lineRead && strncmp(line, "part", 4) == 0)
+      {
+        // Part number was not followed by "coordinates" or "block"; we are
+        // at the start of another part, skip to next iteration to avoid
+        // reading anything more.
+        continue;
+      }
+    }
+    else
+    {
       if (component == 0)
       {
         scalars = vtkFloatArray::New();
@@ -1459,8 +1413,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
       }
       else
       {
-        scalars = (vtkFloatArray*)(output->GetPointData()->
-          GetArray(description));
+        scalars = (vtkFloatArray*)(output->GetPointData()->GetArray(description));
       }
 
       scalarsRead = new float[numPts];
@@ -1484,11 +1437,11 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
       {
         output->GetPointData()->AddArray(scalars);
       }
-      delete [] scalarsRead;
+      delete[] scalarsRead;
     }
 
-    this->IFile->peek();
-    if (this->IFile->eof())
+    this->GoldIFile->peek();
+    if (this->GoldIFile->eof())
     {
       lineRead = 0;
       continue;
@@ -1496,27 +1449,23 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerNode(
     lineRead = this->ReadLine(line);
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
+
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
-  const char* fileName, const char* description, int timeStep,
-  vtkMultiBlockDataSet *compositeOutput, int measured)
+int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(const char* fileName, const char* description,
+  int timeStep, vtkMultiBlockDataSet* compositeOutput, int measured)
 {
   char line[80];
   int partId, realId, numPts, i, lineRead;
-  vtkFloatArray *vectors;
+  vtkFloatArray* vectors;
   float tuple[3];
   float *comp1, *comp2, *comp3;
-  float *vectorsRead;
-  vtkDataSet *output;
+  float* vectorsRead;
+  vtkDataSet* output;
 
   // Initialize
   //
@@ -1529,7 +1478,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
@@ -1551,7 +1500,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -1562,7 +1511,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
         this->ReadLine(line);
       }
       // found a time step -> cache it
-      this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+      this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
 
       this->ReadLine(line); // skip the description line
 
@@ -1575,24 +1524,22 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
         {
           this->ReadLine(line);
           // Skip vectors.
-          this->IFile->seekg(sizeof(float)*3*numPts, ios::cur);
+          this->GoldIFile->seekg(sizeof(float) * 3 * numPts, ios::cur);
         }
       }
 
-      while (this->ReadLine(line) &&
-        strncmp(line, "part", 4) == 0)
+      while (this->ReadLine(line) && strncmp(line, "part", 4) == 0)
       {
         this->ReadPartId(&partId);
         partId--; // EnSight starts #ing with 1.
         realId = this->InsertNewPartId(partId);
-        output = static_cast<vtkDataSet*>(
-          this->GetDataSetFromBlock(compositeOutput, realId));
+        output = static_cast<vtkDataSet*>(this->GetDataSetFromBlock(compositeOutput, realId));
         numPts = output->GetNumberOfPoints();
         if (numPts)
         {
           this->ReadLine(line); // "coordinates" or "block"
           // Skip comp1, comp2 and comp3
-          this->IFile->seekg(sizeof(float)*3*numPts, ios::cur);
+          this->GoldIFile->seekg(sizeof(float) * 3 * numPts, ios::cur);
         }
       }
     }
@@ -1619,7 +1566,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
       vectors->SetNumberOfComponents(3);
       vectors->SetNumberOfTuples(numPts);
       vectorsRead = vectors->GetPointer(0);
-      this->ReadFloatArray(vectorsRead, numPts*3);
+      this->ReadFloatArray(vectorsRead, numPts * 3);
       vectors->SetName(description);
       output->GetPointData()->AddArray(vectors);
       if (!output->GetPointData()->GetVectors())
@@ -1628,27 +1575,41 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
       }
       vectors->Delete();
     }
-    if (this->IFile)
-    {
-      this->IFile->close();
-      delete this->IFile;
-      this->IFile = nullptr;
-    }
+
+    delete this->GoldIFile;
+    this->GoldIFile = nullptr;
+
     return 1;
   }
 
   lineRead = this->ReadLine(line);
   while (lineRead && strncmp(line, "part", 4) == 0)
   {
-    vectors = vtkFloatArray::New();
     this->ReadPartId(&partId);
     partId--; // EnSight starts #ing with 1.
     realId = this->InsertNewPartId(partId);
     output = this->GetDataSetFromBlock(compositeOutput, realId);
     numPts = output->GetNumberOfPoints();
-    if (numPts)
+    // If the part has points, part number is followed by "coordinates" or
+    // "block" and list of values.
+    // If the part has no points, only part number is given, which may be
+    // optionally followed by "coordinates" or "block", without any values.
+
+    lineRead = this->ReadLine(line); // "coordinates", "block" or next part
+
+    if (!numPts)
     {
-      this->ReadLine(line); // "coordinates" or "block"
+      if (lineRead && strncmp(line, "part", 4) == 0)
+      {
+        // Part number was not followed by "coordinates" or "block"; we are
+        // at the start of another part, skip to next iteration to avoid
+        // reading anything more.
+        continue;
+      }
+    }
+    else
+    {
+      vectors = vtkFloatArray::New();
       vectors->SetNumberOfComponents(3);
       vectors->SetNumberOfTuples(numPts);
       comp1 = new float[numPts];
@@ -1671,13 +1632,13 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
         output->GetPointData()->SetVectors(vectors);
       }
       vectors->Delete();
-      delete [] comp1;
-      delete [] comp2;
-      delete [] comp3;
+      delete[] comp1;
+      delete[] comp2;
+      delete[] comp3;
     }
 
-    this->IFile->peek();
-    if (this->IFile->eof())
+    this->GoldIFile->peek();
+    if (this->GoldIFile->eof())
     {
       lineRead = 0;
       continue;
@@ -1685,27 +1646,22 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerNode(
     lineRead = this->ReadLine(line);
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
 
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
-  const char* fileName, const char* description, int timeStep,
-  vtkMultiBlockDataSet *compositeOutput)
+int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(const char* fileName, const char* description,
+  int timeStep, vtkMultiBlockDataSet* compositeOutput)
 {
   char line[80];
   int partId, realId, numPts, i, lineRead;
-  vtkFloatArray *tensors;
+  vtkFloatArray* tensors;
   float *comp1, *comp2, *comp3, *comp4, *comp5, *comp6;
   float tuple[6];
-  vtkDataSet *output;
+  vtkDataSet* output;
 
   // Initialize
   //
@@ -1718,7 +1674,7 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
@@ -1740,7 +1696,7 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -1751,12 +1707,11 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
         this->ReadLine(line);
       }
       // found a time step -> cache it
-      this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+      this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
 
       this->ReadLine(line); // skip the description line
 
-      while (this->ReadLine(line) &&
-        strncmp(line, "part", 4) == 0)
+      while (this->ReadLine(line) && strncmp(line, "part", 4) == 0)
       {
         this->ReadPartId(&partId);
         partId--; // EnSight starts #ing with 1.
@@ -1767,7 +1722,7 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
         {
           this->ReadLine(line); // "coordinates" or "block"
           // Skip over comp1, comp2, ... comp6
-          this->IFile->seekg(sizeof(float)*6*numPts, ios::cur);
+          this->GoldIFile->seekg(sizeof(float) * 6 * numPts, ios::cur);
         }
       }
     }
@@ -1819,16 +1774,16 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
       tensors->SetName(description);
       output->GetPointData()->AddArray(tensors);
       tensors->Delete();
-      delete [] comp1;
-      delete [] comp2;
-      delete [] comp3;
-      delete [] comp4;
-      delete [] comp5;
-      delete [] comp6;
+      delete[] comp1;
+      delete[] comp2;
+      delete[] comp3;
+      delete[] comp4;
+      delete[] comp5;
+      delete[] comp6;
     }
 
-    this->IFile->peek();
-    if (this->IFile->eof())
+    this->GoldIFile->peek();
+    if (this->GoldIFile->eof())
     {
       lineRead = 0;
       continue;
@@ -1836,28 +1791,22 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerNode(
     lineRead = this->ReadLine(line);
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
 
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
-  const char* fileName, const char* description, int timeStep,
-  vtkMultiBlockDataSet *compositeOutput, int numberOfComponents,
-  int component)
+int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(const char* fileName, const char* description,
+  int timeStep, vtkMultiBlockDataSet* compositeOutput, int numberOfComponents, int component)
 {
   char line[80];
   int partId, realId, numCells, numCellsPerElement, i, idx;
-  vtkFloatArray *scalars;
-  float *scalarsRead;
+  vtkFloatArray* scalars;
+  float* scalarsRead;
   int lineRead, elementType;
-  vtkDataSet *output;
+  vtkDataSet* output;
 
   // Initialize
   //
@@ -1870,13 +1819,12 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
     sfilename += fileName;
-    vtkDebugMacro("full path to scalar per element file: "
-      << sfilename.c_str());
+    vtkDebugMacro("full path to scalar per element file: " << sfilename.c_str());
   }
   else
   {
@@ -1893,7 +1841,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -1903,10 +1851,10 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
       {
         this->ReadLine(line);
       }
-       // found a time step -> cache it
-      this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+      // found a time step -> cache it
+      this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
 
-      this->ReadLine(line); // skip the description line
+      this->ReadLine(line);            // skip the description line
       lineRead = this->ReadLine(line); // "part"
 
       while (lineRead && strncmp(line, "part", 4) == 0)
@@ -1926,40 +1874,35 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
           if (strncmp(line, "block", 5) == 0)
           {
             // Skip over float scalars.
-            this->IFile->seekg(sizeof(float)*numCells, ios::cur);
+            this->GoldIFile->seekg(sizeof(float) * numCells, ios::cur);
             lineRead = this->ReadLine(line);
           }
           else
           {
-            while (lineRead && strncmp(line, "part", 4) != 0 &&
-              strncmp(line, "END TIME STEP", 13) != 0)
+            while (
+              lineRead && strncmp(line, "part", 4) != 0 && strncmp(line, "END TIME STEP", 13) != 0)
             {
               elementType = this->GetElementType(line);
               if (elementType == -1)
               {
                 vtkErrorMacro("Unknown element type \"" << line << "\"");
-                if (this->IFile)
-                {
-                  this->IFile->close();
-                  delete this->IFile;
-                  this->IFile = nullptr;
-                }
+                delete this->GoldIFile;
+                this->GoldIFile = nullptr;
                 return 0;
               }
               idx = this->UnstructuredPartIds->IsId(realId);
-              numCellsPerElement = this->GetCellIds(idx, elementType)->
-                GetNumberOfIds();
-              this->IFile->seekg(sizeof(float)*numCellsPerElement, ios::cur);
+              numCellsPerElement = this->GetCellIds(idx, elementType)->GetNumberOfIds();
+              this->GoldIFile->seekg(sizeof(float) * numCellsPerElement, ios::cur);
               lineRead = this->ReadLine(line);
             }
           } // end while
-        } // end if (numCells)
+        }   // end if (numCells)
         else
         {
           lineRead = this->ReadLine(line);
         }
       } // end while
-    } // end for
+    }   // end for
     this->ReadLine(line);
     while (strncmp(line, "BEGIN TIME STEP", 15) != 0)
     {
@@ -1967,7 +1910,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
     }
   }
 
-  this->ReadLine(line); // skip the description line
+  this->ReadLine(line);            // skip the description line
   lineRead = this->ReadLine(line); // "part"
 
   while (lineRead && strncmp(line, "part", 4) == 0)
@@ -2001,7 +1944,7 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
         {
           scalars->SetComponent(i, component, scalarsRead[i]);
         }
-        if (this->IFile->eof())
+        if (this->GoldIFile->eof())
         {
           lineRead = 0;
         }
@@ -2009,23 +1952,19 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
         {
           lineRead = this->ReadLine(line);
         }
-        delete [] scalarsRead;
+        delete[] scalarsRead;
       }
       else
       {
-        while (lineRead && strncmp(line, "part", 4) != 0 &&
-          strncmp(line, "END TIME STEP", 13) != 0)
+        while (lineRead && strncmp(line, "part", 4) != 0 && strncmp(line, "END TIME STEP", 13) != 0)
         {
           elementType = this->GetElementType(line);
           if (elementType == -1)
           {
             vtkErrorMacro("Unknown element type \"" << line << "\"");
-            if (this->IFile)
-            {
-              this->IFile->close();
-              delete this->IFile;
-              this->IFile = nullptr;
-            }
+            delete this->GoldIFile;
+            this->GoldIFile = nullptr;
+
             if (component == 0)
             {
               scalars->Delete();
@@ -2033,17 +1972,16 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
             return 0;
           }
           idx = this->UnstructuredPartIds->IsId(realId);
-          numCellsPerElement =
-            this->GetCellIds(idx, elementType)->GetNumberOfIds();
+          numCellsPerElement = this->GetCellIds(idx, elementType)->GetNumberOfIds();
           scalarsRead = new float[numCellsPerElement];
           this->ReadFloatArray(scalarsRead, numCellsPerElement);
           for (i = 0; i < numCellsPerElement; i++)
           {
-            scalars->SetComponent(this->GetCellIds(idx, elementType)->GetId(i),
-              component, scalarsRead[i]);
+            scalars->SetComponent(
+              this->GetCellIds(idx, elementType)->GetId(i), component, scalarsRead[i]);
           }
-          this->IFile->peek();
-          if (this->IFile->eof())
+          this->GoldIFile->peek();
+          if (this->GoldIFile->eof())
           {
             lineRead = 0;
           }
@@ -2051,9 +1989,9 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
           {
             lineRead = this->ReadLine(line);
           }
-          delete [] scalarsRead;
+          delete[] scalarsRead;
         } // end while
-      } // end else
+      }   // end else
       if (component == 0)
       {
         scalars->SetName(description);
@@ -2071,8 +2009,8 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
     }
     else
     {
-      this->IFile->peek();
-      if (this->IFile->eof())
+      this->GoldIFile->peek();
+      if (this->GoldIFile->eof())
       {
         lineRead = 0;
       }
@@ -2083,27 +2021,22 @@ int vtkEnSightGoldBinaryReader::ReadScalarsPerElement(
     }
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
-  const char* fileName, const char* description, int timeStep,
-  vtkMultiBlockDataSet *compositeOutput)
+int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(const char* fileName, const char* description,
+  int timeStep, vtkMultiBlockDataSet* compositeOutput)
 {
   char line[80];
   int partId, realId, numCells, numCellsPerElement, i, idx;
-  vtkFloatArray *vectors;
+  vtkFloatArray* vectors;
   float *comp1, *comp2, *comp3;
   int lineRead, elementType;
   float tuple[3];
-  vtkDataSet *output;
+  vtkDataSet* output;
 
   // Initialize
   //
@@ -2116,13 +2049,12 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
     sfilename += fileName;
-    vtkDebugMacro("full path to vector per element file: "
-      << sfilename.c_str());
+    vtkDebugMacro("full path to vector per element file: " << sfilename.c_str());
   }
   else
   {
@@ -2139,7 +2071,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -2149,10 +2081,10 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
       {
         this->ReadLine(line);
       }
-       // found a time step -> cache it
-      this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+      // found a time step -> cache it
+      this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
 
-      this->ReadLine(line); // skip the description line
+      this->ReadLine(line);            // skip the description line
       lineRead = this->ReadLine(line); // "part"
 
       while (lineRead && strncmp(line, "part", 4) == 0)
@@ -2172,13 +2104,13 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
           if (strncmp(line, "block", 5) == 0)
           {
             // Skip over comp1, comp2 and comp3
-            this->IFile->seekg(sizeof(float)*3*numCells, ios::cur);
+            this->GoldIFile->seekg(sizeof(float) * 3 * numCells, ios::cur);
             lineRead = this->ReadLine(line);
           }
           else
           {
-            while (lineRead && strncmp(line, "part", 4) != 0 &&
-              strncmp(line, "END TIME STEP", 13) != 0)
+            while (
+              lineRead && strncmp(line, "part", 4) != 0 && strncmp(line, "END TIME STEP", 13) != 0)
             {
               elementType = this->GetElementType(line);
               if (elementType == -1)
@@ -2189,13 +2121,12 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
                 return 0;
               }
               idx = this->UnstructuredPartIds->IsId(realId);
-              numCellsPerElement = this->GetCellIds(idx, elementType)->
-                GetNumberOfIds();
+              numCellsPerElement = this->GetCellIds(idx, elementType)->GetNumberOfIds();
               // Skip over comp1, comp2 and comp3
-              this->IFile->seekg(sizeof(float)*3*numCellsPerElement, ios::cur);
+              this->GoldIFile->seekg(sizeof(float) * 3 * numCellsPerElement, ios::cur);
               lineRead = this->ReadLine(line);
             } // end while
-          } // end else
+          }   // end else
         }
         else
         {
@@ -2210,7 +2141,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
     }
   }
 
-  this->ReadLine(line); // skip the description line
+  this->ReadLine(line);            // skip the description line
   lineRead = this->ReadLine(line); // "part"
 
   while (lineRead && strncmp(line, "part", 4) == 0)
@@ -2243,8 +2174,8 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
           tuple[2] = comp3[i];
           vectors->SetTuple(i, tuple);
         }
-        this->IFile->peek();
-        if (this->IFile->eof())
+        this->GoldIFile->peek();
+        if (this->GoldIFile->eof())
         {
           lineRead = 0;
         }
@@ -2252,14 +2183,13 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
         {
           lineRead = this->ReadLine(line);
         }
-        delete [] comp1;
-        delete [] comp2;
-        delete [] comp3;
+        delete[] comp1;
+        delete[] comp2;
+        delete[] comp3;
       }
       else
       {
-        while (lineRead && strncmp(line, "part", 4) != 0 &&
-          strncmp(line, "END TIME STEP", 13) != 0)
+        while (lineRead && strncmp(line, "part", 4) != 0 && strncmp(line, "END TIME STEP", 13) != 0)
         {
           elementType = this->GetElementType(line);
           if (elementType == -1)
@@ -2271,8 +2201,7 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
             return 0;
           }
           idx = this->UnstructuredPartIds->IsId(realId);
-          numCellsPerElement =
-            this->GetCellIds(idx, elementType)->GetNumberOfIds();
+          numCellsPerElement = this->GetCellIds(idx, elementType)->GetNumberOfIds();
           comp1 = new float[numCellsPerElement];
           comp2 = new float[numCellsPerElement];
           comp3 = new float[numCellsPerElement];
@@ -2284,11 +2213,10 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
             tuple[0] = comp1[i];
             tuple[1] = comp2[i];
             tuple[2] = comp3[i];
-            vectors->SetTuple(this->GetCellIds(idx, elementType)->GetId(i),
-              tuple);
+            vectors->SetTuple(this->GetCellIds(idx, elementType)->GetId(i), tuple);
           }
-          this->IFile->peek();
-          if (this->IFile->eof())
+          this->GoldIFile->peek();
+          if (this->GoldIFile->eof())
           {
             lineRead = 0;
           }
@@ -2296,11 +2224,11 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
           {
             lineRead = this->ReadLine(line);
           }
-          delete [] comp1;
-          delete [] comp2;
-          delete [] comp3;
+          delete[] comp1;
+          delete[] comp2;
+          delete[] comp3;
         } // end while
-      } // end else
+      }   // end else
       vectors->SetName(description);
       output->GetCellData()->AddArray(vectors);
       if (!output->GetCellData()->GetVectors())
@@ -2311,8 +2239,8 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
     }
     else
     {
-      this->IFile->peek();
-      if (this->IFile->eof())
+      this->GoldIFile->peek();
+      if (this->GoldIFile->eof())
       {
         lineRead = 0;
       }
@@ -2323,27 +2251,22 @@ int vtkEnSightGoldBinaryReader::ReadVectorsPerElement(
     }
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
-  const char* fileName, const char* description, int timeStep,
-  vtkMultiBlockDataSet *compositeOutput)
+int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(const char* fileName, const char* description,
+  int timeStep, vtkMultiBlockDataSet* compositeOutput)
 {
   char line[80];
   int partId, realId, numCells, numCellsPerElement, i, idx;
-  vtkFloatArray *tensors;
+  vtkFloatArray* tensors;
   int lineRead, elementType;
   float *comp1, *comp2, *comp3, *comp4, *comp5, *comp6;
   float tuple[6];
-  vtkDataSet *output;
+  vtkDataSet* output;
 
   // Initialize
   //
@@ -2356,13 +2279,12 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
   if (this->FilePath)
   {
     sfilename = this->FilePath;
-    if (sfilename.at(sfilename.length()-1) != '/')
+    if (sfilename.at(sfilename.length() - 1) != '/')
     {
       sfilename += "/";
     }
     sfilename += fileName;
-    vtkDebugMacro("full path to  tensor per element file: "
-      << sfilename.c_str());
+    vtkDebugMacro("full path to  tensor per element file: " << sfilename.c_str());
   }
   else
   {
@@ -2379,7 +2301,7 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
   {
     this->AddFileIndexToCache(fileName);
 
-    i = this->SeekToCachedTimeStep(fileName, timeStep-1);
+    i = this->SeekToCachedTimeStep(fileName, timeStep - 1);
     // start w/ the number of TS we skipped, not the one we are at
     // if we are not at the appropriate time step yet, we keep searching
     for (; i < timeStep - 1; i++)
@@ -2390,9 +2312,9 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
         this->ReadLine(line);
       }
       // found a time step -> cache it
-      this->AddTimeStepToCache(fileName, i, this->IFile->tellg());
+      this->AddTimeStepToCache(fileName, i, this->GoldIFile->tellg());
 
-      this->ReadLine(line); // skip the description line
+      this->ReadLine(line);            // skip the description line
       lineRead = this->ReadLine(line); // "part"
 
       while (lineRead && strncmp(line, "part", 4) == 0)
@@ -2412,13 +2334,13 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
           if (strncmp(line, "block", 5) == 0)
           {
             // Skip comp1 - comp6
-            this->IFile->seekg(sizeof(float)*6*numCells, ios::cur);
+            this->GoldIFile->seekg(sizeof(float) * 6 * numCells, ios::cur);
             lineRead = this->ReadLine(line);
           }
           else
           {
-            while (lineRead && strncmp(line, "part", 4) != 0 &&
-              strncmp(line, "END TIME STEP", 13) != 0)
+            while (
+              lineRead && strncmp(line, "part", 4) != 0 && strncmp(line, "END TIME STEP", 13) != 0)
             {
               elementType = this->GetElementType(line);
               if (elementType == -1)
@@ -2429,14 +2351,13 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
                 return 0;
               }
               idx = this->UnstructuredPartIds->IsId(realId);
-              numCellsPerElement = this->GetCellIds(idx, elementType)->
-                GetNumberOfIds();
+              numCellsPerElement = this->GetCellIds(idx, elementType)->GetNumberOfIds();
               // Skip over comp1->comp6
-              this->IFile->seekg(sizeof(float)*6*numCellsPerElement, ios::cur);
+              this->GoldIFile->seekg(sizeof(float) * 6 * numCellsPerElement, ios::cur);
               lineRead = this->ReadLine(line);
             } // end while
-          } // end else
-        } // end if (numCells)
+          }   // end else
+        }     // end if (numCells)
         else
         {
           lineRead = this->ReadLine(line);
@@ -2450,7 +2371,7 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
     }
   }
 
-  this->ReadLine(line); // skip the description line
+  this->ReadLine(line);            // skip the description line
   lineRead = this->ReadLine(line); // "part"
 
   while (lineRead && strncmp(line, "part", 4) == 0)
@@ -2493,8 +2414,8 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
           tuple[5] = comp6[i];
           tensors->InsertTuple(i, tuple);
         }
-        this->IFile->peek();
-        if (this->IFile->eof())
+        this->GoldIFile->peek();
+        if (this->GoldIFile->eof())
         {
           lineRead = 0;
         }
@@ -2502,17 +2423,16 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
         {
           lineRead = this->ReadLine(line);
         }
-        delete [] comp1;
-        delete [] comp2;
-        delete [] comp3;
-        delete [] comp4;
-        delete [] comp5;
-        delete [] comp6;
+        delete[] comp1;
+        delete[] comp2;
+        delete[] comp3;
+        delete[] comp4;
+        delete[] comp5;
+        delete[] comp6;
       }
       else
       {
-        while (lineRead && strncmp(line, "part", 4) != 0 &&
-          strncmp(line, "END TIME STEP", 13) != 0)
+        while (lineRead && strncmp(line, "part", 4) != 0 && strncmp(line, "END TIME STEP", 13) != 0)
         {
           elementType = this->GetElementType(line);
           if (elementType == -1)
@@ -2524,8 +2444,7 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
             return 0;
           }
           idx = this->UnstructuredPartIds->IsId(realId);
-          numCellsPerElement =
-            this->GetCellIds(idx, elementType)->GetNumberOfIds();
+          numCellsPerElement = this->GetCellIds(idx, elementType)->GetNumberOfIds();
           comp1 = new float[numCellsPerElement];
           comp2 = new float[numCellsPerElement];
           comp3 = new float[numCellsPerElement];
@@ -2546,11 +2465,10 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
             tuple[3] = comp4[i];
             tuple[4] = comp5[i];
             tuple[5] = comp6[i];
-            tensors->InsertTuple(this->GetCellIds(idx, elementType)->GetId(i),
-              tuple);
+            tensors->InsertTuple(this->GetCellIds(idx, elementType)->GetId(i), tuple);
           }
-          this->IFile->peek();
-          if (this->IFile->eof())
+          this->GoldIFile->peek();
+          if (this->GoldIFile->eof())
           {
             lineRead = 0;
           }
@@ -2558,22 +2476,22 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
           {
             lineRead = this->ReadLine(line);
           }
-          delete [] comp1;
-          delete [] comp2;
-          delete [] comp3;
-          delete [] comp4;
-          delete [] comp5;
-          delete [] comp6;
+          delete[] comp1;
+          delete[] comp2;
+          delete[] comp3;
+          delete[] comp4;
+          delete[] comp5;
+          delete[] comp6;
         } // end while
-      } // end else
+      }   // end else
       tensors->SetName(description);
       output->GetCellData()->AddArray(tensors);
       tensors->Delete();
     }
     else
     {
-      this->IFile->peek();
-      if (this->IFile->eof())
+      this->GoldIFile->peek();
+      if (this->GoldIFile->eof())
       {
         lineRead = 0;
       }
@@ -2584,24 +2502,20 @@ int vtkEnSightGoldBinaryReader::ReadTensorsPerElement(
     }
   }
 
-  if (this->IFile)
-  {
-    this->IFile->close();
-    delete this->IFile;
-    this->IFile = nullptr;
-  }
+  delete this->GoldIFile;
+  this->GoldIFile = nullptr;
+
   return 1;
 }
 
 //----------------------------------------------------------------------------
 int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
-  int partId, char line[80], const char* name,
-  vtkMultiBlockDataSet *compositeOutput)
+  int partId, char line[80], const char* name, vtkMultiBlockDataSet* compositeOutput)
 {
   int lineRead = 1;
   int i, j;
-  vtkIdType *nodeIds;
-  int *nodeIdList;
+  vtkIdType* nodeIds;
+  int* nodeIdList;
   int numElements;
   int idx, cellId, cellType;
   float *xCoords, *yCoords, *zCoords;
@@ -2619,8 +2533,8 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
     this->UnstructuredPartIds->InsertNextId(partId);
   }
 
-  vtkUnstructuredGrid* output = vtkUnstructuredGrid::SafeDownCast(
-    this->GetDataSetFromBlock(compositeOutput, partId));
+  vtkUnstructuredGrid* output =
+    vtkUnstructuredGrid::SafeDownCast(this->GetDataSetFromBlock(compositeOutput, partId));
   this->SetBlockName(compositeOutput, partId, name);
 
   // Clear all cell ids from the last execution, if any.
@@ -2632,7 +2546,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
   output->Allocate(1000);
 
-  while(lineRead && strncmp(line, "part", 4) != 0)
+  while (lineRead && strncmp(line, "part", 4) != 0)
   {
     if (strncmp(line, "coordinates", 11) == 0)
     {
@@ -2642,18 +2556,19 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       this->ReadInt(&numPts);
       if (numPts < 0 || static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
       {
-        vtkErrorMacro("Invalid number of unstructured points read; check that ByteOrder is set correctly.");
+        vtkErrorMacro(
+          "Invalid number of unstructured points read; check that ByteOrder is set correctly.");
         return -1;
       }
 
-      vtkPoints *points = vtkPoints::New();
+      vtkPoints* points = vtkPoints::New();
       vtkDebugMacro("num. points: " << numPts);
 
       points->Allocate(numPts);
 
       if (this->NodeIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numPts, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numPts, ios::cur);
       }
 
       xCoords = new float[numPts];
@@ -2670,9 +2585,9 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       output->SetPoints(points);
       points->Delete();
-      delete [] xCoords;
-      delete [] yCoords;
-      delete [] zCoords;
+      delete[] xCoords;
+      delete[] yCoords;
+      delete[] zCoords;
     }
     else if (strncmp(line, "point", 5) == 0)
     {
@@ -2690,7 +2605,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       nodeIdList = new int[numElements];
@@ -2703,8 +2618,8 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         this->GetCellIds(idx, vtkEnSightReader::POINT)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
     else if (strncmp(line, "g_point", 7) == 0)
     {
@@ -2720,11 +2635,11 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       }
       if (this->ElementIdsListed)
       { // skip element ids.
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+      this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
     }
     else if (strncmp(line, "bar2", 4) == 0)
     {
@@ -2740,7 +2655,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       nodeIds = new vtkIdType[2];
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       nodeIdList = new int[numElements * 2];
@@ -2750,14 +2665,14 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       {
         for (j = 0; j < 2; j++)
         {
-          nodeIds[j] = nodeIdList[2*i+j] - 1;
+          nodeIds[j] = nodeIdList[2 * i + j] - 1;
         }
         cellId = output->InsertNextCell(VTK_LINE, 2, nodeIds);
         this->GetCellIds(idx, vtkEnSightReader::BAR2)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
     else if (strncmp(line, "g_bar2", 6) == 0)
     {
@@ -2773,11 +2688,11 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*2*numElements, ios::cur);
+      this->GoldIFile->seekg(sizeof(int) * 2 * numElements, ios::cur);
     }
     else if (strncmp(line, "bar3", 4) == 0)
     {
@@ -2794,24 +2709,24 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
-      nodeIdList = new int[numElements*3];
-      this->ReadIntArray(nodeIdList, numElements*3);
+      nodeIdList = new int[numElements * 3];
+      this->ReadIntArray(nodeIdList, numElements * 3);
 
       for (i = 0; i < numElements; i++)
       {
-        nodeIds[0] = nodeIdList[3*i]-1;
-        nodeIds[1] = nodeIdList[3*i+2]-1;
-        nodeIds[2] = nodeIdList[3*i+1]-1;
+        nodeIds[0] = nodeIdList[3 * i] - 1;
+        nodeIds[1] = nodeIdList[3 * i + 2] - 1;
+        nodeIds[2] = nodeIdList[3 * i + 1] - 1;
 
         cellId = output->InsertNextCell(VTK_QUADRATIC_EDGE, 3, nodeIds);
         this->GetCellIds(idx, vtkEnSightReader::BAR3)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
     else if (strncmp(line, "g_bar3", 6) == 0)
     {
@@ -2828,16 +2743,16 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*2*numElements, ios::cur);
+      this->GoldIFile->seekg(sizeof(int) * 2 * numElements, ios::cur);
     }
     else if (strncmp(line, "nsided", 6) == 0)
     {
       vtkDebugMacro("nsided");
-      int *numNodesPerElement;
+      int* numNodesPerElement;
       int numNodes = 0;
       int nodeCount = 0;
 
@@ -2852,7 +2767,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       numNodesPerElement = new int[numElements];
@@ -2872,25 +2787,23 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
           nodeIds[j] = nodeIdList[nodeCount] - 1;
           nodeCount++;
         }
-        cellId = output->InsertNextCell(VTK_POLYGON,
-          numNodesPerElement[i],
-          nodeIds);
+        cellId = output->InsertNextCell(VTK_POLYGON, numNodesPerElement[i], nodeIds);
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
 
-        delete [] nodeIds;
+        delete[] nodeIds;
       }
 
-      delete [] nodeIdList;
-      delete [] numNodesPerElement;
+      delete[] nodeIdList;
+      delete[] numNodesPerElement;
     }
     else if (strncmp(line, "g_nsided", 8) == 0)
     {
       // skipping ghost cells
       vtkDebugMacro("g_nsided");
-      int *numNodesPerElement;
+      int* numNodesPerElement;
       int numNodes = 0;
 
-      //cellType = vtkEnSightReader::NSIDED;
+      // cellType = vtkEnSightReader::NSIDED;
       this->ReadInt(&numElements);
       if (numElements < 0 ||
         static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
@@ -2901,7 +2814,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       numNodesPerElement = new int[numElements];
@@ -2911,11 +2824,10 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         numNodes += numNodesPerElement[i];
       }
       // Skip nodeIdList.
-      this->IFile->seekg(sizeof(int)*numNodes, ios::cur);
-      delete [] numNodesPerElement;
+      this->GoldIFile->seekg(sizeof(int) * numNodes, ios::cur);
+      delete[] numNodesPerElement;
     }
-    else if (strncmp(line, "tria3", 5) == 0 ||
-      strncmp(line, "tria6", 5) == 0)
+    else if (strncmp(line, "tria3", 5) == 0 || strncmp(line, "tria6", 5) == 0)
     {
       if (strncmp(line, "tria6", 5) == 0)
       {
@@ -2938,20 +2850,20 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::TRIA6)
       {
         nodeIds = new vtkIdType[6];
-        nodeIdList = new int[numElements*6];
-        this->ReadIntArray(nodeIdList, numElements*6);
+        nodeIdList = new int[numElements * 6];
+        this->ReadIntArray(nodeIdList, numElements * 6);
       }
       else
       {
         nodeIds = new vtkIdType[3];
-        nodeIdList = new int[numElements*3];
-        this->ReadIntArray(nodeIdList, numElements*3);
+        nodeIdList = new int[numElements * 3];
+        this->ReadIntArray(nodeIdList, numElements * 3);
       }
 
       for (i = 0; i < numElements; i++)
@@ -2960,7 +2872,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 6; j++)
           {
-            nodeIds[j] = nodeIdList[6*i+j] - 1;
+            nodeIds[j] = nodeIdList[6 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUADRATIC_TRIANGLE, 6, nodeIds);
         }
@@ -2968,18 +2880,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 3; j++)
           {
-            nodeIds[j] = nodeIdList[3*i+j] - 1;
+            nodeIds[j] = nodeIdList[3 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_TRIANGLE, 3, nodeIds);
         }
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
-    else if (strncmp(line, "g_tria3", 7) == 0 ||
-      strncmp(line, "g_tria6", 7) == 0)
+    else if (strncmp(line, "g_tria3", 7) == 0 || strncmp(line, "g_tria6", 7) == 0)
     {
       // skipping ghost cells
       if (strncmp(line, "g_tria6", 7) == 0)
@@ -3002,22 +2913,21 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::TRIA6)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*6*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 6 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*3*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 3 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "quad4", 5) == 0 ||
-      strncmp(line, "quad8", 5) == 0)
+    else if (strncmp(line, "quad4", 5) == 0 || strncmp(line, "quad8", 5) == 0)
     {
       if (strncmp(line, "quad8", 5) == 0)
       {
@@ -3040,20 +2950,20 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::QUAD8)
       {
         nodeIds = new vtkIdType[8];
-        nodeIdList = new int[numElements*8];
-        this->ReadIntArray(nodeIdList, numElements*8);
+        nodeIdList = new int[numElements * 8];
+        this->ReadIntArray(nodeIdList, numElements * 8);
       }
       else
       {
         nodeIds = new vtkIdType[4];
-        nodeIdList = new int[numElements*4];
-        this->ReadIntArray(nodeIdList, numElements*4);
+        nodeIdList = new int[numElements * 4];
+        this->ReadIntArray(nodeIdList, numElements * 4);
       }
 
       for (i = 0; i < numElements; i++)
@@ -3062,7 +2972,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 8; j++)
           {
-            nodeIds[j] = nodeIdList[8*i+j] - 1;
+            nodeIds[j] = nodeIdList[8 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUADRATIC_QUAD, 8, nodeIds);
         }
@@ -3070,18 +2980,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 4; j++)
           {
-            nodeIds[j] = nodeIdList[4*i+j] - 1;
+            nodeIds[j] = nodeIdList[4 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUAD, 4, nodeIds);
         }
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
-    else if (strncmp(line, "g_quad4", 7) == 0 ||
-      strncmp(line, "g_quad8", 7) == 0)
+    else if (strncmp(line, "g_quad4", 7) == 0 || strncmp(line, "g_quad8", 7) == 0)
     {
       // skipping ghost cells
       if (strncmp(line, "g_quad8", 7) == 0)
@@ -3104,28 +3013,28 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::QUAD8)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*8*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 8 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*4*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 4 * numElements, ios::cur);
       }
     }
 
     else if (strncmp(line, "nfaced", 6) == 0)
     {
       vtkDebugMacro("nfaced");
-      int *numFacesPerElement;
-      int *numNodesPerFace;
-      int *numNodesPerElement;
-      int *nodeMarker;
+      int* numFacesPerElement;
+      int* numNodesPerFace;
+      int* numNodesPerElement;
+      int* nodeMarker;
       int numPts = 0;
       int numFaces = 0;
       int numNodes = 0;
@@ -3144,7 +3053,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       // array: number of faces per element
@@ -3172,10 +3081,10 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         faceCount += numFacesPerElement[i];
       }
 
-      //xxx begin
-      //delete [] numFacesPerElement;
-      //delete [] numNodesPerFace;
-      //xxx end
+      // xxx begin
+      // delete [] numFacesPerElement;
+      // delete [] numNodesPerFace;
+      // xxx end
 
       // number of nodes of all elements
       for (i = 0; i < numElements; i++)
@@ -3199,11 +3108,11 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       this->ReadIntArray(nodeIdList, numNodes);
 
       // yyy begin
-      int         k;              // indexing each node Id of a face
-      int         faceIdx = 0;    // indexing faces throughout all polyhedra
-      int         nodeIdx = 0;    // indexing nodes throughout all polyhedra
-      int         arayIdx = 0;    // indexing the array of Ids (info of faces)
-      vtkIdType * faceAry = nullptr; // array of Ids describing a vtkPolyhedron
+      int k;                        // indexing each node Id of a face
+      int faceIdx = 0;              // indexing faces throughout all polyhedra
+      int nodeIdx = 0;              // indexing nodes throughout all polyhedra
+      int arayIdx = 0;              // indexing the array of Ids (info of faces)
+      vtkIdType* faceAry = nullptr; // array of Ids describing a vtkPolyhedron
       // yyy end
 
       for (i = 0; i < numElements; i++)
@@ -3213,18 +3122,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
         // yyy begin
         arayIdx = 0;
-        faceAry = new vtkIdType[ numFacesPerElement[i] +
-                                 numNodesPerElement[i] ];
-        for ( j = 0; j < numFacesPerElement[i]; j ++, faceIdx ++ )
+        faceAry = new vtkIdType[numFacesPerElement[i] + numNodesPerElement[i]];
+        for (j = 0; j < numFacesPerElement[i]; j++, faceIdx++)
         {
-          faceAry[ arayIdx ++ ] = numNodesPerFace[ faceIdx ];
+          faceAry[arayIdx++] = numNodesPerFace[faceIdx];
 
-          for (  k = 0;  k < numNodesPerFace[ faceIdx ];  k ++  )
+          for (k = 0; k < numNodesPerFace[faceIdx]; k++)
           {
-            faceAry[ arayIdx ++ ] = nodeIdList[ nodeIdx ++ ] - 1;
+            faceAry[arayIdx++] = nodeIdList[nodeIdx++] - 1;
           }
         }
-        //yyy end
+        // yyy end
 
         for (j = 0; j < numNodesPerElement[i]; j++)
         {
@@ -3238,36 +3146,34 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         }
 
         // xxx begin
-        //cellId = output->InsertNextCell( VTK_CONVEX_POINT_SET,
+        // cellId = output->InsertNextCell( VTK_CONVEX_POINT_SET,
         //                                 elementNodeCount, nodeIds );
         // xxx end
 
         // yyy begin
-        cellId = output->InsertNextCell( VTK_POLYHEDRON, elementNodeCount,
-                                         nodeIds, numFacesPerElement[i],
-                                         faceAry );
-        delete [] faceAry;
+        cellId = output->InsertNextCell(
+          VTK_POLYHEDRON, elementNodeCount, nodeIds, numFacesPerElement[i], faceAry);
+        delete[] faceAry;
         faceAry = nullptr;
-        //yyy end
+        // yyy end
 
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
 
-        delete [] nodeIds;
+        delete[] nodeIds;
       }
 
       // yyy begin
-      delete [] numNodesPerFace;
-      delete [] numFacesPerElement;
-      numNodesPerFace    = nullptr;
+      delete[] numNodesPerFace;
+      delete[] numFacesPerElement;
+      numNodesPerFace = nullptr;
       numFacesPerElement = nullptr;
       // yyy end
 
-      delete [] nodeMarker;
-      delete [] nodeIdList;
-      delete [] numNodesPerElement;
+      delete[] nodeMarker;
+      delete[] nodeIdList;
+      delete[] numNodesPerElement;
     }
-    else if (strncmp(line, "tetra4", 6) == 0 ||
-      strncmp(line, "tetra10", 7) == 0)
+    else if (strncmp(line, "tetra4", 6) == 0 || strncmp(line, "tetra10", 7) == 0)
     {
       if (strncmp(line, "tetra10", 7) == 0)
       {
@@ -3284,26 +3190,27 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       if (numElements < 0 ||
         static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
       {
-        vtkErrorMacro("Invalid number of tetrahedral cells; check that ByteOrder is set correctly.");
+        vtkErrorMacro(
+          "Invalid number of tetrahedral cells; check that ByteOrder is set correctly.");
         return -1;
       }
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::TETRA10)
       {
         nodeIds = new vtkIdType[10];
-        nodeIdList = new int[numElements*10];
-        this->ReadIntArray(nodeIdList, numElements*10);
+        nodeIdList = new int[numElements * 10];
+        this->ReadIntArray(nodeIdList, numElements * 10);
       }
       else
       {
         nodeIds = new vtkIdType[4];
-        nodeIdList = new int[numElements*4];
-        this->ReadIntArray(nodeIdList, numElements*4);
+        nodeIdList = new int[numElements * 4];
+        this->ReadIntArray(nodeIdList, numElements * 4);
       }
 
       for (i = 0; i < numElements; i++)
@@ -3312,7 +3219,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 10; j++)
           {
-            nodeIds[j] = nodeIdList[10*i+j] - 1;
+            nodeIds[j] = nodeIdList[10 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUADRATIC_TETRA, 10, nodeIds);
         }
@@ -3320,18 +3227,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 4; j++)
           {
-            nodeIds[j] = nodeIdList[4*i+j] - 1;
+            nodeIds[j] = nodeIdList[4 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_TETRA, 4, nodeIds);
         }
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
-    else if (strncmp(line, "g_tetra4", 8) == 0 ||
-      strncmp(line, "g_tetra10", 9) == 0)
+    else if (strncmp(line, "g_tetra4", 8) == 0 || strncmp(line, "g_tetra10", 9) == 0)
     {
       // skipping ghost cells
       if (strncmp(line, "g_tetra10", 9) == 0)
@@ -3349,27 +3255,27 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       if (numElements < 0 ||
         static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
       {
-        vtkErrorMacro("Invalid number of tetrahedral cells; check that ByteOrder is set correctly.");
+        vtkErrorMacro(
+          "Invalid number of tetrahedral cells; check that ByteOrder is set correctly.");
         return -1;
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::TETRA10)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*10*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 10 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*4*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 4 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "pyramid5", 8) == 0 ||
-      strncmp(line, "pyramid13", 9) == 0)
+    else if (strncmp(line, "pyramid5", 8) == 0 || strncmp(line, "pyramid13", 9) == 0)
     {
       if (strncmp(line, "pyramid13", 9) == 0)
       {
@@ -3392,20 +3298,20 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::PYRAMID13)
       {
         nodeIds = new vtkIdType[13];
-        nodeIdList = new int[numElements*13];
-        this->ReadIntArray(nodeIdList, numElements*13);
+        nodeIdList = new int[numElements * 13];
+        this->ReadIntArray(nodeIdList, numElements * 13);
       }
       else
       {
         nodeIds = new vtkIdType[5];
-        nodeIdList = new int[numElements*5];
-        this->ReadIntArray(nodeIdList, numElements*5);
+        nodeIdList = new int[numElements * 5];
+        this->ReadIntArray(nodeIdList, numElements * 5);
       }
 
       for (i = 0; i < numElements; i++)
@@ -3414,7 +3320,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 13; j++)
           {
-            nodeIds[j] = nodeIdList[13*i+j] - 1;
+            nodeIds[j] = nodeIdList[13 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUADRATIC_PYRAMID, 13, nodeIds);
         }
@@ -3422,18 +3328,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 5; j++)
           {
-            nodeIds[j] = nodeIdList[5*i+j] - 1;
+            nodeIds[j] = nodeIdList[5 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_PYRAMID, 5, nodeIds);
         }
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
-    else if (strncmp(line, "g_pyramid5", 10) == 0 ||
-      strncmp(line, "g_pyramid13", 11) == 0)
+    else if (strncmp(line, "g_pyramid5", 10) == 0 || strncmp(line, "g_pyramid13", 11) == 0)
     {
       // skipping ghost cells
       if (strncmp(line, "g_pyramid13", 11) == 0)
@@ -3456,22 +3361,21 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::PYRAMID13)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*13*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 13 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*5*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 5 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "hexa8", 5) == 0 ||
-      strncmp(line, "hexa20", 6) == 0)
+    else if (strncmp(line, "hexa8", 5) == 0 || strncmp(line, "hexa20", 6) == 0)
     {
       if (strncmp(line, "hexa20", 6) == 0)
       {
@@ -3494,20 +3398,20 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::HEXA20)
       {
         nodeIds = new vtkIdType[20];
-        nodeIdList = new int[numElements*20];
-        this->ReadIntArray(nodeIdList, numElements*20);
+        nodeIdList = new int[numElements * 20];
+        this->ReadIntArray(nodeIdList, numElements * 20);
       }
       else
       {
         nodeIds = new vtkIdType[8];
-        nodeIdList = new int[numElements*8];
-        this->ReadIntArray(nodeIdList, numElements*8);
+        nodeIdList = new int[numElements * 8];
+        this->ReadIntArray(nodeIdList, numElements * 8);
       }
 
       for (i = 0; i < numElements; i++)
@@ -3516,7 +3420,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 20; j++)
           {
-            nodeIds[j] = nodeIdList[20*i+j] - 1;
+            nodeIds[j] = nodeIdList[20 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUADRATIC_HEXAHEDRON, 20, nodeIds);
         }
@@ -3524,18 +3428,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 8; j++)
           {
-            nodeIds[j] = nodeIdList[8*i+j] - 1;
+            nodeIds[j] = nodeIdList[8 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_HEXAHEDRON, 8, nodeIds);
         }
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
-    else if (strncmp(line, "g_hexa8", 7) == 0 ||
-      strncmp(line, "g_hexa20", 8) == 0)
+    else if (strncmp(line, "g_hexa8", 7) == 0 || strncmp(line, "g_hexa20", 8) == 0)
     {
       // skipping ghost cells
       if (strncmp(line, "g_hexa20", 8) == 0)
@@ -3558,22 +3461,21 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::HEXA20)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*20*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 20 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*8*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 8 * numElements, ios::cur);
       }
     }
-    else if (strncmp(line, "penta6", 6) == 0 ||
-      strncmp(line, "penta15", 7) == 0)
+    else if (strncmp(line, "penta6", 6) == 0 || strncmp(line, "penta15", 7) == 0)
     {
       if (strncmp(line, "penta15", 7) == 0)
       {
@@ -3596,24 +3498,24 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::PENTA15)
       {
         nodeIds = new vtkIdType[15];
-        nodeIdList = new int[numElements*15];
-        this->ReadIntArray(nodeIdList, numElements*15);
+        nodeIdList = new int[numElements * 15];
+        this->ReadIntArray(nodeIdList, numElements * 15);
       }
       else
       {
         nodeIds = new vtkIdType[6];
-        nodeIdList = new int[numElements*6];
-        this->ReadIntArray(nodeIdList, numElements*6);
+        nodeIdList = new int[numElements * 6];
+        this->ReadIntArray(nodeIdList, numElements * 6);
       }
 
-      const unsigned char penta6Map[6] = {0, 2, 1, 3, 5, 4};
-      const unsigned char penta15Map[15] = {0, 2, 1, 3, 5, 4, 8, 7, 6, 11, 10, 9, 12, 14, 13};
+      const unsigned char penta6Map[6] = { 0, 2, 1, 3, 5, 4 };
+      const unsigned char penta15Map[15] = { 0, 2, 1, 3, 5, 4, 8, 7, 6, 11, 10, 9, 12, 14, 13 };
 
       for (i = 0; i < numElements; i++)
       {
@@ -3621,7 +3523,7 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 15; j++)
           {
-            nodeIds[penta15Map[j]] = nodeIdList[15*i+j] - 1;
+            nodeIds[penta15Map[j]] = nodeIdList[15 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_QUADRATIC_WEDGE, 15, nodeIds);
         }
@@ -3629,18 +3531,17 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
         {
           for (j = 0; j < 6; j++)
           {
-            nodeIds[penta6Map[j]] = nodeIdList[6*i+j] - 1;
+            nodeIds[penta6Map[j]] = nodeIdList[6 * i + j] - 1;
           }
           cellId = output->InsertNextCell(VTK_WEDGE, 6, nodeIds);
         }
         this->GetCellIds(idx, cellType)->InsertNextId(cellId);
       }
 
-      delete [] nodeIds;
-      delete [] nodeIdList;
+      delete[] nodeIds;
+      delete[] nodeIdList;
     }
-    else if (strncmp(line, "g_penta6", 8) == 0 ||
-      strncmp(line, "g_penta15", 9) == 0)
+    else if (strncmp(line, "g_penta6", 8) == 0 || strncmp(line, "g_penta15", 9) == 0)
     {
       // skipping ghost cells
       if (strncmp(line, "g_penta15", 9) == 0)
@@ -3656,25 +3557,25 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
       this->ReadInt(&numElements);
       if (numElements < 0 ||
-       static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
+        static_cast<unsigned int>(numElements * this->SizeOfInt) > this->FileSize)
       {
         vtkErrorMacro("Invalid number of pentagonal cells; check that ByteOrder is set correctly.");
         return -1;
       }
       if (this->ElementIdsListed)
       {
-        this->IFile->seekg(sizeof(int)*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * numElements, ios::cur);
       }
 
       if (cellType == vtkEnSightReader::PENTA15)
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*15*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 15 * numElements, ios::cur);
       }
       else
       {
         // Skip nodeIdList.
-        this->IFile->seekg(sizeof(int)*6*numElements, ios::cur);
+        this->GoldIFile->seekg(sizeof(int) * 6 * numElements, ios::cur);
       }
     }
     else if (strncmp(line, "END TIME STEP", 13) == 0)
@@ -3683,8 +3584,8 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
     }
     else if (this->IS->fail())
     {
-      //May want consistency check here?
-      //vtkWarningMacro("EOF on geometry file");
+      // May want consistency check here?
+      // vtkWarningMacro("EOF on geometry file");
       return 1;
     }
     else
@@ -3692,8 +3593,8 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
       vtkErrorMacro("undefined geometry file line");
       return -1;
     }
-    this->IFile->peek();
-    if (this->IFile->eof())
+    this->GoldIFile->peek();
+    if (this->GoldIFile->eof())
     {
       lineRead = 0;
       continue;
@@ -3705,22 +3606,21 @@ int vtkEnSightGoldBinaryReader::CreateUnstructuredGridOutput(
 
 //----------------------------------------------------------------------------
 int vtkEnSightGoldBinaryReader::CreateStructuredGridOutput(
-  int partId, char line[80], const char* name,
-  vtkMultiBlockDataSet *compositeOutput)
+  int partId, char line[80], const char* name, vtkMultiBlockDataSet* compositeOutput)
 {
   char subLine[80];
   int lineRead;
   int iblanked = 0;
   int dimensions[3];
   int i;
-  vtkPoints *points = vtkPoints::New();
+  vtkPoints* points = vtkPoints::New();
   int numPts;
   float *xCoords, *yCoords, *zCoords;
 
   this->NumberOfNewOutputs++;
 
   vtkDataSet* ds = this->GetDataSetFromBlock(compositeOutput, partId);
-  if (ds == nullptr || ! ds->IsA("vtkStructuredGrid"))
+  if (ds == nullptr || !ds->IsA("vtkStructuredGrid"))
   {
     vtkDebugMacro("creating new structured grid output");
     vtkStructuredGrid* sgrid = vtkStructuredGrid::New();
@@ -3747,8 +3647,8 @@ int vtkEnSightGoldBinaryReader::CreateStructuredGridOutput(
     dimensions[1] < 0 ||
     static_cast<unsigned int>(dimensions[1] * this->SizeOfInt) > this->FileSize ||
     dimensions[2] < 0 ||
-    static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize ||
-    numPts < 0 || static_cast<unsigned int>(numPts*this->SizeOfInt) > this->FileSize)
+    static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize || numPts < 0 ||
+    static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
   {
     vtkErrorMacro("Invalid dimensions read; check that ByteOrder is set correctly.");
     points->Delete();
@@ -3771,7 +3671,7 @@ int vtkEnSightGoldBinaryReader::CreateStructuredGridOutput(
   output->SetPoints(points);
   if (iblanked)
   {
-    int *iblanks = new int[numPts];
+    int* iblanks = new int[numPts];
     this->ReadIntArray(iblanks, numPts);
 
     for (i = 0; i < numPts; i++)
@@ -3781,16 +3681,16 @@ int vtkEnSightGoldBinaryReader::CreateStructuredGridOutput(
         output->BlankPoint(i);
       }
     }
-    delete [] iblanks;
+    delete[] iblanks;
   }
 
   points->Delete();
-  delete [] xCoords;
-  delete [] yCoords;
-  delete [] zCoords;
+  delete[] xCoords;
+  delete[] yCoords;
+  delete[] zCoords;
 
-  this->IFile->peek();
-  if (this->IFile->eof())
+  this->GoldIFile->peek();
+  if (this->GoldIFile->eof())
   {
     lineRead = 0;
   }
@@ -3801,19 +3701,18 @@ int vtkEnSightGoldBinaryReader::CreateStructuredGridOutput(
 
   if (strncmp(line, "node_ids", 8) == 0)
   {
-    int *nodeIds = new int[numPts];
+    int* nodeIds = new int[numPts];
     this->ReadIntArray(nodeIds, numPts);
     lineRead = this->ReadLine(line);
-    delete [] nodeIds;
+    delete[] nodeIds;
   }
   if (strncmp(line, "element_ids", 11) == 0)
   {
-    int numElements = (dimensions[0] - 1) * (dimensions[1] - 1) *
-      (dimensions[2] - 1);
-    int *elementIds = new int[numElements];
+    int numElements = (dimensions[0] - 1) * (dimensions[1] - 1) * (dimensions[2] - 1);
+    int* elementIds = new int[numElements];
     this->ReadIntArray(elementIds, numElements);
     lineRead = this->ReadLine(line);
-    delete [] elementIds;
+    delete[] elementIds;
   }
 
   return lineRead;
@@ -3821,18 +3720,17 @@ int vtkEnSightGoldBinaryReader::CreateStructuredGridOutput(
 
 //----------------------------------------------------------------------------
 int vtkEnSightGoldBinaryReader::CreateRectilinearGridOutput(
-  int partId, char line[80], const char* name,
-  vtkMultiBlockDataSet *compositeOutput)
+  int partId, char line[80], const char* name, vtkMultiBlockDataSet* compositeOutput)
 {
   char subLine[80];
   int lineRead;
   int iblanked = 0;
   int dimensions[3];
   int i;
-  vtkFloatArray *xCoords = vtkFloatArray::New();
-  vtkFloatArray *yCoords = vtkFloatArray::New();
-  vtkFloatArray *zCoords = vtkFloatArray::New();
-  float *tempCoords;
+  vtkFloatArray* xCoords = vtkFloatArray::New();
+  vtkFloatArray* yCoords = vtkFloatArray::New();
+  vtkFloatArray* zCoords = vtkFloatArray::New();
+  float* tempCoords;
   int numPts;
 
   this->NumberOfNewOutputs++;
@@ -3866,7 +3764,7 @@ int vtkEnSightGoldBinaryReader::CreateRectilinearGridOutput(
     static_cast<unsigned int>(dimensions[1] * this->SizeOfInt) > this->FileSize ||
     dimensions[2] < 0 ||
     static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize ||
-    (dimensions[0]+dimensions[1]+dimensions[2]) < 0 ||
+    (dimensions[0] + dimensions[1] + dimensions[2]) < 0 ||
     static_cast<unsigned int>((dimensions[0] + dimensions[1] + dimensions[2]) * this->SizeOfInt) >
       this->FileSize)
   {
@@ -3888,28 +3786,28 @@ int vtkEnSightGoldBinaryReader::CreateRectilinearGridOutput(
   {
     xCoords->InsertNextTuple(&tempCoords[i]);
   }
-  delete [] tempCoords;
+  delete[] tempCoords;
   tempCoords = new float[dimensions[1]];
   this->ReadFloatArray(tempCoords, dimensions[1]);
   for (i = 0; i < dimensions[1]; i++)
   {
     yCoords->InsertNextTuple(&tempCoords[i]);
   }
-  delete [] tempCoords;
+  delete[] tempCoords;
   tempCoords = new float[dimensions[2]];
   this->ReadFloatArray(tempCoords, dimensions[2]);
   for (i = 0; i < dimensions[2]; i++)
   {
     zCoords->InsertNextTuple(&tempCoords[i]);
   }
-  delete [] tempCoords;
+  delete[] tempCoords;
   if (iblanked)
   {
     vtkWarningMacro("VTK does not handle blanking for rectilinear grids.");
     numPts = dimensions[0] * dimensions[1] * dimensions[2];
-    int *tempArray = new int[numPts];
+    int* tempArray = new int[numPts];
     this->ReadIntArray(tempArray, numPts);
-    delete [] tempArray;
+    delete[] tempArray;
   }
 
   output->SetXCoordinates(xCoords);
@@ -3927,8 +3825,7 @@ int vtkEnSightGoldBinaryReader::CreateRectilinearGridOutput(
 
 //----------------------------------------------------------------------------
 int vtkEnSightGoldBinaryReader::CreateImageDataOutput(
-  int partId, char line[80], const char* name,
-  vtkMultiBlockDataSet *compositeOutput)
+  int partId, char line[80], const char* name, vtkMultiBlockDataSet* compositeOutput)
 {
   char subLine[80];
   int lineRead;
@@ -3971,20 +3868,20 @@ int vtkEnSightGoldBinaryReader::CreateImageDataOutput(
   if (iblanked)
   {
     vtkWarningMacro("VTK does not handle blanking for image data.");
-    numPts = dimensions[0]*dimensions[1]*dimensions[2];
+    numPts = dimensions[0] * dimensions[1] * dimensions[2];
     if (dimensions[0] < 0 ||
       static_cast<unsigned int>(dimensions[0] * this->SizeOfInt) > this->FileSize ||
       dimensions[1] < 0 ||
       static_cast<unsigned int>(dimensions[1] * this->SizeOfInt) > this->FileSize ||
       dimensions[2] < 0 ||
-      static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize ||
-      numPts < 0 || static_cast<unsigned int>(numPts*this->SizeOfInt) > this->FileSize)
+      static_cast<unsigned int>(dimensions[2] * this->SizeOfInt) > this->FileSize || numPts < 0 ||
+      static_cast<unsigned int>(numPts * this->SizeOfInt) > this->FileSize)
     {
       return -1;
     }
-    int *tempArray = new int[numPts];
+    int* tempArray = new int[numPts];
     this->ReadIntArray(tempArray, numPts);
-    delete [] tempArray;
+    delete[] tempArray;
   }
 
   // reading next line to check for EOF
@@ -3996,13 +3893,13 @@ int vtkEnSightGoldBinaryReader::CreateImageDataOutput(
 // Returns zero if there was an error.
 int vtkEnSightGoldBinaryReader::ReadLine(char result[80])
 {
-  if (!this->IFile->read(result, 80))
+  if (!this->GoldIFile->read(result, 80))
   {
     // The read fails when reading the last part/array when there are no points.
-    // I took out the error macro as a tempory fix.
+    // I took out the error macro as a temporary fix.
     // We need to determine what EnSight does when the part with zero point
     // is not the last, and change the read array method.
-    //int fixme; // I do not a file to test with yet.
+    // int fixme; // I do not have a file to test with yet.
     vtkDebugMacro("Read failed");
     return 0;
   }
@@ -4011,11 +3908,20 @@ int vtkEnSightGoldBinaryReader::ReadLine(char result[80])
 
   if (this->Fortran)
   {
-    strncpy(result, &result[4], 76);
+    // strncpy cannot be used for overlapping buffers
+    int i = 0;
+    for (; i < 76 && result[i + 4] != '\0'; ++i)
+    {
+      result[i] = result[i + 4];
+    }
+    for (; i < 76; ++i)
+    {
+      result[i] = '\0';
+    }
     result[76] = 0;
     // better read an extra 8 bytes to prevent error next time
     char dummy[8];
-    if (!this->IFile->read(dummy, 8))
+    if (!this->GoldIFile->read(dummy, 8))
     {
       vtkDebugMacro("Read (fortran) failed");
       return 0;
@@ -4028,7 +3934,7 @@ int vtkEnSightGoldBinaryReader::ReadLine(char result[80])
 // Internal function to read a single integer.
 // Returns zero if there was an error.
 // Sets byte order so that part id is reasonable.
-int vtkEnSightGoldBinaryReader::ReadPartId(int *result)
+int vtkEnSightGoldBinaryReader::ReadPartId(int* result)
 {
   // first swap like normal.
   if (this->ReadInt(result) == 0)
@@ -4067,19 +3973,19 @@ int vtkEnSightGoldBinaryReader::ReadPartId(int *result)
 
 // Internal function to read a single integer.
 // Returns zero if there was an error.
-int vtkEnSightGoldBinaryReader::ReadInt(int *result)
+int vtkEnSightGoldBinaryReader::ReadInt(int* result)
 {
   char dummy[4];
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
     }
   }
 
-  if (!this->IFile->read((char*)result, sizeof(int)))
+  if (!this->GoldIFile->read((char*)result, sizeof(int)))
   {
     vtkErrorMacro("Read failed");
     return 0;
@@ -4096,7 +4002,7 @@ int vtkEnSightGoldBinaryReader::ReadInt(int *result)
 
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
@@ -4108,8 +4014,7 @@ int vtkEnSightGoldBinaryReader::ReadInt(int *result)
 
 // Internal function to read an integer array.
 // Returns zero if there was an error.
-int vtkEnSightGoldBinaryReader::ReadIntArray(int *result,
-  int numInts)
+int vtkEnSightGoldBinaryReader::ReadIntArray(int* result, int numInts)
 {
   if (numInts <= 0)
   {
@@ -4119,14 +4024,14 @@ int vtkEnSightGoldBinaryReader::ReadIntArray(int *result,
   char dummy[4];
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
     }
   }
 
-  if (!this->IFile->read((char*)result, sizeof(int)*numInts))
+  if (!this->GoldIFile->read((char*)result, sizeof(int) * numInts))
   {
     vtkErrorMacro("Read failed.");
     return 0;
@@ -4143,7 +4048,7 @@ int vtkEnSightGoldBinaryReader::ReadIntArray(int *result,
 
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
@@ -4155,19 +4060,19 @@ int vtkEnSightGoldBinaryReader::ReadIntArray(int *result,
 
 // Internal function to read a single vtkTypeInt64.
 // Returns zero if there was an error.
-int vtkEnSightGoldBinaryReader::ReadLong(vtkTypeInt64 *result)
+int vtkEnSightGoldBinaryReader::ReadLong(vtkTypeInt64* result)
 {
   char dummy[4];
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
     }
   }
 
-  if (!this->IFile->read((char*)result, sizeof(vtkTypeInt64)))
+  if (!this->GoldIFile->read((char*)result, sizeof(vtkTypeInt64)))
   {
     vtkErrorMacro("Read failed");
     return 0;
@@ -4184,7 +4089,7 @@ int vtkEnSightGoldBinaryReader::ReadLong(vtkTypeInt64 *result)
 
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
@@ -4196,8 +4101,7 @@ int vtkEnSightGoldBinaryReader::ReadLong(vtkTypeInt64 *result)
 
 // Internal function to read a float array.
 // Returns zero if there was an error.
-int vtkEnSightGoldBinaryReader::ReadFloatArray(float *result,
-  int numFloats)
+int vtkEnSightGoldBinaryReader::ReadFloatArray(float* result, int numFloats)
 {
   if (numFloats <= 0)
   {
@@ -4207,14 +4111,14 @@ int vtkEnSightGoldBinaryReader::ReadFloatArray(float *result,
   char dummy[4];
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
     }
   }
 
-  if (!this->IFile->read((char*)result, sizeof(float)*numFloats))
+  if (!this->GoldIFile->read((char*)result, sizeof(float) * numFloats))
   {
     vtkErrorMacro("Read failed");
     return 0;
@@ -4231,7 +4135,7 @@ int vtkEnSightGoldBinaryReader::ReadFloatArray(float *result,
 
   if (this->Fortran)
   {
-    if (!this->IFile->read(dummy, 4))
+    if (!this->GoldIFile->read(dummy, 4))
     {
       vtkErrorMacro("Read (fortran) failed.");
       return 0;
@@ -4243,14 +4147,13 @@ int vtkEnSightGoldBinaryReader::ReadFloatArray(float *result,
 //----------------------------------------------------------------------------
 void vtkEnSightGoldBinaryReader::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
 // Seeks the IFile to the cached timestep nearest the target timestep.
 // Returns the actually sought to timestep
 //----------------------------------------------------------------------------
-int vtkEnSightGoldBinaryReader::SeekToCachedTimeStep(const char* fileName,
-                                                     int realTimeStep)
+int vtkEnSightGoldBinaryReader::SeekToCachedTimeStep(const char* fileName, int realTimeStep)
 {
   typedef vtkEnSightGoldBinaryReader::FileOffsetMapInternal MapType;
   typedef MapType::const_iterator MapNameIterator;
@@ -4259,7 +4162,7 @@ int vtkEnSightGoldBinaryReader::SeekToCachedTimeStep(const char* fileName,
   int j = 0;
 
   MapNameIterator nameIterator = this->FileOffsets->Map.find(fileName);
-  if(nameIterator == this->FileOffsets->Map.end())
+  if (nameIterator == this->FileOffsets->Map.end())
   {
     return j;
   }
@@ -4270,10 +4173,10 @@ int vtkEnSightGoldBinaryReader::SeekToCachedTimeStep(const char* fileName,
     FileOffsetIterator fileOffsetIterator = nameIterator->second.find(i);
     if (fileOffsetIterator != nameIterator->second.end())
     {
-      //we need to account for the last 80 characters as where we need to seek,
-      //as we need to be at the BEGIN TIMESTEP keyword and not
-      //the description line
-      this->IFile->seekg(fileOffsetIterator->second - 80l, ios::beg);
+      // we need to account for the last 80 characters as where we need to seek,
+      // as we need to be at the BEGIN TIMESTEP keyword and not
+      // the description line
+      this->GoldIFile->seekg(fileOffsetIterator->second - 80l, ios::beg);
       j = i;
       break;
     }
@@ -4283,9 +4186,8 @@ int vtkEnSightGoldBinaryReader::SeekToCachedTimeStep(const char* fileName,
 
 //----------------------------------------------------------------------------
 // Add a cached file offset
-void vtkEnSightGoldBinaryReader::AddTimeStepToCache(const char* fileName,
-                                                    int realTimeStep,
-                                                    vtkTypeInt64 address)
+void vtkEnSightGoldBinaryReader::AddTimeStepToCache(
+  const char* fileName, int realTimeStep, vtkTypeInt64 address)
 {
   if (this->FileOffsets->Map.find(fileName) == this->FileOffsets->Map.end())
   {
@@ -4303,17 +4205,16 @@ void vtkEnSightGoldBinaryReader::AddFileIndexToCache(const char* fileName)
   {
     char line[80];
     vtkTypeInt64 addr;
-    int  numTS;
+    int numTS;
 
     // We add an empty map to prevent further attempts at reading the file index
     std::map<int, vtkTypeInt64> tsMap;
     this->FileOffsets->Map[fileName] = tsMap;
 
     // Read the last 80 characters (+ a vtkTypeInt64) of the file and check for FILE_INDEX
-    vtkIdType seekOffset =
-      ( vtkIdType(-80) * static_cast<vtkIdType>(sizeof(char)) ) -
-                         static_cast<vtkIdType>(sizeof(vtkTypeInt64));
-    this->IFile->seekg(seekOffset, ios::end);
+    vtkIdType seekOffset = (vtkIdType(-80) * static_cast<vtkIdType>(sizeof(char))) -
+      static_cast<vtkIdType>(sizeof(vtkTypeInt64));
+    this->GoldIFile->seekg(seekOffset, ios::end);
 
     // right before the FILE_INDEX entry we might find the address of the index start
     this->ReadLong(&addr);
@@ -4322,7 +4223,7 @@ void vtkEnSightGoldBinaryReader::AddFileIndexToCache(const char* fileName)
     if (strncmp(line, "FILE_INDEX", 10) == 0)
     {
       // jump to beginning of the index and add all time steps
-      this->IFile->seekg(addr, ios::beg);
+      this->GoldIFile->seekg(addr, ios::beg);
       this->ReadInt(&numTS);
 
       for (int i = 0; i < numTS; ++i)
@@ -4333,5 +4234,5 @@ void vtkEnSightGoldBinaryReader::AddFileIndexToCache(const char* fileName)
       }
     }
   }
-  this->IFile->seekg(0l, ios::beg);
+  this->GoldIFile->seekg(0l, ios::beg);
 }

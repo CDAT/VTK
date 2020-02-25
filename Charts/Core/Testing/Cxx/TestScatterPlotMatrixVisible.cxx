@@ -13,46 +13,46 @@
 
 =========================================================================*/
 
-#include "vtkScatterPlotMatrix.h"
-#include "vtkRenderWindow.h"
 #include "vtkChart.h"
-#include "vtkPlot.h"
-#include "vtkTable.h"
-#include "vtkFloatArray.h"
-#include "vtkContextView.h"
 #include "vtkContextScene.h"
-#include "vtkRenderWindowInteractor.h"
+#include "vtkContextView.h"
+#include "vtkFloatArray.h"
 #include "vtkNew.h"
+#include "vtkPlot.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkScatterPlotMatrix.h"
+#include "vtkTable.h"
 
 //----------------------------------------------------------------------------
-int TestScatterPlotMatrixVisible(int, char * [])
+int TestScatterPlotMatrixVisible(int, char*[])
 {
   // Set up a 2D scene, add a chart to it.
   vtkNew<vtkContextView> view;
   view->GetRenderWindow()->SetSize(800, 600);
   vtkNew<vtkScatterPlotMatrix> matrix;
-  view->GetScene()->AddItem(matrix.GetPointer());
+  view->GetScene()->AddItem(matrix);
 
   // Create a table with some points in it...
   vtkNew<vtkTable> table;
   vtkNew<vtkFloatArray> arrX;
   arrX->SetName("x");
-  table->AddColumn(arrX.GetPointer());
+  table->AddColumn(arrX);
   vtkNew<vtkFloatArray> arrC;
   arrC->SetName("cos(x)");
-  table->AddColumn(arrC.GetPointer());
+  table->AddColumn(arrC);
   vtkNew<vtkFloatArray> arrS;
   arrS->SetName("sin(x)");
-  table->AddColumn(arrS.GetPointer());
+  table->AddColumn(arrS);
   vtkNew<vtkFloatArray> arrS2;
   arrS2->SetName("sin(x + 0.5)");
-  table->AddColumn(arrS2.GetPointer());
+  table->AddColumn(arrS2);
   vtkNew<vtkFloatArray> tangent;
   tangent->SetName("tan(x)");
-  table->AddColumn(tangent.GetPointer());
+  table->AddColumn(tangent);
   // Test the chart scatter plot matrix
   int numPoints = 42;
-  float inc = 7.5 / (numPoints-1);
+  float inc = 7.5 / (numPoints - 1);
   table->SetNumberOfRows(numPoints);
   for (int i = 0; i < numPoints; ++i)
   {
@@ -64,14 +64,14 @@ int TestScatterPlotMatrixVisible(int, char * [])
   }
 
   // Select a few columns in the table to analyze.
-  matrix->SetInput(table.GetPointer());
+  matrix->SetInput(table);
   matrix->SetColumnVisibilityAll(false);
   matrix->SetColumnVisibility("x", true);
   matrix->SetColumnVisibility("sin(x)", true);
   matrix->SetColumnVisibility("cos(x)", true);
   matrix->SetColumnVisibility("tan(x)", true);
 
-  //Finally render the scene and compare the image to a reference image
+  // Finally render the scene and compare the image to a reference image
   view->GetRenderWindow()->SetMultiSamples(0);
   view->GetInteractor()->Initialize();
   view->GetInteractor()->Start();

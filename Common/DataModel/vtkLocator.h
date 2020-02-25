@@ -55,7 +55,7 @@
  *
  * @sa
  * vtkPointLocator vtkCellLocator vtkOBBTree vtkMergePoints
-*/
+ */
 
 #ifndef vtkLocator_h
 #define vtkLocator_h
@@ -73,8 +73,8 @@ public:
   /**
    * Standard type and print methods.
    */
-  vtkTypeMacro(vtkLocator,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkLocator, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -82,7 +82,7 @@ public:
    * Build the locator from the points/cells defining this dataset.
    */
   virtual void SetDataSet(vtkDataSet*);
-  vtkGetObjectMacro(DataSet,vtkDataSet);
+  vtkGetObjectMacro(DataSet, vtkDataSet);
   //@}
 
   //@{
@@ -91,8 +91,8 @@ public:
    * off, this will be the target depth of the locator.
    * Initial value is 8.
    */
-  vtkSetClampMacro(MaxLevel,int,0,VTK_INT_MAX);
-  vtkGetMacro(MaxLevel,int);
+  vtkSetClampMacro(MaxLevel, int, 0, VTK_INT_MAX);
+  vtkGetMacro(MaxLevel, int);
   //@}
 
   //@{
@@ -101,7 +101,7 @@ public:
    * true). The value of this ivar may change each time the locator is built.
    * Initial value is 8.
    */
-  vtkGetMacro(Level,int);
+  vtkGetMacro(Level, int);
   //@}
 
   //@{
@@ -111,9 +111,9 @@ public:
    * there will be an explicit method to control the construction of the
    * locator (found in the subclass).
    */
-  vtkSetMacro(Automatic,int);
-  vtkGetMacro(Automatic,int);
-  vtkBooleanMacro(Automatic,int);
+  vtkSetMacro(Automatic, vtkTypeBool);
+  vtkGetMacro(Automatic, vtkTypeBool);
+  vtkBooleanMacro(Automatic, vtkTypeBool);
   //@}
 
   //@{
@@ -121,8 +121,8 @@ public:
    * Specify absolute tolerance (in world coordinates) for performing
    * geometric operations.
    */
-  vtkSetClampMacro(Tolerance,double,0.0,VTK_DOUBLE_MAX);
-  vtkGetMacro(Tolerance,double);
+  vtkSetClampMacro(Tolerance, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(Tolerance, double);
   //@}
 
   /**
@@ -152,7 +152,7 @@ public:
    * the tree. You must provide a vtkPolyData object into which to place the
    * data.
    */
-  virtual void GenerateRepresentation(int level, vtkPolyData *pd) = 0;
+  virtual void GenerateRepresentation(int level, vtkPolyData* pd) = 0;
 
   //@{
   /**
@@ -165,27 +165,27 @@ public:
   /**
    * Handle the PointSet <-> Locator loop.
    */
-  void Register(vtkObjectBase *o) VTK_OVERRIDE;
-  void UnRegister(vtkObjectBase *o) VTK_OVERRIDE;
+  void Register(vtkObjectBase* o) override;
+  void UnRegister(vtkObjectBase* o) override;
   //@}
 
 protected:
   vtkLocator();
-  ~vtkLocator() VTK_OVERRIDE;
+  ~vtkLocator() override;
 
-  vtkDataSet *DataSet;
-  int Automatic; // boolean controls automatic subdivision (or uses user spec.)
-  double Tolerance; // for performing merging
+  vtkDataSet* DataSet;
+  vtkTypeBool Automatic; // boolean controls automatic subdivision (or uses user spec.)
+  double Tolerance;      // for performing merging
   int MaxLevel;
   int Level;
 
-  vtkTimeStamp BuildTime;  // time at which locator was built
+  vtkTimeStamp BuildTime; // time at which locator was built
 
-  void ReportReferences(vtkGarbageCollector*) VTK_OVERRIDE;
+  void ReportReferences(vtkGarbageCollector*) override;
 
 private:
-  vtkLocator(const vtkLocator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLocator&) VTK_DELETE_FUNCTION;
+  vtkLocator(const vtkLocator&) = delete;
+  void operator=(const vtkLocator&) = delete;
 };
 
 #endif

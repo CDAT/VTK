@@ -2325,3 +2325,4 @@ static const unsigned short Groups[119][1] = {
 };
 
 } // end namespace _vtkBlueObeliskData
+// VTK-HeaderTest-Exclude: vtkBlueObeliskDataInternal.h

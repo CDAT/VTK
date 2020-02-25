@@ -29,14 +29,10 @@
 
 vtkStandardNewMacro(vtkHierarchicalGraphView);
 //----------------------------------------------------------------------------
-vtkHierarchicalGraphView::vtkHierarchicalGraphView()
-{
-}
+vtkHierarchicalGraphView::vtkHierarchicalGraphView() = default;
 
 //----------------------------------------------------------------------------
-vtkHierarchicalGraphView::~vtkHierarchicalGraphView()
-{
-}
+vtkHierarchicalGraphView::~vtkHierarchicalGraphView() = default;
 
 //----------------------------------------------------------------------------
 vtkRenderedGraphRepresentation* vtkHierarchicalGraphView::GetGraphRepresentation()
@@ -54,8 +50,8 @@ vtkRenderedGraphRepresentation* vtkHierarchicalGraphView::GetGraphRepresentation
   if (!graphRep)
   {
     vtkSmartPointer<vtkTree> t = vtkSmartPointer<vtkTree>::New();
-    graphRep = vtkRenderedHierarchyRepresentation::SafeDownCast(
-      this->AddRepresentationFromInput(t));
+    graphRep =
+      vtkRenderedHierarchyRepresentation::SafeDownCast(this->AddRepresentationFromInput(t));
     vtkSmartPointer<vtkDirectedGraph> g = vtkSmartPointer<vtkDirectedGraph>::New();
     graphRep->SetInputData(1, g);
   }
@@ -78,7 +74,8 @@ vtkDataRepresentation* vtkHierarchicalGraphView::CreateDefaultRepresentation(
 }
 
 //----------------------------------------------------------------------------
-vtkDataRepresentation* vtkHierarchicalGraphView::SetHierarchyFromInputConnection(vtkAlgorithmOutput* conn)
+vtkDataRepresentation* vtkHierarchicalGraphView::SetHierarchyFromInputConnection(
+  vtkAlgorithmOutput* conn)
 {
   this->GetHierarchyRepresentation()->SetInputConnection(0, conn);
   return this->GetHierarchyRepresentation();
@@ -93,7 +90,8 @@ vtkDataRepresentation* vtkHierarchicalGraphView::SetHierarchyFromInput(vtkDataOb
 }
 
 //----------------------------------------------------------------------------
-vtkDataRepresentation* vtkHierarchicalGraphView::SetGraphFromInputConnection(vtkAlgorithmOutput* conn)
+vtkDataRepresentation* vtkHierarchicalGraphView::SetGraphFromInputConnection(
+  vtkAlgorithmOutput* conn)
 {
   this->GetHierarchyRepresentation()->SetInputConnection(1, conn);
   return this->GetHierarchyRepresentation();
@@ -200,6 +198,5 @@ int vtkHierarchicalGraphView::GetGraphEdgeLabelFontSize()
 //----------------------------------------------------------------------------
 void vtkHierarchicalGraphView::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
-

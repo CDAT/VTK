@@ -72,15 +72,13 @@ version available from Los Alamos National Laboratory.
  *
  * Christine Ahrens (cahrens@lanl.gov)
  * Version 1.3
-*/
+ */
 
 #ifndef vtkMPASReader_h
 #define vtkMPASReader_h
 
 #include "vtkIONetCDFModule.h" // For export macro
 #include "vtkUnstructuredGridAlgorithm.h"
-
-#include "vtk_netcdfcpp_fwd.h" // Forward declarations for vtknetcdfcpp
 
 #include <string> // for std::string
 
@@ -92,10 +90,10 @@ class vtkStringArray;
 
 class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
 {
- public:
-  static vtkMPASReader *New();
-  vtkTypeMacro(vtkMPASReader,vtkUnstructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+public:
+  static vtkMPASReader* New();
+  vtkTypeMacro(vtkMPASReader, vtkUnstructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -131,8 +129,8 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
   /**
    * Get the reader's output
    */
-  vtkUnstructuredGrid *GetOutput();
-  vtkUnstructuredGrid *GetOutput(int index);
+  vtkUnstructuredGrid* GetOutput();
+  vtkUnstructuredGrid* GetOutput(int index);
   //@}
 
   //@{
@@ -142,9 +140,9 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
    * This is useful for user-visible array selection, but is disabled by default
    * for backwards compatibility.
    */
-  vtkSetMacro(UseDimensionedArrayNames, bool)
-  vtkGetMacro(UseDimensionedArrayNames, bool)
-  vtkBooleanMacro(UseDimensionedArrayNames, bool)
+  vtkSetMacro(UseDimensionedArrayNames, bool);
+  vtkGetMacro(UseDimensionedArrayNames, bool);
+  vtkBooleanMacro(UseDimensionedArrayNames, bool);
   //@}
 
   //@{
@@ -177,12 +175,12 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
    * in the dimensions, and Set/GetDimensionCurrentIndex controls the value
    * to fix a given dimension at when extracting slices of data.
    */
-  int GetNumberOfDimensions();
+  vtkIdType GetNumberOfDimensions();
   std::string GetDimensionName(int idx);
   vtkStringArray* GetAllDimensions();
-  int GetDimensionCurrentIndex(const std::string &dim);
-  void SetDimensionCurrentIndex(const std::string &dim, int idx);
-  int GetDimensionSize(const std::string &dim);
+  int GetDimensionCurrentIndex(const std::string& dim);
+  void SetDimensionCurrentIndex(const std::string& dim, int idx);
+  int GetDimensionSize(const std::string& dim);
   //@}
 
   //@{
@@ -190,69 +188,66 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
    * Get/Set the name to the dimension that identifies the vertical dimension.
    * Defaults to "nVertLevels".
    */
-  vtkSetMacro(VerticalDimension, std::string)
-  vtkGetMacro(VerticalDimension, std::string)
+  vtkSetMacro(VerticalDimension, std::string);
+  vtkGetMacro(VerticalDimension, std::string);
   //@}
 
   //@{
   /**
-   * Convenience functon for setting/querying [GS]etDimensionCurrentIndex
+   * Convenience function for setting/querying [GS]etDimensionCurrentIndex
    * for the dimension returned by GetVerticalDimension.
    */
   void SetVerticalLevel(int level);
   int GetVerticalLevel();
   //@}
 
-  vtkGetVector2Macro(VerticalLevelRange, int)
+  vtkGetVector2Macro(VerticalLevelRange, int);
 
-  vtkSetMacro(LayerThickness, int)
-  vtkGetMacro(LayerThickness, int)
-  vtkGetVector2Macro(LayerThicknessRange, int)
+  vtkSetMacro(LayerThickness, int);
+  vtkGetMacro(LayerThickness, int);
+  vtkGetVector2Macro(LayerThicknessRange, int);
 
   void SetCenterLon(int val);
-  vtkGetVector2Macro(CenterLonRange, int)
+  vtkGetVector2Macro(CenterLonRange, int);
 
-  vtkSetMacro(ProjectLatLon, bool)
-  vtkGetMacro(ProjectLatLon, bool)
+  vtkSetMacro(ProjectLatLon, bool);
+  vtkGetMacro(ProjectLatLon, bool);
 
-  vtkSetMacro(IsAtmosphere, bool)
-  vtkGetMacro(IsAtmosphere, bool)
+  vtkSetMacro(IsAtmosphere, bool);
+  vtkGetMacro(IsAtmosphere, bool);
 
-  vtkSetMacro(IsZeroCentered, bool)
-  vtkGetMacro(IsZeroCentered, bool)
+  vtkSetMacro(IsZeroCentered, bool);
+  vtkGetMacro(IsZeroCentered, bool);
 
-  vtkSetMacro(ShowMultilayerView, bool)
-  vtkGetMacro(ShowMultilayerView, bool)
+  vtkSetMacro(ShowMultilayerView, bool);
+  vtkGetMacro(ShowMultilayerView, bool);
 
   /**
    * Returns true if the given file can be read.
    */
-  static int CanReadFile(const char *filename);
+  static int CanReadFile(const char* filename);
 
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
- protected:
+protected:
   vtkMPASReader();
-  ~vtkMPASReader() VTK_OVERRIDE;
+  ~vtkMPASReader() override;
   void ReleaseNcData();
   void DestroyData();
 
-  char *FileName;         // First field part file giving path
+  char* FileName; // First field part file giving path
 
-  int NumberOfTimeSteps;      // Temporal domain
-  double DTime;               // The current time
+  size_t NumberOfTimeSteps; // Temporal domain
+  double DTime;             // The current time
 
   // Observer to modify this object when array selections are modified
   vtkCallbackCommand* SelectionObserver;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-
-  static void SelectionCallback(vtkObject* caller, unsigned long eid,
-                                void* clientdata, void* calldata);
+  static void SelectionCallback(
+    vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
 
   // Selected field of interest
   vtkDataArraySelection* PointDataArraySelection;
@@ -283,7 +278,7 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
   GeometryType Geometry;
 
   bool ProjectLatLon; // User option
-  bool OnASphere; // Data file attribute
+  bool OnASphere;     // Data file attribute
   bool IsAtmosphere;
   bool IsZeroCentered;
   bool ShowMultilayerView;
@@ -295,26 +290,26 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
   bool UseDimensionedArrayNames;
 
   // geometry
-  int MaximumNVertLevels;
-  int NumberOfCells;
-  int NumberOfPoints;
+  size_t MaximumNVertLevels;
+  size_t NumberOfCells;
+  size_t NumberOfPoints;
   int CellOffset;
-  int PointOffset;
-  int PointsPerCell;
-  int CurrentExtraPoint;  // current extra point
-  int CurrentExtraCell;   // current extra  cell
-  double* PointX;      // x coord of point
-  double* PointY;      // y coord of point
-  double* PointZ;      // z coord of point
-  int ModNumPoints;
-  int ModNumCells;
+  size_t PointOffset;
+  size_t PointsPerCell;
+  size_t CurrentExtraPoint; // current extra point
+  size_t CurrentExtraCell;  // current extra cell
+  double* PointX;           // x coord of point
+  double* PointY;           // y coord of point
+  double* PointZ;           // z coord of point
+  size_t ModNumPoints;
+  size_t ModNumCells;
   int* OrigConnections;   // original connections
   int* ModConnections;    // modified connections
-  int* CellMap;           // maps from added cell to original cell #
-  int* PointMap;          // maps from added point to original point #
-  int* MaximumLevelPoint;      //
-  int MaximumCells;           // max cells
-  int MaximumPoints;          // max points
+  size_t* CellMap;        // maps from added cell to original cell #
+  size_t* PointMap;       // maps from added point to original point #
+  int* MaximumLevelPoint; //
+  int MaximumCells;       // max cells
+  int MaximumPoints;      // max points
 
   void SetDefaults();
   int GetNcDims();
@@ -334,32 +329,6 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
   void OutputCells();
   unsigned char GetCellType();
 
-  /**
-   * Returns true if the dimensions in var match the expected args, or prints a
-   * warning and returns false if any are incorrect.
-   * ndims is the number of dimensions, and the variatic args must be
-   * C-strings identifying the expected dimensions.
-   * If silent is true, no warnings are printed.
-   */
-  bool ValidateDimensions(NcVar *var, bool silent, int ndims, ...);
-
-  /**
-   * Return the cursor position for the specified dimension.
-   */
-  long GetCursorForDimension(const NcDim *dim);
-
-  /**
-   * Return the number of values to read for the specified dimension.
-   */
-  size_t GetCountForDimension(const NcDim *dim);
-
-  /**
-   * For an arbitrary (i.e. not nCells, nVertices, or Time) dimension, extract
-   * the dimension's metadata into memory (if needed) and return the last used
-   * index into the dimension values, or 0 if the dimension is new.
-   */
-  long InitializeDimension(const NcDim *dim);
-
   vtkDataArray* LoadPointVarData(int variable);
   vtkDataArray* LoadCellVarData(int variable);
   vtkDataArray* LookupPointDataArray(int varIdx);
@@ -373,28 +342,14 @@ class VTKIONETCDF_EXPORT vtkMPASReader : public vtkUnstructuredGridAlgorithm
    * If a non-string array named Time already exists in the FieldData, dataset
    * is not modified in any way.
    */
-  void LoadTimeFieldData(vtkUnstructuredGrid *dataset);
+  void LoadTimeFieldData(vtkUnstructuredGrid* dataset);
 
- private:
-  vtkMPASReader(const vtkMPASReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMPASReader&) VTK_DELETE_FUNCTION;
+private:
+  vtkMPASReader(const vtkMPASReader&) = delete;
+  void operator=(const vtkMPASReader&) = delete;
 
   class Internal;
-  Internal *Internals;
-
-  static int NcTypeToVtkType(int ncType);
-
-  vtkDataArray* CreateDataArray(int ncType);
-  vtkIdType ComputeNumberOfTuples(NcVar *ncVar);
-
-  template <typename ValueType>
-  bool LoadDataArray(NcVar *ncVar, vtkDataArray *array, bool resize = true);
-
-  template <typename ValueType>
-  int LoadPointVarDataImpl(NcVar *ncVar, vtkDataArray *array);
-
-  template <typename ValueType>
-  int LoadCellVarDataImpl(NcVar *ncVar, vtkDataArray *array);
+  Internal* Internals;
 };
 
 #endif

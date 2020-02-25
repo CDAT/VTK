@@ -1,102 +1,88 @@
-/*
-
-This file is part of netcdf-4, a netCDF-like interface for HDF5, or a
-HDF5 backend for netCDF, depending on your point of view.
-
-This file handles the nc_ calls, calling the appropriate nc3 or nc4
-function, depending on ncid.
-
-Copyright 2003, University Corporation for Atmospheric Research. See
-netcdf-4/docs/COPYRIGHT file for copying and redistribution
-conditions.
-
-$Id: ncfunc.c,v 1.51 2010/05/26 20:13:32 dmh Exp $
-*/
+/**
+ * @internal
+ *
+ * Copyright 2018, University Corporation for Atmospheric
+ * Research. See netcdf-4/docs/COPYRIGHT file for copying and
+ * redistribution conditions.
+ *
+ * This file is part of netcdf-4, a netCDF-like interface for HDF5, or a
+ * HDF5 backend for netCDF, depending on your point of view.
+ *
+ * This file handles the inq_format functions.
+ *
+ * @author Ed Hartnett, Dennis Heimbigner
+ */
 
 #include "nc4internal.h"
-#include "nc3dispatch.h"
+#include "nc4dispatch.h"
 
-#ifdef IGNORE
-/* Keep a linked list of file info objects. */
-extern NC_FILE_INFO_T *nc_file;
-#endif
+/**
+ * @internal Get the format (i.e. NC_FORMAT_NETCDF4 pr
+ * NC_FORMAT_NETCDF4_CLASSIC) of an open netCDF-4 file.
+ *
+ * @param ncid File ID (ignored).
+ * @param formatp Pointer that gets the constant indicating format.
 
-#ifdef IGNORE
-/* This function deletes a member of parliment. Be careful! Last time
- * this function was used, Labor got in! This function only does
- * anything for netcdf-3 files. */
-
-int
-nc_delete(const char *path)
-{
-   return NC3_delete_mp(path, 0);
-}
-
-int
-nc_delete_mp(const char *path, int basepe)
-{
-   return NC3_delete_mp(path, basepe);
-}
-#endif
-
-/* This will return the length of a netcdf data type in bytes. Since
-   we haven't added any new types, I just call the v3 function.
-   Ed Hartnett 10/43/03
-*/
-
-/* This function only does anything for netcdf-3 files. */
-int
-NC4_set_base_pe(int ncid, int pe)
-{
-   NC_FILE_INFO_T *nc;
-   if (!(nc = nc4_find_nc_file(ncid)))
-      return NC_EBADID;
-   if (nc->nc4_info)
-      return NC_ENOTNC3;
-   return NC3_set_base_pe(nc->int_ncid,  pe);
-}
-
-/* This function only does anything for netcdf-3 files. */
-int
-NC4_inq_base_pe(int ncid, int *pe)
-{
-   NC_FILE_INFO_T *nc;
-   if (!(nc = nc4_find_nc_file(ncid)))
-      return NC_EBADID;
-   if (nc->nc4_info)
-      return NC_ENOTNC3;
-   return NC3_inq_base_pe(nc->int_ncid, pe);
-}
-
-/* Get the format (i.e. classic, 64-bit-offset, or netcdf-4) of an
- * open file. */
+ * @return ::NC_NOERR No error.
+ * @return ::NC_EBADID Bad ncid.
+ * @author Ed Hartnett
+ */
 int
 NC4_inq_format(int ncid, int *formatp)
 {
-   NC_FILE_INFO_T *nc;
+    NC_FILE_INFO_T *nc4_info;
+    int retval;
 
-   LOG((2, "nc_inq_format: ncid 0x%x", ncid));
+    LOG((2, "nc_inq_format: ncid 0x%x", ncid));
 
-   if (!formatp)
-      return NC_NOERR;
+    if (!formatp)
+        return NC_NOERR;
 
-   /* Find the file metadata. */
-   if (!(nc = nc4_find_nc_file(ncid)))
-      return NC_EBADID;
+    /* Find the file metadata. */
+    if ((retval = nc4_find_nc_grp_h5(ncid, NULL, NULL, &nc4_info)))
+        return retval;
 
-   /* If this isn't a netcdf-4 file, pass this call on to the netcdf-3
-    * library. */
-   if (!nc->nc4_info)
-      return NC3_inq_format(nc->int_ncid, formatp);
-   
-   /* Otherwise, this is a netcdf-4 file. Check if classic NC3 rules
-    * are in effect for this file. */
-   if (nc->nc4_info->cmode & NC_CLASSIC_MODEL)
-      *formatp = NC_FORMAT_NETCDF4_CLASSIC;
-   else
-      *formatp = NC_FORMAT_NETCDF4;
+    /* Check if classic NC3 rules are in effect for this file. */
+    if (nc4_info->cmode & NC_CLASSIC_MODEL)
+        *formatp = NC_FORMAT_NETCDF4_CLASSIC;
+    else
+        *formatp = NC_FORMAT_NETCDF4;
 
-   return NC_NOERR;
+    return NC_NOERR;
 }
 
+/**
+ * @internal Return the extended format (i.e. the dispatch model),
+ * plus the mode associated with an open file.
+ *
+ * @param ncid File ID (ignored).
+ * @param formatp a pointer that gets the extended format. Note that
+ * this is not the same as the format provided by nc_inq_format(). The
+ * extended format indicates the dispatch layer model. NetCDF-4 files
+ * will always get NC_FORMATX_NC4.
+ * @param modep a pointer that gets the open/create mode associated with
+ * this file. Ignored if NULL.
 
+ * @return ::NC_NOERR No error.
+ * @return ::NC_EBADID Bad ncid.
+ * @author Dennis Heimbigner
+ */
+int
+NC4_inq_format_extended(int ncid, int *formatp, int *modep)
+{
+    NC *nc;
+    int retval;
+
+    LOG((2, "%s: ncid 0x%x", __func__, ncid));
+
+    if ((retval = nc4_find_nc_grp_h5(ncid, &nc, NULL, NULL)))
+        return NC_EBADID;
+
+    if(modep)
+        *modep = nc->mode|NC_NETCDF4;
+
+    if (formatp)
+        *formatp = NC_FORMATX_NC_HDF5;
+
+    return NC_NOERR;
+}

@@ -28,15 +28,15 @@
  * @par Thanks:
  * Thanks to Godzilla for not eating my computer so that this class
  * could be written.
-*/
+ */
 
 #ifndef vtkFast2DLayoutStrategy_h
 #define vtkFast2DLayoutStrategy_h
 
-#include "vtkInfovisLayoutModule.h" // For export macro
 #include "vtkGraphLayoutStrategy.h"
+#include "vtkInfovisLayoutModule.h" // For export macro
 
-#include "vtkSmartPointer.h"    // Required for smart pointer internal ivars.
+#include "vtkSmartPointer.h" // Required for smart pointer internal ivars.
 
 class vtkFastSplatter;
 class vtkFloatArray;
@@ -46,10 +46,10 @@ class vtkImageData;
 class VTKINFOVISLAYOUT_EXPORT vtkFast2DLayoutStrategy : public vtkGraphLayoutStrategy
 {
 public:
-  static vtkFast2DLayoutStrategy *New();
+  static vtkFast2DLayoutStrategy* New();
 
   vtkTypeMacro(vtkFast2DLayoutStrategy, vtkGraphLayoutStrategy);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -123,7 +123,7 @@ public:
    * This strategy sets up some data structures
    * for faster processing of each Layout() call
    */
-  void Initialize() VTK_OVERRIDE;
+  void Initialize() override;
 
   /**
    * This is the layout method where the graph that was
@@ -132,24 +132,23 @@ public:
    * graph. If you have an iterative layout please implement
    * the IsLayoutComplete() method.
    */
-  void Layout() VTK_OVERRIDE;
+  void Layout() override;
 
   /**
    * I'm an iterative layout so this method lets the caller
    * know if I'm done laying out the graph
    */
-  int IsLayoutComplete() VTK_OVERRIDE {return this->LayoutComplete;}
+  int IsLayoutComplete() override { return this->LayoutComplete; }
 
 protected:
   vtkFast2DLayoutStrategy();
-  ~vtkFast2DLayoutStrategy() VTK_OVERRIDE;
+  ~vtkFast2DLayoutStrategy() override;
 
-  int    MaxNumberOfIterations;  //Maximum number of iterations.
-  float  InitialTemperature;
-  float  CoolDownRate;  //Cool-down rate.  Note:  Higher # = Slower rate.
+  int MaxNumberOfIterations; // Maximum number of iterations.
+  float InitialTemperature;
+  float CoolDownRate; // Cool-down rate.  Note:  Higher # = Slower rate.
 
 private:
-
   // An edge consists of two vertices joined together.
   // This struct acts as a "pointer" to those two vertices.
   typedef struct
@@ -160,13 +159,13 @@ private:
   } vtkLayoutEdge;
 
   // This class 'has a' vtkFastSplatter for the density grid
-  vtkSmartPointer<vtkGraphToPolyData>     GraphToPoly;
-  vtkSmartPointer<vtkFastSplatter>        DensityGrid;
-  vtkSmartPointer<vtkImageData>           SplatImage;
-  vtkSmartPointer<vtkFloatArray>          RepulsionArray;
-  vtkSmartPointer<vtkFloatArray>          AttractionArray;
+  vtkSmartPointer<vtkGraphToPolyData> GraphToPoly;
+  vtkSmartPointer<vtkFastSplatter> DensityGrid;
+  vtkSmartPointer<vtkImageData> SplatImage;
+  vtkSmartPointer<vtkFloatArray> RepulsionArray;
+  vtkSmartPointer<vtkFloatArray> AttractionArray;
 
-  vtkLayoutEdge *EdgeArray;
+  vtkLayoutEdge* EdgeArray;
 
   int RandomSeed;
   int IterationsPerLayout;
@@ -176,13 +175,12 @@ private:
   float RestDistance;
 
   // Private helper methods
-  void GenerateCircularSplat(vtkImageData *splat, int x, int y);
-  void GenerateGaussianSplat(vtkImageData *splat, int x, int y);
+  void GenerateCircularSplat(vtkImageData* splat, int x, int y);
+  void GenerateGaussianSplat(vtkImageData* splat, int x, int y);
   void ResolveCoincidentVertices();
 
-  vtkFast2DLayoutStrategy(const vtkFast2DLayoutStrategy&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFast2DLayoutStrategy&) VTK_DELETE_FUNCTION;
+  vtkFast2DLayoutStrategy(const vtkFast2DLayoutStrategy&) = delete;
+  void operator=(const vtkFast2DLayoutStrategy&) = delete;
 };
 
 #endif
-

@@ -20,35 +20,31 @@
  *
  * @sa
  * vtkCompositeDataGeometryFilter
-*/
+ */
 
 #ifndef vtkHierarchicalDataSetGeometryFilter_h
 #define vtkHierarchicalDataSetGeometryFilter_h
 
-#include "vtkFiltersGeometryModule.h" // For export macro
 #include "vtkCompositeDataGeometryFilter.h"
+#include "vtkFiltersGeometryModule.h" // For export macro
 
 class vtkPolyData;
 
-class VTKFILTERSGEOMETRY_EXPORT vtkHierarchicalDataSetGeometryFilter :
-  public vtkCompositeDataGeometryFilter
+class VTKFILTERSGEOMETRY_EXPORT vtkHierarchicalDataSetGeometryFilter
+  : public vtkCompositeDataGeometryFilter
 {
 public:
-  static vtkHierarchicalDataSetGeometryFilter *New();
-  vtkTypeMacro(vtkHierarchicalDataSetGeometryFilter,
-    vtkCompositeDataGeometryFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-
+  static vtkHierarchicalDataSetGeometryFilter* New();
+  vtkTypeMacro(vtkHierarchicalDataSetGeometryFilter, vtkCompositeDataGeometryFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkHierarchicalDataSetGeometryFilter();
-  ~vtkHierarchicalDataSetGeometryFilter() VTK_OVERRIDE;
+  ~vtkHierarchicalDataSetGeometryFilter() override;
 
 private:
-  vtkHierarchicalDataSetGeometryFilter(const vtkHierarchicalDataSetGeometryFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHierarchicalDataSetGeometryFilter&) VTK_DELETE_FUNCTION;
+  vtkHierarchicalDataSetGeometryFilter(const vtkHierarchicalDataSetGeometryFilter&) = delete;
+  void operator=(const vtkHierarchicalDataSetGeometryFilter&) = delete;
 };
 
 #endif
-
-

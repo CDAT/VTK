@@ -25,38 +25,36 @@
  *
  * @sa
  * vtkFixedPointVolumeRayCastMapper
-*/
+ */
 
 #ifndef vtkFixedPointVolumeRayCastCompositeShadeHelper_h
 #define vtkFixedPointVolumeRayCastCompositeShadeHelper_h
 
-#include "vtkRenderingVolumeModule.h" // For export macro
 #include "vtkFixedPointVolumeRayCastHelper.h"
+#include "vtkRenderingVolumeModule.h" // For export macro
 
 class vtkFixedPointVolumeRayCastMapper;
 class vtkVolume;
 
-class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeShadeHelper : public vtkFixedPointVolumeRayCastHelper
+class VTKRENDERINGVOLUME_EXPORT vtkFixedPointVolumeRayCastCompositeShadeHelper
+  : public vtkFixedPointVolumeRayCastHelper
 {
 public:
-  static vtkFixedPointVolumeRayCastCompositeShadeHelper *New();
-  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeShadeHelper,vtkFixedPointVolumeRayCastHelper);
-  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  static vtkFixedPointVolumeRayCastCompositeShadeHelper* New();
+  vtkTypeMacro(vtkFixedPointVolumeRayCastCompositeShadeHelper, vtkFixedPointVolumeRayCastHelper);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void  GenerateImage( int threadID,
-                               int threadCount,
-                               vtkVolume *vol,
-                               vtkFixedPointVolumeRayCastMapper *mapper) VTK_OVERRIDE;
+  void GenerateImage(int threadID, int threadCount, vtkVolume* vol,
+    vtkFixedPointVolumeRayCastMapper* mapper) override;
 
 protected:
   vtkFixedPointVolumeRayCastCompositeShadeHelper();
-  ~vtkFixedPointVolumeRayCastCompositeShadeHelper() VTK_OVERRIDE;
+  ~vtkFixedPointVolumeRayCastCompositeShadeHelper() override;
 
 private:
-  vtkFixedPointVolumeRayCastCompositeShadeHelper(const vtkFixedPointVolumeRayCastCompositeShadeHelper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFixedPointVolumeRayCastCompositeShadeHelper&) VTK_DELETE_FUNCTION;
+  vtkFixedPointVolumeRayCastCompositeShadeHelper(
+    const vtkFixedPointVolumeRayCastCompositeShadeHelper&) = delete;
+  void operator=(const vtkFixedPointVolumeRayCastCompositeShadeHelper&) = delete;
 };
 
 #endif
-
-

@@ -68,7 +68,7 @@ class FixedPointRayCasterNearest(object):
         iac.AddInputConnection(d.GetOutputPort())
         iac.AddInputConnection(ss.GetOutputPort())
 
-        # Some more gaussians for the four component indepent case
+        # Some more gaussians for the four component independent case
         gs1 = vtk.vtkImageGaussianSource()
         gs1.SetWholeExtent(0, 30, 0, 30, 0, 30)
         gs1.SetMaximum(255.0)
@@ -118,7 +118,7 @@ class FixedPointRayCasterNearest(object):
         iac3.AddInputConnection(iac2.GetOutputPort())
         iac3.AddInputConnection(gs4.GetOutputPort())
 
-        # create the four component dependend -
+        # create the four component dependent -
         # use lines in x, y, z for colors
         gridR = vtk.vtkImageGridSource()
         gridR.SetDataScalarTypeToUnsignedChar()

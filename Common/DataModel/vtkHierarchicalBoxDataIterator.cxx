@@ -17,18 +17,13 @@
 
 vtkStandardNewMacro(vtkHierarchicalBoxDataIterator);
 
-vtkHierarchicalBoxDataIterator::vtkHierarchicalBoxDataIterator()
-{
-}
+vtkHierarchicalBoxDataIterator::vtkHierarchicalBoxDataIterator() = default;
 
 //------------------------------------------------------------------------------
-vtkHierarchicalBoxDataIterator::~vtkHierarchicalBoxDataIterator()
-{
-}
+vtkHierarchicalBoxDataIterator::~vtkHierarchicalBoxDataIterator() = default;
 
 //------------------------------------------------------------------------------
-void vtkHierarchicalBoxDataIterator::PrintSelf(ostream &os, vtkIndent indent)
+void vtkHierarchicalBoxDataIterator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
-

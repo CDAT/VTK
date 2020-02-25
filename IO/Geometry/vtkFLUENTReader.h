@@ -30,7 +30,7 @@
  *
  * @sa
  * vtkGAMBITReader
-*/
+ */
 
 #ifndef vtkFLUENTReader_h
 #define vtkFLUENTReader_h
@@ -51,9 +51,9 @@ class vtkConvexPointSet;
 class VTKIOGEOMETRY_EXPORT vtkFLUENTReader : public vtkMultiBlockDataSetAlgorithm
 {
 public:
-  static vtkFLUENTReader *New();
-  vtkTypeMacro(vtkFLUENTReader,vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkFLUENTReader* New();
+  vtkTypeMacro(vtkFLUENTReader, vtkMultiBlockDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -68,7 +68,7 @@ public:
    * Get the total number of cells. The number of cells is only valid after a
    * successful read of the data file is performed. Initial value is 0.
    */
-  vtkGetMacro(NumberOfCells,int);
+  vtkGetMacro(NumberOfCells, vtkIdType);
   //@}
 
   /**
@@ -77,7 +77,7 @@ public:
   int GetNumberOfCellArrays(void);
 
   /**
-   * Get the name of the  cell array with the given index in
+   * Get the name of the cell array with the given index in
    * the input.
    */
   const char* GetCellArrayName(int index);
@@ -116,9 +116,9 @@ public:
    */
   void SetDataByteOrderToBigEndian();
   void SetDataByteOrderToLittleEndian();
-  int  GetDataByteOrder();
+  int GetDataByteOrder();
   void SetDataByteOrder(int);
-  const char *GetDataByteOrderAsString();
+  const char* GetDataByteOrderAsString();
   //
   //  Structures
   //
@@ -140,117 +140,116 @@ public:
 
 protected:
   vtkFLUENTReader();
-  ~vtkFLUENTReader() VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *,
-    vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  ~vtkFLUENTReader() override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   //@{
   /**
    * Set/Get the byte swapping to explicitly swap the bytes of a file.
    * Not used when reading text files.
    */
-  vtkSetMacro(SwapBytes,int);
-  int GetSwapBytes() {return this->SwapBytes;}
-  vtkBooleanMacro(SwapBytes,int);
+  vtkSetMacro(SwapBytes, vtkTypeBool);
+  vtkTypeBool GetSwapBytes() { return this->SwapBytes; }
+  vtkBooleanMacro(SwapBytes, vtkTypeBool);
   //@}
 
-  vtkDataArraySelection* CellDataArraySelection;
-  char * FileName;
-  int NumberOfCells;
-  int NumberOfCellArrays;
-  virtual bool                   OpenCaseFile(const char *filename);
-  virtual bool                   OpenDataFile(const char *filename);
-  virtual int                    GetCaseChunk ();
-  virtual void                   GetNumberOfCellZones();
-  virtual int                    GetCaseIndex();
-  virtual void                   LoadVariableNames();
-  virtual int                    GetDataIndex();
-  virtual int                    GetDataChunk();
-  virtual void                   GetSpeciesVariableNames();
+  virtual bool OpenCaseFile(const char* filename);
+  virtual bool OpenDataFile(const char* filename);
+  virtual int GetCaseChunk();
+  virtual void GetNumberOfCellZones();
+  virtual int GetCaseIndex();
+  virtual void LoadVariableNames();
+  virtual int GetDataIndex();
+  virtual int GetDataChunk();
+  virtual void GetSpeciesVariableNames();
 
-  virtual void                   ParseCaseFile();
-  virtual int                    GetDimension();
-  virtual void                   GetLittleEndianFlag();
-  virtual void                   GetNodesAscii();
-  virtual void                   GetNodesSinglePrecision();
-  virtual void                   GetNodesDoublePrecision();
-  virtual void                   GetCellsAscii();
-  virtual void                   GetCellsBinary();
-  virtual void                   GetFacesAscii();
-  virtual void                   GetFacesBinary();
-  virtual void                   GetPeriodicShadowFacesAscii();
-  virtual void                   GetPeriodicShadowFacesBinary();
-  virtual void                   GetCellTreeAscii();
-  virtual void                   GetCellTreeBinary();
-  virtual void                   GetFaceTreeAscii();
-  virtual void                   GetFaceTreeBinary();
-  virtual void                   GetInterfaceFaceParentsAscii();
-  virtual void                   GetInterfaceFaceParentsBinary();
-  virtual void                   GetNonconformalGridInterfaceFaceInformationAscii();
-  virtual void                   GetNonconformalGridInterfaceFaceInformationBinary();
-  virtual void                   GetPartitionInfo() {}
-  virtual void                   CleanCells();
-  virtual void                   PopulateCellNodes();
-  virtual int                    GetCaseBufferInt(int ptr);
-  virtual float                  GetCaseBufferFloat(int ptr);
-  virtual double                 GetCaseBufferDouble(int ptr);
-  virtual void                   PopulateTriangleCell(int i);
-  virtual void                   PopulateTetraCell(int i);
-  virtual void                   PopulateQuadCell(int i);
-  virtual void                   PopulateHexahedronCell(int i);
-  virtual void                   PopulatePyramidCell(int i);
-  virtual void                   PopulateWedgeCell(int i);
-  virtual void                   PopulatePolyhedronCell(int i);
-  virtual void                   ParseDataFile();
-  virtual int                    GetDataBufferInt(int ptr);
-  virtual float                  GetDataBufferFloat(int ptr);
-  virtual double                 GetDataBufferDouble(int ptr);
-  virtual void                   GetData(int dataType);
-  virtual bool                   ParallelCheckCell(int vtkNotUsed(i)) { return true; }
+  virtual void ParseCaseFile();
+  virtual int GetDimension();
+  virtual void GetLittleEndianFlag();
+  virtual void GetNodesAscii();
+  virtual void GetNodesSinglePrecision();
+  virtual void GetNodesDoublePrecision();
+  virtual void GetCellsAscii();
+  virtual void GetCellsBinary();
+  virtual void GetFacesAscii();
+  virtual void GetFacesBinary();
+  virtual void GetPeriodicShadowFacesAscii();
+  virtual void GetPeriodicShadowFacesBinary();
+  virtual void GetCellTreeAscii();
+  virtual void GetCellTreeBinary();
+  virtual void GetFaceTreeAscii();
+  virtual void GetFaceTreeBinary();
+  virtual void GetInterfaceFaceParentsAscii();
+  virtual void GetInterfaceFaceParentsBinary();
+  virtual void GetNonconformalGridInterfaceFaceInformationAscii();
+  virtual void GetNonconformalGridInterfaceFaceInformationBinary();
+  virtual void GetPartitionInfo() {}
+  virtual void CleanCells();
+  virtual void PopulateCellNodes();
+  virtual int GetCaseBufferInt(int ptr);
+  virtual float GetCaseBufferFloat(int ptr);
+  virtual double GetCaseBufferDouble(int ptr);
+  virtual void PopulateTriangleCell(int i);
+  virtual void PopulateTetraCell(int i);
+  virtual void PopulateQuadCell(int i);
+  virtual void PopulateHexahedronCell(int i);
+  virtual void PopulatePyramidCell(int i);
+  virtual void PopulateWedgeCell(int i);
+  virtual void PopulatePolyhedronCell(int i);
+  virtual void ParseDataFile();
+  virtual int GetDataBufferInt(int ptr);
+  virtual float GetDataBufferFloat(int ptr);
+  virtual double GetDataBufferDouble(int ptr);
+  virtual void GetData(int dataType);
+  virtual bool ParallelCheckCell(int vtkNotUsed(i)) { return true; }
 
   //
   //  Variables
   //
-  ifstream *FluentCaseFile;
-  ifstream *FluentDataFile;
-  stdString *CaseBuffer;
-  stdString *DataBuffer;
+  vtkDataArraySelection* CellDataArraySelection;
+  char* FileName;
+  vtkIdType NumberOfCells;
+  int NumberOfCellArrays;
 
-  vtkPoints           *Points;
-  vtkTriangle         *Triangle;
-  vtkTetra            *Tetra;
-  vtkQuad             *Quad;
-  vtkHexahedron       *Hexahedron;
-  vtkPyramid          *Pyramid;
-  vtkWedge            *Wedge;
-  vtkConvexPointSet   *ConvexPointSet;
+  istream* FluentCaseFile;
+  istream* FluentDataFile;
+  stdString* CaseBuffer;
+  stdString* DataBuffer;
 
-  cellVector *Cells;
-  faceVector *Faces;
-  stdMap *VariableNames;
-  intVector  *CellZones;
-  scalarDataVector *ScalarDataChunks;
-  vectorDataVector *VectorDataChunks;
+  vtkPoints* Points;
+  vtkTriangle* Triangle;
+  vtkTetra* Tetra;
+  vtkQuad* Quad;
+  vtkHexahedron* Hexahedron;
+  vtkPyramid* Pyramid;
+  vtkWedge* Wedge;
+  vtkConvexPointSet* ConvexPointSet;
 
-  intVectorVector *SubSectionZones;
-  intVector *SubSectionIds;
-  intVector *SubSectionSize;
+  cellVector* Cells;
+  faceVector* Faces;
+  stdMap* VariableNames;
+  intVector* CellZones;
+  scalarDataVector* ScalarDataChunks;
+  vectorDataVector* VectorDataChunks;
 
-  stringVector *ScalarVariableNames;
-  intVector *ScalarSubSectionIds;
-  stringVector *VectorVariableNames;
-  intVector *VectorSubSectionIds;
+  intVectorVector* SubSectionZones;
+  intVector* SubSectionIds;
+  intVector* SubSectionSize;
 
-  int SwapBytes;
+  stringVector* ScalarVariableNames;
+  intVector* ScalarSubSectionIds;
+  stringVector* VectorVariableNames;
+  intVector* VectorSubSectionIds;
+
+  vtkTypeBool SwapBytes;
   int GridDimension;
   int DataPass;
   int NumberOfScalars;
   int NumberOfVectors;
 
 private:
-  vtkFLUENTReader(const vtkFLUENTReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkFLUENTReader&) VTK_DELETE_FUNCTION;
+  vtkFLUENTReader(const vtkFLUENTReader&) = delete;
+  void operator=(const vtkFLUENTReader&) = delete;
 };
 #endif

@@ -31,18 +31,19 @@
  *     kind of data object, support distributed input.
  *
  * It has two outputs :
- * * port 0 : ParticlePaths : a polyData of polyLines showing the paths of
- *     particles in the flow
+ * * port 0 : ParticlePaths : a multipiece of polyData (one per thread) of polyLines showing the
+ * paths of particles in the flow
  * * port 1 : ParticleInteractions : empty if no surface input, contains a
- *     polydata of vertex
- * with the same composite layout of surface input if any, showing all
- *     interactions between particles and the surface input
+ *     a multiblock with as many children as the number of threads, each children containing a
+ * multiblock with the same structure as the surfaces. The leafs of these structures contain a
+ * polydata of vertexes corresponding to the interactions. with the same composite layout of surface
+ * input if any, showing all interactions between particles and the surface input.
  *
  * It has a parallel implementation which streams particle between domains.
  *
  * The most important parameters of this filter is it's integrationModel.
  * Only one integration model implementation exist currently in ParaView
- * ,vtkLagrangianMatidaIntegrationModel but the design enables plugin developpers
+ * ,vtkLagrangianMatidaIntegrationModel but the design enables plugin developers
  * to expand this tracker by creating new models.
  * A model can define  :
  * * The number of integration variable and new user defined integration variable
@@ -72,26 +73,28 @@
  *      when the next position is too far
  *  * Different kind of cell length computation, including a divergence theorem
  *      based computation
- *  * Optional lines rendering controlled by a treshold
+ *  * Optional lines rendering controlled by a threshold
  *  * Ghost cell support
- *  * Non planar quad interactionn support
+ *  * Non planar quad interaction support
  *  * Built-in support for surface interaction including, terminate, bounce,
- *      break-up and pass-trough surface
+ *      break-up and pass-through surface
  * The serial and parallel filters are fully tested.
  *
  * @sa
  * vtkLagrangianMatidaIntegrationModel vtkLagrangianParticle
  * vtkLagrangianBasicIntegrationModel
-*/
+ */
 
 #ifndef vtkLagrangianParticleTracker_h
 #define vtkLagrangianParticleTracker_h
 
-#include "vtkFiltersFlowPathsModule.h" // For export macro
-#include "vtkDataObjectAlgorithm.h"
 #include "vtkBoundingBox.h" // For cached bounds
+#include "vtkDataObjectAlgorithm.h"
+#include "vtkFiltersFlowPathsModule.h" // For export macro
 
-#include <queue> // for particle queue
+#include <atomic> // for atomic
+#include <mutex>  // for mutexes
+#include <queue>  // for particle queue
 
 class vtkBoundingBox;
 class vtkCellArray;
@@ -102,20 +105,23 @@ class vtkInformation;
 class vtkInitialValueProblemSolver;
 class vtkLagrangianBasicIntegrationModel;
 class vtkLagrangianParticle;
+class vtkMultiBlockDataSet;
+class vtkMultiPieceDataSet;
 class vtkPointData;
 class vtkPoints;
 class vtkPolyData;
+class vtkPolyLine;
+struct IntegratingFunctor;
 
-class VTKFILTERSFLOWPATHS_EXPORT vtkLagrangianParticleTracker :
-  public vtkDataObjectAlgorithm
+class VTKFILTERSFLOWPATHS_EXPORT vtkLagrangianParticleTracker : public vtkDataObjectAlgorithm
 {
 public:
-
   vtkTypeMacro(vtkLagrangianParticleTracker, vtkDataObjectAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkLagrangianParticleTracker *New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkLagrangianParticleTracker* New();
 
-  typedef enum CellLengthComputation{
+  typedef enum CellLengthComputation
+  {
     STEP_LAST_CELL_LENGTH = 0,
     STEP_CUR_CELL_LENGTH = 1,
     STEP_LAST_CELL_VEL_DIR = 2,
@@ -127,6 +133,7 @@ public:
   //@{
   /**
    * Set/Get the integration model.
+   * Default is vtkLagrangianMatidaIntegrationModel
    */
   void SetIntegrationModel(vtkLagrangianBasicIntegrationModel* integrationModel);
   vtkGetObjectMacro(IntegrationModel, vtkLagrangianBasicIntegrationModel);
@@ -135,9 +142,20 @@ public:
   //@{
   /**
    * Set/Get the integrator.
+   * Default is vtkRungeKutta2
    */
   void SetIntegrator(vtkInitialValueProblemSolver* integrator);
   vtkGetObjectMacro(Integrator, vtkInitialValueProblemSolver);
+  //@}
+
+  //@{
+  /**
+   * Set/Get whether or not to use PolyVertex cell type
+   * for the interaction output
+   * Default is false
+   */
+  vtkSetMacro(GeneratePolyVertexInteractionOutput, bool);
+  vtkGetMacro(GeneratePolyVertexInteractionOutput, bool);
   //@}
 
   //@{
@@ -158,12 +176,11 @@ public:
    * and the edges of the last cell the particle was in.
    * - STEP_LAST_CELL_DIV_THEO :
    * Compute cell length using the particle velocity
-   * and the divergence theorem, not supported
-   * with vtkVoxel, fallback to STEP_LAST_CELL_LENGTH
+   * and the divergence theorem.
    * - STEP_CUR_CELL_DIV_THEO :
    * Compute cell length using the particle velocity
-   * and the divergence theorem, not supported
-   * with vtkVoxel, fallback to STEP_CUR_CELL_LENGTH
+   * and the divergence theorem.
+   * Default is STEP_LAST_CELL_LENGTH.
    */
   vtkSetMacro(CellLengthComputationMode, int);
   vtkGetMacro(CellLengthComputationMode, int);
@@ -171,7 +188,7 @@ public:
 
   //@{
   /**
-   * Set/Get the integration step factor.
+   * Set/Get the integration step factor. Default is 1.0.
    */
   vtkSetMacro(StepFactor, double);
   vtkGetMacro(StepFactor, double);
@@ -179,7 +196,7 @@ public:
 
   //@{
   /**
-   * Set/Get the integration step factor min.
+   * Set/Get the integration step factor min. Default is 0.5.
    */
   vtkSetMacro(StepFactorMin, double);
   vtkGetMacro(StepFactorMin, double);
@@ -187,7 +204,7 @@ public:
 
   //@{
   /**
-   * Set/Get the integration step factor max.
+   * Set/Get the integration step factor max. Default is 1.5.
    */
   vtkSetMacro(StepFactorMax, double);
   vtkGetMacro(StepFactorMax, double);
@@ -195,7 +212,7 @@ public:
 
   //@{
   /**
-   * Set/Get the maximum number of steps.
+   * Set/Get the maximum number of steps. -1 means no limit. Default is 100.
    */
   vtkSetMacro(MaximumNumberOfSteps, int);
   vtkGetMacro(MaximumNumberOfSteps, int);
@@ -203,9 +220,19 @@ public:
 
   //@{
   /**
+   * Set/Get the maximum integration time. A negative value means no limit.
+   * Default is -1.
+   */
+  vtkSetMacro(MaximumIntegrationTime, double);
+  vtkGetMacro(MaximumIntegrationTime, double);
+  //@}
+
+  //@{
+  /**
    * Set/Get the Adaptive Step Reintegration feature.
    * it checks the step size after the integration
    * and if it is too big will retry with a smaller step
+   * Default is false.
    */
   vtkSetMacro(AdaptiveStepReintegration, bool);
   vtkGetMacro(AdaptiveStepReintegration, bool);
@@ -214,28 +241,12 @@ public:
 
   //@{
   /**
-   * Set/Get the Optional Paths Rendering feature
+   * Set/Get the generation of the particle path output,
+   * Default is true.
    */
-  vtkSetMacro(UseParticlePathsRenderingThreshold, bool);
-  vtkGetMacro(UseParticlePathsRenderingThreshold, bool);
-  vtkBooleanMacro(UseParticlePathsRenderingThreshold, bool);
-  //@}
-
-  //@{
-  /**
-   * Set/Get the Optional Paths Rendering feature
-   */
-  vtkSetMacro(ParticlePathsRenderingPointsThreshold, int);
-  vtkGetMacro(ParticlePathsRenderingPointsThreshold, int);
-  //@}
-
-  //@{
-  /**
-   * Set/Get the Creation of particle initially outside of the domain
-   */
-  vtkSetMacro(CreateOutOfDomainParticle, bool);
-  vtkGetMacro(CreateOutOfDomainParticle, bool);
-  vtkBooleanMacro(CreateOutOfDomainParticle, bool);
+  vtkSetMacro(GenerateParticlePathsOutput, bool);
+  vtkGetMacro(GenerateParticlePathsOutput, bool);
+  vtkBooleanMacro(GenerateParticlePathsOutput, bool);
   //@}
 
   //@{
@@ -261,8 +272,8 @@ public:
    * work on the input data as it is without updating the producer of the data.
    * See SetSurfaceConnection for connecting the pipeline.
    */
-  void SetSurfaceData(vtkDataObject *source);
-  vtkDataObject *GetSurface();
+  void SetSurfaceData(vtkDataObject* source);
+  vtkDataObject* GetSurface();
   //@}
 
   /**
@@ -273,100 +284,95 @@ public:
   /**
    * Declare input port type
    */
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Declare output port type
    */
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Create outputs objects.
    */
-  int RequestDataObject(vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Process inputs to integrate particle and generate output.
    */
-  int RequestData(vtkInformation *request,
-    vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   /**
    * Get the tracker modified time taking into account the integration model
    * and the integrator.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   /**
    * Get an unique id for a particle
+   * This method is thread safe
    */
   virtual vtkIdType GetNewParticleId();
 
 protected:
   vtkLagrangianParticleTracker();
-  ~vtkLagrangianParticleTracker() VTK_OVERRIDE;
+  ~vtkLagrangianParticleTracker() override;
 
-  virtual bool InitializeInputs(vtkInformationVector **inputVector,
-    vtkDataObject*& flow, vtkDataObject*& seeds, vtkDataObject*& surfaces,
-    std::queue<vtkLagrangianParticle*>& particleQueue, vtkPointData* seedData);
   virtual bool InitializeFlow(vtkDataObject* flow, vtkBoundingBox* bounds);
-  virtual bool InitializeParticles(const vtkBoundingBox* bounds, vtkDataObject* seeds,
+  virtual bool InitializeParticles(const vtkBoundingBox* bounds, vtkDataSet* seeds,
     std::queue<vtkLagrangianParticle*>& particles, vtkPointData* seedData);
   virtual void GenerateParticles(const vtkBoundingBox* bounds, vtkDataSet* seeds,
-    vtkDataArray* initialVelocities, vtkDataArray* initialIntegrationTimes,
-    vtkPointData* seedData, int nVar, std::queue<vtkLagrangianParticle*>& particles);
+    vtkDataArray* initialVelocities, vtkDataArray* initialIntegrationTimes, vtkPointData* seedData,
+    int nVar, std::queue<vtkLagrangianParticle*>& particles);
   virtual bool UpdateSurfaceCacheIfNeeded(vtkDataObject*& surfaces);
   virtual void InitializeSurface(vtkDataObject*& surfaces);
-  virtual bool InitializeOutputs(vtkInformationVector *outputVector, vtkPointData* seedData,
-    vtkIdType numberOfSeeds, vtkDataObject* surfaces,
-    vtkPolyData*& particlePathsOutput, vtkDataObject*& interactionOutput);
 
-  virtual bool InitializePathsOutput(vtkInformationVector *outputVector,
-    vtkPointData* seedData, vtkIdType numberOfSeeds,
-    vtkPolyData*& particlePathsOutput);
+  /**
+   * This method is thread safe
+   */
+  virtual bool InitializePathsOutput(
+    vtkPointData* seedData, vtkIdType numberOfSeeds, vtkPolyData*& particlePathsOutput);
 
-  virtual bool InitializeInteractionOutput(vtkInformationVector *outputVector,
+  /**
+   * This method is thread safe
+   */
+  virtual bool InitializeInteractionOutput(
     vtkPointData* seedData, vtkDataObject* surfaces, vtkDataObject*& interractionOutput);
 
-  virtual void InitializeParticleData(vtkFieldData* particleData, int maxTuples = 0);
-  virtual void InitializePathData(vtkFieldData* data);
-  virtual void InitializeInteractionData(vtkFieldData* data);
-
-  virtual bool FinalizeOutputs(vtkPolyData* particlePathsOutput,
-    vtkDataObject* interractionOutput);
+  virtual bool FinalizeOutputs(vtkPolyData* particlePathsOutput, vtkDataObject* interactionOutput);
 
   static void InsertPolyVertexCell(vtkPolyData* polydata);
+  static void InsertVertexCells(vtkPolyData* polydata);
 
   virtual void GetParticleFeed(std::queue<vtkLagrangianParticle*>& particleQueue);
 
-  virtual int Integrate(vtkLagrangianParticle*, std::queue<vtkLagrangianParticle*>&,
-    vtkPolyData* particlePathsOutput, vtkIdList* particlePathPointId,
-    vtkDataObject* interactionOutput);
+  /**
+   * This method is thread safe
+   */
+  virtual int Integrate(vtkInitialValueProblemSolver* integrator, vtkLagrangianParticle*,
+    std::queue<vtkLagrangianParticle*>&, vtkPolyData* particlePathsOutput,
+    vtkPolyLine* particlePath, vtkDataObject* interactionOutput);
 
-  void InsertPathOutputPoint(vtkLagrangianParticle* particle,
-    vtkPolyData* particlePathsOutput, vtkIdList* particlePathPointId,
-    bool prev = false);
+  /**
+   * This method is thread safe
+   */
+  void InsertPathOutputPoint(vtkLagrangianParticle* particle, vtkPolyData* particlePathsOutput,
+    vtkIdList* particlePathPointId, bool prev = false);
 
+  /**
+   * This method is thread safe
+   */
   void InsertInteractionOutputPoint(vtkLagrangianParticle* particle,
     unsigned int interactedSurfaceFlatIndex, vtkDataObject* interactionOutput);
 
-  void InsertSeedData(vtkLagrangianParticle* particle, vtkFieldData* data);
-  void InsertPathData(vtkLagrangianParticle* particle, vtkFieldData* data);
-  void InsertInteractionData(vtkLagrangianParticle* particle, vtkFieldData* data);
-  void InsertParticleData(vtkLagrangianParticle* particle, vtkFieldData* data, int stepEnum);
-
   double ComputeCellLength(vtkLagrangianParticle* particle);
 
-  bool ComputeNextStep(
-    double* xprev, double* xnext,
-    double t, double& delT, double& delTActual,
-    double minStep, double maxStep,
-    int& integrationRes);
-
-  virtual bool CheckParticlePathsRenderingThreshold(vtkPolyData* particlePathsOutput);
+  /**
+   * This method is thread safe
+   */
+  bool ComputeNextStep(vtkInitialValueProblemSolver* integrator, double* xprev, double* xnext,
+    double t, double& delT, double& delTActual, double minStep, double maxStep, double cellLength,
+    int& integrationRes, vtkLagrangianParticle* particle);
 
   vtkLagrangianBasicIntegrationModel* IntegrationModel;
   vtkInitialValueProblemSolver* Integrator;
@@ -376,11 +382,14 @@ protected:
   double StepFactorMin;
   double StepFactorMax;
   int MaximumNumberOfSteps;
+  double MaximumIntegrationTime;
   bool AdaptiveStepReintegration;
-  bool UseParticlePathsRenderingThreshold;
-  int ParticlePathsRenderingPointsThreshold;
-  bool CreateOutOfDomainParticle;
-  vtkIdType ParticleCounter;
+  bool GenerateParticlePathsOutput = true;
+  bool GeneratePolyVertexInteractionOutput;
+  std::atomic<vtkIdType> ParticleCounter;
+  std::atomic<vtkIdType> IntegratedParticleCounter;
+  vtkIdType IntegratedParticleCounterIncrement;
+  vtkPointData* SeedData;
 
   // internal parameters use for step computation
   double MinimumVelocityMagnitude;
@@ -393,9 +402,12 @@ protected:
   vtkDataObject* SurfacesCache;
   vtkMTimeType SurfacesTime;
 
+  std::mutex ProgressMutex;
+  friend struct IntegratingFunctor;
+
 private:
-  vtkLagrangianParticleTracker(const vtkLagrangianParticleTracker&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkLagrangianParticleTracker&) VTK_DELETE_FUNCTION;
+  vtkLagrangianParticleTracker(const vtkLagrangianParticleTracker&) = delete;
+  void operator=(const vtkLagrangianParticleTracker&) = delete;
 };
 
 #endif

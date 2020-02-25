@@ -1,19 +1,31 @@
-include(vtkMPI)
-
+set(vtkFiltersParallelGeometryCxxTests-MPI_NUMPROCS 4)
 set(Tests_SRCS
   TestPStructuredGridConnectivity.cxx
   TestPStructuredGridGhostDataGenerator.cxx
   TestPUnstructuredGridGhostCellsGenerator.cxx
   TestPUniformGridGhostDataGenerator.cxx)
 
-if (NOT VTK_LEGACY_REMOVE)
-  # only add those tests if not removing legacy code.
-  list(APPEND Tests_SRCS
-    TestPUnstructuredGridConnectivity.cxx
-    TestPUnstructuredGridGhostDataGenerator.cxx)
-endif()
+vtk_add_test_mpi(vtkFiltersParallelGeometryCxxTests-MPI tests ${Tests_SRCS})
 
-vtk_add_test_mpi(${vtk-module}CxxTests-MPI tests ${Tests_SRCS})
+set(vtkFiltersParallelGeometryCxxTests-MPI_NUMPROCS 1)
+vtk_add_test_mpi(vtkFiltersParallelGeometryCxxTests-MPI data_tests_1_proc
+  ParallelConnectivity1,ParallelConnectivity.cxx,TESTING_DATA,NO_VALID
+  )
 
-vtk_test_mpi_executable(${vtk-module}CxxTests-MPI tests
+set(vtkFiltersParallelGeometryCxxTests-MPI_NUMPROCS 4)
+vtk_add_test_mpi(vtkFiltersParallelGeometryCxxTests-MPI data_tests_4_procs
+  ParallelConnectivity4,ParallelConnectivity.cxx,TESTING_DATA,NO_VALID
+  )
+
+vtk_add_test_mpi(vtkFiltersParallelGeometryCxxTests-MPI data_tests_4_procs
+  TestPolyhedralMeshDistributedDataFilter.cxx,TESTING_DATA,NO_VALID
+)
+
+set(all_tests
+  ${tests}
+  ${data_tests_1_proc}
+  ${data_tests_4_procs}
+)
+
+vtk_test_cxx_executable(vtkFiltersParallelGeometryCxxTests-MPI all_tests
   UnstructuredGhostZonesCommon.cxx)

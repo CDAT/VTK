@@ -27,7 +27,7 @@
  * on cell data.
  * @sa
  * vtkImageExport
-*/
+ */
 
 #ifndef vtkImageImport_h
 #define vtkImageImport_h
@@ -38,16 +38,16 @@
 class VTKIOIMAGE_EXPORT vtkImageImport : public vtkImageAlgorithm
 {
 public:
-  static vtkImageImport *New();
-  vtkTypeMacro(vtkImageImport,vtkImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageImport* New();
+  vtkTypeMacro(vtkImageImport, vtkImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Import data and make an internal copy of it.  If you do not want
    * VTK to copy the data, then use SetImportVoidPointer instead (do
    * not use both).  Give the size of the data array in bytes.
    */
-  void CopyImportVoidPointer(void *ptr, vtkIdType size);
+  void CopyImportVoidPointer(void* ptr, vtkIdType size);
 
   //@{
   /**
@@ -56,8 +56,8 @@ public:
    * from the supplied array.  VTK will not attempt to delete the data
    * nor modify the data.
    */
-  void SetImportVoidPointer(void *ptr);
-  void *GetImportVoidPointer() {return this->ImportVoidPointer;};
+  void SetImportVoidPointer(void* ptr);
+  void* GetImportVoidPointer() { return this->ImportVoidPointer; }
   //@}
 
   /**
@@ -67,25 +67,25 @@ public:
    * own copy of the data, it will access the data directly from the
    * supplied array.
    */
-  void SetImportVoidPointer(void *ptr, int save);
+  void SetImportVoidPointer(void* ptr, int save);
 
   //@{
   /**
    * Set/Get the data type of pixels in the imported data.  This is used
    * as the scalar type of the Output.  Default: Short.
    */
-  vtkSetMacro(DataScalarType,int);
-  void SetDataScalarTypeToDouble(){this->SetDataScalarType(VTK_DOUBLE);}
-  void SetDataScalarTypeToFloat(){this->SetDataScalarType(VTK_FLOAT);}
-  void SetDataScalarTypeToInt(){this->SetDataScalarType(VTK_INT);}
-  void SetDataScalarTypeToShort(){this->SetDataScalarType(VTK_SHORT);}
-  void SetDataScalarTypeToUnsignedShort()
-    {this->SetDataScalarType(VTK_UNSIGNED_SHORT);}
-  void SetDataScalarTypeToUnsignedChar()
-    {this->SetDataScalarType(VTK_UNSIGNED_CHAR);}
+  vtkSetMacro(DataScalarType, int);
+  void SetDataScalarTypeToDouble() { this->SetDataScalarType(VTK_DOUBLE); }
+  void SetDataScalarTypeToFloat() { this->SetDataScalarType(VTK_FLOAT); }
+  void SetDataScalarTypeToInt() { this->SetDataScalarType(VTK_INT); }
+  void SetDataScalarTypeToShort() { this->SetDataScalarType(VTK_SHORT); }
+  void SetDataScalarTypeToUnsignedShort() { this->SetDataScalarType(VTK_UNSIGNED_SHORT); }
+  void SetDataScalarTypeToUnsignedChar() { this->SetDataScalarType(VTK_UNSIGNED_CHAR); }
   vtkGetMacro(DataScalarType, int);
-  const char *GetDataScalarTypeAsString() {
-    return vtkImageScalarTypeNameMacro(this->DataScalarType); }
+  const char* GetDataScalarTypeAsString()
+  {
+    return vtkImageScalarTypeNameMacro(this->DataScalarType);
+  }
   //@}
 
   //@{
@@ -93,8 +93,8 @@ public:
    * Set/Get the number of scalar components, for RGB images this must be 3.
    * Default: 1.
    */
-  vtkSetMacro(NumberOfScalarComponents,int);
-  vtkGetMacro(NumberOfScalarComponents,int);
+  vtkSetMacro(NumberOfScalarComponents, int);
+  vtkGetMacro(NumberOfScalarComponents, int);
   //@}
 
   //@{
@@ -104,10 +104,9 @@ public:
    * (extent[5]-DataExtent[4]+1).  For example, for a 2D image use
    * (0,width-1, 0,height-1, 0,0).
    */
-  vtkSetVector6Macro(DataExtent,int);
-  vtkGetVector6Macro(DataExtent,int);
-  void SetDataExtentToWholeExtent()
-    {this->SetDataExtent(this->GetWholeExtent());}
+  vtkSetVector6Macro(DataExtent, int);
+  vtkGetVector6Macro(DataExtent, int);
+  void SetDataExtentToWholeExtent() { this->SetDataExtent(this->GetWholeExtent()); }
   //@}
 
   //@{
@@ -115,8 +114,8 @@ public:
    * Set/Get the spacing (typically in mm) between image voxels.
    * Default: (1.0, 1.0, 1.0).
    */
-  vtkSetVector3Macro(DataSpacing,double);
-  vtkGetVector3Macro(DataSpacing,double);
+  vtkSetVector3Macro(DataSpacing, double);
+  vtkGetVector3Macro(DataSpacing, double);
   //@}
 
   //@{
@@ -124,8 +123,18 @@ public:
    * Set/Get the origin of the data, i.e. the coordinates (usually in mm)
    * of voxel (0,0,0).  Default: (0.0, 0.0, 0.0).
    */
-  vtkSetVector3Macro(DataOrigin,double);
-  vtkGetVector3Macro(DataOrigin,double);
+  vtkSetVector3Macro(DataOrigin, double);
+  vtkGetVector3Macro(DataOrigin, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the direction of the data, i.e. the 3x3 matrix to rotate
+   * the coordinates from index space (ijk) to physical space (xyz).
+   * Default: Identity Matrix (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+   */
+  vtkSetVectorMacro(DataDirection, double, 9);
+  vtkGetVectorMacro(DataDirection, double, 9);
   //@}
 
   //@{
@@ -134,25 +143,20 @@ public:
    * extent.  Set the DataExtent to the extent of the image in the buffer
    * pointed to by the ImportVoidPointer.
    */
-  vtkSetVector6Macro(WholeExtent,int);
-  vtkGetVector6Macro(WholeExtent,int);
+  vtkSetVector6Macro(WholeExtent, int);
+  vtkGetVector6Macro(WholeExtent, int);
   //@}
 
   /**
    * Propagates the update extent through the callback if it is set.
    */
-  int RequestUpdateExtent(  vtkInformation* request,
-                                    vtkInformationVector** inputVector,
-                                    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
   /**
    * Override vtkAlgorithm
    */
-  int
-  ComputePipelineMTime(vtkInformation* request,
-                       vtkInformationVector** inInfoVec,
-                       vtkInformationVector* outInfoVec,
-                       int requestFromOutputPort,
-                       vtkMTimeType* mtime) VTK_OVERRIDE;
+  int ComputePipelineMTime(vtkInformation* request, vtkInformationVector** inInfoVec,
+    vtkInformationVector* outInfoVec, int requestFromOutputPort, vtkMTimeType* mtime) override;
 
   //@{
   /**
@@ -173,6 +177,7 @@ public:
   typedef int* (*WholeExtentCallbackType)(void*);
   typedef double* (*SpacingCallbackType)(void*);
   typedef double* (*OriginCallbackType)(void*);
+  typedef double* (*DirectionCallbackType)(void*);
   typedef const char* (*ScalarTypeCallbackType)(void*);
   typedef int (*NumberOfComponentsCallbackType)(void*);
   typedef void (*PropagateUpdateExtentCallbackType)(void*, int*);
@@ -235,6 +240,16 @@ public:
 
   //@{
   /**
+   * Set/Get the callback for getting the direction of the input image
+   * from a third-party pipeline.  The callback should return a vector
+   * of nine double values describing the rotation from ijk to xyz.
+   */
+  vtkSetMacro(DirectionCallback, DirectionCallbackType);
+  vtkGetMacro(DirectionCallback, DirectionCallbackType);
+  //@}
+
+  //@{
+  /**
    * Set/Get the callback for getting the scalar value type of the
    * input image from a third-party pipeline.  The callback should
    * return a string with the name of the type.
@@ -261,8 +276,8 @@ public:
    * third-party pipeline to provide data which contains at least this
    * extent after the next UpdateData callback.
    */
-  vtkSetMacro(PropagateUpdateExtentCallback,PropagateUpdateExtentCallbackType);
-  vtkGetMacro(PropagateUpdateExtentCallback,PropagateUpdateExtentCallbackType);
+  vtkSetMacro(PropagateUpdateExtentCallback, PropagateUpdateExtentCallbackType);
+  vtkGetMacro(PropagateUpdateExtentCallback, PropagateUpdateExtentCallbackType);
   //@}
 
   //@{
@@ -320,13 +335,11 @@ public:
 
 protected:
   vtkImageImport();
-  ~vtkImageImport() VTK_OVERRIDE;
+  ~vtkImageImport() override;
 
-  int RequestInformation (vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-
-  void *ImportVoidPointer;
+  void* ImportVoidPointer;
   int SaveUserArray;
 
   int NumberOfScalarComponents;
@@ -336,27 +349,29 @@ protected:
   int DataExtent[6];
   double DataSpacing[3];
   double DataOrigin[3];
+  double DataDirection[9];
 
-  char *ScalarArrayName;
+  char* ScalarArrayName;
   void* CallbackUserData;
 
-  UpdateInformationCallbackType     UpdateInformationCallback;
-  PipelineModifiedCallbackType      PipelineModifiedCallback;
-  WholeExtentCallbackType           WholeExtentCallback;
-  SpacingCallbackType               SpacingCallback;
-  OriginCallbackType                OriginCallback;
-  ScalarTypeCallbackType            ScalarTypeCallback;
-  NumberOfComponentsCallbackType    NumberOfComponentsCallback;
+  UpdateInformationCallbackType UpdateInformationCallback;
+  PipelineModifiedCallbackType PipelineModifiedCallback;
+  WholeExtentCallbackType WholeExtentCallback;
+  SpacingCallbackType SpacingCallback;
+  OriginCallbackType OriginCallback;
+  DirectionCallbackType DirectionCallback;
+  ScalarTypeCallbackType ScalarTypeCallback;
+  NumberOfComponentsCallbackType NumberOfComponentsCallback;
   PropagateUpdateExtentCallbackType PropagateUpdateExtentCallback;
-  UpdateDataCallbackType            UpdateDataCallback;
-  DataExtentCallbackType            DataExtentCallback;
-  BufferPointerCallbackType         BufferPointerCallback;
+  UpdateDataCallbackType UpdateDataCallback;
+  DataExtentCallbackType DataExtentCallback;
+  BufferPointerCallbackType BufferPointerCallback;
 
-  void ExecuteDataWithInformation(vtkDataObject *d, vtkInformation* outInfo) VTK_OVERRIDE;
+  void ExecuteDataWithInformation(vtkDataObject* d, vtkInformation* outInfo) override;
 
 private:
-  vtkImageImport(const vtkImageImport&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageImport&) VTK_DELETE_FUNCTION;
+  vtkImageImport(const vtkImageImport&) = delete;
+  void operator=(const vtkImageImport&) = delete;
 };
 
 #endif

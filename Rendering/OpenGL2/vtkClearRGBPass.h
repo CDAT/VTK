@@ -20,38 +20,38 @@
  *
  * @sa
  * vtkValuePasses
-*/
+ */
 
 #ifndef vtkClearRGBPass_h
 #define vtkClearRGBPass_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkRenderPass.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
 
 class vtkOpenGLRenderWindow;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkClearRGBPass : public vtkRenderPass
 {
 public:
-  static vtkClearRGBPass *New();
-  vtkTypeMacro(vtkClearRGBPass,vtkRenderPass);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkClearRGBPass* New();
+  vtkTypeMacro(vtkClearRGBPass, vtkRenderPass);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform rendering according to a render state s.
    */
-  void Render(const vtkRenderState *s) VTK_OVERRIDE;
+  void Render(const vtkRenderState* s) override;
 
   //@{
   /**
    * Set/Get the background color of the rendering screen using an rgb color
    * specification.
    */
-  vtkSetVector3Macro(Background,double);
-  vtkGetVector3Macro(Background,double);
+  vtkSetVector3Macro(Background, double);
+  vtkGetVector3Macro(Background, double);
   //@}
 
- protected:
+protected:
   /**
    * Default constructor.
    */
@@ -60,13 +60,13 @@ public:
   /**
    * Destructor.
    */
-  ~vtkClearRGBPass() VTK_OVERRIDE;
+  ~vtkClearRGBPass() override;
 
   double Background[3];
 
- private:
-  vtkClearRGBPass(const vtkClearRGBPass&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkClearRGBPass&) VTK_DELETE_FUNCTION;
+private:
+  vtkClearRGBPass(const vtkClearRGBPass&) = delete;
+  void operator=(const vtkClearRGBPass&) = delete;
 };
 
 #endif

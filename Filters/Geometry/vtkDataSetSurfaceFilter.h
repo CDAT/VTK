@@ -23,7 +23,7 @@
  *
  * @sa
  * vtkGeometryFilter vtkStructuredGridGeometryFilter.
-*/
+ */
 
 #ifndef vtkDataSetSurfaceFilter_h
 #define vtkDataSetSurfaceFilter_h
@@ -39,7 +39,7 @@ class vtkStructuredGrid;
 // Helper structure for hashing faces.
 struct vtkFastGeomQuadStruct
 {
-  struct vtkFastGeomQuadStruct *Next;
+  struct vtkFastGeomQuadStruct* Next;
   vtkIdType SourceId;
   int numPts;
   vtkIdType* ptArray;
@@ -49,9 +49,9 @@ typedef struct vtkFastGeomQuadStruct vtkFastGeomQuad;
 class VTKFILTERSGEOMETRY_EXPORT vtkDataSetSurfaceFilter : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkDataSetSurfaceFilter *New();
-  vtkTypeMacro(vtkDataSetSurfaceFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkDataSetSurfaceFilter* New();
+  vtkTypeMacro(vtkDataSetSurfaceFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -59,9 +59,9 @@ public:
    * triangle strips.  This should render faster and use less memory, but no
    * cell data is copied.  By default, UseStrips is Off.
    */
-  vtkSetMacro(UseStrips, int);
-  vtkGetMacro(UseStrips, int);
-  vtkBooleanMacro(UseStrips, int);
+  vtkSetMacro(UseStrips, vtkTypeBool);
+  vtkGetMacro(UseStrips, vtkTypeBool);
+  vtkBooleanMacro(UseStrips, vtkTypeBool);
   //@}
 
   //@{
@@ -83,12 +83,12 @@ public:
    * since in that case each tringle strip can represent more than on of the
    * input cells.
    */
-  vtkSetMacro(PassThroughCellIds,int);
-  vtkGetMacro(PassThroughCellIds,int);
-  vtkBooleanMacro(PassThroughCellIds,int);
-  vtkSetMacro(PassThroughPointIds,int);
-  vtkGetMacro(PassThroughPointIds,int);
-  vtkBooleanMacro(PassThroughPointIds,int);
+  vtkSetMacro(PassThroughCellIds, vtkTypeBool);
+  vtkGetMacro(PassThroughCellIds, vtkTypeBool);
+  vtkBooleanMacro(PassThroughCellIds, vtkTypeBool);
+  vtkSetMacro(PassThroughPointIds, vtkTypeBool);
+  vtkGetMacro(PassThroughPointIds, vtkTypeBool);
+  vtkBooleanMacro(PassThroughPointIds, vtkTypeBool);
   //@}
 
   //@{
@@ -99,16 +99,14 @@ public:
    * is used, respectively.
    */
   vtkSetStringMacro(OriginalCellIdsName);
-  virtual const char *GetOriginalCellIdsName()
+  virtual const char* GetOriginalCellIdsName()
   {
-    return (  this->OriginalCellIdsName
-              ? this->OriginalCellIdsName : "vtkOriginalCellIds");
+    return (this->OriginalCellIdsName ? this->OriginalCellIdsName : "vtkOriginalCellIds");
   }
   vtkSetStringMacro(OriginalPointIdsName);
-  virtual const char *GetOriginalPointIdsName()
+  virtual const char* GetOriginalPointIdsName()
   {
-    return (  this->OriginalPointIdsName
-            ? this->OriginalPointIdsName : "vtkOriginalPointIds");
+    return (this->OriginalPointIdsName ? this->OriginalPointIdsName : "vtkOriginalPointIds");
   }
   //@}
 
@@ -116,7 +114,7 @@ public:
   /**
    * If the input is an unstructured grid with nonlinear faces, this parameter
    * determines how many times the face is subdivided into linear faces.  If 0,
-   * the output is the equivalent of its linear couterpart (and the midpoints
+   * the output is the equivalent of its linear counterpart (and the midpoints
    * determining the nonlinear interpolation are discarded).  If 1 (the
    * default), the nonlinear face is triangulated based on the midpoints.  If
    * greater than 1, the triangulated pieces are recursively subdivided to reach
@@ -133,14 +131,14 @@ public:
    * Direct access methods that can be used to use the this class as an
    * algorithm without using it as a filter.
    */
-  virtual int StructuredExecute(vtkDataSet *input,
-    vtkPolyData *output, vtkIdType *ext, vtkIdType *wholeExt);
+  virtual int StructuredExecute(
+    vtkDataSet* input, vtkPolyData* output, vtkIdType* ext, vtkIdType* wholeExt);
 #ifdef VTK_USE_64BIT_IDS
-  virtual int StructuredExecute(vtkDataSet *input,
-    vtkPolyData *output, int *ext32, int *wholeExt32)
+  virtual int StructuredExecute(vtkDataSet* input, vtkPolyData* output, int* ext32, int* wholeExt32)
   {
-    vtkIdType ext[6]; vtkIdType wholeExt[6];
-    for (int cc=0; cc < 6; cc++)
+    vtkIdType ext[6];
+    vtkIdType wholeExt[6];
+    for (int cc = 0; cc < 6; cc++)
     {
       ext[cc] = ext32[cc];
       wholeExt[cc] = wholeExt32[cc];
@@ -148,19 +146,18 @@ public:
     return this->StructuredExecute(input, output, ext, wholeExt);
   }
 #endif
-  virtual int UnstructuredGridExecute(vtkDataSet *input,
-                                      vtkPolyData *output);
-  virtual int DataSetExecute(vtkDataSet *input, vtkPolyData *output);
-  virtual int StructuredWithBlankingExecute(vtkStructuredGrid *input, vtkPolyData *output);
-  virtual int UniformGridExecute(
-      vtkDataSet *input, vtkPolyData *output,
-      vtkIdType *ext, vtkIdType *wholeExt, bool extractface[6] );
+  virtual int UnstructuredGridExecute(vtkDataSet* input, vtkPolyData* output);
+  virtual int DataSetExecute(vtkDataSet* input, vtkPolyData* output);
+  virtual int StructuredWithBlankingExecute(vtkStructuredGrid* input, vtkPolyData* output);
+  virtual int UniformGridExecute(vtkDataSet* input, vtkPolyData* output, vtkIdType* ext,
+    vtkIdType* wholeExt, bool extractface[6]);
 #ifdef VTK_USE_64BIT_IDS
-  virtual int UniformGridExecute(vtkDataSet *input,
-    vtkPolyData *output, int *ext32, int *wholeExt32, bool extractface[6] )
+  virtual int UniformGridExecute(
+    vtkDataSet* input, vtkPolyData* output, int* ext32, int* wholeExt32, bool extractface[6])
   {
-    vtkIdType ext[6]; vtkIdType wholeExt[6];
-    for (int cc=0; cc < 6; cc++)
+    vtkIdType ext[6];
+    vtkIdType wholeExt[6];
+    for (int cc = 0; cc < 6; cc++)
     {
       ext[cc] = ext32[cc];
       wholeExt[cc] = wholeExt32[cc];
@@ -172,15 +169,14 @@ public:
 
 protected:
   vtkDataSetSurfaceFilter();
-  ~vtkDataSetSurfaceFilter() VTK_OVERRIDE;
+  ~vtkDataSetSurfaceFilter() override;
 
-  int UseStrips;
+  vtkTypeBool UseStrips;
 
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
-
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   // Helper methods.
 
@@ -192,50 +188,41 @@ protected:
    * numCells -- the estimated number of cells (out)
    */
   void EstimateStructuredDataArraySizes(
-      vtkIdType *ext, vtkIdType *wholeExt,
-      vtkIdType &numPoints, vtkIdType &numCells );
+    vtkIdType* ext, vtkIdType* wholeExt, vtkIdType& numPoints, vtkIdType& numCells);
 
-  void ExecuteFaceStrips(vtkDataSet *input, vtkPolyData *output,
-                         int maxFlag, vtkIdType *ext,
-                         int aAxis, int bAxis, int cAxis,
-                         vtkIdType *wholeExt);
+  void ExecuteFaceStrips(vtkDataSet* input, vtkPolyData* output, int maxFlag, vtkIdType* ext,
+    int aAxis, int bAxis, int cAxis, vtkIdType* wholeExt);
 
-  void ExecuteFaceQuads(vtkDataSet *input, vtkPolyData *output,
-      int maxFlag, vtkIdType *ext, int aAxis, int bAxis, int cAxis,
-      vtkIdType *wholeExt, bool checkVisibility );
+  void ExecuteFaceQuads(vtkDataSet* input, vtkPolyData* output, int maxFlag, vtkIdType* ext,
+    int aAxis, int bAxis, int cAxis, vtkIdType* wholeExt, bool checkVisibility);
 
-  void ExecuteFaceQuads(vtkDataSet *input, vtkPolyData *output,
-                        int maxFlag, vtkIdType *ext,
-                        int aAxis, int bAxis, int cAxis,
-                        vtkIdType *wholeExt);
+  void ExecuteFaceQuads(vtkDataSet* input, vtkPolyData* output, int maxFlag, vtkIdType* ext,
+    int aAxis, int bAxis, int cAxis, vtkIdType* wholeExt);
 
   void InitializeQuadHash(vtkIdType numPoints);
   void DeleteQuadHash();
-  virtual void InsertQuadInHash(vtkIdType a, vtkIdType b, vtkIdType c, vtkIdType d,
-                        vtkIdType sourceId);
-  virtual void InsertTriInHash(vtkIdType a, vtkIdType b, vtkIdType c,
-                       vtkIdType sourceId, vtkIdType faceId = -1);
-  virtual void InsertPolygonInHash(vtkIdType* ids, int numpts,
-                           vtkIdType sourceId);
+  virtual void InsertQuadInHash(
+    vtkIdType a, vtkIdType b, vtkIdType c, vtkIdType d, vtkIdType sourceId);
+  virtual void InsertTriInHash(
+    vtkIdType a, vtkIdType b, vtkIdType c, vtkIdType sourceId, vtkIdType faceId = -1);
+  virtual void InsertPolygonInHash(const vtkIdType* ids, int numpts, vtkIdType sourceId);
   void InitQuadHashTraversal();
-  vtkFastGeomQuad *GetNextVisibleQuadFromHash();
+  vtkFastGeomQuad* GetNextVisibleQuadFromHash();
 
-  vtkFastGeomQuad **QuadHash;
+  vtkFastGeomQuad** QuadHash;
   vtkIdType QuadHashLength;
-  vtkFastGeomQuad *QuadHashTraversal;
+  vtkFastGeomQuad* QuadHashTraversal;
   vtkIdType QuadHashTraversalIndex;
 
-  vtkIdType *PointMap;
-  vtkIdType GetOutputPointId(vtkIdType inPtId, vtkDataSet *input,
-                             vtkPoints *outPts, vtkPointData *outPD);
+  vtkIdType* PointMap;
+  vtkIdType GetOutputPointId(
+    vtkIdType inPtId, vtkDataSet* input, vtkPoints* outPts, vtkPointData* outPD);
 
   class vtkEdgeInterpolationMap;
 
-  vtkEdgeInterpolationMap *EdgeMap;
-  vtkIdType GetInterpolatedPointId(vtkIdType edgePtA, vtkIdType edgePtB,
-                                   vtkDataSet *input, vtkCell *cell,
-                                   double pcoords[3], vtkPoints *outPts,
-                                   vtkPointData *outPD);
+  vtkEdgeInterpolationMap* EdgeMap;
+  vtkIdType GetInterpolatedPointId(vtkIdType edgePtA, vtkIdType edgePtB, vtkDataSet* input,
+    vtkCell* cell, double pcoords[3], vtkPoints* outPts, vtkPointData* outPD);
 
   vtkIdType NumberOfNewCells;
 
@@ -246,29 +233,29 @@ protected:
   // -----
   vtkIdType FastGeomQuadArrayLength;
   vtkIdType NumberOfFastGeomQuadArrays;
-  unsigned char** FastGeomQuadArrays;  // store this data as an array of bytes
+  unsigned char** FastGeomQuadArrays; // store this data as an array of bytes
   // These indexes allow us to find the next available face.
   vtkIdType NextArrayIndex;
   vtkIdType NextQuadIndex;
 
   int PieceInvariant;
 
-  int PassThroughCellIds;
+  vtkTypeBool PassThroughCellIds;
   void RecordOrigCellId(vtkIdType newIndex, vtkIdType origId);
-  virtual void RecordOrigCellId(vtkIdType newIndex, vtkFastGeomQuad *quad);
-  vtkIdTypeArray *OriginalCellIds;
-  char *OriginalCellIdsName;
+  virtual void RecordOrigCellId(vtkIdType newIndex, vtkFastGeomQuad* quad);
+  vtkIdTypeArray* OriginalCellIds;
+  char* OriginalCellIdsName;
 
-  int PassThroughPointIds;
+  vtkTypeBool PassThroughPointIds;
   void RecordOrigPointId(vtkIdType newIndex, vtkIdType origId);
-  vtkIdTypeArray *OriginalPointIds;
-  char *OriginalPointIdsName;
+  vtkIdTypeArray* OriginalPointIds;
+  char* OriginalPointIdsName;
 
   int NonlinearSubdivisionLevel;
 
 private:
-  vtkDataSetSurfaceFilter(const vtkDataSetSurfaceFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDataSetSurfaceFilter&) VTK_DELETE_FUNCTION;
+  vtkDataSetSurfaceFilter(const vtkDataSetSurfaceFilter&) = delete;
+  void operator=(const vtkDataSetSurfaceFilter&) = delete;
 };
 
 #endif

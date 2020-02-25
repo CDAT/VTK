@@ -27,16 +27,16 @@
  * @par Thanks:
  * Thanks to Brian Wylie from Sandia National Laboratories for implementing
  * this class
-*/
+ */
 
 #ifndef vtkQtTableView_h
 #define vtkQtTableView_h
 
-#include "vtkViewsQtModule.h" // For export macro
 #include "vtkQtView.h"
+#include "vtkViewsQtModule.h" // For export macro
 
-#include <QPointer> // Needed to hold the view
 #include "vtkSmartPointer.h" // Needed for member variables
+#include <QPointer>          // Needed to hold the view
 
 class vtkAddMembershipArray;
 class vtkApplyColors;
@@ -49,12 +49,12 @@ class vtkQtTableModelAdapter;
 
 class VTKVIEWSQT_EXPORT vtkQtTableView : public vtkQtView
 {
-Q_OBJECT
+  Q_OBJECT
 
 public:
-  static vtkQtTableView *New();
+  static vtkQtTableView* New();
   vtkTypeMacro(vtkQtTableView, vtkQtView);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Get the main container of this view (a  QWidget).
@@ -62,7 +62,7 @@ public:
    * to GetWidget(): something like this
    * this->ui->box->layout()->addWidget(this->View->GetWidget());
    */
-  QWidget* GetWidget() VTK_OVERRIDE;
+  QWidget* GetWidget() override;
 
   /**
    * Have the view show/hide its column headers
@@ -123,7 +123,7 @@ public:
   vtkGetStringMacro(ColumnName);
   //@}
 
-  void SetColumnVisibility(const QString &name, bool status);
+  void SetColumnVisibility(const QString& name, bool status);
 
   /**
    * Set whether or not the table view should split multi-component columns
@@ -157,7 +157,7 @@ public:
   /**
    * Updates the view.
    */
-  void Update() VTK_OVERRIDE;
+  void Update() override;
 
   //@{
   /**
@@ -179,7 +179,7 @@ public:
   /**
    * Apply a view theme to this view.
    */
-  void ApplyViewTheme(vtkViewTheme* theme) VTK_OVERRIDE;
+  void ApplyViewTheme(vtkViewTheme* theme) override;
 
   enum
   {
@@ -214,13 +214,13 @@ public:
 
 protected:
   vtkQtTableView();
-  ~vtkQtTableView() VTK_OVERRIDE;
+  ~vtkQtTableView() override;
 
-  void AddRepresentationInternal(vtkDataRepresentation* rep) VTK_OVERRIDE;
-  void RemoveRepresentationInternal(vtkDataRepresentation* rep) VTK_OVERRIDE;
+  void AddRepresentationInternal(vtkDataRepresentation* rep) override;
+  void RemoveRepresentationInternal(vtkDataRepresentation* rep) override;
 
 private slots:
-  void slotQtSelectionChanged(const QItemSelection&,const QItemSelection&);
+  void slotQtSelectionChanged(const QItemSelection&, const QItemSelection&);
 
 private:
   void SetVTKSelection();
@@ -246,9 +246,8 @@ private:
   vtkSmartPointer<vtkDataObjectToTable> DataObjectToTable;
   vtkSmartPointer<vtkApplyColors> ApplyColors;
 
-  vtkQtTableView(const vtkQtTableView&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtTableView&) VTK_DELETE_FUNCTION;
-
+  vtkQtTableView(const vtkQtTableView&) = delete;
+  void operator=(const vtkQtTableView&) = delete;
 };
 
 #endif

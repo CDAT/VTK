@@ -27,13 +27,13 @@
  * an edge.  You may additionally specify whether to begin with a random
  * tree (which enforces graph connectivity).
  *
-*/
+ */
 
 #ifndef vtkRandomGraphSource_h
 #define vtkRandomGraphSource_h
 
-#include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkGraphAlgorithm.h"
+#include "vtkInfovisCoreModule.h" // For export macro
 
 class vtkGraph;
 class vtkPVXMLElement;
@@ -42,8 +42,8 @@ class VTKINFOVISCORE_EXPORT vtkRandomGraphSource : public vtkGraphAlgorithm
 {
 public:
   static vtkRandomGraphSource* New();
-  vtkTypeMacro(vtkRandomGraphSource,vtkGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkRandomGraphSource, vtkGraphAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -176,7 +176,7 @@ public:
 
 protected:
   vtkRandomGraphSource();
-  ~vtkRandomGraphSource() VTK_OVERRIDE;
+  ~vtkRandomGraphSource() override;
   int NumberOfVertices;
   int NumberOfEdges;
   double EdgeProbability;
@@ -192,22 +192,17 @@ protected:
   char* VertexPedigreeIdArrayName;
   char* EdgePedigreeIdArrayName;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Creates directed or undirected output based on Directed flag.
    */
-  int RequestDataObject(vtkInformation*,
-                                vtkInformationVector** inputVector,
-                                vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation*, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
 private:
-  vtkRandomGraphSource(const vtkRandomGraphSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRandomGraphSource&) VTK_DELETE_FUNCTION;
+  vtkRandomGraphSource(const vtkRandomGraphSource&) = delete;
+  void operator=(const vtkRandomGraphSource&) = delete;
 };
 
 #endif
-

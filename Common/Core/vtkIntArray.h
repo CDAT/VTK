@@ -23,14 +23,14 @@
  * The C++ standard does not define the exact size of the int type, so use
  * of this type directly is discouraged.  If an array of 32 bit integers is
  * needed, prefer vtkTypeInt32Array to this class.
-*/
+ */
 
 #ifndef vtkIntArray_h
 #define vtkIntArray_h
 
-#include "vtkCommonCoreModule.h" // For export macro
-#include "vtkDataArray.h"
 #include "vtkAOSDataArrayTemplate.h" // Real Superclass
+#include "vtkCommonCoreModule.h"     // For export macro
+#include "vtkDataArray.h"
 
 // Fake the superclass for the wrappers.
 #ifndef __VTK_WRAP__
@@ -39,24 +39,24 @@
 class VTKCOMMONCORE_EXPORT vtkIntArray : public vtkDataArray
 {
 public:
-  vtkTypeMacro(vtkIntArray, vtkDataArray)
+  vtkTypeMacro(vtkIntArray, vtkDataArray);
 #ifndef __VTK_WRAP__
 #undef vtkDataArray
 #endif
   static vtkIntArray* New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // This macro expands to the set of method declarations that
   // make up the interface of vtkAOSDataArrayTemplate, which is ignored
   // by the wrappers.
-#if defined(__VTK_WRAP__) || defined (__WRAP_GCCXML__)
+#if defined(__VTK_WRAP__) || defined(__WRAP_GCCXML__)
   vtkCreateWrappedArrayInterface(int);
 #endif
 
   /**
    * A faster alternative to SafeDownCast for downcasting vtkAbstractArrays.
    */
-  static vtkIntArray* FastDownCast(vtkAbstractArray *source)
+  static vtkIntArray* FastDownCast(vtkAbstractArray* source)
   {
     return static_cast<vtkIntArray*>(Superclass::FastDownCast(source));
   }
@@ -73,17 +73,16 @@ public:
 
 protected:
   vtkIntArray();
-  ~vtkIntArray() VTK_OVERRIDE;
+  ~vtkIntArray() override;
 
 private:
-
   typedef vtkAOSDataArrayTemplate<int> RealSuperclass;
 
-  vtkIntArray(const vtkIntArray&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkIntArray&) VTK_DELETE_FUNCTION;
+  vtkIntArray(const vtkIntArray&) = delete;
+  void operator=(const vtkIntArray&) = delete;
 };
 
 // Define vtkArrayDownCast implementation:
-vtkArrayDownCast_FastCastMacro(vtkIntArray)
+vtkArrayDownCast_FastCastMacro(vtkIntArray);
 
 #endif

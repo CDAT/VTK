@@ -23,16 +23,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkOpenVRRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkSelection.h"
-
-// #include "vtkAssemblyNode.h"
-// #include "vtkAssemblyPath.h"
-// #include "vtkRenderer.h"
-// #include "vtkMath.h"
-// #include "vtkCamera.h"
-// #include "vtkBox.h"
-// #include "vtkRenderWindow.h"
-// #include "vtkRenderWindowInteractor3D.h"
-// #include "vtkTransform.h"
+#include "vtkTransform.h"
 
 vtkStandardNewMacro(vtkOpenVRHardwarePicker);
 
@@ -57,8 +48,7 @@ void vtkOpenVRHardwarePicker::Initialize()
 
 // Pick from the given collection
 int vtkOpenVRHardwarePicker::PickProp(
-  double p0[3], double wxyz[4],
-  vtkRenderer *renderer, vtkPropCollection*)
+  double p0[3], double wxyz[4], vtkRenderer* renderer, vtkPropCollection*, bool actorPassOnly)
 {
   //  Initialize picking process
   this->Initialize();
@@ -67,47 +57,61 @@ int vtkOpenVRHardwarePicker::PickProp(
   // Invoke start pick method if defined
   this->InvokeEvent(vtkCommand::StartPickEvent, nullptr);
 
-  vtkOpenVRRenderWindow* renWin =
-    vtkOpenVRRenderWindow::SafeDownCast(renderer->GetRenderWindow());
+  vtkOpenVRRenderWindow* renWin = vtkOpenVRRenderWindow::SafeDownCast(renderer->GetRenderWindow());
   if (!renWin)
   {
     return 0;
   }
 
-  vtkHardwareSelector *sel = vtkHardwareSelector::New();
+  vtkNew<vtkHardwareSelector> sel;
   sel->SetFieldAssociation(vtkDataObject::FIELD_ASSOCIATION_CELLS);
   sel->SetRenderer(renderer);
-  vtkCamera *oldcam = renderer->GetActiveCamera();
+  sel->SetActorPassOnly(actorPassOnly);
+  vtkCamera* oldcam = renderer->GetActiveCamera();
   renWin->SetTrackHMD(false);
 
-  vtkNew<vtkTransform > tran;
+  vtkNew<vtkTransform> tran;
   tran->RotateWXYZ(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
-  double pin[4] = {0.0, 0.0, -1.0, 1.0};
+  double pin[4] = { 0.0, 0.0, -1.0, 1.0 };
   double dop[4];
   tran->MultiplyPoint(pin, dop);
   double distance = oldcam->GetDistance();
   oldcam->SetPosition(p0);
-  oldcam->SetFocalPoint(p0[0] + dop[0]*distance,
-   p0[1] + dop[1]*distance,
-   p0[2] + dop[2]*distance);
+  oldcam->SetFocalPoint(
+    p0[0] + dop[0] * distance, p0[1] + dop[1] * distance, p0[2] + dop[2] * distance);
   oldcam->OrthogonalizeViewUp();
 
-  int *size = renderer->GetSize();
+  int* size = renderer->GetSize();
 
-  sel->SetArea(size[0]/2 - 2, size[1]/2 - 2, size[0]/2 + 1, size[1]/2 + 1);
+  sel->SetArea(size[0] / 2 - 5, size[1] / 2 - 5, size[0] / 2 + 5, size[1] / 2 + 5);
 
   if (this->Selection)
   {
     this->Selection->Delete();
   }
-  this->Selection = sel->Select();
 
+  this->Selection = nullptr;
+  if (sel->CaptureBuffers())
+  {
+    unsigned int outPos[2];
+    unsigned int inPos[2] = { static_cast<unsigned int>(size[0] / 2),
+      static_cast<unsigned int>(size[1] / 2) };
+    // find the data closest to the center
+    vtkHardwareSelector::PixelInformation pinfo = sel->GetPixelInformation(inPos, 5, outPos);
+    if (pinfo.Valid)
+    {
+      this->Selection = sel->GenerateSelection(outPos[0], outPos[1], outPos[0], outPos[1]);
+    }
+  }
+
+  // this->Selection = sel->Select();
   // sel->SetArea(0, 0, size[0]-1, size[1]-1);
+
   renWin->SetTrackHMD(true);
 
   this->InvokeEvent(vtkCommand::EndPickEvent, this->Selection);
 
-  if (this->Selection->GetNode(0))
+  if (this->Selection && this->Selection->GetNode(0))
   {
     return 1;
   }

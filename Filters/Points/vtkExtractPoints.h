@@ -41,11 +41,17 @@
  * non-sequential type (set in the CMake variable
  * VTK_SMP_IMPLEMENTATION_TYPE) may improve performance significantly.
  *
+ * @warning
+ * The vtkExtractEnclosedPoints filter can be used to extract points inside of
+ * a volume defined by a manifold, closed polygonal surface. This filter
+ * however is much slower than methods based on implicit functions (like this
+ * filter).
+ *
  * @sa
- * vtkPointCloudFilter vtkRadiusOutlierRemoval vtkStatisticalOutlierRemoval
- * vtkThresholdPoints vtkImplicitFunction vtkExtractGeoemtry
- * vtkFitImplicitFunction
-*/
+ * vtkExtractEnclosedPoints vtkSelectEnclosedPoints vtkPointCloudFilter
+ * vtkRadiusOutlierRemoval vtkStatisticalOutlierRemoval vtkThresholdPoints
+ * vtkImplicitFunction vtkExtractGeometry vtkFitImplicitFunction
+ */
 
 #ifndef vtkExtractPoints_h
 #define vtkExtractPoints_h
@@ -56,7 +62,6 @@
 class vtkImplicitFunction;
 class vtkPointSet;
 
-
 class VTKFILTERSPOINTS_EXPORT vtkExtractPoints : public vtkPointCloudFilter
 {
 public:
@@ -65,9 +70,9 @@ public:
    * Standard methods for instantiating, obtaining type information, and
    * printing information.
    */
-  static vtkExtractPoints *New();
-  vtkTypeMacro(vtkExtractPoints,vtkPointCloudFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkExtractPoints* New();
+  vtkTypeMacro(vtkExtractPoints, vtkPointCloudFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -75,7 +80,7 @@ public:
    * Specify the implicit function for inside/outside checks.
    */
   virtual void SetImplicitFunction(vtkImplicitFunction*);
-  vtkGetObjectMacro(ImplicitFunction,vtkImplicitFunction);
+  vtkGetObjectMacro(ImplicitFunction, vtkImplicitFunction);
   //@}
 
   //@{
@@ -84,31 +89,30 @@ public:
    * function (ExtractInside == true) or outside of implicit function
    * (ExtractInside == false). By default, ExtractInside is true.
    */
-  vtkSetMacro(ExtractInside,bool);
-  vtkGetMacro(ExtractInside,bool);
-  vtkBooleanMacro(ExtractInside,bool);
+  vtkSetMacro(ExtractInside, bool);
+  vtkGetMacro(ExtractInside, bool);
+  vtkBooleanMacro(ExtractInside, bool);
   //@}
 
   /**
    * Return the MTime taking into account changes to the implicit function
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkExtractPoints();
-  ~vtkExtractPoints() VTK_OVERRIDE;
+  ~vtkExtractPoints() override;
 
-  vtkImplicitFunction *ImplicitFunction;
+  vtkImplicitFunction* ImplicitFunction;
   bool ExtractInside;
 
   // All derived classes must implement this method. Note that a side effect of
   // the class is to populate the PointMap. Zero is returned if there is a failure.
-  int FilterPoints(vtkPointSet *input) VTK_OVERRIDE;
+  int FilterPoints(vtkPointSet* input) override;
 
 private:
-  vtkExtractPoints(const vtkExtractPoints&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractPoints&) VTK_DELETE_FUNCTION;
-
+  vtkExtractPoints(const vtkExtractPoints&) = delete;
+  void operator=(const vtkExtractPoints&) = delete;
 };
 
 #endif

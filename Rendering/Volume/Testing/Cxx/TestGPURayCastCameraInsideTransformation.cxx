@@ -20,29 +20,28 @@
 #include "vtkCamera.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkGPUVolumeRayCastMapper.h"
+#include "vtkImageResize.h"
 #include "vtkInteractorStyleTrackballCamera.h"
-#include "vtkVolume16Reader.h"
 #include "vtkNew.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkTestUtilities.h"
 #include "vtkVolume.h"
+#include "vtkVolume16Reader.h"
 #include "vtkVolumeProperty.h"
-#include "vtkImageResize.h"
-
 
 static const char* TestGPURayCastCameraInsideTransformationLog =
-"# StreamVersion 1\n"
-"EnterEvent 298 27 0 0 0 0 0\n"
-"MouseWheelForwardEvent 200 142 0 0 0 0 0\n"
-"LeaveEvent 311 71 0 0 0 0 0\n";
+  "# StreamVersion 1\n"
+  "EnterEvent 298 27 0 0 0 0 0\n"
+  "MouseWheelForwardEvent 200 142 0 0 0 0 0\n"
+  "LeaveEvent 311 71 0 0 0 0 0\n";
 
 int TestGPURayCastCameraInsideTransformation(int argc, char* argv[])
 {
-  //cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
+  // cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
   // Load data
   vtkNew<vtkVolume16Reader> reader;
@@ -63,26 +62,26 @@ int TestGPURayCastCameraInsideTransformation(int argc, char* argv[])
 
   // Prepare TFs
   vtkNew<vtkColorTransferFunction> ctf;
-  ctf->AddRGBPoint(0,    0.0, 0.0, 0.0);
-  ctf->AddRGBPoint(500,  1.0, 0.5, 0.3);
+  ctf->AddRGBPoint(0, 0.0, 0.0, 0.0);
+  ctf->AddRGBPoint(500, 1.0, 0.5, 0.3);
   ctf->AddRGBPoint(1000, 1.0, 0.5, 0.3);
   ctf->AddRGBPoint(1150, 1.0, 1.0, 0.9);
 
   vtkNew<vtkPiecewiseFunction> pf;
-  pf->AddPoint(0,    0.00);
-  pf->AddPoint(500,  0.02);
+  pf->AddPoint(0, 0.00);
+  pf->AddPoint(500, 0.02);
   pf->AddPoint(1000, 0.02);
   pf->AddPoint(1150, 0.85);
 
   vtkNew<vtkPiecewiseFunction> gf;
-  gf->AddPoint(0,   0.0);
-  gf->AddPoint(90,  0.5);
+  gf->AddPoint(0, 0.0);
+  gf->AddPoint(90, 0.5);
   gf->AddPoint(100, 0.7);
 
   vtkNew<vtkVolumeProperty> volumeProperty;
-  volumeProperty->SetScalarOpacity(pf.GetPointer());
-  volumeProperty->SetGradientOpacity(gf.GetPointer());
-  volumeProperty->SetColor(ctf.GetPointer());
+  volumeProperty->SetScalarOpacity(pf);
+  volumeProperty->SetGradientOpacity(gf);
+  volumeProperty->SetColor(ctf);
   volumeProperty->ShadeOn();
 
   // Setup rendering context
@@ -91,16 +90,16 @@ int TestGPURayCastCameraInsideTransformation(int argc, char* argv[])
   renWin->SetMultiSamples(0);
 
   vtkNew<vtkRenderer> ren;
-  renWin->AddRenderer(ren.GetPointer());
+  renWin->AddRenderer(ren);
   ren->SetBackground(0.1, 0.1, 0.1);
 
   vtkNew<vtkGPUVolumeRayCastMapper> mapper;
   mapper->SetInputConnection(resample->GetOutputPort());
 
   vtkNew<vtkVolume> volume;
-  volume->SetMapper(mapper.GetPointer());
-  volume->SetProperty(volumeProperty.GetPointer());
-  ren->AddVolume(volume.GetPointer());
+  volume->SetMapper(mapper);
+  volume->SetProperty(volumeProperty);
+  ren->AddVolume(volume);
 
   // Set a vtkProp3D transformation
   volume->RotateX(180);
@@ -114,15 +113,15 @@ int TestGPURayCastCameraInsideTransformation(int argc, char* argv[])
 
   // Initialize interactor
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
 
   vtkNew<vtkInteractorStyleTrackballCamera> style;
-  iren->SetInteractorStyle(style.GetPointer());
+  iren->SetInteractorStyle(style);
 
   renWin->Render();
   iren->Initialize();
 
-  int rv = vtkTesting::InteractorEventLoop(argc, argv, iren.GetPointer(),
-    TestGPURayCastCameraInsideTransformationLog);
+  int rv =
+    vtkTesting::InteractorEventLoop(argc, argv, iren, TestGPURayCastCameraInsideTransformationLog);
   return rv;
 }

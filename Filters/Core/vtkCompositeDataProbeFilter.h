@@ -33,7 +33,7 @@
  * output. For all those locations in a block of where a particular data array
  * is missing, this filter uses vtkMath::Nan() for double and float arrays,
  * while 0 for all other types of arrays i.e int, char etc.
-*/
+ */
 
 #ifndef vtkCompositeDataProbeFilter_h
 #define vtkCompositeDataProbeFilter_h
@@ -47,7 +47,7 @@ class VTKFILTERSCORE_EXPORT vtkCompositeDataProbeFilter : public vtkProbeFilter
 public:
   static vtkCompositeDataProbeFilter* New();
   vtkTypeMacro(vtkCompositeDataProbeFilter, vtkProbeFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -69,13 +69,13 @@ public:
 
 protected:
   vtkCompositeDataProbeFilter();
-  ~vtkCompositeDataProbeFilter() VTK_OVERRIDE;
+  ~vtkCompositeDataProbeFilter() override;
 
   /**
    * Change input information to accept composite datasets as the input which
    * is probed into.
    */
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * Builds the field list using the composite dataset source.
@@ -85,26 +85,23 @@ protected:
   /**
    * Initializes output and various arrays which keep track for probing status.
    */
-  void InitializeOutputArrays(vtkPointData *outPD, vtkIdType numPts) VTK_OVERRIDE;
+  void InitializeOutputArrays(vtkPointData* outPD, vtkIdType numPts) override;
 
   /**
    * Handle composite input.
    */
-  int RequestData(vtkInformation *,
-    vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Create a default executive.
    */
-  vtkExecutive* CreateDefaultExecutive() VTK_OVERRIDE;
+  vtkExecutive* CreateDefaultExecutive() override;
 
   bool PassPartialArrays;
-private:
-  vtkCompositeDataProbeFilter(const vtkCompositeDataProbeFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositeDataProbeFilter&) VTK_DELETE_FUNCTION;
 
+private:
+  vtkCompositeDataProbeFilter(const vtkCompositeDataProbeFilter&) = delete;
+  void operator=(const vtkCompositeDataProbeFilter&) = delete;
 };
 
 #endif
-
-

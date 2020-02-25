@@ -21,45 +21,40 @@
  * same scalar type of the output. The filter does copy the
  * data when it executes. This filter is actually a very thin wrapper
  * around vtkImageReslice.
-*/
+ */
 
 #ifndef vtkImagePermute_h
 #define vtkImagePermute_h
 
-
-#include "vtkImagingCoreModule.h" // For export macro
 #include "vtkImageReslice.h"
+#include "vtkImagingCoreModule.h" // For export macro
 
 class VTKIMAGINGCORE_EXPORT vtkImagePermute : public vtkImageReslice
 {
 public:
-  static vtkImagePermute *New();
-  vtkTypeMacro(vtkImagePermute,vtkImageReslice);
+  static vtkImagePermute* New();
+  vtkTypeMacro(vtkImagePermute, vtkImageReslice);
 
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * The filtered axes are the input axes that get relabeled to X,Y,Z.
    */
   void SetFilteredAxes(int x, int y, int z);
-  void SetFilteredAxes(const int xyz[3]) {
-    this->SetFilteredAxes(xyz[0], xyz[1], xyz[2]); };
+  void SetFilteredAxes(const int xyz[3]) { this->SetFilteredAxes(xyz[0], xyz[1], xyz[2]); }
   vtkGetVector3Macro(FilteredAxes, int);
   //@}
 
 protected:
   vtkImagePermute();
-  ~vtkImagePermute()VTK_OVERRIDE {}
+  ~vtkImagePermute() override {}
 
   int FilteredAxes[3];
 
 private:
-  vtkImagePermute(const vtkImagePermute&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImagePermute&) VTK_DELETE_FUNCTION;
+  vtkImagePermute(const vtkImagePermute&) = delete;
+  void operator=(const vtkImagePermute&) = delete;
 };
 
 #endif
-
-
-

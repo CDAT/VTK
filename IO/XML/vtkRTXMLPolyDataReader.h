@@ -18,7 +18,7 @@
  *
  * vtkRTXMLPolyDataReader reads the VTK XML PolyData file format in real time.
  *
-*/
+ */
 
 #ifndef vtkRTXMLPolyDataReader_h
 #define vtkRTXMLPolyDataReader_h
@@ -31,8 +31,8 @@ class vtkRTXMLPolyDataReaderInternals;
 class VTKIOXML_EXPORT vtkRTXMLPolyDataReader : public vtkXMLPolyDataReader
 {
 public:
-  vtkTypeMacro(vtkRTXMLPolyDataReader,vtkXMLPolyDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkRTXMLPolyDataReader, vtkXMLPolyDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkRTXMLPolyDataReader* New();
 
   // This sets the DataLocation and also
@@ -70,7 +70,7 @@ public:
 
 protected:
   vtkRTXMLPolyDataReader();
-  ~vtkRTXMLPolyDataReader() VTK_OVERRIDE;
+  ~vtkRTXMLPolyDataReader() override;
 
   //@{
   /**
@@ -93,8 +93,8 @@ protected:
   //@}
 
 private:
-  vtkRTXMLPolyDataReader(const vtkRTXMLPolyDataReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRTXMLPolyDataReader&) VTK_DELETE_FUNCTION;
+  vtkRTXMLPolyDataReader(const vtkRTXMLPolyDataReader&) = delete;
+  void operator=(const vtkRTXMLPolyDataReader&) = delete;
 };
 
 #endif

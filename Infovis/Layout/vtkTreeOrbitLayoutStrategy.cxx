@@ -21,7 +21,7 @@
 
 #include "vtkAbstractArray.h"
 #include "vtkAdjacentVertexIterator.h"
-#ifdef VTK_USE_BOOST
+#if VTK_MODULE_ENABLE_VTK_InfovisBoostGraphAlgorithms
 #include "vtkBoostBreadthFirstSearchTree.h"
 #endif
 #include "vtkDataArray.h"
@@ -44,27 +44,24 @@ vtkTreeOrbitLayoutStrategy::vtkTreeOrbitLayoutStrategy()
   this->ChildRadiusFactor = .5;
 }
 
-vtkTreeOrbitLayoutStrategy::~vtkTreeOrbitLayoutStrategy()
-{
-
-}
+vtkTreeOrbitLayoutStrategy::~vtkTreeOrbitLayoutStrategy() = default;
 
 // Helper method for recursively orbiting children
 // around their parents
-void vtkTreeOrbitLayoutStrategy::OrbitChildren(vtkTree *t,
-  vtkPoints *p, vtkIdType parent, double radius)
+void vtkTreeOrbitLayoutStrategy::OrbitChildren(
+  vtkTree* t, vtkPoints* p, vtkIdType parent, double radius)
 {
 
   // Get the current position of the parent
   double pt[3];
-  double xCenter,yCenter;
+  double xCenter, yCenter;
   p->GetPoint(parent, pt);
   xCenter = pt[0];
   yCenter = pt[1];
 
   // Check for leaf_count array
-  vtkIntArray* leaf_count = vtkArrayDownCast<vtkIntArray>(
-                            t->GetVertexData()->GetArray("leaf_count"));
+  vtkIntArray* leaf_count =
+    vtkArrayDownCast<vtkIntArray>(t->GetVertexData()->GetArray("leaf_count"));
   if (!leaf_count)
   {
     vtkErrorMacro("vtkTreeOrbitLayoutStrategy has to have a leaf_count array");
@@ -78,21 +75,21 @@ void vtkTreeOrbitLayoutStrategy::OrbitChildren(vtkTree *t,
   // Now simply orbit the children around the
   // parent's centerpoint
   double currentAngle = 0;
-  for (vtkIdType i=0; i < immediateChildren; ++i)
+  for (vtkIdType i = 0; i < immediateChildren; ++i)
   {
     vtkIdType childID = t->GetChild(parent, i);
     vtkIdType subChildren = leaf_count->GetValue(childID);
 
     // What angle do I get? If I have a lot of sub children
     // then I should get a greater angle 'pizza slice'
-    double myAngle = subChildren/totalChildren;
+    double myAngle = subChildren / totalChildren;
 
     // So I want to be in the middle of my pizza slice
-    double angle = currentAngle + myAngle/2.0;
+    double angle = currentAngle + myAngle / 2.0;
 
     // Compute coords
-    double x = cos(2.0*vtkMath::Pi()*angle);
-    double y = sin(2.0*vtkMath::Pi()*angle);
+    double x = cos(2.0 * vtkMath::Pi() * angle);
+    double y = sin(2.0 * vtkMath::Pi() * angle);
 
     // Am I a leaf
     double radiusFactor;
@@ -105,10 +102,10 @@ void vtkTreeOrbitLayoutStrategy::OrbitChildren(vtkTree *t,
     p->SetPoint(childID, xOrbit, yOrbit, 0);
 
     // Compute child radius
-    double childRadius = radius*tan(myAngle)*2.0 * this->ChildRadiusFactor;
+    double childRadius = radius * tan(myAngle) * 2.0 * this->ChildRadiusFactor;
 
     // Now recurse with a reduced radius
-    this->OrbitChildren(t,p,childID,childRadius);
+    this->OrbitChildren(t, p, childID, childRadius);
 
     // Accumulate angle
     currentAngle += myAngle;
@@ -121,7 +118,7 @@ void vtkTreeOrbitLayoutStrategy::Layout()
   vtkTree* tree = vtkTree::SafeDownCast(this->Graph);
   if (tree == nullptr)
   {
-#ifdef VTK_USE_BOOST
+#if VTK_MODULE_ENABLE_VTK_InfovisBoostGraphAlgorithms
     // Use the BFS search tree to perform the layout
     vtkBoostBreadthFirstSearchTree* bfs = vtkBoostBreadthFirstSearchTree::New();
     bfs->CreateGraphVertexIdArrayOn();
@@ -131,19 +128,19 @@ void vtkTreeOrbitLayoutStrategy::Layout()
     tree->ShallowCopy(bfs->GetOutput());
     bfs->Delete();
 #else
-    vtkErrorMacro("Layout only works on vtkTree unless VTK_USE_BOOST is on.");
+    vtkErrorMacro("Layout only works on vtkTree if VTK::InfovisBoostGraphAlgorithms is available.");
 #endif
   }
 
- if (tree->GetNumberOfVertices() == 0)
- {
+  if (tree->GetNumberOfVertices() == 0)
+  {
     vtkErrorMacro("Tree Input has 0 vertices - Punting...");
     return;
- }
+  }
 
   // Create a new point set
   vtkIdType numVertices = tree->GetNumberOfVertices();
-  vtkPoints *newPoints = vtkPoints::New();
+  vtkPoints* newPoints = vtkPoints::New();
   newPoints->SetNumberOfPoints(numVertices);
 
   // Setting the root to position 0,0 but this could
@@ -161,7 +158,7 @@ void vtkTreeOrbitLayoutStrategy::Layout()
   {
     this->Graph->SetPoints(newPoints);
   }
-#ifdef VTK_USE_BOOST
+#if VTK_MODULE_ENABLE_VTK_InfovisBoostGraphAlgorithms
   else
   {
     // Reorder the points based on the mapping back to graph vertex ids
@@ -171,8 +168,8 @@ void vtkTreeOrbitLayoutStrategy::Layout()
     {
       reordered->SetPoint(i, 0, 0, 0);
     }
-    vtkIdTypeArray* graphVertexIdArr = vtkArrayDownCast<vtkIdTypeArray>(
-      tree->GetVertexData()->GetAbstractArray("GraphVertexId"));
+    vtkIdTypeArray* graphVertexIdArr =
+      vtkArrayDownCast<vtkIdTypeArray>(tree->GetVertexData()->GetAbstractArray("GraphVertexId"));
     for (vtkIdType i = 0; i < graphVertexIdArr->GetNumberOfTuples(); i++)
     {
       reordered->SetPoint(graphVertexIdArr->GetValue(i), newPoints->GetPoint(i));
@@ -189,7 +186,7 @@ void vtkTreeOrbitLayoutStrategy::Layout()
 
 void vtkTreeOrbitLayoutStrategy::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
   os << indent << "LogSpacingValue: " << this->LogSpacingValue << endl;
   os << indent << "LeafSpacing: " << this->LeafSpacing << endl;
   os << indent << "ChildRadiusFactor: " << this->ChildRadiusFactor << endl;

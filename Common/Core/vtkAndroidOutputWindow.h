@@ -23,7 +23,7 @@
  * only handles one output window per process.  If the window is destroyed,
  * the vtkObject::GlobalWarningDisplayOff() function is called.  The
  * window is created the next time text is written to the window.
-*/
+ */
 
 #ifndef vtkAndroidOutputWindow_h
 #define vtkAndroidOutputWindow_h
@@ -31,13 +31,12 @@
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkOutputWindow.h"
 
-
 class VTKCOMMONCORE_EXPORT vtkAndroidOutputWindow : public vtkOutputWindow
 {
 public:
-// Methods from vtkObject
-  vtkTypeMacro(vtkAndroidOutputWindow,vtkOutputWindow);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  // Methods from vtkObject
+  vtkTypeMacro(vtkAndroidOutputWindow, vtkOutputWindow);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Create a vtkAndroidOutputWindow.
@@ -48,7 +47,7 @@ public:
   /**
    * New lines are converted to carriage return new lines.
    */
-  virtual void DisplayText(const char*);
+  void DisplayText(const char*) override;
   virtual void DisplayErrorText(const char*);
   virtual void DisplayWarningText(const char*);
   virtual void DisplayGenericWarningText(const char*);
@@ -58,12 +57,11 @@ public:
 
 protected:
   vtkAndroidOutputWindow();
-  virtual ~vtkAndroidOutputWindow();
+  ~vtkAndroidOutputWindow() override;
 
 private:
-  vtkAndroidOutputWindow(const vtkAndroidOutputWindow&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAndroidOutputWindow&) VTK_DELETE_FUNCTION;
+  vtkAndroidOutputWindow(const vtkAndroidOutputWindow&) = delete;
+  void operator=(const vtkAndroidOutputWindow&) = delete;
 };
-
 
 #endif

@@ -12,7 +12,7 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-/**
+/*
  * @class   vtkHardwareSelector
  * @brief   manager for OpenGL-based selection.
  *
@@ -37,32 +37,80 @@
  * Antialiasing will break this class. If your graphics card settings force
  * their use this class will return invalid results.
  *
- * Currently only cells from PolyDataMappers can be selected from. When
- * vtkRenderer::Selector is non-null vtkPainterPolyDataMapper uses the
- * vtkHardwareSelectionPolyDataPainter which make appropriate calls to
- * BeginRenderProp(), EndRenderProp(), RenderProcessId(),
- * RenderAttributeId() to render colors
- * correctly. Until alternatives to vtkHardwareSelectionPolyDataPainter
- * exist that can do a similar coloration of other vtkDataSet types, only
- * polygonal data can be selected. If you need to select other data types,
- * consider using vtkDataSetMapper and turning on it's PassThroughCellIds
- * feature, or using vtkFrustumExtractor.
- *
  * Only Opaque geometry in Actors is selected from. Assemblies and LODMappers
  * are not currently supported.
  *
  * During selection, visible datasets that can not be selected from are
  * temporarily hidden so as not to produce invalid indices from their colors.
  *
+ *
+ * The basic approach this class uses is to invoke render multiple times
+ * (passes) and have the mappers render pass specific information into
+ * the color buffer. For example during the ACTOR_PASS a mapper is
+ * supposed to render it's actor's id into the color buffer as a RGB
+ * value where R is the lower 8 bits, G is the next 8, etc. Giving us 24
+ * bits of unsigned int range.
+ *
+ * The same concept applies to the COMPOSITE_INDEX_PASS and the point and
+ * cell ID passes. As points and cells can easily exceed the 24 bit range
+ * of the color buffer we break them into two 24 bit passes for a total
+ * of 48 bits of range.
+ *
+ * During each pass the mappers render their data into the color buffer,
+ * the hardware selector grabs that buffer and then invokes
+ * ProcessSelectorPixelBuffer on all of the hit props. Giving them, and
+ * their mappers, a chance to modify the pixel buffer.
+ *
+ * Most mappers use this ProcessSelectorPixelBuffers pass to take when
+ * they rendered into the color buffer and convert it into what the
+ * hardware selector is expecting. This is because in some cases it is
+ * far easier and faster to  render something else, such as
+ * gl_PrimitiveID or gl_VertexID and then in the processing convert those
+ * values to the appropriate VTK values.
+ *
+ * NOTE:  The goal is for mappers to support hardware selection without
+ * having to rebuild any of their VBO/IBOs to maintain fast picking
+ * performance.
+ *
+ * NOTE: This class has a complex interaction with parallel compositing
+ * techniques such as IceT that are used on supercomputers. In those
+ * cases the local nodes render each pass, process it, send it to icet
+ * which composits it, and then must copy the result back to the hardware
+ * selector. Be aware of these interactions  if you work on this class.
+ *
+ * NOTE: many mappers support remapping arrays from their local value to
+ * some other provided value. For example ParaView when creating a
+ * polydata from an unstructured grid will create point and cell data
+ * arrays on the polydata that may the polydata point and cell IDs back
+ * to the original unstructured grid's point and cell IDs. The hardware
+ * selection process honors those arrays and will provide the original
+ * unstructured grid point and cell ID when a selection is made.
+ * Likewise there are process and composite arrays that most mappers
+ * support that allow for parallel data generation, delivery, and local
+ * rendering while preserving the original process and composite values
+ * from when the data was distributed. Be aware the process array is a
+ * point data while the composite array is a cell data.
+ *
+ * TODO: This whole selection process could be nicely encapsulated as a
+ * RenderPass that internally renders multiple times with different
+ * settings. That would be my suggestion for the future.
+ *
+ * TODO: The pick method build into renderer could use the ACTOR pass of
+ * this class to do it's work eliminating some confusion and duplicate
+ * code paths.
+ *
+ * TODO: I am not sure where the composite array indirection is used.
+ *
+ *
  * @sa
- * vtkIdentColoredPainter
-*/
+ * vtkOpenGLHardwareSelector
+ */
 
 #ifndef vtkHardwareSelector_h
 #define vtkHardwareSelector_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 #include <string> // for std::string
 
@@ -87,19 +135,22 @@ public:
     vtkProp* Prop;
     unsigned int CompositeID;
     vtkIdType AttributeID;
-    PixelInformation():
-      Valid(false),
-      ProcessID(-1),
-      Prop(nullptr),
-      CompositeID(0),
-      AttributeID(-1) {}
+    PixelInformation()
+      : Valid(false)
+      , ProcessID(-1)
+      , PropID(-1)
+      , Prop(nullptr)
+      , CompositeID(0)
+      , AttributeID(-1)
+    {
+    }
   };
   //@}
 
 public:
   static vtkHardwareSelector* New();
   vtkTypeMacro(vtkHardwareSelector, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -143,7 +194,7 @@ public:
   //@}
 
   /**
-   * Perform the selection. Returns  a new instance of vtkSelection containing
+   * Perform the selection. Returns a new instance of vtkSelection containing
    * the selection on success.
    */
   vtkSelection* Select();
@@ -164,13 +215,20 @@ public:
    */
   virtual bool CaptureBuffers();
   PixelInformation GetPixelInformation(const unsigned int display_position[2])
-    { return this->GetPixelInformation(display_position, 0); }
+  {
+    return this->GetPixelInformation(display_position, 0);
+  }
   PixelInformation GetPixelInformation(const unsigned int display_position[2], int maxDist)
-    { unsigned int temp[2]; return this->GetPixelInformation(display_position, maxDist, temp); }
-  PixelInformation GetPixelInformation(const unsigned int display_position[2],
-    int maxDist, unsigned int selected_position[2]);
-  void ClearBuffers()
-    { this->ReleasePixBuffers(); }
+  {
+    unsigned int temp[2];
+    return this->GetPixelInformation(display_position, maxDist, temp);
+  }
+  PixelInformation GetPixelInformation(
+    const unsigned int display_position[2], int maxDist, unsigned int selected_position[2]);
+  void ClearBuffers() { this->ReleasePixBuffers(); }
+  // raw is before processing
+  unsigned char* GetRawPixelBuffer(int passNo) { return this->RawPixBuffer[passNo]; }
+  unsigned char* GetPixelBuffer(int passNo) { return this->PixBuffer[passNo]; }
   //@}
 
   /**
@@ -179,10 +237,16 @@ public:
    */
   virtual void RenderCompositeIndex(unsigned int index);
 
+  //@{
   /**
-   * Called by any vtkMapper or vtkProp subclass to render an attribute's id.
+   * Called by any vtkMapper or vtkProp subclass to indicate the
+   * maximum cell or point attribute ID it uses. These values are
+   * used for determining if the POINT_ID_HIGH or CELL_ID_HIGH
+   * passes are required.
    */
-  virtual void RenderAttributeId(vtkIdType attribid);
+  virtual void UpdateMaximumCellId(vtkIdType attribid);
+  virtual void UpdateMaximumPointId(vtkIdType attribid);
+  //@}
 
   /**
    * Called by any vtkMapper or subclass to render process id. This has any
@@ -198,8 +262,27 @@ public:
 
   //@{
   /**
-   * Called by the mapper (vtkHardwareSelectionPolyDataPainter) before and after
-   * rendering each prop.
+   * Get/Set to only do the actor pass. If true all other passes will be
+   * skipped resulting in a faster pick.
+   */
+  vtkGetMacro(ActorPassOnly, bool);
+  vtkSetMacro(ActorPassOnly, bool);
+  //@}
+
+  //@{
+  /**
+   * Get/Set to capture the zvalue. If true the closest zvalue is
+   * stored for each prop that is in the selection. ZValue in this
+   * case is the value from the zbuffer which can be used in
+   * coordinate conversions
+   */
+  vtkGetMacro(CaptureZValues, bool);
+  vtkSetMacro(CaptureZValues, bool);
+  //@}
+
+  //@{
+  /**
+   * Called by the mapper before and after rendering each prop.
    */
   virtual void BeginRenderProp();
   virtual void EndRenderProp();
@@ -218,8 +301,9 @@ public:
   /**
    * Get/Set the color to be used by the prop when drawing
    */
-  vtkGetVector3Macro(PropColorValue,float);
-  vtkSetVector3Macro(PropColorValue,float);
+  vtkGetVector3Macro(PropColorValue, float);
+  vtkSetVector3Macro(PropColorValue, float);
+  void SetPropColorValue(vtkIdType val);
   //@}
 
   //@{
@@ -237,13 +321,13 @@ public:
    * of the region specified by SetArea(), otherwise it will be
    * clipped to that region.
    */
-  virtual vtkSelection* GenerateSelection()
-    { return GenerateSelection(this->Area); }
+  virtual vtkSelection* GenerateSelection() { return GenerateSelection(this->Area); }
   virtual vtkSelection* GenerateSelection(unsigned int r[4])
-    { return GenerateSelection(r[0], r[1], r[2], r[3]); }
+  {
+    return GenerateSelection(r[0], r[1], r[2], r[3]);
+  }
   virtual vtkSelection* GenerateSelection(
-    unsigned int x1, unsigned int y1,
-    unsigned int x2, unsigned int y2);
+    unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2);
 
   /**
    * Generates the vtkSelection from pixel buffers.
@@ -251,8 +335,7 @@ public:
    * of a rectangle region, and select elements inside the polygon.
    * NOTE: The CaptureBuffers() needs to be called first.
    */
-  virtual vtkSelection* GeneratePolygonSelection(
-    int* polygonPoints, vtkIdType count);
+  virtual vtkSelection* GeneratePolygonSelection(int* polygonPoints, vtkIdType count);
 
   /**
    * returns the prop associated with a ID. This is valid only until
@@ -260,16 +343,34 @@ public:
    */
   vtkProp* GetPropFromID(int id);
 
+  // it is very critical that these passes happen in the right order
+  // this is because of two complexities
+  //
+  // Compositing engines such as iceT send each pass as it
+  // renders. This means
+  //
+  // Mappers use point Ids or cell Id to update the process
+  // and composite ids. So the point and cell id passes
+  // have to happen before the last process and compoite
+  // passes respectively
+  //
+  //
   enum PassTypes
   {
-    PROCESS_PASS,
+    // always must be first so that the prop IDs are set
     ACTOR_PASS,
+    // must always be second for composite mapper
     COMPOSITE_INDEX_PASS,
-    ID_LOW24,
-    ID_MID24,
-    ID_HIGH16,
-    MAX_KNOWN_PASS = ID_HIGH16,
-    MIN_KNOWN_PASS = PROCESS_PASS
+
+    POINT_ID_LOW24,
+    POINT_ID_HIGH24, // if needed
+    PROCESS_PASS,    // best to be after point id pass
+
+    CELL_ID_LOW24,
+    CELL_ID_HIGH24, // if needed
+
+    MAX_KNOWN_PASS = CELL_ID_HIGH24,
+    MIN_KNOWN_PASS = ACTOR_PASS
   };
 
   /**
@@ -277,16 +378,20 @@ public:
    */
   std::string PassTypeToString(PassTypes type);
 
-  static void Convert(int id, float tcoord[3])
+  static void Convert(vtkIdType id, float tcoord[3])
   {
-    tcoord[0] = static_cast<float>((id & 0xff)/255.0);
-    tcoord[1] = static_cast<float>(((id & 0xff00) >> 8)/255.0);
-    tcoord[2] = static_cast<float>(((id & 0xff0000) >> 16)/255.0);
+    tcoord[0] = static_cast<float>((id & 0xff) / 255.0);
+    tcoord[1] = static_cast<float>(((id & 0xff00) >> 8) / 255.0);
+    tcoord[2] = static_cast<float>(((id & 0xff0000) >> 16) / 255.0);
   }
+
+  // grab the pixel buffer and save it
+  // typically called internally
+  virtual void SavePixelBuffer(int passNo);
 
 protected:
   vtkHardwareSelector();
-  ~vtkHardwareSelector() VTK_OVERRIDE;
+  ~vtkHardwareSelector() override;
 
   // Used to notify subclasses when a capture pass is occurring.
   virtual void PreCapturePass(int pass) { (void)pass; }
@@ -294,8 +399,10 @@ protected:
 
   // Called internally before and after each prop is rendered
   // for device specific configuration/preparation etc.
-  virtual void BeginRenderProp(vtkRenderWindow *) = 0;
-  virtual void EndRenderProp(vtkRenderWindow *) = 0;
+  virtual void BeginRenderProp(vtkRenderWindow*) = 0;
+  virtual void EndRenderProp(vtkRenderWindow*) = 0;
+
+  double GetZValue(int propid);
 
   int Convert(unsigned long offset, unsigned char* pb)
   {
@@ -306,8 +413,8 @@ protected:
     offset = offset * 3;
     unsigned char rgb[3];
     rgb[0] = pb[offset];
-    rgb[1] = pb[offset+1];
-    rgb[2] = pb[offset+2];
+    rgb[1] = pb[offset + 1];
+    rgb[2] = pb[offset + 2];
     int val = 0;
     val |= rgb[2];
     val = val << 8;
@@ -321,19 +428,18 @@ protected:
   /**
    * \c pos must be relative to the lower-left corner of this->Area.
    */
-  int Convert(unsigned int pos[2], unsigned char* pb)
-    { return this->Convert(pos[0], pos[1], pb); }
+  int Convert(unsigned int pos[2], unsigned char* pb) { return this->Convert(pos[0], pos[1], pb); }
   int Convert(int xx, int yy, unsigned char* pb)
   {
     if (!pb)
     {
       return 0;
     }
-    int offset = (yy * static_cast<int>(this->Area[2]-this->Area[0]+1) + xx) * 3;
+    int offset = (yy * static_cast<int>(this->Area[2] - this->Area[0] + 1) + xx) * 3;
     unsigned char rgb[3];
     rgb[0] = pb[offset];
-    rgb[1] = pb[offset+1];
-    rgb[2] = pb[offset+2];
+    rgb[1] = pb[offset + 1];
+    rgb[2] = pb[offset + 2];
     int val = 0;
     val |= rgb[2];
     val = val << 8;
@@ -370,13 +476,12 @@ protected:
   /**
    * Return a unique ID for the prop.
    */
-  virtual int GetPropID(int idx, vtkProp* vtkNotUsed(prop))
-    { return idx; }
+  virtual int GetPropID(int idx, vtkProp* vtkNotUsed(prop)) { return idx; }
 
   virtual void BeginSelection();
   virtual void EndSelection();
 
-  virtual void SavePixelBuffer(int passNo);
+  virtual void ProcessPixelBuffers();
   void BuildPropHitList(unsigned char* rgbData);
 
   //@{
@@ -388,26 +493,30 @@ protected:
   unsigned int Area[4];
   int FieldAssociation;
   bool UseProcessIdFromData;
-  vtkIdType MaxAttributeId;
+  vtkIdType MaximumPointId;
+  vtkIdType MaximumCellId;
   //@}
 
   // At most 10 passes.
   unsigned char* PixBuffer[10];
+  unsigned char* RawPixBuffer[10];
   int ProcessID;
   int CurrentPass;
+  int Iteration;
   int InPropRender;
   int PropID;
   float PropColorValue[3];
 
+  bool ActorPassOnly;
+
+  bool CaptureZValues;
+
 private:
-  vtkHardwareSelector(const vtkHardwareSelector&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHardwareSelector&) VTK_DELETE_FUNCTION;
+  vtkHardwareSelector(const vtkHardwareSelector&) = delete;
+  void operator=(const vtkHardwareSelector&) = delete;
 
   class vtkInternals;
   vtkInternals* Internals;
-
 };
 
 #endif
-
-

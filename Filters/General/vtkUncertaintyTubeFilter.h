@@ -26,11 +26,11 @@
  * polyline point. The uncertainty tubes can be envisioned as the
  * interpolation of these ellipsoids between the points defining the
  * polyline (or rather, the interpolation of the cross section of the
- * ellipsoids alog the polyline).
+ * ellipsoids along the polyline).
  *
  * @sa
  * vtkTensorGlyph vtkStreamTracer
-*/
+ */
 
 #ifndef vtkUncertaintyTubeFilter_h
 #define vtkUncertaintyTubeFilter_h
@@ -47,43 +47,43 @@ public:
   /**
    * Standard methods for printing and obtaining type information for instances of this class.
    */
-  vtkTypeMacro(vtkUncertaintyTubeFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkUncertaintyTubeFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * Object factory method to instantiate this class.
    */
-  static vtkUncertaintyTubeFilter *New();
+  static vtkUncertaintyTubeFilter* New();
 
   //@{
   /**
    * Set / get the number of sides for the tube. At a minimum,
    * the number of sides is 3.
    */
-  vtkSetClampMacro(NumberOfSides,int,3,VTK_INT_MAX);
-  vtkGetMacro(NumberOfSides,int);
+  vtkSetClampMacro(NumberOfSides, int, 3, VTK_INT_MAX);
+  vtkGetMacro(NumberOfSides, int);
   //@}
 
 protected:
   vtkUncertaintyTubeFilter();
-  ~vtkUncertaintyTubeFilter() VTK_OVERRIDE;
+  ~vtkUncertaintyTubeFilter() override;
 
   // Integrate data
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int BuildTubes(vtkPointData *pd, vtkPointData *outPD,
-                 vtkCellData *cd, vtkCellData *outCD, vtkPolyData *output);
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int BuildTubes(vtkPointData* pd, vtkPointData* outPD, vtkCellData* cd, vtkCellData* outCD,
+    vtkPolyData* output);
 
-  //array of uncertainty tubes
-  vtkTubeArray *Tubes;
+  // array of uncertainty tubes
+  vtkTubeArray* Tubes;
   int NumberOfTubes;
 
   // number of sides of tube
   int NumberOfSides;
 
 private:
-  vtkUncertaintyTubeFilter(const vtkUncertaintyTubeFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkUncertaintyTubeFilter&) VTK_DELETE_FUNCTION;
+  vtkUncertaintyTubeFilter(const vtkUncertaintyTubeFilter&) = delete;
+  void operator=(const vtkUncertaintyTubeFilter&) = delete;
 };
 
 #endif

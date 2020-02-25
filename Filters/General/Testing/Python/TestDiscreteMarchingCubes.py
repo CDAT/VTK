@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import vtk
+from math import cos, sin, pi
 from vtk.util.misc import vtkGetDataRoot
 VTK_DATA_ROOT = vtkGetDataRoot()
 
@@ -72,6 +73,14 @@ while i < n:
 
     i += 1
 
+angle = pi/6
+orientation = [
+  -cos(angle), 0, sin(angle),
+  0, 1, 0,
+  sin(angle), 0, cos(angle),
+]
+blobImage.SetDirectionMatrix(orientation)
+
 discrete = vtk.vtkDiscreteMarchingCubes()
 discrete.SetInputData(blobImage)
 discrete.GenerateValues(n, 1, n)
@@ -87,5 +96,4 @@ actor.SetMapper(mapper)
 ren1.AddActor(actor)
 
 renWin.Render()
-
-#iren.Start()
+iren.Start()

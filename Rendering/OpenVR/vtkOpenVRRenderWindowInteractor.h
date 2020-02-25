@@ -18,17 +18,19 @@
  * required by vtkRenderWindowInteractor.
  *
  *
-*/
+ */
 
 #ifndef vtkOpenVRRenderWindowInteractor_h
 #define vtkOpenVRRenderWindowInteractor_h
 
-#include "vtkRenderingOpenVRModule.h" // For export macro
 #include "vtkRenderWindowInteractor3D.h"
+#include "vtkRenderingOpenVRModule.h" // For export macro
 
+#include "vtkNew.h"                // ivars
 #include "vtkOpenVRRenderWindow.h" // ivars
-#include "vtkNew.h" // ivars
-#include "vtkTransform.h" // ivars
+
+class vtkTransform;
+class vtkMatrix4x4;
 
 class VTKRENDERINGOPENVR_EXPORT vtkOpenVRRenderWindowInteractor : public vtkRenderWindowInteractor3D
 {
@@ -36,9 +38,9 @@ public:
   /**
    * Construct object so that light follows camera motion.
    */
-  static vtkOpenVRRenderWindowInteractor *New();
+  static vtkOpenVRRenderWindowInteractor* New();
 
-  vtkTypeMacro(vtkOpenVRRenderWindowInteractor,vtkRenderWindowInteractor3D);
+  vtkTypeMacro(vtkOpenVRRenderWindowInteractor, vtkRenderWindowInteractor3D);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   /**
@@ -46,26 +48,19 @@ public:
    */
   virtual void Initialize();
 
-  /**
-   * OpenVR specific application terminate, calls ClassExitMethod then
-   * calls PostQuitMessage(0) to terminate the application. An application can Specify
-   * ExitMethod for alternative behavior (i.e. suppression of keyboard exit)
-   */
-  void TerminateApp(void);
-
   //@{
   /**
    * Methods to set the default exit method for the class. This method is
    * only used if no instance level ExitMethod has been defined.  It is
    * provided as a means to control how an interactor is exited given
-   * the various language bindings (tcl, Win32, etc.).
+   * the various language bindings (Win32, etc.).
    */
-  static void SetClassExitMethod(void (*f)(void *), void *arg);
-  static void SetClassExitMethodArgDelete(void (*f)(void *));
+  static void SetClassExitMethod(void (*f)(void*), void* arg);
+  static void SetClassExitMethodArgDelete(void (*f)(void*));
   //@}
 
   /**
-   * These methods correspond to the the Exit, User and Pick
+   * These methods correspond to the Exit, User and Pick
    * callbacks. They allow for the Style to invoke them.
    */
   virtual void ExitCallback();
@@ -75,44 +70,69 @@ public:
    * Set/Get the optional translation to map world coordinates into the
    * 3D physical space (meters, 0,0,0).
    */
-  virtual void SetPhysicalTranslation(vtkCamera *, double, double, double);
-  virtual double *GetPhysicalTranslation(vtkCamera *);
+  virtual void SetPhysicalTranslation(vtkCamera*, double, double, double);
+  virtual double* GetPhysicalTranslation(vtkCamera*);
   virtual void SetPhysicalScale(double);
   virtual double GetPhysicalScale();
   //@}
 
-  virtual void DoOneEvent(vtkOpenVRRenderWindow *renWin, vtkRenderer *ren);
+  /**
+   * Run the event loop and return. This is provided so that you can
+   * implement your own event loop but yet use the vtk event handling as
+   * well.
+   */
+  void ProcessEvents() override;
+
+  virtual void DoOneEvent(vtkOpenVRRenderWindow* renWin, vtkRenderer* ren);
 
   /*
-   * returns the pointer index as a device
+   * Return the pointer index as a device
    */
   vtkEventDataDevice GetPointerDevice();
 
-  // converts a device pose to a world coordinate
-  // position and orientation
-  void ConvertPoseToWorldCoordinates(
-    const vr::TrackedDevicePose_t &tdPose,
-    double pos[3],
-    double wxyz[4],
-    double ppos[3],
-    double wdir[3]);
+  /*
+   * Convert a device pose to pose matrices
+   * \param poseMatrixPhysical Optional output pose matrix in physical frame
+   * \param poseMatrixWorld    Optional output pose matrix in world frame
+   */
+  void ConvertOpenVRPoseToMatrices(const vr::TrackedDevicePose_t& tdPose,
+    vtkMatrix4x4* poseMatrixWorld, vtkMatrix4x4* poseMatrixPhysical = nullptr);
+
+  /*
+   * Convert a device pose to a world coordinate position and orientation
+   * \param pos  Output world position
+   * \param wxyz Output world orientation quaternion
+   * \param ppos Output physical position
+   * \param wdir Output world view direction (-Z)
+   */
+  void ConvertPoseToWorldCoordinates(const vr::TrackedDevicePose_t& tdPose, double pos[3],
+    double wxyz[4], double ppos[3], double wdir[3]);
+
+  //@{
+  /**
+   * Get the latest touchpad or joystick position for a device
+   */
+  void GetTouchPadPosition(vtkEventDataDevice, vtkEventDataDeviceInput, float[3]) override;
+  //@}
+
+  /*
+   * Return starting physical to world matrix
+   */
+  void GetStartingPhysicalToWorldMatrix(vtkMatrix4x4* startingPhysicalToWorldMatrix);
 
 protected:
   vtkOpenVRRenderWindowInteractor();
-  ~vtkOpenVRRenderWindowInteractor();
-
-  void UpdateTouchPadPosition(vr::IVRSystem *pHMD,
-     vr::TrackedDeviceIndex_t tdi);
+  ~vtkOpenVRRenderWindowInteractor() override;
 
   //@{
   /**
    * Class variables so an exit method can be defined for this class
    * (used to set different exit methods for various language bindings,
-   * i.e. tcl, java, Win32)
+   * i.e. java, Win32)
    */
-  static void (*ClassExitMethod)(void *);
-  static void (*ClassExitMethodArgDelete)(void *);
-  static void *ClassExitMethodArg;
+  static void (*ClassExitMethod)(void*);
+  static void (*ClassExitMethodArgDelete)(void*);
+  static void* ClassExitMethodArg;
   //@}
 
   //@{
@@ -131,20 +151,22 @@ protected:
    */
   virtual void StartEventLoop();
 
-
-  vtkNew<vtkTransform> PoseTransform;
-
   /**
-  * Handle multitouch events. Multitouch events recognition starts when
-  * both controllers the trigger pressed.
-  */
+   * Handle multitouch events. Multitouch events recognition starts when
+   * both controllers the trigger pressed.
+   */
   int DeviceInputDown[VTKI_MAX_POINTERS][2];
   int DeviceInputDownCount[2];
-  void RecognizeComplexGesture(vtkEventDataDevice3D* edata);
+  virtual void RecognizeComplexGesture(vtkEventDataDevice3D* edata);
+
+  /**
+   * Store physical to world matrix at the start of a multi-touch gesture
+   */
+  vtkNew<vtkMatrix4x4> StartingPhysicalToWorldMatrix;
 
 private:
-  vtkOpenVRRenderWindowInteractor(const vtkOpenVRRenderWindowInteractor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenVRRenderWindowInteractor&) VTK_DELETE_FUNCTION;
+  vtkOpenVRRenderWindowInteractor(const vtkOpenVRRenderWindowInteractor&) = delete;
+  void operator=(const vtkOpenVRRenderWindowInteractor&) = delete;
 };
 
 #endif

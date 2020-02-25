@@ -22,11 +22,10 @@
  *
  * @sa
  * vtkImageRGBToHSV
-*/
+ */
 
 #ifndef vtkImageHSVToRGB_h
 #define vtkImageHSVToRGB_h
-
 
 #include "vtkImagingColorModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -34,10 +33,10 @@
 class VTKIMAGINGCOLOR_EXPORT vtkImageHSVToRGB : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageHSVToRGB *New();
-  vtkTypeMacro(vtkImageHSVToRGB,vtkThreadedImageAlgorithm);
+  static vtkImageHSVToRGB* New();
+  vtkTypeMacro(vtkImageHSVToRGB, vtkThreadedImageAlgorithm);
 
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -46,24 +45,21 @@ public:
    * is expected as input.
    * Maximum also specifies the maximum of the Saturation, and R, G, B.
    */
-  vtkSetMacro(Maximum,double);
-  vtkGetMacro(Maximum,double);
+  vtkSetMacro(Maximum, double);
+  vtkGetMacro(Maximum, double);
   //@}
 
 protected:
   vtkImageHSVToRGB();
-  ~vtkImageHSVToRGB() VTK_OVERRIDE {}
+  ~vtkImageHSVToRGB() override {}
 
   double Maximum;
 
-  void ThreadedExecute (vtkImageData *inData, vtkImageData *outData,
-                       int ext[6], int id) VTK_OVERRIDE;
+  void ThreadedExecute(vtkImageData* inData, vtkImageData* outData, int ext[6], int id) override;
+
 private:
-  vtkImageHSVToRGB(const vtkImageHSVToRGB&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageHSVToRGB&) VTK_DELETE_FUNCTION;
+  vtkImageHSVToRGB(const vtkImageHSVToRGB&) = delete;
+  void operator=(const vtkImageHSVToRGB&) = delete;
 };
 
 #endif
-
-
-

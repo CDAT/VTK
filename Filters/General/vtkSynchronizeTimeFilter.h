@@ -58,7 +58,7 @@ public:
 
 protected:
   vtkSynchronizeTimeFilter();
-  ~vtkSynchronizeTimeFilter() VTK_OVERRIDE;
+  ~vtkSynchronizeTimeFilter() override;
 
   /**
    * Helper methods for getting the input time value or output time
@@ -67,24 +67,17 @@ protected:
   double GetInputTimeValue(double outputTimeValue);
   double GetOutputTimeValue(double inputTimeValue);
 
-  int RequestInformation(
-    vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestUpdateExtent(
-    vtkInformation* request,
-    vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkSynchronizeTimeFilter(const vtkSynchronizeTimeFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSynchronizeTimeFilter&) VTK_DELETE_FUNCTION;
+  vtkSynchronizeTimeFilter(const vtkSynchronizeTimeFilter&) = delete;
+  void operator=(const vtkSynchronizeTimeFilter&) = delete;
 
   /**
    * Copies of the time steps for both the input and

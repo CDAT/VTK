@@ -28,20 +28,20 @@
  *
  * @par Thanks:
  * This class was contributed to VTK by David Gobbi on behalf of Atamai Inc.
-*/
+ */
 
 #ifndef vtkVolumePicker_h
 #define vtkVolumePicker_h
 
-#include "vtkRenderingVolumeModule.h" // For export macro
 #include "vtkCellPicker.h"
+#include "vtkRenderingVolumeModule.h" // For export macro
 
 class VTKRENDERINGVOLUME_EXPORT vtkVolumePicker : public vtkCellPicker
 {
 public:
-  static vtkVolumePicker *New();
+  static vtkVolumePicker* New();
   vtkTypeMacro(vtkVolumePicker, vtkCellPicker);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -51,9 +51,9 @@ public:
    * the index of the cropping plane of the volume that was picked.  This
    * setting is only relevant to the picking of volumes.
    */
-  vtkSetMacro(PickCroppingPlanes, int);
-  vtkBooleanMacro(PickCroppingPlanes, int);
-  vtkGetMacro(PickCroppingPlanes, int);
+  vtkSetMacro(PickCroppingPlanes, vtkTypeBool);
+  vtkBooleanMacro(PickCroppingPlanes, vtkTypeBool);
+  vtkGetMacro(PickCroppingPlanes, vtkTypeBool);
   //@}
 
   //@{
@@ -69,32 +69,23 @@ public:
 
 protected:
   vtkVolumePicker();
-  ~vtkVolumePicker() VTK_OVERRIDE;
+  ~vtkVolumePicker() override;
 
-  void ResetPickInfo() VTK_OVERRIDE;
+  void ResetPickInfo() override;
 
-  double IntersectVolumeWithLine(const double p1[3],
-                                         const double p2[3],
-                                         double t1, double t2,
-                                         vtkProp3D *prop,
-                                         vtkAbstractVolumeMapper *mapper) VTK_OVERRIDE;
+  double IntersectVolumeWithLine(const double p1[3], const double p2[3], double t1, double t2,
+    vtkProp3D* prop, vtkAbstractVolumeMapper* mapper) override;
 
-  static int ClipLineWithCroppingRegion(const double bounds[6],
-                                        const int extent[6], int flags,
-                                        const double x1[3], const double x2[3],
-                                        double t1, double t2,
-                                        int &extentPlaneId, int &numSegments,
-                                        double *t1List, double *t2List,
-                                        double *s1List, int *planeIdList);
+  static int ClipLineWithCroppingRegion(const double bounds[6], const int extent[6], int flags,
+    const double x1[3], const double x2[3], double t1, double t2, int& extentPlaneId,
+    int& numSegments, double* t1List, double* t2List, double* s1List, int* planeIdList);
 
-  int PickCroppingPlanes;
+  vtkTypeBool PickCroppingPlanes;
   int CroppingPlaneId;
 
 private:
-  vtkVolumePicker(const vtkVolumePicker&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkVolumePicker&) VTK_DELETE_FUNCTION;
+  vtkVolumePicker(const vtkVolumePicker&) = delete;
+  void operator=(const vtkVolumePicker&) = delete;
 };
 
 #endif
-
-

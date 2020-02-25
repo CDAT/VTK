@@ -27,13 +27,13 @@
  * this is not intended to be shared. each object should use it's
  * own instance of this class. it's intended to be called once per
  * render.
-*/
+ */
 
 #ifndef vtkBackgroundColorMonitor_h
 #define vtkBackgroundColorMonitor_h
 
-#include "vtkRenderingCoreModule.h" // for export macro
 #include "vtkObject.h"
+#include "vtkRenderingCoreModule.h" // for export macro
 
 class vtkRenderer;
 
@@ -42,7 +42,7 @@ class VTKRENDERINGCORE_EXPORT vtkBackgroundColorMonitor : public vtkObject
 public:
   static vtkBackgroundColorMonitor* New();
   vtkTypeMacro(vtkBackgroundColorMonitor, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Fetches the current background color state and
@@ -51,17 +51,17 @@ public:
    * changed. Typically this is the only function a
    * user needs to call.
    */
-  bool StateChanged(vtkRenderer *ren);
+  bool StateChanged(vtkRenderer* ren);
 
   /**
    * Update the internal state if anything changed. Note,
    * this is done automatically in SateChanged.
    */
-  void Update(vtkRenderer *ren);
+  void Update(vtkRenderer* ren);
 
 protected:
   vtkBackgroundColorMonitor();
-  ~vtkBackgroundColorMonitor() VTK_OVERRIDE{}
+  ~vtkBackgroundColorMonitor() override {}
 
 private:
   unsigned int UpTime;
@@ -70,8 +70,8 @@ private:
   double Color2[3];
 
 private:
- vtkBackgroundColorMonitor(const vtkBackgroundColorMonitor&) VTK_DELETE_FUNCTION;
- void operator=(const vtkBackgroundColorMonitor&) VTK_DELETE_FUNCTION;
+  vtkBackgroundColorMonitor(const vtkBackgroundColorMonitor&) = delete;
+  void operator=(const vtkBackgroundColorMonitor&) = delete;
 };
 
 #endif

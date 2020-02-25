@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
@@ -26,6 +24,10 @@
 
 #ifndef _T4_
 #define	_T4_
+
+/* These symbols are publicly exported, make sure they are mangled */
+#include "vtk_tiff_mangle.h"
+
 /*
  * CCITT T.4 1D Huffman runlength codes and
  * related definitions.  Given the small sizes

@@ -36,13 +36,13 @@
  *
  * @sa
  * vtkAffineRepresentation vtkAffineWidget
-*/
+ */
 
 #ifndef vtkAffineRepresentation2D_h
 #define vtkAffineRepresentation2D_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAffineRepresentation.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkProperty2D;
 class vtkActor2D;
@@ -55,21 +55,20 @@ class vtkLeaderActor2D;
 class vtkTextMapper;
 class vtkActor2D;
 
-
 class VTKINTERACTIONWIDGETS_EXPORT vtkAffineRepresentation2D : public vtkAffineRepresentation
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkAffineRepresentation2D *New();
+  static vtkAffineRepresentation2D* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkAffineRepresentation2D,vtkAffineRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAffineRepresentation2D, vtkAffineRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -80,12 +79,12 @@ public:
    * widget resizes itself so that the width and height are always the
    * same, only the width needs to be specified.
    */
-  vtkSetClampMacro(BoxWidth,int,10,VTK_INT_MAX);
-  vtkGetMacro(BoxWidth,int);
-  vtkSetClampMacro(CircleWidth,int,10,VTK_INT_MAX);
-  vtkGetMacro(CircleWidth,int);
-  vtkSetClampMacro(AxesWidth,int,10,VTK_INT_MAX);
-  vtkGetMacro(AxesWidth,int);
+  vtkSetClampMacro(BoxWidth, int, 10, VTK_INT_MAX);
+  vtkGetMacro(BoxWidth, int);
+  vtkSetClampMacro(CircleWidth, int, 10, VTK_INT_MAX);
+  vtkGetMacro(CircleWidth, int);
+  vtkSetClampMacro(AxesWidth, int, 10, VTK_INT_MAX);
+  vtkGetMacro(AxesWidth, int);
   //@}
 
   //@{
@@ -94,9 +93,9 @@ public:
    * is the point where the widget places itself. Note that rotations and
    * scaling occurs around the origin.
    */
-  void SetOrigin(const double o[3]) {this->SetOrigin(o[0],o[1],o[2]);}
+  void SetOrigin(const double o[3]) { this->SetOrigin(o[0], o[1], o[2]); }
   void SetOrigin(double ox, double oy, double oz);
-  vtkGetVector3Macro(Origin,double);
+  vtkGetVector3Macro(Origin, double);
   //@}
 
   /**
@@ -107,7 +106,7 @@ public:
    * scale, translate, rotate, shear) are concatenated with the internal
    * transform.
    */
-  void GetTransform(vtkTransform *t) VTK_OVERRIDE;
+  void GetTransform(vtkTransform* t) override;
 
   //@{
   /**
@@ -116,9 +115,9 @@ public:
   void SetProperty(vtkProperty2D*);
   void SetSelectedProperty(vtkProperty2D*);
   void SetTextProperty(vtkTextProperty*);
-  vtkGetObjectMacro(Property,vtkProperty2D);
-  vtkGetObjectMacro(SelectedProperty,vtkProperty2D);
-  vtkGetObjectMacro(TextProperty,vtkTextProperty);
+  vtkGetObjectMacro(Property, vtkProperty2D);
+  vtkGetObjectMacro(SelectedProperty, vtkProperty2D);
+  vtkGetObjectMacro(TextProperty, vtkTextProperty);
   //@}
 
   //@{
@@ -127,9 +126,9 @@ public:
    * transformation. Rotation and shear are expressed in degrees; translation
    * the distance in world coordinates; and scale normalized (sx,sy) values.
    */
-  vtkSetMacro(DisplayText,int);
-  vtkGetMacro(DisplayText,int);
-  vtkBooleanMacro(DisplayText,int);
+  vtkSetMacro(DisplayText, vtkTypeBool);
+  vtkGetMacro(DisplayText, vtkTypeBool);
+  vtkBooleanMacro(DisplayText, vtkTypeBool);
   //@}
 
   //@{
@@ -140,35 +139,35 @@ public:
    * transformation matrix (i.e., sets it to identity). It also sets the
    * origin for scaling and rotation.
    */
-  void PlaceWidget(double bounds[6]) VTK_OVERRIDE;
-  void StartWidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  void WidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  void EndWidgetInteraction(double eventPos[2]) VTK_OVERRIDE;
-  int ComputeInteractionState(int X, int Y, int modify=0) VTK_OVERRIDE;
-  void BuildRepresentation() VTK_OVERRIDE;
+  void PlaceWidget(double bounds[6]) override;
+  void StartWidgetInteraction(double eventPos[2]) override;
+  void WidgetInteraction(double eventPos[2]) override;
+  void EndWidgetInteraction(double eventPos[2]) override;
+  int ComputeInteractionState(int X, int Y, int modify = 0) override;
+  void BuildRepresentation() override;
   //@}
 
   //@{
   /**
    * Methods to make this class behave as a vtkProp.
    */
-  void ShallowCopy(vtkProp *prop) VTK_OVERRIDE;
-  void GetActors2D(vtkPropCollection *) VTK_OVERRIDE;
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
+  void ShallowCopy(vtkProp* prop) override;
+  void GetActors2D(vtkPropCollection*) override;
+  void ReleaseGraphicsResources(vtkWindow*) override;
+  int RenderOverlay(vtkViewport* viewport) override;
   //@}
 
 protected:
   vtkAffineRepresentation2D();
-  ~vtkAffineRepresentation2D() VTK_OVERRIDE;
+  ~vtkAffineRepresentation2D() override;
 
   // Methods to manipulate the cursor
   void Translate(double eventPos[2]);
   void Scale(double eventPos[2]);
   void Rotate(double eventPos[2]);
   void Shear(double eventPos[2]);
-  void Highlight(int highlight) VTK_OVERRIDE;
-  void UpdateText(const char *text, double eventPos[2]);
+  void Highlight(int highlight) override;
+  void UpdateText(const char* text, double eventPos[2]);
 
   // The width of the widget in normalized viewport coordinates.
   int BoxWidth;
@@ -176,7 +175,7 @@ protected:
   int AxesWidth;
 
   // Display text
-  int DisplayText;
+  vtkTypeBool DisplayText;
 
   // Internal variables for bookkeeping (in display coordinates unless noted)
   double CurrentWidth;
@@ -184,71 +183,70 @@ protected:
   double CurrentAxesWidth;
 
   // The internal transformation matrix
-  vtkTransform *CurrentTransform;
-  vtkTransform *TotalTransform;
-  vtkTransform *TempTransform;
-  double Origin[4]; //the current origin in world coordinates
-  double DisplayOrigin[3]; //the current origin in display coordinates
-  double CurrentTranslation[3]; //translation this movement
-  double StartWorldPosition[4]; //Start event position converted to world
-  double StartAngle; //The starting angle (always positive)
+  vtkTransform* CurrentTransform;
+  vtkTransform* TotalTransform;
+  double Origin[4];             // the current origin in world coordinates
+  double DisplayOrigin[3];      // the current origin in display coordinates
+  double CurrentTranslation[3]; // translation this movement
+  double StartWorldPosition[4]; // Start event position converted to world
+  double StartAngle;            // The starting angle (always positive)
   double CurrentAngle;
   double CurrentScale[2];
   double CurrentShear[2];
-  void   ApplyShear(); //helper method to apply shear to matrix
+  void ApplyShear(); // helper method to apply shear to matrix
 
   // Properties used to control the appearance of selected objects and
   // the manipulator in general.
-  vtkProperty2D   *Property;
-  vtkProperty2D   *SelectedProperty;
-  vtkTextProperty *TextProperty;
-  void             CreateDefaultProperties();
-  double           Opacity;
-  double           SelectedOpacity;
+  vtkProperty2D* Property;
+  vtkProperty2D* SelectedProperty;
+  vtkTextProperty* TextProperty;
+  void CreateDefaultProperties();
+  double Opacity;
+  double SelectedOpacity;
 
   // Support picking
   double LastEventPosition[2];
 
   // These are the classes that form the geometric representation -----------
   // The label
-  vtkTextMapper *TextMapper;
-  vtkActor2D    *TextActor;
+  vtkTextMapper* TextMapper;
+  vtkActor2D* TextActor;
 
   // The outer box
-  vtkPoints           *BoxPoints;
-  vtkCellArray        *BoxCellArray;
-  vtkPolyData         *Box;
-  vtkPolyDataMapper2D *BoxMapper;
-  vtkActor2D          *BoxActor;
+  vtkPoints* BoxPoints;
+  vtkCellArray* BoxCellArray;
+  vtkPolyData* Box;
+  vtkPolyDataMapper2D* BoxMapper;
+  vtkActor2D* BoxActor;
 
-  vtkPoints           *HBoxPoints;
-  vtkCellArray        *HBoxCellArray;
-  vtkPolyData         *HBox;
-  vtkPolyDataMapper2D *HBoxMapper;
-  vtkActor2D          *HBoxActor;
+  vtkPoints* HBoxPoints;
+  vtkCellArray* HBoxCellArray;
+  vtkPolyData* HBox;
+  vtkPolyDataMapper2D* HBoxMapper;
+  vtkActor2D* HBoxActor;
 
   // The circle
-  vtkPoints           *CirclePoints;
-  vtkCellArray        *CircleCellArray;
-  vtkPolyData         *Circle;
-  vtkPolyDataMapper2D *CircleMapper;
-  vtkActor2D          *CircleActor;
+  vtkPoints* CirclePoints;
+  vtkCellArray* CircleCellArray;
+  vtkPolyData* Circle;
+  vtkPolyDataMapper2D* CircleMapper;
+  vtkActor2D* CircleActor;
 
-  vtkPoints           *HCirclePoints;
-  vtkCellArray        *HCircleCellArray;
-  vtkPolyData         *HCircle;
-  vtkPolyDataMapper2D *HCircleMapper;
-  vtkActor2D          *HCircleActor;
+  vtkPoints* HCirclePoints;
+  vtkCellArray* HCircleCellArray;
+  vtkPolyData* HCircle;
+  vtkPolyDataMapper2D* HCircleMapper;
+  vtkActor2D* HCircleActor;
 
   // The translation axes
-  vtkLeaderActor2D    *XAxis;
-  vtkLeaderActor2D    *YAxis;
-  vtkLeaderActor2D    *HXAxis;
-  vtkLeaderActor2D    *HYAxis;
+  vtkLeaderActor2D* XAxis;
+  vtkLeaderActor2D* YAxis;
+  vtkLeaderActor2D* HXAxis;
+  vtkLeaderActor2D* HYAxis;
 
 private:
-  vtkAffineRepresentation2D(const vtkAffineRepresentation2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAffineRepresentation2D&) VTK_DELETE_FUNCTION;
+  vtkAffineRepresentation2D(const vtkAffineRepresentation2D&) = delete;
+  void operator=(const vtkAffineRepresentation2D&) = delete;
 };
 
 #endif

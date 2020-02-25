@@ -19,7 +19,7 @@
  * For each pixel with red, blue, and green components this
  * filter output the color coded as hue, saturation and intensity.
  * Output type must be the same as input type.
-*/
+ */
 
 #ifndef vtkImageRGBToHSI_h
 #define vtkImageRGBToHSI_h
@@ -30,9 +30,9 @@
 class VTKIMAGINGCOLOR_EXPORT vtkImageRGBToHSI : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageRGBToHSI *New();
-  vtkTypeMacro(vtkImageRGBToHSI,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageRGBToHSI* New();
+  vtkTypeMacro(vtkImageRGBToHSI, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -40,25 +40,21 @@ public:
    * defaults to 255 instead of 2PI, because unsigned char is expected as
    * input.  Maximum also specifies the maximum of the Saturation.
    */
-  vtkSetMacro(Maximum,double);
-  vtkGetMacro(Maximum,double);
+  vtkSetMacro(Maximum, double);
+  vtkGetMacro(Maximum, double);
   //@}
 
 protected:
   vtkImageRGBToHSI();
-  ~vtkImageRGBToHSI() VTK_OVERRIDE {}
+  ~vtkImageRGBToHSI() override {}
 
   double Maximum;
 
-  void ThreadedExecute (vtkImageData *inData, vtkImageData *outData,
-                       int ext[6], int id) VTK_OVERRIDE;
+  void ThreadedExecute(vtkImageData* inData, vtkImageData* outData, int ext[6], int id) override;
 
 private:
-  vtkImageRGBToHSI(const vtkImageRGBToHSI&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageRGBToHSI&) VTK_DELETE_FUNCTION;
+  vtkImageRGBToHSI(const vtkImageRGBToHSI&) = delete;
+  void operator=(const vtkImageRGBToHSI&) = delete;
 };
 
 #endif
-
-
-

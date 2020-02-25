@@ -21,14 +21,14 @@
  * data files are meta-files that point to a list of serial VTK XML files.
  * @sa
  * vtkXMLPCompositeDataWriter
-*/
+ */
 
 #ifndef vtkXMLCompositeDataWriter_h
 #define vtkXMLCompositeDataWriter_h
 
 #include "vtkIOXMLModule.h" // For export macro
+#include "vtkStdString.h"   // needed for vtkStdString.
 #include "vtkXMLWriter.h"
-#include "vtkStdString.h" // needed for vtkStdString.
 
 class vtkCallbackCommand;
 class vtkCompositeDataSet;
@@ -38,13 +38,13 @@ class vtkXMLCompositeDataWriterInternals;
 class VTKIOXML_EXPORT vtkXMLCompositeDataWriter : public vtkXMLWriter
 {
 public:
-  vtkTypeMacro(vtkXMLCompositeDataWriter,vtkXMLWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkXMLCompositeDataWriter, vtkXMLWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Get the default file extension for files written by this writer.
    */
-  const char* GetDefaultFileExtension() VTK_OVERRIDE;
+  const char* GetDefaultFileExtension() override;
 
   /**
    * Get/Set the number of pieces into which the inputs are split.
@@ -67,23 +67,22 @@ public:
   //@}
 
   /**
-   * See the vtkAlgorithm for a desciption of what these do
+   * See the vtkAlgorithm for a description of what these do
    */
-  int ProcessRequest(vtkInformation*,
-                     vtkInformationVector**,
-                     vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
   vtkXMLCompositeDataWriter();
-  ~vtkXMLCompositeDataWriter() VTK_OVERRIDE;
+  ~vtkXMLCompositeDataWriter() override;
 
   /**
    * Methods to define the file's major and minor version numbers.
    * Major version incremented since v0.1 composite data readers cannot read
    * the files written by this new reader.
    */
-  int GetDataSetMajorVersion() VTK_OVERRIDE { return 1; }
-  int GetDataSetMinorVersion() VTK_OVERRIDE { return 0; }
+  int GetDataSetMajorVersion() override { return 1; }
+  int GetDataSetMinorVersion() override { return 0; }
 
   /**
    * Create a filename for the given index.
@@ -91,18 +90,16 @@ protected:
   vtkStdString CreatePieceFileName(int Piece);
 
   // see algorithm for more info
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int RequestData(
-    vtkInformation*  , vtkInformationVector** , vtkInformationVector*) VTK_OVERRIDE;
-  int RequestUpdateExtent(
-    vtkInformation*  , vtkInformationVector** , vtkInformationVector*);
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
-  int WriteData() VTK_OVERRIDE;
-  const char* GetDataSetName() VTK_OVERRIDE;
+  int WriteData() override;
+  const char* GetDataSetName() override;
 
   // Create a default executive.
-  vtkExecutive* CreateDefaultExecutive() VTK_OVERRIDE;
+  vtkExecutive* CreateDefaultExecutive() override;
 
   vtkInformation* InputInformation;
 
@@ -162,14 +159,13 @@ protected:
    */
   int WriteMetaFile;
 
-  // Callback registered with the ProgressObserver.
-  static void ProgressCallbackFunction(vtkObject*, unsigned long, void*,
-                                       void*);
+  // Callback registered with the InternalProgressObserver.
+  static void ProgressCallbackFunction(vtkObject*, unsigned long, void*, void*);
   // Progress callback from internal writer.
   virtual void ProgressCallback(vtkAlgorithm* w);
 
   // The observer to report progress from the internal writer.
-  vtkCallbackCommand* ProgressObserver;
+  vtkCallbackCommand* InternalProgressObserver;
 
   /**
    * Internal method called recursively to create the xml tree for
@@ -180,8 +176,8 @@ protected:
    * This function returns 0 if no files were written from
    * compositeData.
    */
-  virtual int WriteComposite(vtkCompositeDataSet* compositeData,
-    vtkXMLDataElement* element, int &writerIdx)=0;
+  virtual int WriteComposite(
+    vtkCompositeDataSet* compositeData, vtkXMLDataElement* element, int& writerIdx) = 0;
 
   /**
    * Internal method to write a non vtkCompositeDataSet subclass as
@@ -194,8 +190,7 @@ protected:
    * this->ErrorCode is set on error.
    */
   virtual int WriteNonCompositeData(
-    vtkDataObject* dObj, vtkXMLDataElement* element,
-    int& writerIdx, const char* FileName);
+    vtkDataObject* dObj, vtkXMLDataElement* element, int& writerIdx, const char* fileName);
 
   /**
    * Utility function to remove any already written files
@@ -204,8 +199,8 @@ protected:
   virtual void RemoveWrittenFiles(const char* SubDirectory);
 
 private:
-  vtkXMLCompositeDataWriter(const vtkXMLCompositeDataWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkXMLCompositeDataWriter&) VTK_DELETE_FUNCTION;
+  vtkXMLCompositeDataWriter(const vtkXMLCompositeDataWriter&) = delete;
+  void operator=(const vtkXMLCompositeDataWriter&) = delete;
 };
 
 #endif

@@ -23,8 +23,8 @@ class vtkAbstractRenderDevice;
 class VTKRENDERINGCORE_EXPORT vtkAbstractInteractionDevice : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkAbstractInteractionDevice, vtkObject)
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAbstractInteractionDevice, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * @brief Make a new device, this class is abstract and one of its derived
@@ -49,22 +49,22 @@ public:
    */
   virtual void ProcessEvents() = 0;
 
-  void SetRenderWidget(vtkRenderWidget *widget);
+  void SetRenderWidget(vtkRenderWidget* widget);
   vtkRenderWidget* GetRenderWidget() { return this->RenderWidget; }
-  void SetRenderDevice(vtkAbstractRenderDevice *device);
+  void SetRenderDevice(vtkAbstractRenderDevice* device);
   vtkAbstractRenderDevice* GetRenderDevice() { return this->RenderDevice; }
 
 protected:
   vtkAbstractInteractionDevice();
-  ~vtkAbstractInteractionDevice() VTK_OVERRIDE;
+  ~vtkAbstractInteractionDevice() override;
 
   bool Initialized;
-  vtkRenderWidget *RenderWidget;
-  vtkAbstractRenderDevice *RenderDevice;
+  vtkRenderWidget* RenderWidget;
+  vtkAbstractRenderDevice* RenderDevice;
 
 private:
-  vtkAbstractInteractionDevice(const vtkAbstractInteractionDevice&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAbstractInteractionDevice&) VTK_DELETE_FUNCTION;
+  vtkAbstractInteractionDevice(const vtkAbstractInteractionDevice&) = delete;
+  void operator=(const vtkAbstractInteractionDevice&) = delete;
 };
 
 #endif

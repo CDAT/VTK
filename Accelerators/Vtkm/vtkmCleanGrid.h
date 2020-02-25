@@ -21,13 +21,13 @@
  * generates vtkUnstructuredGrid as output. vtkmCleanGrid will convert all cells
  * to an explicit representation, and if enabled, will remove unused points.
  *
-*/
+ */
 
 #ifndef vtkmCleanGrid_h
 #define vtkmCleanGrid_h
 
-#include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkAcceleratorsVTKmModule.h" //required for correct implementation
+#include "vtkUnstructuredGridAlgorithm.h"
 
 class vtkDataSet;
 class vtkUnstructuredGrid;
@@ -35,9 +35,9 @@ class vtkUnstructuredGrid;
 class VTKACCELERATORSVTKM_EXPORT vtkmCleanGrid : public vtkUnstructuredGridAlgorithm
 {
 public:
-  vtkTypeMacro(vtkmCleanGrid, vtkUnstructuredGridAlgorithm)
+  vtkTypeMacro(vtkmCleanGrid, vtkUnstructuredGridAlgorithm);
 
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkmCleanGrid* New();
 
   //@{
@@ -53,17 +53,16 @@ public:
 
 protected:
   vtkmCleanGrid();
-  ~vtkmCleanGrid();
+  ~vtkmCleanGrid() override;
 
-  int FillInputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   bool CompactPoints;
 
 private:
-  vtkmCleanGrid(const vtkmCleanGrid&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkmCleanGrid&) VTK_DELETE_FUNCTION;
+  vtkmCleanGrid(const vtkmCleanGrid&) = delete;
+  void operator=(const vtkmCleanGrid&) = delete;
 };
 
 #endif // vtkmCleanGrid_h

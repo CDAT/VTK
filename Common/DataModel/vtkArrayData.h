@@ -35,13 +35,13 @@
  *
  * @par Thanks:
  * Developed by Timothy M. Shead (tshead@sandia.gov) at Sandia National Laboratories.
-*/
+ */
 
 #ifndef vtkArrayData_h
 #define vtkArrayData_h
 
-#include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkArray.h"
+#include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkDataObject.h"
 
 class vtkArray;
@@ -51,7 +51,7 @@ class VTKCOMMONDATAMODEL_EXPORT vtkArrayData : public vtkDataObject
 public:
   static vtkArrayData* New();
   vtkTypeMacro(vtkArrayData, vtkDataObject);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkArrayData* GetData(vtkInformation* info);
   static vtkArrayData* GetData(vtkInformationVector* v, int i = 0);
@@ -79,27 +79,26 @@ public:
   /**
    * Returns the array having called name from the collection
    */
-  vtkArray* GetArrayByName(const char *name);
+  vtkArray* GetArrayByName(const char* name);
 
   /**
    * Return class name of data type (VTK_ARRAY_DATA).
    */
-  int GetDataObjectType() VTK_OVERRIDE {return VTK_ARRAY_DATA;}
+  int GetDataObjectType() override { return VTK_ARRAY_DATA; }
 
-  void ShallowCopy(vtkDataObject* other) VTK_OVERRIDE;
-  void DeepCopy(vtkDataObject* other) VTK_OVERRIDE;
+  void ShallowCopy(vtkDataObject* other) override;
+  void DeepCopy(vtkDataObject* other) override;
 
 protected:
   vtkArrayData();
-  ~vtkArrayData() VTK_OVERRIDE;
+  ~vtkArrayData() override;
 
 private:
-  vtkArrayData(const vtkArrayData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkArrayData&) VTK_DELETE_FUNCTION;
+  vtkArrayData(const vtkArrayData&) = delete;
+  void operator=(const vtkArrayData&) = delete;
 
   class implementation;
   implementation* const Implementation;
-
 };
 
 #endif

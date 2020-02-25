@@ -18,7 +18,7 @@
  *
  * vtkTRUCHASReader is a source object that reads TRUCHAS simulation
  * data from HDF5 files.
-*/
+ */
 
 #ifndef vtkTRUCHASReader_h
 #define vtkTRUCHASReader_h
@@ -28,13 +28,12 @@
 
 class vtkDataArraySelection;
 
-class VTKIOTRUCHAS_EXPORT vtkTRUCHASReader
-  : public vtkMultiBlockDataSetAlgorithm
+class VTKIOTRUCHAS_EXPORT vtkTRUCHASReader : public vtkMultiBlockDataSetAlgorithm
 {
 public:
-  static vtkTRUCHASReader *New();
-  vtkTypeMacro(vtkTRUCHASReader,vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTRUCHASReader* New();
+  vtkTypeMacro(vtkTRUCHASReader, vtkMultiBlockDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -47,7 +46,7 @@ public:
   /**
    * A simple, non-exhaustive check to see if a file is a valid truchas file.
    */
-  static int CanReadFile(const char *filename);
+  static int CanReadFile(const char* filename);
 
   //@{
   /**
@@ -105,23 +104,21 @@ public:
 
 protected:
   vtkTRUCHASReader();
-  ~vtkTRUCHASReader();
+  ~vtkTRUCHASReader() override;
 
   /**
    * Overridden to announce timesteps we can produce
    */
-  virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   /**
    * Overridden to read the file and parse into an output
    */
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  char *FileName;
+  char* FileName;
 
   class Internal;
-  Internal * Internals;
+  Internal* Internals;
   friend class Internal;
 
   vtkDataArraySelection* BlockChoices;
@@ -129,9 +126,8 @@ protected:
   vtkDataArraySelection* CellArrayChoices;
 
 private:
-  vtkTRUCHASReader(const vtkTRUCHASReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTRUCHASReader&) VTK_DELETE_FUNCTION;
-
+  vtkTRUCHASReader(const vtkTRUCHASReader&) = delete;
+  void operator=(const vtkTRUCHASReader&) = delete;
 };
 
 #endif

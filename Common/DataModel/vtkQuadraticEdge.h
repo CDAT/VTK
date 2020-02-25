@@ -26,7 +26,7 @@
  * @sa
  * vtkQuadraticTriangle vtkQuadraticTetra vtkQuadraticWedge
  * vtkQuadraticQuad vtkQuadraticHexahedron vtkQuadraticPyramid
-*/
+ */
 
 #ifndef vtkQuadraticEdge_h
 #define vtkQuadraticEdge_h
@@ -40,92 +40,80 @@ class vtkDoubleArray;
 class VTKCOMMONDATAMODEL_EXPORT vtkQuadraticEdge : public vtkNonLinearCell
 {
 public:
-  static vtkQuadraticEdge *New();
-  vtkTypeMacro(vtkQuadraticEdge,vtkNonLinearCell);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkQuadraticEdge* New();
+  vtkTypeMacro(vtkQuadraticEdge, vtkNonLinearCell);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Implement the vtkCell API. See the vtkCell API for descriptions
    * of these methods.
    */
-  int GetCellType() VTK_OVERRIDE {return VTK_QUADRATIC_EDGE;};
-  int GetCellDimension() VTK_OVERRIDE {return 1;}
-  int GetNumberOfEdges() VTK_OVERRIDE {return 0;}
-  int GetNumberOfFaces() VTK_OVERRIDE {return 0;}
-  vtkCell *GetEdge(int) VTK_OVERRIDE {return nullptr;}
-  vtkCell *GetFace(int) VTK_OVERRIDE {return nullptr;}
+  int GetCellType() override { return VTK_QUADRATIC_EDGE; }
+  int GetCellDimension() override { return 1; }
+  int GetNumberOfEdges() override { return 0; }
+  int GetNumberOfFaces() override { return 0; }
+  vtkCell* GetEdge(int) override { return nullptr; }
+  vtkCell* GetFace(int) override { return nullptr; }
 
-  int CellBoundary(int subId, double pcoords[3], vtkIdList *pts) VTK_OVERRIDE;
-  void Contour(double value, vtkDataArray *cellScalars,
-               vtkIncrementalPointLocator *locator, vtkCellArray *verts,
-               vtkCellArray *lines, vtkCellArray *polys,
-               vtkPointData *inPd, vtkPointData *outPd,
-               vtkCellData *inCd, vtkIdType cellId, vtkCellData *outCd) VTK_OVERRIDE;
-  int EvaluatePosition(double x[3], double* closestPoint,
-                       int& subId, double pcoords[3],
-                       double& dist2, double *weights) VTK_OVERRIDE;
-  void EvaluateLocation(int& subId, double pcoords[3], double x[3],
-                        double *weights) VTK_OVERRIDE;
-  int Triangulate(int index, vtkIdList *ptIds, vtkPoints *pts) VTK_OVERRIDE;
-  void Derivatives(int subId, double pcoords[3], double *values,
-                   int dim, double *derivs) VTK_OVERRIDE;
-  double *GetParametricCoords() VTK_OVERRIDE;
+  int CellBoundary(int subId, const double pcoords[3], vtkIdList* pts) override;
+  void Contour(double value, vtkDataArray* cellScalars, vtkIncrementalPointLocator* locator,
+    vtkCellArray* verts, vtkCellArray* lines, vtkCellArray* polys, vtkPointData* inPd,
+    vtkPointData* outPd, vtkCellData* inCd, vtkIdType cellId, vtkCellData* outCd) override;
+  int EvaluatePosition(const double x[3], double closestPoint[3], int& subId, double pcoords[3],
+    double& dist2, double weights[]) override;
+  void EvaluateLocation(int& subId, const double pcoords[3], double x[3], double* weights) override;
+  int Triangulate(int index, vtkIdList* ptIds, vtkPoints* pts) override;
+  void Derivatives(
+    int subId, const double pcoords[3], const double* values, int dim, double* derivs) override;
+  double* GetParametricCoords() override;
 
   /**
    * Clip this edge using scalar value provided. Like contouring, except
    * that it cuts the edge to produce linear line segments.
    */
-  void Clip(double value, vtkDataArray *cellScalars,
-            vtkIncrementalPointLocator *locator, vtkCellArray *lines,
-            vtkPointData *inPd, vtkPointData *outPd,
-            vtkCellData *inCd, vtkIdType cellId, vtkCellData *outCd,
-            int insideOut) VTK_OVERRIDE;
+  void Clip(double value, vtkDataArray* cellScalars, vtkIncrementalPointLocator* locator,
+    vtkCellArray* lines, vtkPointData* inPd, vtkPointData* outPd, vtkCellData* inCd,
+    vtkIdType cellId, vtkCellData* outCd, int insideOut) override;
 
   /**
    * Line-edge intersection. Intersection has to occur within [0,1] parametric
    * coordinates and with specified tolerance.
    */
-  int IntersectWithLine(double p1[3], double p2[3], double tol, double& t,
-                        double x[3], double pcoords[3], int& subId) VTK_OVERRIDE;
+  int IntersectWithLine(const double p1[3], const double p2[3], double tol, double& t, double x[3],
+    double pcoords[3], int& subId) override;
 
   /**
    * Return the center of the quadratic tetra in parametric coordinates.
    */
-  int GetParametricCenter(double pcoords[3]) VTK_OVERRIDE;
+  int GetParametricCenter(double pcoords[3]) override;
 
-  /**
-   * @deprecated Replaced by vtkQuadraticEdge::InterpolateFunctions as of VTK 5.2
-   */
-  static void InterpolationFunctions(double pcoords[3], double weights[3]);
-  /**
-   * @deprecated Replaced by vtkQuadraticEdge::InterpolateDerivs as of VTK 5.2
-   */
-  static void InterpolationDerivs(double pcoords[3], double derivs[3]);
+  static void InterpolationFunctions(const double pcoords[3], double weights[3]);
+  static void InterpolationDerivs(const double pcoords[3], double derivs[3]);
   //@{
   /**
    * Compute the interpolation functions/derivatives
    * (aka shape functions/derivatives)
    */
-  void InterpolateFunctions(double pcoords[3], double weights[3]) VTK_OVERRIDE
+  void InterpolateFunctions(const double pcoords[3], double weights[3]) override
   {
-    vtkQuadraticEdge::InterpolationFunctions(pcoords,weights);
+    vtkQuadraticEdge::InterpolationFunctions(pcoords, weights);
   }
-  void InterpolateDerivs(double pcoords[3], double derivs[3]) VTK_OVERRIDE
+  void InterpolateDerivs(const double pcoords[3], double derivs[3]) override
   {
-    vtkQuadraticEdge::InterpolationDerivs(pcoords,derivs);
+    vtkQuadraticEdge::InterpolationDerivs(pcoords, derivs);
   }
   //@}
 
 protected:
   vtkQuadraticEdge();
-  ~vtkQuadraticEdge() VTK_OVERRIDE;
+  ~vtkQuadraticEdge() override;
 
-  vtkLine *Line;
-  vtkDoubleArray *Scalars; //used to avoid New/Delete in contouring/clipping
+  vtkLine* Line;
+  vtkDoubleArray* Scalars; // used to avoid New/Delete in contouring/clipping
 
 private:
-  vtkQuadraticEdge(const vtkQuadraticEdge&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQuadraticEdge&) VTK_DELETE_FUNCTION;
+  vtkQuadraticEdge(const vtkQuadraticEdge&) = delete;
+  void operator=(const vtkQuadraticEdge&) = delete;
 };
 //----------------------------------------------------------------------------
 inline int vtkQuadraticEdge::GetParametricCenter(double pcoords[3])
@@ -136,5 +124,3 @@ inline int vtkQuadraticEdge::GetParametricCenter(double pcoords[3])
 }
 
 #endif
-
-

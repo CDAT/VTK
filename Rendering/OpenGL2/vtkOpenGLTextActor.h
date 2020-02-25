@@ -16,7 +16,7 @@
 /**
  * @class   vtkOpenGLTextActor
  * @brief   vtkTextActor override.
-*/
+ */
 
 #ifndef vtkOpenGLTextActor_h
 #define vtkOpenGLTextActor_h
@@ -26,24 +26,24 @@
 
 class vtkOpenGLGL2PSHelper;
 
-class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLTextActor: public vtkTextActor
+class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLTextActor : public vtkTextActor
 {
 public:
   static vtkOpenGLTextActor* New();
-  vtkTypeMacro(vtkOpenGLTextActor, vtkTextActor)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOpenGLTextActor, vtkTextActor);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  int RenderOverlay(vtkViewport* viewport) VTK_OVERRIDE;
+  int RenderOverlay(vtkViewport* viewport) override;
 
 protected:
   vtkOpenGLTextActor();
-  ~vtkOpenGLTextActor() VTK_OVERRIDE;
+  ~vtkOpenGLTextActor() override;
 
-  int RenderGL2PS(vtkViewport *viewport, vtkOpenGLGL2PSHelper *gl2ps);
+  int RenderGL2PS(vtkViewport* viewport, vtkOpenGLGL2PSHelper* gl2ps);
 
 private:
-  vtkOpenGLTextActor(const vtkOpenGLTextActor&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLTextActor&) VTK_DELETE_FUNCTION;
+  vtkOpenGLTextActor(const vtkOpenGLTextActor&) = delete;
+  void operator=(const vtkOpenGLTextActor&) = delete;
 };
 
 #endif // vtkOpenGLTextActor_h

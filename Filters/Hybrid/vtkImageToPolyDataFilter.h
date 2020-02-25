@@ -59,7 +59,7 @@
  *
  * @sa
  * vtkCGMWriter vtkImageQuantizeRGBToIndex vtkTriangleFilter
-*/
+ */
 
 #ifndef vtkImageToPolyDataFilter_h
 #define vtkImageToPolyDataFilter_h
@@ -86,8 +86,8 @@ class vtkUnsignedCharArray;
 class VTKFILTERSHYBRID_EXPORT vtkImageToPolyDataFilter : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkImageToPolyDataFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImageToPolyDataFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Instantiate object with initial number of colors 256.
@@ -103,26 +103,21 @@ public:
    * quad polygons that may encompass several pixels on a scan line. The
    * default behavior is Polygonalize.
    */
-  vtkSetClampMacro(OutputStyle,int,VTK_STYLE_PIXELIZE,VTK_STYLE_RUN_LENGTH);
-  vtkGetMacro(OutputStyle,int);
-  void SetOutputStyleToPixelize()
-    {this->SetOutputStyle(VTK_STYLE_PIXELIZE);};
-  void SetOutputStyleToPolygonalize()
-    {this->SetOutputStyle(VTK_STYLE_POLYGONALIZE);};
-  void SetOutputStyleToRunLength()
-    {this->SetOutputStyle(VTK_STYLE_RUN_LENGTH);};
+  vtkSetClampMacro(OutputStyle, int, VTK_STYLE_PIXELIZE, VTK_STYLE_RUN_LENGTH);
+  vtkGetMacro(OutputStyle, int);
+  void SetOutputStyleToPixelize() { this->SetOutputStyle(VTK_STYLE_PIXELIZE); }
+  void SetOutputStyleToPolygonalize() { this->SetOutputStyle(VTK_STYLE_POLYGONALIZE); }
+  void SetOutputStyleToRunLength() { this->SetOutputStyle(VTK_STYLE_RUN_LENGTH); }
   //@}
 
   //@{
   /**
    * Specify how to quantize color.
    */
-  vtkSetClampMacro(ColorMode,int,VTK_COLOR_MODE_LUT,VTK_COLOR_MODE_LINEAR_256);
-  vtkGetMacro(ColorMode,int);
-  void SetColorModeToLUT()
-    {this->SetColorMode(VTK_COLOR_MODE_LUT);};
-  void SetColorModeToLinear256()
-    {this->SetColorMode(VTK_COLOR_MODE_LINEAR_256);};
+  vtkSetClampMacro(ColorMode, int, VTK_COLOR_MODE_LUT, VTK_COLOR_MODE_LINEAR_256);
+  vtkGetMacro(ColorMode, int);
+  void SetColorModeToLUT() { this->SetColorMode(VTK_COLOR_MODE_LUT); }
+  void SetColorModeToLinear256() { this->SetColorMode(VTK_COLOR_MODE_LINEAR_256); }
   //@}
 
   //@{
@@ -131,7 +126,7 @@ public:
    * color mode is set to LUT and a single component scalar is input.
    */
   virtual void SetLookupTable(vtkScalarsToColors*);
-  vtkGetObjectMacro(LookupTable,vtkScalarsToColors);
+  vtkGetObjectMacro(LookupTable, vtkScalarsToColors);
   //@}
 
   //@{
@@ -139,9 +134,9 @@ public:
    * If the output style is set to polygonalize, then you can control
    * whether to smooth boundaries.
    */
-  vtkSetMacro(Smoothing, int);
-  vtkGetMacro(Smoothing, int);
-  vtkBooleanMacro(Smoothing, int);
+  vtkSetMacro(Smoothing, vtkTypeBool);
+  vtkGetMacro(Smoothing, vtkTypeBool);
+  vtkBooleanMacro(Smoothing, vtkTypeBool);
   //@}
 
   //@{
@@ -149,8 +144,8 @@ public:
    * Specify the number of smoothing iterations to smooth polygons. (Only
    * in effect if output style is Polygonalize and smoothing is on.)
    */
-  vtkSetClampMacro(NumberOfSmoothingIterations,int,0,VTK_INT_MAX);
-  vtkGetMacro(NumberOfSmoothingIterations,int);
+  vtkSetClampMacro(NumberOfSmoothingIterations, int, 0, VTK_INT_MAX);
+  vtkGetMacro(NumberOfSmoothingIterations, int);
   //@}
 
   //@{
@@ -158,9 +153,9 @@ public:
    * Turn on/off whether the final polygons should be decimated.
    * whether to smooth boundaries.
    */
-  vtkSetMacro(Decimation, int);
-  vtkGetMacro(Decimation, int);
-  vtkBooleanMacro(Decimation, int);
+  vtkSetMacro(Decimation, vtkTypeBool);
+  vtkGetMacro(Decimation, vtkTypeBool);
+  vtkBooleanMacro(Decimation, vtkTypeBool);
   //@}
 
   //@{
@@ -170,8 +165,8 @@ public:
    * dimensions are used to create points so the error should be
    * consistent with the image size.
    */
-  vtkSetClampMacro(DecimationError,double,0.0,VTK_DOUBLE_MAX);
-  vtkGetMacro(DecimationError,double);
+  vtkSetClampMacro(DecimationError, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(DecimationError, double);
   //@}
 
   //@{
@@ -180,8 +175,8 @@ public:
    * considered the same. Only use this if the color mode uses the
    * default 256 table.
    */
-  vtkSetClampMacro(Error,int,0,VTK_INT_MAX);
-  vtkGetMacro(Error,int);
+  vtkSetClampMacro(Error, int, 0, VTK_INT_MAX);
+  vtkGetMacro(Error, int);
   //@}
 
   //@{
@@ -192,72 +187,67 @@ public:
    * the image is broken into pieces that are at most Size pixels in
    * width and height.
    */
-  vtkSetClampMacro(SubImageSize,int,10,VTK_INT_MAX);
-  vtkGetMacro(SubImageSize,int);
+  vtkSetClampMacro(SubImageSize, int, 10, VTK_INT_MAX);
+  vtkGetMacro(SubImageSize, int);
   //@}
 
 protected:
   vtkImageToPolyDataFilter();
-  ~vtkImageToPolyDataFilter() VTK_OVERRIDE;
+  ~vtkImageToPolyDataFilter() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   int OutputStyle;
   int ColorMode;
-  int Smoothing;
+  vtkTypeBool Smoothing;
   int NumberOfSmoothingIterations;
-  int Decimation;
+  vtkTypeBool Decimation;
   double DecimationError;
   int Error;
   int SubImageSize;
-  vtkScalarsToColors *LookupTable;
+  vtkScalarsToColors* LookupTable;
 
-  virtual void PixelizeImage(vtkUnsignedCharArray *pixels, int dims[3],
-                             double origin[3], double spacing[3],
-                             vtkPolyData *output);
-  virtual void PolygonalizeImage(vtkUnsignedCharArray *pixels, int dims[3],
-                                 double origin[3], double spacing[3],
-                                 vtkPolyData *output);
-  virtual void RunLengthImage(vtkUnsignedCharArray *pixels, int dims[3],
-                              double origin[3], double spacing[3],
-                              vtkPolyData *output);
-private:
-  vtkUnsignedCharArray *Table;      // color table used to quantize points
-  vtkTimeStamp         TableMTime;
-  int                  *Visited;    // traverse & mark connected regions
-  vtkUnsignedCharArray *PolyColors; // the colors of each region -> polygon
-  vtkEdgeTable         *EdgeTable;  // keep track of intersection points
-  vtkEdgeTable         *EdgeUseTable; // keep track of polygons use of edges
-  vtkIntArray          *EdgeUses; //the two polygons that use an edge
-                                  //and point id associated with edge (if any)
-
-  void BuildTable(unsigned char *inPixels);
-  vtkUnsignedCharArray *QuantizeImage(vtkDataArray *inScalars, int numComp,
-                                          int type, int dims[3], int ext[4]);
-  int ProcessImage(vtkUnsignedCharArray *pixels, int dims[2]);
-  int BuildEdges(vtkUnsignedCharArray *pixels, int dims[3], double origin[3],
-                 double spacing[3], vtkUnsignedCharArray *pointDescr,
-                 vtkPolyData *edges);
-  void BuildPolygons(vtkUnsignedCharArray *pointDescr, vtkPolyData *edges,
-                     int numPolys, vtkUnsignedCharArray *polyColors);
-  void SmoothEdges(vtkUnsignedCharArray *pointDescr, vtkPolyData *edges);
-  void DecimateEdges(vtkPolyData *edges, vtkUnsignedCharArray *pointDescr,
-                     double tol2);
-  void GeneratePolygons(vtkPolyData *edges, int numPolys, vtkPolyData *output,
-                        vtkUnsignedCharArray *polyColors,
-                        vtkUnsignedCharArray *pointDescr);
-
-  int GetNeighbors(unsigned char *ptr, int &i, int &j, int dims[3],
-                   unsigned char *neighbors[4], int mode);
-
-  void GetIJ(int id, int &i, int &j, int dims[2]);
-  unsigned char *GetColor(unsigned char *rgb);
-  int IsSameColor(unsigned char *p1, unsigned char *p2);
+  virtual void PixelizeImage(vtkUnsignedCharArray* pixels, int dims[3], double origin[3],
+    double spacing[3], vtkPolyData* output);
+  virtual void PolygonalizeImage(vtkUnsignedCharArray* pixels, int dims[3], double origin[3],
+    double spacing[3], vtkPolyData* output);
+  virtual void RunLengthImage(vtkUnsignedCharArray* pixels, int dims[3], double origin[3],
+    double spacing[3], vtkPolyData* output);
 
 private:
-  vtkImageToPolyDataFilter(const vtkImageToPolyDataFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageToPolyDataFilter&) VTK_DELETE_FUNCTION;
+  vtkUnsignedCharArray* Table; // color table used to quantize points
+  vtkTimeStamp TableMTime;
+  int* Visited;                     // traverse & mark connected regions
+  vtkUnsignedCharArray* PolyColors; // the colors of each region -> polygon
+  vtkEdgeTable* EdgeTable;          // keep track of intersection points
+  vtkEdgeTable* EdgeUseTable;       // keep track of polygons use of edges
+  vtkIntArray* EdgeUses;            // the two polygons that use an edge
+                                    // and point id associated with edge (if any)
+
+  void BuildTable(unsigned char* inPixels);
+  vtkUnsignedCharArray* QuantizeImage(
+    vtkDataArray* inScalars, int numComp, int type, int dims[3], int ext[4]);
+  int ProcessImage(vtkUnsignedCharArray* pixels, int dims[2]);
+  int BuildEdges(vtkUnsignedCharArray* pixels, int dims[3], double origin[3], double spacing[3],
+    vtkUnsignedCharArray* pointDescr, vtkPolyData* edges);
+  void BuildPolygons(vtkUnsignedCharArray* pointDescr, vtkPolyData* edges, int numPolys,
+    vtkUnsignedCharArray* polyColors);
+  void SmoothEdges(vtkUnsignedCharArray* pointDescr, vtkPolyData* edges);
+  void DecimateEdges(vtkPolyData* edges, vtkUnsignedCharArray* pointDescr, double tol2);
+  void GeneratePolygons(vtkPolyData* edges, int numPolys, vtkPolyData* output,
+    vtkUnsignedCharArray* polyColors, vtkUnsignedCharArray* pointDescr);
+
+  int GetNeighbors(
+    unsigned char* ptr, int& i, int& j, int dims[3], unsigned char* neighbors[4], int mode);
+
+  void GetIJ(int id, int& i, int& j, int dims[2]);
+  unsigned char* GetColor(unsigned char* rgb);
+  int IsSameColor(unsigned char* p1, unsigned char* p2);
+
+private:
+  vtkImageToPolyDataFilter(const vtkImageToPolyDataFilter&) = delete;
+  void operator=(const vtkImageToPolyDataFilter&) = delete;
 };
 
 #endif

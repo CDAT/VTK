@@ -37,7 +37,7 @@
  * greatly from the VRML spec and the External Authoring Interface (see the
  * VRML spec). The DEF/USE mechanism does allow the VTK user to extract
  * objects from the scene and directly manipulate them using the native
- * language (Tcl, Python, Java, or whatever language VTK is wrapped
+ * language (Python, Java, or whatever language VTK is wrapped
  * in). This, in a way, removes the need for the route and script mechanism
  * (not completely though).
  * Texture coordinates are attached to the mesh is available but
@@ -49,7 +49,7 @@
  *
  * @sa
  * vtkImporter
-*/
+ */
 
 #ifndef vtkVRMLImporter_h
 #define vtkVRMLImporter_h
@@ -74,10 +74,10 @@ class vtkCellArray;
 class VTKIOIMPORT_EXPORT vtkVRMLImporter : public vtkImporter
 {
 public:
-  static vtkVRMLImporter *New();
+  static vtkVRMLImporter* New();
 
   vtkTypeMacro(vtkVRMLImporter, vtkImporter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -104,19 +104,24 @@ public:
    * You will have to check and correctly cast the object since
    * this only returns vtkObjects.
    */
-  vtkObject* GetVRMLDEFObject(const char *name);
+  vtkObject* GetVRMLDEFObject(const char* name);
+
+  /**
+   * Get a printable string describing the outputs
+   */
+  std::string GetOutputsDescription() override;
 
 protected:
   vtkVRMLImporter();
-  ~vtkVRMLImporter() VTK_OVERRIDE;
+  ~vtkVRMLImporter() override;
 
   int OpenImportFile();
-  int ImportBegin() VTK_OVERRIDE;
-  void ImportEnd() VTK_OVERRIDE;
-  void ImportActors(vtkRenderer*) VTK_OVERRIDE {}
-  void ImportCameras(vtkRenderer*) VTK_OVERRIDE {}
-  void ImportLights(vtkRenderer*) VTK_OVERRIDE {}
-  void ImportProperties(vtkRenderer*) VTK_OVERRIDE {}
+  int ImportBegin() override;
+  void ImportEnd() override;
+  void ImportActors(vtkRenderer*) override {}
+  void ImportCameras(vtkRenderer*) override {}
+  void ImportLights(vtkRenderer*) override {}
+  void ImportProperties(vtkRenderer*) override {}
 
   //@{
   /**
@@ -132,10 +137,10 @@ protected:
   /**
    * Return the file pointer to the open file.
    */
-  FILE *GetFileFD() { return this->FileFD; }
+  FILE* GetFileFD() { return this->FileFD; }
 
-  char *FileName;
-  FILE *FileFD;
+  char* FileName;
+  FILE* FileFD;
   int ShapeResolution;
 
   friend class vtkVRMLYaccData;
@@ -164,8 +169,8 @@ private:
   vtkPolyDataMapper* CurrentMapper;
 
 private:
-  vtkVRMLImporter(const vtkVRMLImporter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkVRMLImporter&) VTK_DELETE_FUNCTION;
+  vtkVRMLImporter(const vtkVRMLImporter&) = delete;
+  void operator=(const vtkVRMLImporter&) = delete;
 };
 
 #endif

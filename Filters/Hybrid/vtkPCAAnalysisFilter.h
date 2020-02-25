@@ -45,7 +45,7 @@
  *
  * @sa
  * vtkProcrustesAlignmentFilter
-*/
+ */
 
 #ifndef vtkPCAAnalysisFilter_h
 #define vtkPCAAnalysisFilter_h
@@ -58,18 +58,18 @@ class vtkPointSet;
 
 class VTKFILTERSHYBRID_EXPORT vtkPCAAnalysisFilter : public vtkMultiBlockDataSetAlgorithm
 {
- public:
-  vtkTypeMacro(vtkPCAAnalysisFilter,vtkMultiBlockDataSetAlgorithm);
+public:
+  vtkTypeMacro(vtkPCAAnalysisFilter, vtkMultiBlockDataSetAlgorithm);
 
   /**
    * Prints information about the state of the filter.
    */
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates with similarity transform.
    */
-  static vtkPCAAnalysisFilter *New();
+  static vtkPCAAnalysisFilter* New();
 
   //@{
   /**
@@ -91,7 +91,7 @@ class VTKFILTERSHYBRID_EXPORT vtkPCAAnalysisFilter : public vtkMultiBlockDataSet
    * This function assumes that shape is already allocated
    * with the right size, it just moves the points.
    */
-  void GetParameterisedShape(vtkFloatArray *b, vtkPointSet* shape);
+  void GetParameterisedShape(vtkFloatArray* b, vtkPointSet* shape);
 
   /**
    * Return the bsize parameters b that best model the given shape
@@ -103,7 +103,7 @@ class VTKFILTERSHYBRID_EXPORT vtkPCAAnalysisFilter : public vtkMultiBlockDataSet
    * ...
    * + b[bsize-1] * sqrt(eigenvalue[bsize-1]) * eigenvector[bsize-1]
    */
-  void GetShapeParameters(vtkPointSet *shape, vtkFloatArray *b, int bsize);
+  void GetShapeParameters(vtkPointSet* shape, vtkFloatArray* b, int bsize);
 
   /**
    * Retrieve how many modes are necessary to model the given proportion of the variation.
@@ -113,27 +113,25 @@ class VTKFILTERSHYBRID_EXPORT vtkPCAAnalysisFilter : public vtkMultiBlockDataSet
 
 protected:
   vtkPCAAnalysisFilter();
-  ~vtkPCAAnalysisFilter() VTK_OVERRIDE;
+  ~vtkPCAAnalysisFilter() override;
 
   /**
    * Usual data generation method.
    */
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkPCAAnalysisFilter(const vtkPCAAnalysisFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPCAAnalysisFilter&) VTK_DELETE_FUNCTION;
+  vtkPCAAnalysisFilter(const vtkPCAAnalysisFilter&) = delete;
+  void operator=(const vtkPCAAnalysisFilter&) = delete;
 
   // Eigenvalues
-  vtkFloatArray *Evals;
+  vtkFloatArray* Evals;
 
   // Matrix where each column is an eigenvector
-  double **evecMat2;
+  double** evecMat2;
 
   // The mean shape in a vector
-  double *meanshape;
+  double* meanshape;
 };
 
 #endif
-
-

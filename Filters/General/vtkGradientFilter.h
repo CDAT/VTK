@@ -39,46 +39,48 @@
  * the entire data set. For Patch or DataSetMax it is possible that some values
  * will not be computed. The ReplacementValueOption specifies what to use
  * for these values.
-*/
+ */
 
 #ifndef vtkGradientFilter_h
 #define vtkGradientFilter_h
 
-#include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersGeneralModule.h" // For export macro
 
 class VTKFILTERSGENERAL_EXPORT vtkGradientFilter : public vtkDataSetAlgorithm
 {
 public:
   vtkTypeMacro(vtkGradientFilter, vtkDataSetAlgorithm);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /// Options to choose what cells contribute to the gradient calculation
-  enum ContributingCellEnum {
-    All=0,        //!< All cells
-    Patch=1,      //!< Highest dimension cells in the patch of cells contributing to the calculation
-    DataSetMax=2  //!< Highest dimension cells in the data set
+  enum ContributingCellEnum
+  {
+    All = 0,   //!< All cells
+    Patch = 1, //!< Highest dimension cells in the patch of cells contributing to the calculation
+    DataSetMax = 2 //!< Highest dimension cells in the data set
   };
 
   /// The replacement value or entities that don't have any gradient computed over them based on
   /// the ContributingCellOption
-  enum ReplacementValueEnum {
-    Zero=0,        //!< 0
-    NaN=1,         //!< NaN
-    DataTypeMin=2, //!< The minimum possible value of the input array data type
-    DataTypeMax=3  //!< The maximum possible value of the input array data type
+  enum ReplacementValueEnum
+  {
+    Zero = 0,        //!< 0
+    NaN = 1,         //!< NaN
+    DataTypeMin = 2, //!< The minimum possible value of the input array data type
+    DataTypeMax = 3  //!< The maximum possible value of the input array data type
   };
 
-  static vtkGradientFilter *New();
+  static vtkGradientFilter* New();
 
   //@{
   /**
    * These are basically a convenience method that calls SetInputArrayToProcess
    * to set the array used as the input scalars.  The fieldAssociation comes
-   * from the vtkDataObject::FieldAssocations enum.  The fieldAttributeType
+   * from the vtkDataObject::FieldAssociations enum.  The fieldAttributeType
    * comes from the vtkDataSetAttributes::AttributeTypes enum.
    */
-  virtual void SetInputScalars(int fieldAssociation, const char *name);
+  virtual void SetInputScalars(int fieldAssociation, const char* name);
   virtual void SetInputScalars(int fieldAssociation, int fieldAttributeType);
   //@}
 
@@ -122,20 +124,20 @@ public:
   vtkSetStringMacro(QCriterionArrayName);
   //@}
 
- //@{
- /**
-  * When this flag is on (default is off), the gradient filter will provide a
-  * less accurate (but close) algorithm that performs fewer derivative
-  * calculations (and is therefore faster).  The error contains some smoothing
-  * of the output data and some possible errors on the boundary.  This
-  * parameter has no effect when performing the gradient of cell data.
-  * This only applies if the input grid is a vtkUnstructuredGrid or a
-  * vtkPolyData.
-  */
-  vtkGetMacro(FasterApproximation, int);
-  vtkSetMacro(FasterApproximation, int);
-  vtkBooleanMacro(FasterApproximation, int);
- //@}
+  //@{
+  /**
+   * When this flag is on (default is off), the gradient filter will provide a
+   * less accurate (but close) algorithm that performs fewer derivative
+   * calculations (and is therefore faster).  The error contains some smoothing
+   * of the output data and some possible errors on the boundary.  This
+   * parameter has no effect when performing the gradient of cell data.
+   * This only applies if the input grid is a vtkUnstructuredGrid or a
+   * vtkPolyData.
+   */
+  vtkGetMacro(FasterApproximation, vtkTypeBool);
+  vtkSetMacro(FasterApproximation, vtkTypeBool);
+  vtkBooleanMacro(FasterApproximation, vtkTypeBool);
+  //@}
 
   //@{
   /**
@@ -143,9 +145,9 @@ public:
    * will be ResultArrayName and will be the same type as the input
    * array. The default is on.
    */
-  vtkSetMacro(ComputeGradient, int);
-  vtkGetMacro(ComputeGradient, int);
-  vtkBooleanMacro(ComputeGradient, int);
+  vtkSetMacro(ComputeGradient, vtkTypeBool);
+  vtkGetMacro(ComputeGradient, vtkTypeBool);
+  vtkBooleanMacro(ComputeGradient, vtkTypeBool);
   //@}
 
   //@{
@@ -155,9 +157,9 @@ public:
    * array.  The input array must have 3 components in order to
    * compute this. The default is off.
    */
-  vtkSetMacro(ComputeDivergence, int);
-  vtkGetMacro(ComputeDivergence, int);
-  vtkBooleanMacro(ComputeDivergence, int);
+  vtkSetMacro(ComputeDivergence, vtkTypeBool);
+  vtkGetMacro(ComputeDivergence, vtkTypeBool);
+  vtkBooleanMacro(ComputeDivergence, vtkTypeBool);
   //@}
 
   //@{
@@ -167,9 +169,9 @@ public:
    * array.  The input array must have 3 components in order to
    * compute this. The default is off.
    */
-  vtkSetMacro(ComputeVorticity, int);
-  vtkGetMacro(ComputeVorticity, int);
-  vtkBooleanMacro(ComputeVorticity, int);
+  vtkSetMacro(ComputeVorticity, vtkTypeBool);
+  vtkGetMacro(ComputeVorticity, vtkTypeBool);
+  vtkBooleanMacro(ComputeVorticity, vtkTypeBool);
   //@}
 
   //@{
@@ -180,9 +182,9 @@ public:
    * compute this.  Note that Q-citerion is a balance of the rate
    * of vorticity and the rate of strain. The default is off.
    */
-  vtkSetMacro(ComputeQCriterion, int);
-  vtkGetMacro(ComputeQCriterion, int);
-  vtkBooleanMacro(ComputeQCriterion, int);
+  vtkSetMacro(ComputeQCriterion, vtkTypeBool);
+  vtkGetMacro(ComputeQCriterion, vtkTypeBool);
+  vtkBooleanMacro(ComputeQCriterion, vtkTypeBool);
   //@}
 
   //@{
@@ -206,22 +208,18 @@ public:
 
 protected:
   vtkGradientFilter();
-  ~vtkGradientFilter() VTK_OVERRIDE;
+  ~vtkGradientFilter() override;
 
-  int RequestUpdateExtent(vtkInformation *,
-                          vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Compute the gradients for grids that are not a vtkImageData,
    * vtkRectilinearGrid, or vtkStructuredGrid.
    * Returns non-zero if the operation was successful.
    */
-  virtual int ComputeUnstructuredGridGradient(
-    vtkDataArray* Array, int fieldAssociation, vtkDataSet* input,
-    bool computeVorticity, bool computeQCriterion, bool computeDivergence,
+  virtual int ComputeUnstructuredGridGradient(vtkDataArray* Array, int fieldAssociation,
+    vtkDataSet* input, bool computeVorticity, bool computeQCriterion, bool computeDivergence,
     vtkDataSet* output);
 
   /**
@@ -229,9 +227,8 @@ protected:
    * a vtkStructuredGrid.  Computes the gradient using finite differences.
    * Returns non-zero if the operation was successful.
    */
-  virtual int ComputeRegularGridGradient(
-    vtkDataArray* Array, int fieldAssociation, bool computeVorticity,
-    bool computeQCriterion, bool computeDivergence, vtkDataSet* output);
+  virtual int ComputeRegularGridGradient(vtkDataArray* Array, int fieldAssociation,
+    bool computeVorticity, bool computeQCriterion, bool computeDivergence, vtkDataSet* output);
 
   /**
    * Get the proper array type to compute requested derivative quantities for.
@@ -245,25 +242,25 @@ protected:
    * If non-null then it contains the name of the outputted gradient array.
    * By derault it is "Gradients".
    */
-  char *ResultArrayName;
+  char* ResultArrayName;
 
   /**
    * If non-null then it contains the name of the outputted divergence array.
    * By derault it is "Divergence".
    */
-  char *DivergenceArrayName;
+  char* DivergenceArrayName;
 
   /**
    * If non-null then it contains the name of the outputted vorticity array.
    * By derault it is "Vorticity".
    */
-  char *VorticityArrayName;
+  char* VorticityArrayName;
 
   /**
    * If non-null then it contains the name of the outputted Q criterion array.
    * By derault it is "Q-criterion".
    */
-  char *QCriterionArrayName;
+  char* QCriterionArrayName;
 
   /**
    * When this flag is on (default is off), the gradient filter will provide a
@@ -274,34 +271,34 @@ protected:
    * This only applies if the input grid is a vtkUnstructuredGrid or a
    * vtkPolyData.
    */
-  int FasterApproximation;
+  vtkTypeBool FasterApproximation;
 
   /**
    * Flag to indicate that the gradient of the input vector is to
    * be computed. By default ComputeDivergence is on.
    */
-  int ComputeGradient;
+  vtkTypeBool ComputeGradient;
 
   /**
    * Flag to indicate that the divergence of the input vector is to
    * be computed.  The input array to be processed must have
    * 3 components.  By default ComputeDivergence is off.
    */
-  int ComputeDivergence;
+  vtkTypeBool ComputeDivergence;
 
   /**
    * Flag to indicate that the Q-criterion of the input vector is to
    * be computed.  The input array to be processed must have
    * 3 components.  By default ComputeQCriterion is off.
    */
-  int ComputeQCriterion;
+  vtkTypeBool ComputeQCriterion;
 
   /**
    * Flag to indicate that vorticity/curl of the input vector is to
    * be computed.  The input array to be processed must have
    * 3 components.  By default ComputeVorticity is off.
    */
-  int ComputeVorticity;
+  vtkTypeBool ComputeVorticity;
 
   /**
    * Option to specify what cells to include in the gradient computation.
@@ -317,8 +314,8 @@ protected:
   int ReplacementValueOption;
 
 private:
-  vtkGradientFilter(const vtkGradientFilter &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGradientFilter &) VTK_DELETE_FUNCTION;
+  vtkGradientFilter(const vtkGradientFilter&) = delete;
+  void operator=(const vtkGradientFilter&) = delete;
 };
 
 #endif //_vtkGradientFilter_h

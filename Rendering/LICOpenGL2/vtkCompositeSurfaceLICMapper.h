@@ -21,14 +21,14 @@
  * same properties (normals, tcoord, scalars, etc) It will only draw
  * polys and it does not support edge flags. The advantage to using
  * this class is that it generally should be faster
-*/
+ */
 
 #ifndef vtkCompositeSurfaceLICMapper_h
 #define vtkCompositeSurfaceLICMapper_h
 
-#include "vtkRenderingLICOpenGL2Module.h" // For export macro
 #include "vtkCompositePolyDataMapper2.h"
-#include "vtkNew.h" // for ivars
+#include "vtkNew.h"                       // for ivars
+#include "vtkRenderingLICOpenGL2Module.h" // For export macro
 
 class vtkSurfaceLICInterface;
 
@@ -38,36 +38,34 @@ class VTKRENDERINGLICOPENGL2_EXPORT vtkCompositeSurfaceLICMapper
 public:
   static vtkCompositeSurfaceLICMapper* New();
   vtkTypeMacro(vtkCompositeSurfaceLICMapper, vtkCompositePolyDataMapper2);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the vtkSurfaceLICInterface used by this mapper
    */
-  vtkSurfaceLICInterface *GetLICInterface() {
-    return this->LICInterface.Get(); }
+  vtkSurfaceLICInterface* GetLICInterface() { return this->LICInterface.Get(); }
   //@}
 
   /**
    * Lots of LIC setup code
    */
-  void Render(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
+  void Render(vtkRenderer* ren, vtkActor* act) override;
 
 protected:
   vtkCompositeSurfaceLICMapper();
-  ~vtkCompositeSurfaceLICMapper();
+  ~vtkCompositeSurfaceLICMapper() override;
 
   vtkNew<vtkSurfaceLICInterface> LICInterface;
 
-  virtual vtkCompositeMapperHelper2 *CreateHelper() VTK_OVERRIDE;
+  vtkCompositeMapperHelper2* CreateHelper() override;
 
   // copy values to the helpers
-  virtual void CopyMapperValuesToHelper(vtkCompositeMapperHelper2 *helper) VTK_OVERRIDE;
+  void CopyMapperValuesToHelper(vtkCompositeMapperHelper2* helper) override;
 
 private:
-  vtkCompositeSurfaceLICMapper(
-    const vtkCompositeSurfaceLICMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCompositeSurfaceLICMapper&) VTK_DELETE_FUNCTION;
+  vtkCompositeSurfaceLICMapper(const vtkCompositeSurfaceLICMapper&) = delete;
+  void operator=(const vtkCompositeSurfaceLICMapper&) = delete;
 };
 
 #endif

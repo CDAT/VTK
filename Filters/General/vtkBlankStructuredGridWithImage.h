@@ -27,7 +27,7 @@
  *
  * @sa
  * vtkStructuredGrid
-*/
+ */
 
 #ifndef vtkBlankStructuredGridWithImage_h
 #define vtkBlankStructuredGridWithImage_h
@@ -40,28 +40,28 @@ class vtkImageData;
 class VTKFILTERSGENERAL_EXPORT vtkBlankStructuredGridWithImage : public vtkStructuredGridAlgorithm
 {
 public:
-  static vtkBlankStructuredGridWithImage *New();
-  vtkTypeMacro(vtkBlankStructuredGridWithImage,vtkStructuredGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkBlankStructuredGridWithImage* New();
+  vtkTypeMacro(vtkBlankStructuredGridWithImage, vtkStructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set / get the input image used to perform the blanking.
    */
-  void SetBlankingInputData(vtkImageData *input);
-  vtkImageData *GetBlankingInput();
+  void SetBlankingInputData(vtkImageData* input);
+  vtkImageData* GetBlankingInput();
   //@}
 
 protected:
   vtkBlankStructuredGridWithImage();
-  ~vtkBlankStructuredGridWithImage() VTK_OVERRIDE;
+  ~vtkBlankStructuredGridWithImage() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkBlankStructuredGridWithImage(const vtkBlankStructuredGridWithImage&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBlankStructuredGridWithImage&) VTK_DELETE_FUNCTION;
+  vtkBlankStructuredGridWithImage(const vtkBlankStructuredGridWithImage&) = delete;
+  void operator=(const vtkBlankStructuredGridWithImage&) = delete;
 };
 
 #endif

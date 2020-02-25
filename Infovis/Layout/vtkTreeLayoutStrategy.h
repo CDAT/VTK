@@ -38,26 +38,26 @@
  *
  * If the input is not a tree but a general graph, this strategy first extracts
  * a tree from the graph using a breadth-first search starting at vertex ID 0.
-*/
+ */
 
 #ifndef vtkTreeLayoutStrategy_h
 #define vtkTreeLayoutStrategy_h
 
-#include "vtkInfovisLayoutModule.h" // For export macro
 #include "vtkGraphLayoutStrategy.h"
+#include "vtkInfovisLayoutModule.h" // For export macro
 
 class VTKINFOVISLAYOUT_EXPORT vtkTreeLayoutStrategy : public vtkGraphLayoutStrategy
 {
 public:
-  static vtkTreeLayoutStrategy *New();
+  static vtkTreeLayoutStrategy* New();
 
   vtkTypeMacro(vtkTreeLayoutStrategy, vtkGraphLayoutStrategy);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform the tree layout.
    */
-  void Layout() VTK_OVERRIDE;
+  void Layout() override;
 
   //@{
   /**
@@ -132,21 +132,19 @@ public:
 
 protected:
   vtkTreeLayoutStrategy();
-  ~vtkTreeLayoutStrategy() VTK_OVERRIDE;
+  ~vtkTreeLayoutStrategy() override;
 
   double Angle;
   bool Radial;
   double LogSpacingValue;
   double LeafSpacing;
-  char *DistanceArrayName;
+  char* DistanceArrayName;
   double Rotation;
   bool ReverseEdges;
 
 private:
-
-  vtkTreeLayoutStrategy(const vtkTreeLayoutStrategy&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTreeLayoutStrategy&) VTK_DELETE_FUNCTION;
+  vtkTreeLayoutStrategy(const vtkTreeLayoutStrategy&) = delete;
+  void operator=(const vtkTreeLayoutStrategy&) = delete;
 };
 
 #endif
-

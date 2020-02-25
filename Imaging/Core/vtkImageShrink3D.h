@@ -18,11 +18,10 @@
  *
  * vtkImageShrink3D shrinks an image by sub sampling on a
  * uniform grid (integer multiples).
-*/
+ */
 
 #ifndef vtkImageShrink3D_h
 #define vtkImageShrink3D_h
-
 
 #include "vtkImagingCoreModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -30,24 +29,24 @@
 class VTKIMAGINGCORE_EXPORT vtkImageShrink3D : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageShrink3D *New();
-  vtkTypeMacro(vtkImageShrink3D,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageShrink3D* New();
+  vtkTypeMacro(vtkImageShrink3D, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/Get the shrink factors
    */
-  vtkSetVector3Macro(ShrinkFactors,int);
-  vtkGetVector3Macro(ShrinkFactors,int);
+  vtkSetVector3Macro(ShrinkFactors, int);
+  vtkGetVector3Macro(ShrinkFactors, int);
   //@}
 
   //@{
   /**
    * Set/Get the pixel to use as origin.
    */
-  vtkSetVector3Macro(Shift,int);
-  vtkGetVector3Macro(Shift,int);
+  vtkSetVector3Macro(Shift, int);
+  vtkGetVector3Macro(Shift, int);
   //@}
 
   //@{
@@ -58,55 +57,50 @@ public:
    * You can changed "Shift" to get around this.
    * vtkImageGaussianSmooth or vtkImageMean with strides.
    */
-  void SetAveraging(int);
-  int GetAveraging() {return this->GetMean();};
-  vtkBooleanMacro(Averaging,int);
+  void SetAveraging(vtkTypeBool);
+  vtkTypeBool GetAveraging() { return this->GetMean(); }
+  vtkBooleanMacro(Averaging, vtkTypeBool);
   //@}
 
-  void SetMean(int);
-  vtkGetMacro(Mean,int);
-  vtkBooleanMacro(Mean,int);
+  void SetMean(vtkTypeBool);
+  vtkGetMacro(Mean, vtkTypeBool);
+  vtkBooleanMacro(Mean, vtkTypeBool);
 
-  void SetMinimum(int);
-  vtkGetMacro(Minimum,int);
-  vtkBooleanMacro(Minimum,int);
+  void SetMinimum(vtkTypeBool);
+  vtkGetMacro(Minimum, vtkTypeBool);
+  vtkBooleanMacro(Minimum, vtkTypeBool);
 
-  void SetMaximum(int);
-  vtkGetMacro(Maximum,int);
-  vtkBooleanMacro(Maximum,int);
+  void SetMaximum(vtkTypeBool);
+  vtkGetMacro(Maximum, vtkTypeBool);
+  vtkBooleanMacro(Maximum, vtkTypeBool);
 
-  void SetMedian(int);
-  vtkGetMacro(Median,int);
-  vtkBooleanMacro(Median,int);
+  void SetMedian(vtkTypeBool);
+  vtkGetMacro(Median, vtkTypeBool);
+  vtkBooleanMacro(Median, vtkTypeBool);
 
 protected:
   vtkImageShrink3D();
-  ~vtkImageShrink3D()VTK_OVERRIDE {}
+  ~vtkImageShrink3D() override {}
 
   int ShrinkFactors[3];
   int Shift[3];
   int Mean;
-  int Minimum;
-  int Maximum;
-  int Median;
+  vtkTypeBool Minimum;
+  vtkTypeBool Maximum;
+  vtkTypeBool Median;
 
-  int RequestInformation (vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent (vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void ThreadedRequestData(vtkInformation *request,
-                           vtkInformationVector **inputVector,
-                           vtkInformationVector *outputVector,
-                           vtkImageData ***inData, vtkImageData **outData,
-                           int ext[6], int id) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData, int ext[6],
+    int id) override;
 
-  void InternalRequestUpdateExtent(int *inExt, int *outExt);
+  void InternalRequestUpdateExtent(int* inExt, int* outExt);
 
 private:
-  vtkImageShrink3D(const vtkImageShrink3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageShrink3D&) VTK_DELETE_FUNCTION;
+  vtkImageShrink3D(const vtkImageShrink3D&) = delete;
+  void operator=(const vtkImageShrink3D&) = delete;
 };
 
 #endif
-
-
-

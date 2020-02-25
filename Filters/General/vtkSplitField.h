@@ -27,20 +27,12 @@
  * tells vtkSplitField to extract the first component of the field
  * called gradient and create an array called firstcomponent (the
  * new field will be in the output's point data).
- * The same can be done from Tcl:
- * @verbatim
- * sf SetInputField gradient POINT_DATA
- * sf Split 0 firstcomponent
- *
- * AttributeTypes: SCALARS, VECTORS, NORMALS, TCOORDS, TENSORS
- * Field locations: DATA_OBJECT, POINT_DATA, CELL_DATA
- * @endverbatim
  * Note that, by default, the original array is also passed through.
  *
  * @warning
- * When using Tcl, Java, Python or Visual Basic bindings, the array name
+ * When using Java, Python or Visual Basic bindings, the array name
  * can not be one of the  AttributeTypes when calling Split() which takes
- * strings as arguments. The Tcl (Java etc.) command will
+ * strings as arguments. The wrapped command will
  * always assume the string corresponds to an attribute type when
  * the argument is one of the AttributeTypes. In this situation,
  * use the Split() which takes enums.
@@ -49,13 +41,13 @@
  * vtkFieldData vtkDataSet vtkDataObjectToDataSetFilter
  * vtkDataSetAttributes vtkDataArray vtkRearrangeFields
  * vtkAssignAttribute vtkMergeFields
-*/
+ */
 
 #ifndef vtkSplitField_h
 #define vtkSplitField_h
 
-#include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersGeneralModule.h" // For export macro
 
 #include "vtkDataSetAttributes.h" // Needed for NUM_ATTRIBUTES
 
@@ -64,16 +56,16 @@ class vtkFieldData;
 class VTKFILTERSGENERAL_EXPORT vtkSplitField : public vtkDataSetAlgorithm
 {
 public:
-  vtkTypeMacro(vtkSplitField,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSplitField, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Create a new vtkSplitField.
    */
-  static vtkSplitField *New();
+  static vtkSplitField* New();
 
   /**
-   * Use the  given attribute in the field data given
+   * Use the given attribute in the field data given
    * by fieldLoc as input.
    */
   void SetInputField(int attributeType, int fieldLoc);
@@ -97,33 +89,36 @@ public:
 
   enum FieldLocations
   {
-    DATA_OBJECT=0,
-    POINT_DATA=1,
-    CELL_DATA=2
+    DATA_OBJECT = 0,
+    POINT_DATA = 1,
+    CELL_DATA = 2
   };
 
   struct Component
   {
     int Index;
     char* FieldName;
-    Component* Next;   // linked list
+    Component* Next; // linked list
     void SetName(const char* name)
     {
-        delete[] this->FieldName;
-        this->FieldName = nullptr;
-        if (name)
-        {
-          size_t len = strlen(name)+1;
-          this->FieldName = new char[len];
-          strncpy(this->FieldName, name, len);
-        }
+      delete[] this->FieldName;
+      this->FieldName = nullptr;
+      if (name)
+      {
+        size_t len = strlen(name) + 1;
+        this->FieldName = new char[len];
+#ifdef _MSC_VER
+        strncpy_s(this->FieldName, len, name, len - 1);
+#else
+        strncpy(this->FieldName, name, len);
+#endif
+      }
     }
     Component() { FieldName = nullptr; }
     ~Component() { delete[] FieldName; }
   };
 
 protected:
-
   enum FieldTypes
   {
     NAME,
@@ -131,9 +126,9 @@ protected:
   };
 
   vtkSplitField();
-  ~vtkSplitField() VTK_OVERRIDE;
+  ~vtkSplitField() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   char* FieldName;
   int FieldType;
@@ -145,27 +140,23 @@ protected:
 
   vtkDataArray* SplitArray(vtkDataArray* da, int component);
 
-
   // Components are stored as a linked list.
   Component* Head;
   Component* Tail;
 
   // Methods to browse/modify the linked list.
-  Component* GetNextComponent(Component* op)
-    { return op->Next; }
-  Component* GetFirst()
-    { return this->Head; }
+  Component* GetNextComponent(Component* op) { return op->Next; }
+  Component* GetFirst() { return this->Head; }
   void AddComponent(Component* op);
   Component* FindComponent(int index);
   void DeleteAllComponents();
 
   void PrintComponent(Component* op, ostream& os, vtkIndent indent);
   void PrintAllComponents(ostream& os, vtkIndent indent);
+
 private:
-  vtkSplitField(const vtkSplitField&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSplitField&) VTK_DELETE_FUNCTION;
+  vtkSplitField(const vtkSplitField&) = delete;
+  void operator=(const vtkSplitField&) = delete;
 };
 
 #endif
-
-

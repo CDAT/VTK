@@ -26,7 +26,7 @@
  * z coordinates of the vtkRectilinearGrid are negated so that the
  * first slice/plane has the highest z-value and the last slice/plane
  * has the lowest z-value.
-*/
+ */
 
 #ifndef vtkNetCDFPOPReader_h
 #define vtkNetCDFPOPReader_h
@@ -41,9 +41,9 @@ class vtkNetCDFPOPReaderInternal;
 class VTKIONETCDF_EXPORT vtkNetCDFPOPReader : public vtkRectilinearGridAlgorithm
 {
 public:
-  vtkTypeMacro(vtkNetCDFPOPReader,vtkRectilinearGridAlgorithm);
-  static vtkNetCDFPOPReader *New();
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkNetCDFPOPReader, vtkRectilinearGridAlgorithm);
+  static vtkNetCDFPOPReader* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -66,30 +66,27 @@ public:
    * Variable array selection.
    */
   virtual int GetNumberOfVariableArrays();
-  virtual const char *GetVariableArrayName(int idx);
-  virtual int GetVariableArrayStatus(const char *name);
-  virtual void SetVariableArrayStatus(const char *name, int status);
+  virtual const char* GetVariableArrayName(int idx);
+  virtual int GetVariableArrayStatus(const char* name);
+  virtual void SetVariableArrayStatus(const char* name, int status);
   //@}
 
 protected:
   vtkNetCDFPOPReader();
-  ~vtkNetCDFPOPReader() VTK_OVERRIDE;
+  ~vtkNetCDFPOPReader() override;
 
-  int RequestData(vtkInformation*,vtkInformationVector**,
-                  vtkInformationVector*) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation* request,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  static void SelectionModifiedCallback(vtkObject *caller, unsigned long eid,
-                                        void *clientdata, void *calldata);
+  static void SelectionModifiedCallback(
+    vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
 
-  static void EventCallback(vtkObject* caller, unsigned long eid,
-                            void* clientdata, void* calldata);
+  static void EventCallback(vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
 
   vtkCallbackCommand* SelectionObserver;
 
-  char *FileName;
+  char* FileName;
 
   /**
    * The NetCDF file descriptor.
@@ -106,8 +103,8 @@ protected:
   int Stride[3];
 
 private:
-  vtkNetCDFPOPReader(const vtkNetCDFPOPReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkNetCDFPOPReader&) VTK_DELETE_FUNCTION;
+  vtkNetCDFPOPReader(const vtkNetCDFPOPReader&) = delete;
+  void operator=(const vtkNetCDFPOPReader&) = delete;
 
   vtkNetCDFPOPReaderInternal* Internals;
 };

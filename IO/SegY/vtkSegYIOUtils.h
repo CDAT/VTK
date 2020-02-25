@@ -21,23 +21,25 @@
 class vtkSegYIOUtils
 {
 public:
-  int readShortInteger(int pos, std::ifstream& in);
-  int readLongInteger(int pos, std::ifstream& in);
-  int readLongInteger(std::ifstream& in);
-  float readFloat(std::ifstream& in);
-  float readIBMFloat(std::ifstream& in);
-  char readChar(std::ifstream& in);
-  unsigned char readUChar(std::ifstream& in);
+  char readChar(std::istream& in);
+  short readShortInteger(std::streamoff pos, std::istream& in);
+  short readShortInteger(std::istream& in);
+  int readLongInteger(std::streamoff pos, std::istream& in);
+  int readLongInteger(std::istream& in);
+  float readFloat(std::istream& in);
+  float readIBMFloat(std::istream& in);
+  unsigned char readUChar(std::istream& in);
   void swap(char* a, char* b);
-  bool isBigEndian;
   static vtkSegYIOUtils* Instance();
-  int getFileSize(std::ifstream& in);
+  std::streamoff getFileSize(std::istream& in);
+
+  bool IsBigEndian;
 
 private:
   vtkSegYIOUtils();
   bool checkIfBigEndian()
   {
-    ushort a = 0x1234;
+    unsigned short a = 0x1234;
     if (*((unsigned char*)&a) == 0x12)
       return true;
     return false;

@@ -25,35 +25,35 @@
  * hierarchy of render passes built at runtime.
  * @sa
  * vtkRenderPass
-*/
+ */
 
 #ifndef vtkSequencePass_h
 #define vtkSequencePass_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkRenderPass.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
 
 class vtkRenderPassCollection;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkSequencePass : public vtkRenderPass
 {
 public:
-  static vtkSequencePass *New();
-  vtkTypeMacro(vtkSequencePass,vtkRenderPass);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkSequencePass* New();
+  vtkTypeMacro(vtkSequencePass, vtkRenderPass);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform rendering according to a render state \p s.
    * \pre s_exists: s!=0
    */
-  void Render(const vtkRenderState *s) VTK_OVERRIDE;
+  void Render(const vtkRenderState* s) override;
 
   /**
    * Release graphics resources and ask components to release their own
    * resources.
    * \pre w_exists: w!=0
    */
-  void ReleaseGraphicsResources(vtkWindow *w) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* w) override;
 
   //@{
   /**
@@ -62,19 +62,19 @@ public:
    * There is no warning.
    * Initial value is a NULL pointer.
    */
-  vtkGetObjectMacro(Passes,vtkRenderPassCollection);
-  virtual void SetPasses(vtkRenderPassCollection *passes);
+  vtkGetObjectMacro(Passes, vtkRenderPassCollection);
+  virtual void SetPasses(vtkRenderPassCollection* passes);
   //@}
 
 protected:
-  vtkRenderPassCollection *Passes;
+  vtkRenderPassCollection* Passes;
 
   vtkSequencePass();
-  ~vtkSequencePass() VTK_OVERRIDE;
+  ~vtkSequencePass() override;
 
 private:
-  vtkSequencePass(const vtkSequencePass&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSequencePass&) VTK_DELETE_FUNCTION;
+  vtkSequencePass(const vtkSequencePass&) = delete;
+  void operator=(const vtkSequencePass&) = delete;
 };
 
 #endif

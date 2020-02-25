@@ -21,7 +21,7 @@
  * one group of the multi-group dataset and will assign each update piece
  * as a sub-block. For example, if there are two inputs and four update
  * pieces, the output contains two groups with four datasets each.
-*/
+ */
 
 #ifndef vtkMultiBlockDataGroupFilter_h
 #define vtkMultiBlockDataGroupFilter_h
@@ -32,14 +32,14 @@
 class VTKFILTERSGENERAL_EXPORT vtkMultiBlockDataGroupFilter : public vtkMultiBlockDataSetAlgorithm
 {
 public:
-  vtkTypeMacro(vtkMultiBlockDataGroupFilter,vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMultiBlockDataGroupFilter, vtkMultiBlockDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object with PointIds and CellIds on; and ids being generated
    * as scalars.
    */
-  static vtkMultiBlockDataGroupFilter *New();
+  static vtkMultiBlockDataGroupFilter* New();
 
   //@{
   /**
@@ -47,31 +47,23 @@ public:
    * establish a pipeline connection. Use AddInputConnection() to
    * setup a pipeline connection.
    */
-  void AddInputData(vtkDataObject *);
+  void AddInputData(vtkDataObject*);
   void AddInputData(int, vtkDataObject*);
   //@}
 
 protected:
   vtkMultiBlockDataGroupFilter();
-  ~vtkMultiBlockDataGroupFilter() VTK_OVERRIDE;
+  ~vtkMultiBlockDataGroupFilter() override;
 
-  int RequestInformation(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkMultiBlockDataGroupFilter(const vtkMultiBlockDataGroupFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMultiBlockDataGroupFilter&) VTK_DELETE_FUNCTION;
+  vtkMultiBlockDataGroupFilter(const vtkMultiBlockDataGroupFilter&) = delete;
+  void operator=(const vtkMultiBlockDataGroupFilter&) = delete;
 };
 
 #endif
-
-

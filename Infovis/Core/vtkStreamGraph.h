@@ -31,13 +31,13 @@
  *
  * If you can use an edge window array to filter out old edges based on a
  * moving threshold.
-*/
+ */
 
 #ifndef vtkStreamGraph_h
 #define vtkStreamGraph_h
 
-#include "vtkInfovisCoreModule.h" // For export macro
 #include "vtkGraphAlgorithm.h"
+#include "vtkInfovisCoreModule.h" // For export macro
 
 class vtkBitArray;
 class vtkMergeGraphs;
@@ -50,8 +50,8 @@ class VTKINFOVISCORE_EXPORT vtkStreamGraph : public vtkGraphAlgorithm
 {
 public:
   static vtkStreamGraph* New();
-  vtkTypeMacro(vtkStreamGraph,vtkGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkStreamGraph, vtkGraphAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -84,12 +84,9 @@ public:
 
 protected:
   vtkStreamGraph();
-  ~vtkStreamGraph() VTK_OVERRIDE;
+  ~vtkStreamGraph() override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   vtkMutableGraphHelper* CurrentGraph;
   vtkMergeGraphs* MergeGraphs;
@@ -98,9 +95,8 @@ protected:
   char* EdgeWindowArrayName;
 
 private:
-  vtkStreamGraph(const vtkStreamGraph&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkStreamGraph&) VTK_DELETE_FUNCTION;
+  vtkStreamGraph(const vtkStreamGraph&) = delete;
+  void operator=(const vtkStreamGraph&) = delete;
 };
 
 #endif
-

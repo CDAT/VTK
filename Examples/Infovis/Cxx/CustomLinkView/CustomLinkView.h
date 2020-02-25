@@ -17,7 +17,7 @@
 //
 // .SECTION Description
 // CustomLinkView shows an alternate way to link various views using
-// vtkEventQtSlotConnect where selection  in a particular view sets
+// vtkEventQtSlotConnect where selection in a particular view sets
 // the same selection in all other views associated.
 
 // Other way to get the same functionality is by using vtkAnnotationLink
@@ -29,7 +29,7 @@
 #ifndef CustomLinkView_H
 #define CustomLinkView_H
 
-#include "vtkSmartPointer.h"    // Required for smart pointer internal ivars.
+#include "vtkSmartPointer.h" // Required for smart pointer internal ivars.
 
 #include <QMainWindow>
 
@@ -50,10 +50,9 @@ class CustomLinkView : public QMainWindow
   Q_OBJECT
 
 public:
-
   // Constructor/Destructor
   CustomLinkView();
-  ~CustomLinkView();
+  ~CustomLinkView() override;
 
 public slots:
 
@@ -61,7 +60,6 @@ public slots:
   virtual void slotExit();
 
 protected:
-
 protected slots:
 
 public slots:
@@ -69,27 +67,25 @@ public slots:
   // this slot.
   // Full signature of the slot could be:
   // MySlot(vtkObject* caller, unsigned long vtk_event,
- //         void* clientData, void* callData, vtkCommand*)
+  //         void* clientData, void* callData, vtkCommand*)
   void selectionChanged(vtkObject*, unsigned long, void*, void* callData);
 
 private:
-
   // Methods
   void SetupCustomLink();
 
-
   // Members
-  vtkSmartPointer<vtkXMLTreeReader>       XMLReader;
-  vtkSmartPointer<vtkGraphLayoutView>     GraphView;
-  vtkSmartPointer<vtkQtTreeView>          TreeView;
-  vtkSmartPointer<vtkQtTableView>         TableView;
-  vtkSmartPointer<vtkQtTreeView>          ColumnView;
+  vtkSmartPointer<vtkXMLTreeReader> XMLReader;
+  vtkSmartPointer<vtkGraphLayoutView> GraphView;
+  vtkSmartPointer<vtkQtTreeView> TreeView;
+  vtkSmartPointer<vtkQtTableView> TableView;
+  vtkSmartPointer<vtkQtTreeView> ColumnView;
 
   // This class converts a vtkEvent to QT signal.
-  vtkSmartPointer<vtkEventQtSlotConnect>  Connections;
+  vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 
   // Designer form
-  Ui_CustomLinkView *ui;
+  Ui_CustomLinkView* ui;
 };
 
 #endif // CustomLinkView_H

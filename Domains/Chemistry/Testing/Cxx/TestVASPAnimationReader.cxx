@@ -12,8 +12,8 @@
 
 =========================================================================*/
 
-#include "vtkTestUtilities.h"
 #include "vtkRegressionTestImage.h"
+#include "vtkTestUtilities.h"
 
 #include "vtkActor.h"
 #include "vtkCamera.h"
@@ -22,13 +22,13 @@
 #include "vtkMolecule.h"
 #include "vtkMoleculeMapper.h"
 #include "vtkNew.h"
-#include "vtkRenderWindowInteractor.h"
 #include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkVASPAnimationReader.h"
 
-int TestVASPAnimationReader(int argc, char *argv[])
+int TestVASPAnimationReader(int argc, char* argv[])
 {
   if (argc < 2)
   {
@@ -42,8 +42,8 @@ int TestVASPAnimationReader(int argc, char *argv[])
   reader->SetFileName(fname.c_str());
 
   reader->UpdateInformation();
-  vtkInformation *outInfo = reader->GetExecutive()->GetOutputInformation(0);
-  double *times = outInfo->Get(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
+  vtkInformation* outInfo = reader->GetExecutive()->GetOutputInformation(0);
+  double* times = outInfo->Get(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
   int nTimes = outInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
   if (nTimes < 8)
   {
@@ -67,22 +67,22 @@ int TestVASPAnimationReader(int argc, char *argv[])
     reader->UpdateTimeStep(times[2 * i]);
     vtkNew<vtkMolecule> mol;
     mol->ShallowCopy(reader->GetOutput());
-    mappers[i]->SetInputData(mol.Get());
+    mappers[i]->SetInputData(mol);
 
     // Rendering setup:
     mappers[i]->UseBallAndStickSettings();
     mappers[i]->SetAtomicRadiusTypeToCustomArrayRadius();
     mappers[i]->RenderLatticeOn();
-    actors[i]->SetMapper(mappers[i].Get());
+    actors[i]->SetMapper(mappers[i]);
     rens[i]->SetBackground(0.0, 0.0, 0.0);
-    rens[i]->AddActor(actors[i].Get());
-    win->AddRenderer(rens[i].Get());
+    rens[i]->AddActor(actors[i]);
+    win->AddRenderer(rens[i]);
   }
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(win.GetPointer());
+  iren->SetRenderWindow(win);
 
-  win->SetSize(450,450);
+  win->SetSize(450, 450);
   win->Render();
 
   for (size_t i = 0; i < 4; ++i)

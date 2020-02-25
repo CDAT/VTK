@@ -17,7 +17,7 @@
  * @brief   abstract class to write particle data to file
  *
  * vtkAbstractParticleWriter is an abstract class which is used by
- * vtkTemporalStreamTracer to write particles out during simulations.
+ * vtkParticleTracerBase to write particles out during simulations.
  * This class is abstract and provides a TimeStep and FileName.
  * Subclasses of this should provide the necessary IO.
  *
@@ -25,8 +25,8 @@
  * See vtkWriter
  *
  * @sa
- * vtkTemporalStreamTracer
-*/
+ * vtkParticleTracerBase
+ */
 
 #ifndef vtkAbstractParticleWriter_h
 #define vtkAbstractParticleWriter_h
@@ -37,8 +37,8 @@
 class VTKIOCORE_EXPORT vtkAbstractParticleWriter : public vtkWriter
 {
 public:
-  vtkTypeMacro(vtkAbstractParticleWriter,vtkWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAbstractParticleWriter, vtkWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -51,12 +51,12 @@ public:
   //@{
   /**
    * Before writing the current data out, set the TimeValue (optional)
-   * The TimeValue is a float/double value that corresonds to the real
+   * The TimeValue is a float/double value that corresponds to the real
    * time of the data, it may not be regular, whereas the TimeSteps
    * are simple increments.
    */
-  vtkSetMacro(TimeValue,double);
-  vtkGetMacro(TimeValue,double);
+  vtkSetMacro(TimeValue, double);
+  vtkGetMacro(TimeValue, double);
   //@}
 
   //@{
@@ -72,8 +72,8 @@ public:
    * When running in parallel, this writer may be capable of
    * Collective IO operations (HDF5). By default, this is off.
    */
-  vtkSetMacro(CollectiveIO,int);
-  vtkGetMacro(CollectiveIO,int);
+  vtkSetMacro(CollectiveIO, int);
+  vtkGetMacro(CollectiveIO, int);
   void SetWriteModeToCollective();
   void SetWriteModeToIndependent();
   //@}
@@ -85,18 +85,18 @@ public:
   virtual void CloseFile() = 0;
 
 protected:
-   vtkAbstractParticleWriter();
-  ~vtkAbstractParticleWriter() VTK_OVERRIDE;
+  vtkAbstractParticleWriter();
+  ~vtkAbstractParticleWriter() override;
 
-  void WriteData() VTK_OVERRIDE = 0; //internal method subclasses must respond to
-  int          CollectiveIO;
-  int          TimeStep;
-  double       TimeValue;
-  char        *FileName;
+  void WriteData() override = 0; // internal method subclasses must respond to
+  int CollectiveIO;
+  int TimeStep;
+  double TimeValue;
+  char* FileName;
 
 private:
-  vtkAbstractParticleWriter(const vtkAbstractParticleWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAbstractParticleWriter&) VTK_DELETE_FUNCTION;
+  vtkAbstractParticleWriter(const vtkAbstractParticleWriter&) = delete;
+  void operator=(const vtkAbstractParticleWriter&) = delete;
 };
 
 #endif

@@ -23,31 +23,31 @@
  * Neurosciences, Foothills Medical Centre, Calgary, for providing this class.
  * @sa
  * vtkImage vtkImageMapper3D vtkImageSliceMapper vtkImageResliceMapper
-*/
+ */
 
 #ifndef vtkImageProperty_h
 #define vtkImageProperty_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkScalarsToColors;
 
 class VTKRENDERINGCORE_EXPORT vtkImageProperty : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkImageProperty,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImageProperty, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct a property with no lookup table.
    */
-  static vtkImageProperty *New();
+  static vtkImageProperty* New();
 
   /**
    * Assign one property to another.
    */
-  void DeepCopy(vtkImageProperty *p);
+  void DeepCopy(vtkImageProperty* p);
 
   //@{
   /**
@@ -71,7 +71,7 @@ public:
    * to be displayed as greyscale, or if the input data is
    * already RGB, there is no need to set a lookup table.
    */
-  virtual void SetLookupTable(vtkScalarsToColors *lut);
+  virtual void SetLookupTable(vtkScalarsToColors* lut);
   vtkGetObjectMacro(LookupTable, vtkScalarsToColors);
   //@}
 
@@ -81,9 +81,9 @@ public:
    * of setting the range from the Window/Level settings.
    * This is off by default.
    */
-  vtkSetMacro(UseLookupTableScalarRange, int);
-  vtkGetMacro(UseLookupTableScalarRange, int);
-  vtkBooleanMacro(UseLookupTableScalarRange, int);
+  vtkSetMacro(UseLookupTableScalarRange, vtkTypeBool);
+  vtkGetMacro(UseLookupTableScalarRange, vtkTypeBool);
+  vtkBooleanMacro(UseLookupTableScalarRange, vtkTypeBool);
   //@}
 
   //@{
@@ -115,18 +115,14 @@ public:
 
   //@{
   /**
-   * The interpolation type (default: nearest neighbor).
+   * The interpolation type (default: VTK_LINEAR_INTERPOLATION).
    */
-  vtkSetClampMacro(InterpolationType, int,
-                   VTK_NEAREST_INTERPOLATION, VTK_CUBIC_INTERPOLATION);
+  vtkSetClampMacro(InterpolationType, int, VTK_NEAREST_INTERPOLATION, VTK_CUBIC_INTERPOLATION);
   vtkGetMacro(InterpolationType, int);
-  void SetInterpolationTypeToNearest() {
-    this->SetInterpolationType(VTK_NEAREST_INTERPOLATION); };
-  void SetInterpolationTypeToLinear() {
-    this->SetInterpolationType(VTK_LINEAR_INTERPOLATION); };
-  void SetInterpolationTypeToCubic() {
-    this->SetInterpolationType(VTK_CUBIC_INTERPOLATION); };
-  virtual const char *GetInterpolationTypeAsString();
+  void SetInterpolationTypeToNearest() { this->SetInterpolationType(VTK_NEAREST_INTERPOLATION); }
+  void SetInterpolationTypeToLinear() { this->SetInterpolationType(VTK_LINEAR_INTERPOLATION); }
+  void SetInterpolationTypeToCubic() { this->SetInterpolationType(VTK_CUBIC_INTERPOLATION); }
+  virtual const char* GetInterpolationTypeAsString();
   //@}
 
   //@{
@@ -135,8 +131,7 @@ public:
    * of a vtkImageStack.  The default layer number is zero.
    */
   vtkSetMacro(LayerNumber, int);
-  int GetLayerNumber()
-    { return this->LayerNumber; }
+  int GetLayerNumber() { return this->LayerNumber; }
   //@}
 
   //@{
@@ -144,9 +139,9 @@ public:
    * Make a checkerboard pattern where the black squares are transparent.
    * The pattern is aligned with the camera, and centered by default.
    */
-  vtkSetMacro(Checkerboard, int);
-  vtkBooleanMacro(Checkerboard, int);
-  vtkGetMacro(Checkerboard, int);
+  vtkSetMacro(Checkerboard, vtkTypeBool);
+  vtkBooleanMacro(Checkerboard, vtkTypeBool);
+  vtkGetMacro(Checkerboard, vtkTypeBool);
   //@}
 
   //@{
@@ -173,9 +168,9 @@ public:
    * for all images will be drawn before any of the images in the stack,
    * in order to allow the images in the stack to be composited.
    */
-  vtkSetMacro(Backing, int);
-  vtkBooleanMacro(Backing, int);
-  vtkGetMacro(Backing, int);
+  vtkSetMacro(Backing, vtkTypeBool);
+  vtkBooleanMacro(Backing, vtkTypeBool);
+  vtkGetMacro(Backing, vtkTypeBool);
   //@}
 
   //@{
@@ -190,30 +185,30 @@ public:
    * Get the MTime for this property.  If the lookup table is set,
    * the mtime will include the mtime of the lookup table.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkImageProperty();
-  ~vtkImageProperty() VTK_OVERRIDE;
+  ~vtkImageProperty() override;
 
-  vtkScalarsToColors *LookupTable;
+  vtkScalarsToColors* LookupTable;
   double ColorWindow;
   double ColorLevel;
-  int UseLookupTableScalarRange;
+  vtkTypeBool UseLookupTableScalarRange;
   int InterpolationType;
   int LayerNumber;
   double Opacity;
   double Ambient;
   double Diffuse;
-  int Checkerboard;
+  vtkTypeBool Checkerboard;
   double CheckerboardSpacing[2];
   double CheckerboardOffset[2];
-  int Backing;
+  vtkTypeBool Backing;
   double BackingColor[3];
 
 private:
-  vtkImageProperty(const vtkImageProperty&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageProperty&) VTK_DELETE_FUNCTION;
+  vtkImageProperty(const vtkImageProperty&) = delete;
+  void operator=(const vtkImageProperty&) = delete;
 };
 
 #endif

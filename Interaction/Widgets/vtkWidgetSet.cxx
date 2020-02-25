@@ -20,34 +20,30 @@
 vtkStandardNewMacro(vtkWidgetSet);
 
 //----------------------------------------------------------------------
-vtkWidgetSet::vtkWidgetSet()
-{
-}
+vtkWidgetSet::vtkWidgetSet() = default;
 
 //----------------------------------------------------------------------
 vtkWidgetSet::~vtkWidgetSet()
 {
-  for (WidgetIteratorType it  = this->Widget.begin();
-                          it != this->Widget.end()  ; ++it)
+  for (WidgetIteratorType it = this->Widget.begin(); it != this->Widget.end(); ++it)
   {
     (*it)->UnRegister(this);
   }
 }
 
 //----------------------------------------------------------------------
-void vtkWidgetSet::SetEnabled(int enabling)
+void vtkWidgetSet::SetEnabled(vtkTypeBool enabling)
 {
-  for (WidgetIteratorType it  = this->Widget.begin();
-                          it != this->Widget.end()  ; ++it)
+  for (WidgetIteratorType it = this->Widget.begin(); it != this->Widget.end(); ++it)
   {
     (*it)->SetEnabled(enabling);
   }
 }
 
 //----------------------------------------------------------------------
-void vtkWidgetSet::AddWidget( vtkAbstractWidget *w )
+void vtkWidgetSet::AddWidget(vtkAbstractWidget* w)
 {
-  for ( unsigned int i = 0; i < this->Widget.size(); i++)
+  for (unsigned int i = 0; i < this->Widget.size(); i++)
   {
     if (this->Widget[i] == w)
     {
@@ -63,10 +59,9 @@ void vtkWidgetSet::AddWidget( vtkAbstractWidget *w )
 }
 
 //----------------------------------------------------------------------
-void vtkWidgetSet::RemoveWidget( vtkAbstractWidget * w)
+void vtkWidgetSet::RemoveWidget(vtkAbstractWidget* w)
 {
-  for (WidgetIteratorType it  = this->Widget.begin();
-                          it != this->Widget.end()  ; ++it)
+  for (WidgetIteratorType it = this->Widget.begin(); it != this->Widget.end(); ++it)
   {
     if (*it == w)
     {
@@ -79,8 +74,7 @@ void vtkWidgetSet::RemoveWidget( vtkAbstractWidget * w)
 }
 
 //----------------------------------------------------------------------
-vtkAbstractWidget *
-vtkWidgetSet::GetNthWidget( unsigned int i )
+vtkAbstractWidget* vtkWidgetSet::GetNthWidget(unsigned int i)
 {
   return this->Widget[i];
 }
@@ -94,6 +88,6 @@ unsigned int vtkWidgetSet::GetNumberOfWidgets()
 //----------------------------------------------------------------------
 void vtkWidgetSet::PrintSelf(ostream& os, vtkIndent indent)
 {
-  //Superclass typedef defined in vtkTypeMacro() found in vtkSetGet.h
-  this->Superclass::PrintSelf(os,indent);
+  // Superclass typedef defined in vtkTypeMacro() found in vtkSetGet.h
+  this->Superclass::PrintSelf(os, indent);
 }

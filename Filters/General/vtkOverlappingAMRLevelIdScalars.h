@@ -19,7 +19,7 @@
  * vtkOverlappingAMRLevelIdScalars is a filter that generates scalars using
  * the level number for each level. Note that all datasets within a level get
  * the same scalar. The new scalars array is named \c LevelIdScalars.
-*/
+ */
 
 #ifndef vtkOverlappingAMRLevelIdScalars_h
 #define vtkOverlappingAMRLevelIdScalars_h
@@ -30,29 +30,25 @@
 class vtkUniformGrid;
 class vtkUniformGridAMR;
 
-class VTKFILTERSGENERAL_EXPORT vtkOverlappingAMRLevelIdScalars :
-  public vtkOverlappingAMRAlgorithm
+class VTKFILTERSGENERAL_EXPORT vtkOverlappingAMRLevelIdScalars : public vtkOverlappingAMRAlgorithm
 {
 public:
   static vtkOverlappingAMRLevelIdScalars* New();
-  vtkTypeMacro(vtkOverlappingAMRLevelIdScalars,vtkOverlappingAMRAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOverlappingAMRLevelIdScalars, vtkOverlappingAMRAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkOverlappingAMRLevelIdScalars();
-  ~vtkOverlappingAMRLevelIdScalars() VTK_OVERRIDE;
+  ~vtkOverlappingAMRLevelIdScalars() override;
 
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void AddColorLevels(vtkUniformGridAMR *input, vtkUniformGridAMR *output);
+  void AddColorLevels(vtkUniformGridAMR* input, vtkUniformGridAMR* output);
   vtkUniformGrid* ColorLevel(vtkUniformGrid* input, int group);
 
 private:
-  vtkOverlappingAMRLevelIdScalars(const vtkOverlappingAMRLevelIdScalars&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOverlappingAMRLevelIdScalars&) VTK_DELETE_FUNCTION;
-
+  vtkOverlappingAMRLevelIdScalars(const vtkOverlappingAMRLevelIdScalars&) = delete;
+  void operator=(const vtkOverlappingAMRLevelIdScalars&) = delete;
 };
 
 #endif

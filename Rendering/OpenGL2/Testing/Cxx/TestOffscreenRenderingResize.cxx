@@ -27,29 +27,30 @@
 int TestOffscreenRenderingResize(int argc, char* argv[])
 {
   vtkNew<vtkRenderWindow> window;
-  window->SetOffScreenRendering(1);
+  window->SetShowWindow(false);
+  window->SetUseOffScreenBuffers(true);
   window->SetSize(300, 300);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(window.Get());
+  iren->SetRenderWindow(window);
 
   vtkNew<vtkRenderer> ren;
   ren->SetBackground(0.3, 0.3, 0.3);
-  window->AddRenderer(ren.Get());
+  window->AddRenderer(ren);
 
   vtkNew<vtkSphereSource> sphere;
   vtkNew<vtkPolyDataMapper> mapper;
   mapper->SetInputConnection(sphere->GetOutputPort(0));
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.Get());
-  ren->AddActor(actor.Get());
+  actor->SetMapper(mapper);
+  ren->AddActor(actor);
 
   ren->ResetCamera();
   window->Render();
 
   window->SetSize(400, 300);
   window->Render();
-  int retVal = vtkRegressionTestImage(window.Get());
+  int retVal = vtkRegressionTestImage(window);
   if (retVal == vtkTesting::DO_INTERACTOR)
   {
     iren->Start();

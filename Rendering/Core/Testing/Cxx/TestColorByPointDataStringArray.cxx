@@ -13,8 +13,8 @@
 
 =========================================================================*/
 
-#include "vtkTestUtilities.h"
 #include "vtkRegressionTestImage.h"
+#include "vtkTestUtilities.h"
 
 #include <vtkActor.h>
 #include <vtkDiscretizableColorTransferFunction.h>
@@ -22,13 +22,12 @@
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 #include <vtkSphereSource.h>
 #include <vtkStdString.h>
 #include <vtkStringArray.h>
-
 
 int TestColorByPointDataStringArray(int argc, char* argv[])
 {
@@ -58,7 +57,7 @@ int TestColorByPointDataStringArray(int argc, char* argv[])
   }
 
   vtkPointData* cd = polydata->GetPointData();
-  cd->AddArray(sArray.Get());
+  cd->AddArray(sArray);
 
   // Set up transfer function
   vtkNew<vtkDiscretizableColorTransferFunction> tfer;
@@ -82,27 +81,27 @@ int TestColorByPointDataStringArray(int argc, char* argv[])
   tfer->SetAnnotation(cyan, cyan);
 
   vtkNew<vtkPolyDataMapper> mapper;
-  mapper->SetInputDataObject(polydata.Get());
-  mapper->SetLookupTable(tfer.Get());
+  mapper->SetInputDataObject(polydata);
+  mapper->SetLookupTable(tfer);
   mapper->ScalarVisibilityOn();
   mapper->SetScalarModeToUsePointFieldData();
   mapper->SelectColorArray("color");
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.Get());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.Get());
+  renderer->AddActor(actor);
 
   vtkNew<vtkRenderWindow> renderWindow;
-  renderWindow->AddRenderer(renderer.Get());
+  renderWindow->AddRenderer(renderer);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renderWindow.Get());
+  iren->SetRenderWindow(renderWindow);
 
   renderWindow->Render();
 
-  int retVal = vtkRegressionTestImage(renderWindow.Get());
+  int retVal = vtkRegressionTestImage(renderWindow);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

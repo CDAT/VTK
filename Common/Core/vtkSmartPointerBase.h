@@ -21,7 +21,7 @@
  * for storing VTK objects in STL containers.  This class is not
  * intended to be used directly.  Instead, use the vtkSmartPointer
  * class template to automatically perform proper cast operations.
-*/
+ */
 
 #ifndef vtkSmartPointerBase_h
 #define vtkSmartPointerBase_h
@@ -35,7 +35,7 @@ public:
   /**
    * Initialize smart pointer to nullptr.
    */
-  vtkSmartPointerBase();
+  vtkSmartPointerBase() noexcept;
 
   /**
    * Initialize smart pointer to given object.
@@ -47,6 +47,11 @@ public:
    * referenced by given smart pointer.
    */
   vtkSmartPointerBase(const vtkSmartPointerBase& r);
+
+  /**
+   * Move the pointee from @a r into @a this and reset @ r.
+   */
+  vtkSmartPointerBase(vtkSmartPointerBase&& r) noexcept : Object(r.Object) { r.Object = nullptr; }
 
   /**
    * Destroy smart pointer and remove the reference to its object.
@@ -65,7 +70,7 @@ public:
   /**
    * Get the contained pointer.
    */
-  vtkObjectBase* GetPointer() const
+  vtkObjectBase* GetPointer() const noexcept
   {
     // Inline implementation so smart pointer comparisons can be fully
     // inlined.
@@ -78,11 +83,12 @@ public:
   void Report(vtkGarbageCollector* collector, const char* desc);
 
 protected:
-
   // Initialize smart pointer to given object, but do not increment
   // reference count.  The destructor will still decrement the count.
   // This effectively makes it an auto-ptr.
-  class NoReference {};
+  class NoReference
+  {
+  };
   vtkSmartPointerBase(vtkObjectBase* r, const NoReference&);
 
   // Pointer to the actual object.
@@ -90,27 +96,23 @@ protected:
 
 private:
   // Internal utility methods.
-  void Swap(vtkSmartPointerBase& r);
+  void Swap(vtkSmartPointerBase& r) noexcept;
   void Register();
 };
 
 //----------------------------------------------------------------------------
-#define VTK_SMART_POINTER_BASE_DEFINE_OPERATOR(op) \
-  inline bool \
-  operator op (const vtkSmartPointerBase& l, const vtkSmartPointerBase& r) \
-  { \
-    return (static_cast<void*>(l.GetPointer()) op \
-            static_cast<void*>(r.GetPointer())); \
-  } \
-  inline bool \
-  operator op (vtkObjectBase* l, const vtkSmartPointerBase& r) \
-  { \
-    return (static_cast<void*>(l) op static_cast<void*>(r.GetPointer())); \
-  } \
-  inline bool \
-  operator op (const vtkSmartPointerBase& l, vtkObjectBase* r) \
-  { \
-    return (static_cast<void*>(l.GetPointer()) op static_cast<void*>(r)); \
+#define VTK_SMART_POINTER_BASE_DEFINE_OPERATOR(op)                                                 \
+  inline bool operator op(const vtkSmartPointerBase& l, const vtkSmartPointerBase& r)              \
+  {                                                                                                \
+    return (static_cast<void*>(l.GetPointer()) op static_cast<void*>(r.GetPointer()));             \
+  }                                                                                                \
+  inline bool operator op(vtkObjectBase* l, const vtkSmartPointerBase& r)                          \
+  {                                                                                                \
+    return (static_cast<void*>(l) op static_cast<void*>(r.GetPointer()));                          \
+  }                                                                                                \
+  inline bool operator op(const vtkSmartPointerBase& l, vtkObjectBase* r)                          \
+  {                                                                                                \
+    return (static_cast<void*>(l.GetPointer()) op static_cast<void*>(r));                          \
   }
 /**
  * Compare smart pointer values.
@@ -127,8 +129,7 @@ VTK_SMART_POINTER_BASE_DEFINE_OPERATOR(>=)
 /**
  * Streaming operator to print smart pointer like regular pointers.
  */
-VTKCOMMONCORE_EXPORT ostream& operator << (ostream& os,
-                                        const vtkSmartPointerBase& p);
+VTKCOMMONCORE_EXPORT ostream& operator<<(ostream& os, const vtkSmartPointerBase& p);
 
 #endif
 // VTK-HeaderTest-Exclude: vtkSmartPointerBase.h

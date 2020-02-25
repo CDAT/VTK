@@ -22,20 +22,15 @@
 
 #include "vtkTree.h"
 
-
 vtkAreaLayoutStrategy::vtkAreaLayoutStrategy()
 {
   this->ShrinkPercentage = 0.0;
 }
 
-vtkAreaLayoutStrategy::~vtkAreaLayoutStrategy()
-{
-}
+vtkAreaLayoutStrategy::~vtkAreaLayoutStrategy() = default;
 
-void vtkAreaLayoutStrategy::LayoutEdgePoints(
-  vtkTree* inputTree,
-  vtkDataArray* vtkNotUsed(coordsArray),
-  vtkDataArray* vtkNotUsed(sizeArray),
+void vtkAreaLayoutStrategy::LayoutEdgePoints(vtkTree* inputTree,
+  vtkDataArray* vtkNotUsed(coordsArray), vtkDataArray* vtkNotUsed(sizeArray),
   vtkTree* edgeRoutingTree)
 {
   edgeRoutingTree->ShallowCopy(inputTree);
@@ -43,8 +38,6 @@ void vtkAreaLayoutStrategy::LayoutEdgePoints(
 
 void vtkAreaLayoutStrategy::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
   os << indent << "ShrinkPercentage: " << this->ShrinkPercentage << endl;
 }
-
-

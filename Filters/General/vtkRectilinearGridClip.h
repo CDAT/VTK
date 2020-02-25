@@ -23,7 +23,7 @@
  * Only the whole extent is modified.
  * 2: If ClipDataOn is set, then you will get no more that the clipped
  * extent.
-*/
+ */
 
 #ifndef vtkRectilinearGridClip_h
 #define vtkRectilinearGridClip_h
@@ -37,19 +37,18 @@
 class VTKFILTERSGENERAL_EXPORT vtkRectilinearGridClip : public vtkRectilinearGridAlgorithm
 {
 public:
-  static vtkRectilinearGridClip *New();
-  vtkTypeMacro(vtkRectilinearGridClip,vtkRectilinearGridAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkRectilinearGridClip* New();
+  vtkTypeMacro(vtkRectilinearGridClip, vtkRectilinearGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * The whole extent of the output has to be set explicitly.
    */
-  void SetOutputWholeExtent(int extent[6], vtkInformation *outInfo=nullptr);
-  void SetOutputWholeExtent(int minX, int maxX, int minY, int maxY,
-                            int minZ, int maxZ);
+  void SetOutputWholeExtent(int extent[6], vtkInformation* outInfo = nullptr);
+  void SetOutputWholeExtent(int minX, int maxX, int minY, int maxY, int minZ, int maxZ);
   void GetOutputWholeExtent(int extent[6]);
-  int *GetOutputWholeExtent() {return this->OutputWholeExtent;}
+  int* GetOutputWholeExtent() { return this->OutputWholeExtent; }
   //@}
 
   void ResetOutputWholeExtent();
@@ -60,40 +59,31 @@ public:
    * the data's extent may actually be larger.  When this flag is on,
    * the data extent will be no more than the OutputWholeExtent.
    */
-  vtkSetMacro(ClipData, int);
-  vtkGetMacro(ClipData, int);
-  vtkBooleanMacro(ClipData, int);
+  vtkSetMacro(ClipData, vtkTypeBool);
+  vtkGetMacro(ClipData, vtkTypeBool);
+  vtkBooleanMacro(ClipData, vtkTypeBool);
   //@}
 
 protected:
   vtkRectilinearGridClip();
-  ~vtkRectilinearGridClip() VTK_OVERRIDE {}
+  ~vtkRectilinearGridClip() override {}
 
   // Time when OutputImageExtent was computed.
   vtkTimeStamp CTime;
   int Initialized; // Set the OutputImageExtent for the first time.
   int OutputWholeExtent[6];
 
-  int ClipData;
+  vtkTypeBool ClipData;
 
-  int RequestInformation (vtkInformation *,
-                          vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void CopyData(vtkRectilinearGrid *inData, vtkRectilinearGrid *outData, int *ext);
+  void CopyData(vtkRectilinearGrid* inData, vtkRectilinearGrid* outData, int* ext);
 
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkRectilinearGridClip(const vtkRectilinearGridClip&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRectilinearGridClip&) VTK_DELETE_FUNCTION;
+  vtkRectilinearGridClip(const vtkRectilinearGridClip&) = delete;
+  void operator=(const vtkRectilinearGridClip&) = delete;
 };
 
-
-
 #endif
-
-
-

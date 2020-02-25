@@ -5,18 +5,22 @@
 
 This file must be translated to C and modified to build everywhere.
 
-Run flex like this:
+See the adjacent README.txt file for instructions.
 
-  flex --nodefault --noline -olex.yy.c vtkParse.l
-
-Modify lex.yy.c:
-  - convert tabs to spaces (2 spaces per tab)
-  - remove extra space from end of lines
-  - remove blank lines from end of file
-  - compile with gcc and "-Wsign-compare", there should be no warnings
-  - add a prototype for isatty
-  - remove unused struct yy_trans_info
 */
+
+/* to workaround https://bugs.llvm.org/show_bug.cgi?id=43465 */
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #if defined(__has_warning)
+    #if __has_warning("-Wimplicit-fallthrough")
+      #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+    #endif
+  #endif
+#elif defined(__GNUC__) && (__GNUC__ >= 7)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
 
 /* We do not care of interactive mode */
 #define YY_NEVER_INTERACTIVE 1
@@ -129,7 +133,7 @@ ID [a-zA-Z_\x80-\xff][0-9a-zA-Z_\x80-\xff]*
       return(CHAR_LITERAL);
     }
 
-("R"|"u8R"|"uR"|"UR"|"LR")?\"[^ ()\t\v\f\n]*"(" {
+("R"|"u8R"|"uR"|"UR"|"LR")\"[^ ()\t\v\f\n]*"(" {
       yylval.str = raw_string(yytext);
       return(STRING_LITERAL);
     }
@@ -249,32 +253,6 @@ ID [a-zA-Z_\x80-\xff][0-9a-zA-Z_\x80-\xff]*
 "bitor"         return('|');
 "compl"         return('~');
 
-"vtkIdType"            return(IdType);
-"vtkSetVector2Macro"   return(SetVector2Macro);
-"vtkSetVector3Macro"   return(SetVector3Macro);
-"vtkSetVector4Macro"   return(SetVector4Macro);
-"vtkSetVector6Macro"   return(SetVector6Macro);
-"vtkGetVector2Macro"   return(GetVector2Macro);
-"vtkGetVector3Macro"   return(GetVector3Macro);
-"vtkGetVector4Macro"   return(GetVector4Macro);
-"vtkGetVector6Macro"   return(GetVector6Macro);
-"vtkSetVectorMacro"    return(SetVectorMacro);
-"vtkGetVectorMacro"    return(GetVectorMacro);
-"vtkViewportCoordinateMacro" return(ViewportCoordinateMacro);
-"vtkWorldCoordinateMacro" return(WorldCoordinateMacro);
-"VTK_WRAP_EXTERN"      ;
-"VTK_BYTE_SWAP_DECL"   return(VTK_BYTE_SWAP_DECL);
-"vtkTypeInt8"          return(TypeInt8);
-"vtkTypeUInt8"         return(TypeUInt8);
-"vtkTypeInt16"         return(TypeInt16);
-"vtkTypeUInt16"        return(TypeUInt16);
-"vtkTypeInt32"         return(TypeInt32);
-"vtkTypeUInt32"        return(TypeUInt32);
-"vtkTypeInt64"         return(TypeInt64);
-"vtkTypeUInt64"        return(TypeUInt64);
-"vtkTypeFloat32"       return(TypeFloat32);
-"vtkTypeFloat64"       return(TypeFloat64);
-
 "("{PS}({ID}"::")*"&" {
       size_t i = 1;
       size_t j;
@@ -359,6 +337,10 @@ ID [a-zA-Z_\x80-\xff][0-9a-zA-Z_\x80-\xff]*
 "_Atomic"    /* C11 */
 
 "_Noreturn"  /* C11 */
+
+"_Pragma"  get_macro_arguments(); /* C99 */
+
+"__pragma"  get_macro_arguments(); /* MSVC */
 
 "__attribute__"  get_macro_arguments(); /* gcc attributes */
 
@@ -786,7 +768,7 @@ int skip_trailing_comment(const char *text, size_t l)
 
   while (cp < ep)
   {
-    while (cp < ep && *cp != '/' && *cp != '\"') { cp++; };
+    while (cp < ep && *cp != '/' && *cp != '\"') { cp++; }
     if (cp >= ep)
     {
       break;
@@ -795,7 +777,7 @@ int skip_trailing_comment(const char *text, size_t l)
     {
       incomment = 1;
       cp += 2;
-      while (cp < ep && *cp != '*') { cp++; };
+      while (cp < ep && *cp != '*') { cp++; }
       if (cp[0] == '*' && cp[1] == '/')
       {
         incomment = 0;
@@ -811,7 +793,7 @@ int skip_trailing_comment(const char *text, size_t l)
       cp++;
       while (cp < ep)
       {
-        while (cp < ep && *cp != '\\' && *cp != '\"') { cp++; };
+        while (cp < ep && *cp != '\\' && *cp != '\"') { cp++; }
         if (cp >= ep)
         {
           break;
@@ -1085,7 +1067,7 @@ void doxygen_comment()
     }
     if (l < 256)
     {
-      linetext[l++] = c2;
+      linetext[l++] = (char)c2;
     }
     if (c2 == '\n' || (c1 == '*' && c2 == '/'))
     {
@@ -1721,8 +1703,9 @@ void preprocessor_directive(const char *text, size_t l)
       if (Recursive && ep - cp > 3)
       {
         const char *dp;
-        dp = vtkParsePreprocess_FindIncludeFile(preprocessor,
-          &cp[1], (*cp != '\"'), &already_loaded);
+        dp = vtkParsePreprocess_FindIncludeFile(preprocessor, &cp[1],
+          (*cp != '\"' ? VTK_PARSE_SYSTEM_INCLUDE : VTK_PARSE_SOURCE_INCLUDE),
+          &already_loaded);
         if (dp)
         {
           yyin = fopen(dp, "r");

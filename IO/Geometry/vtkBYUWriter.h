@@ -24,7 +24,7 @@
  * for the files to be written.
  * WARNING: this writer does not currently write triangle strips. Use
  * vtkTriangleFilter to convert strips to triangles.
-*/
+ */
 
 #ifndef vtkBYUWriter_h
 #define vtkBYUWriter_h
@@ -37,10 +37,10 @@ class vtkPolyData;
 class VTKIOGEOMETRY_EXPORT vtkBYUWriter : public vtkWriter
 {
 public:
-  static vtkBYUWriter *New();
+  static vtkBYUWriter* New();
 
-  vtkTypeMacro(vtkBYUWriter,vtkWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkBYUWriter, vtkWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -78,27 +78,27 @@ public:
   /**
    * Turn on/off writing the displacement file.
    */
-  vtkSetMacro(WriteDisplacement,int);
-  vtkGetMacro(WriteDisplacement,int);
-  vtkBooleanMacro(WriteDisplacement,int);
+  vtkSetMacro(WriteDisplacement, vtkTypeBool);
+  vtkGetMacro(WriteDisplacement, vtkTypeBool);
+  vtkBooleanMacro(WriteDisplacement, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off writing the scalar file.
    */
-  vtkSetMacro(WriteScalar,int);
-  vtkGetMacro(WriteScalar,int);
-  vtkBooleanMacro(WriteScalar,int);
+  vtkSetMacro(WriteScalar, vtkTypeBool);
+  vtkGetMacro(WriteScalar, vtkTypeBool);
+  vtkBooleanMacro(WriteScalar, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Turn on/off writing the texture file.
    */
-  vtkSetMacro(WriteTexture,int);
-  vtkGetMacro(WriteTexture,int);
-  vtkBooleanMacro(WriteTexture,int);
+  vtkSetMacro(WriteTexture, vtkTypeBool);
+  vtkGetMacro(WriteTexture, vtkTypeBool);
+  vtkBooleanMacro(WriteTexture, vtkTypeBool);
   //@}
 
   //@{
@@ -111,29 +111,28 @@ public:
 
 protected:
   vtkBYUWriter();
-  ~vtkBYUWriter() VTK_OVERRIDE;
+  ~vtkBYUWriter() override;
 
-  void WriteData() VTK_OVERRIDE;
+  void WriteData() override;
 
-  char *GeometryFileName;
-  char *DisplacementFileName;
-  char *ScalarFileName;
-  char *TextureFileName;
-  int WriteDisplacement;
-  int WriteScalar;
-  int WriteTexture;
+  char* GeometryFileName;
+  char* DisplacementFileName;
+  char* ScalarFileName;
+  char* TextureFileName;
+  vtkTypeBool WriteDisplacement;
+  vtkTypeBool WriteScalar;
+  vtkTypeBool WriteTexture;
 
-  void WriteGeometryFile(FILE *fp, int numPts);
+  void WriteGeometryFile(FILE* fp, int numPts);
   void WriteDisplacementFile(int numPts);
   void WriteScalarFile(int numPts);
   void WriteTextureFile(int numPts);
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkBYUWriter(const vtkBYUWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkBYUWriter&) VTK_DELETE_FUNCTION;
+  vtkBYUWriter(const vtkBYUWriter&) = delete;
+  void operator=(const vtkBYUWriter&) = delete;
 };
 
 #endif
-

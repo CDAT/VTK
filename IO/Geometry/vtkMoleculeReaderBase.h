@@ -21,7 +21,7 @@
  *
  * @par Thanks:
  * Dr. Jean M. Favre who developed and contributed this class
-*/
+ */
 
 #ifndef vtkMoleculeReaderBase_h
 #define vtkMoleculeReaderBase_h
@@ -41,8 +41,8 @@ class vtkMolecule;
 class VTKIOGEOMETRY_EXPORT vtkMoleculeReaderBase : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkMoleculeReaderBase,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMoleculeReaderBase, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
@@ -67,38 +67,38 @@ public:
 
 protected:
   vtkMoleculeReaderBase();
-  ~vtkMoleculeReaderBase() VTK_OVERRIDE;
+  ~vtkMoleculeReaderBase() override;
 
-  char *FileName;
+  char* FileName;
   double BScale;
   double HBScale;
   int NumberOfAtoms;
 
-  int FillOutputPortInformation(int, vtkInformation *) VTK_OVERRIDE;
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int ReadMolecule(FILE *fp, vtkPolyData *output);
-  int MakeAtomType(const char *atype);
+  int ReadMolecule(FILE* fp, vtkPolyData* output);
+  int MakeAtomType(const char* atype);
   int MakeBonds(vtkPoints*, vtkIdTypeArray*, vtkCellArray*);
 
-  vtkMolecule *Molecule;
-  vtkPoints *Points;
-  vtkUnsignedCharArray *RGB;
-  vtkFloatArray *Radii;
-  vtkIdTypeArray *AtomType;
-  vtkStringArray *AtomTypeStrings;
-  vtkIdTypeArray *Residue;
-  vtkUnsignedCharArray *Chain;
-  vtkUnsignedCharArray *SecondaryStructures;
-  vtkUnsignedCharArray *SecondaryStructuresBegin;
-  vtkUnsignedCharArray *SecondaryStructuresEnd;
-  vtkUnsignedCharArray *IsHetatm;
+  vtkMolecule* Molecule;
+  vtkPoints* Points;
+  vtkUnsignedCharArray* RGB;
+  vtkFloatArray* Radii;
+  vtkIdTypeArray* AtomType;
+  vtkStringArray* AtomTypeStrings;
+  vtkIdTypeArray* Residue;
+  vtkUnsignedCharArray* Chain;
+  vtkUnsignedCharArray* SecondaryStructures;
+  vtkUnsignedCharArray* SecondaryStructuresBegin;
+  vtkUnsignedCharArray* SecondaryStructuresEnd;
+  vtkUnsignedCharArray* IsHetatm;
 
   virtual void ReadSpecificMolecule(FILE* fp) = 0;
 
 private:
-  vtkMoleculeReaderBase(const vtkMoleculeReaderBase&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMoleculeReaderBase&) VTK_DELETE_FUNCTION;
+  vtkMoleculeReaderBase(const vtkMoleculeReaderBase&) = delete;
+  void operator=(const vtkMoleculeReaderBase&) = delete;
 };
 
 #endif

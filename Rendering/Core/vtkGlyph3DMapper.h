@@ -23,16 +23,17 @@
  *
  * @sa
  * vtkGlyph3D
-*/
+ */
 
 #ifndef vtkGlyph3DMapper_h
 #define vtkGlyph3DMapper_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
-#include "vtkMapper.h"
 #include "vtkGlyph3D.h" // for the constants (VTK_SCALE_BY_SCALAR, ...).
-#include "vtkWeakPointer.h" // needed for vtkWeakPointer.
+#include "vtkMapper.h"
+#include "vtkRenderingCoreModule.h" // For export macro
+#include "vtkWeakPointer.h"         // needed for vtkWeakPointer.
 
+class vtkCompositeDataDisplayAttributes;
 class vtkDataObjectTree;
 
 class VTKRENDERINGCORE_EXPORT vtkGlyph3DMapper : public vtkMapper
@@ -40,7 +41,7 @@ class VTKRENDERINGCORE_EXPORT vtkGlyph3DMapper : public vtkMapper
 public:
   static vtkGlyph3DMapper* New();
   vtkTypeMacro(vtkGlyph3DMapper, vtkMapper);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   enum ArrayIndexes
   {
@@ -58,19 +59,21 @@ public:
    */
   void SetSourceConnection(int idx, vtkAlgorithmOutput* algOutput);
   void SetSourceConnection(vtkAlgorithmOutput* algOutput)
-    { this->SetSourceConnection(0, algOutput); }
+  {
+    this->SetSourceConnection(0, algOutput);
+  }
 
   /**
    * Assign a data object as input. Note that this method does not
    * establish a pipeline connection. Use SetInputConnection() to
    * setup a pipeline connection.
    */
-  void SetInputData(vtkDataObject *);
+  void SetInputData(vtkDataObject*);
 
   /**
    * Specify a source object at a specified table location.
    */
-  void SetSourceData(int idx, vtkPolyData *pd);
+  void SetSourceData(int idx, vtkPolyData* pd);
 
   /**
    * Specify a data object tree that will be used for the source table. Requires
@@ -80,7 +83,7 @@ public:
    * Must only contain vtkPolyData instances on the OpenGL backend. May contain
    * vtkCompositeDataSets with vtkPolyData leaves on OpenGL2.
    */
-  void SetSourceTableTree(vtkDataObjectTree *tree);
+  void SetSourceTableTree(vtkDataObjectTree* tree);
 
   /**
    * Set the source to use for he glyph.
@@ -88,12 +91,12 @@ public:
    * work on the input data as it is without updating the producer of the data.
    * See SetSourceConnection for connecting the pipeline.
    */
-  void SetSourceData(vtkPolyData *pd);
+  void SetSourceData(vtkPolyData* pd);
 
   /**
    * Get a pointer to a source object at a specified table location.
    */
-  vtkPolyData *GetSource(int idx = 0);
+  vtkPolyData* GetSource(int idx = 0);
 
   /**
    * Convenience method to get the source table tree, if it exists.
@@ -138,13 +141,10 @@ public:
     SCALE_BY_COMPONENTS = 2
   };
 
-  void SetScaleModeToScaleByMagnitude()
-    { this->SetScaleMode(SCALE_BY_MAGNITUDE); }
-  void SetScaleModeToScaleByVectorComponents()
-    { this->SetScaleMode(SCALE_BY_COMPONENTS); }
-  void SetScaleModeToNoDataScaling()
-    { this->SetScaleMode(NO_DATA_SCALING); }
-  const char *GetScaleModeAsString();
+  void SetScaleModeToScaleByMagnitude() { this->SetScaleMode(SCALE_BY_MAGNITUDE); }
+  void SetScaleModeToScaleByVectorComponents() { this->SetScaleMode(SCALE_BY_COMPONENTS); }
+  void SetScaleModeToNoDataScaling() { this->SetScaleMode(NO_DATA_SCALING); }
+  const char* GetScaleModeAsString();
 
   //@{
   /**
@@ -171,19 +171,19 @@ public:
    * vector for the orientation or the rotations around each axes. Default is
    * DIRECTION
    */
-  vtkSetClampMacro(OrientationMode, int, DIRECTION, ROTATION);
+  vtkSetClampMacro(OrientationMode, int, DIRECTION, QUATERNION);
   vtkGetMacro(OrientationMode, int);
-  void SetOrientationModeToDirection()
-    { this->SetOrientationMode(vtkGlyph3DMapper::DIRECTION); }
-  void SetOrientationModeToRotation()
-    { this->SetOrientationMode(vtkGlyph3DMapper::ROTATION); }
+  void SetOrientationModeToDirection() { this->SetOrientationMode(vtkGlyph3DMapper::DIRECTION); }
+  void SetOrientationModeToRotation() { this->SetOrientationMode(vtkGlyph3DMapper::ROTATION); }
+  void SetOrientationModeToQuaternion() { this->SetOrientationMode(vtkGlyph3DMapper::QUATERNION); }
   const char* GetOrientationModeAsString();
   //@}
 
   enum OrientationModes
   {
-    DIRECTION=0,
-    ROTATION=1
+    DIRECTION = 0,
+    ROTATION = 1,
+    QUATERNION = 2
   };
 
   //@{
@@ -213,9 +213,9 @@ public:
    * the top-level members of the tree will be mapped to the glyph source table
    * used for SourceIndexing.
    */
-  vtkSetMacro(UseSourceTableTree, bool)
-  vtkGetMacro(UseSourceTableTree, bool)
-  vtkBooleanMacro(UseSourceTableTree, bool)
+  vtkSetMacro(UseSourceTableTree, bool);
+  vtkGetMacro(UseSourceTableTree, bool);
+  vtkBooleanMacro(UseSourceTableTree, bool);
 
   //@{
   /**
@@ -230,31 +230,17 @@ public:
   /**
    * Redefined to take into account the bounds of the scaled glyphs.
    */
-  double *GetBounds() VTK_OVERRIDE;
+  double* GetBounds() override;
 
   /**
    * Same as superclass. Appear again to stop warnings about hidden method.
    */
-  void GetBounds(double bounds[6]) VTK_OVERRIDE;
+  void GetBounds(double bounds[6]) override;
 
   /**
    * All the work is done is derived classes.
    */
-  void Render(vtkRenderer *ren, vtkActor *act) VTK_OVERRIDE;
-
-  //@{
-  /**
-   * If immediate mode is off, if NestedDisplayLists is false,
-   * only the mappers of each glyph use display lists. If true,
-   * in addition, matrices transforms and color per glyph are also
-   * in a parent display list.
-   * Not relevant if immediate mode is on.
-   * For debugging/profiling purpose. Initial value is true.
-   */
-  vtkSetMacro(NestedDisplayLists, bool);
-  vtkGetMacro(NestedDisplayLists, bool);
-  vtkBooleanMacro(NestedDisplayLists, bool);
-  //@}
+  void Render(vtkRenderer* ren, vtkActor* act) override;
 
   //@{
   /**
@@ -394,27 +380,85 @@ public:
   vtkGetMacro(SelectionColorId, unsigned int);
   //@}
 
+  //@{
+  /**
+   * When the input data object (not the source) is composite data,
+   * it is possible to control visibility and pickability on a per-block
+   * basis by passing the mapper a vtkCompositeDataDisplayAttributes instance.
+   * The color and opacity in the display-attributes instance are ignored
+   * for now. By default, the mapper does not own a display-attributes
+   * instance. The value of BlockAttributes has no effect when the input
+   * is a poly-data object.
+   */
+  virtual void SetBlockAttributes(vtkCompositeDataDisplayAttributes* attr);
+  vtkGetObjectMacro(BlockAttributes, vtkCompositeDataDisplayAttributes);
+  //@}
+
+  //@{
+  /**
+   * Enable or disable frustum culling and LOD of the instances.
+   * When enabled, an OpenGL driver supporting GL_ARB_gpu_shader5 extension is mandatory.
+   */
+  vtkSetMacro(CullingAndLOD, bool);
+  vtkGetMacro(CullingAndLOD, bool);
+
+  /**
+   * Get the maximum number of LOD. OpenGL context must be bound.
+   * The maximum number of LOD depends on GPU capabilities.
+   * This method is intended to be reimplemented in inherited classes, current implementation
+   * always returns zero.
+   */
+  virtual vtkIdType GetMaxNumberOfLOD();
+
+  /**
+   * Set the number of LOD.
+   * This method is intended to be reimplemented in inherited classes, current implementation
+   * does nothing.
+   */
+  virtual void SetNumberOfLOD(vtkIdType vtkNotUsed(nb)) {}
+
+  /**
+   * Configure LODs. Culling must be enabled.
+   * distance have to be a positive value, it is the distance to the camera scaled by
+   * the instanced geometry bounding box.
+   * targetReduction have to be between 0 and 1, 0 disable decimation, 1 draw a point.
+   * This method is intended to be reimplemented in inherited classes, current implementation
+   * does nothing.
+   *
+   * @sa vtkDecimatePro::SetTargetReduction
+   */
+  virtual void SetLODDistanceAndTargetReduction(
+    vtkIdType vtkNotUsed(index), float vtkNotUsed(distance), float vtkNotUsed(targetReduction))
+  {
+  }
+
+  /**
+   * Enable LOD coloring. It can be useful to configure properly the LODs.
+   * Each LOD have a unique color, based on its index.
+   */
+  vtkSetMacro(LODColoring, bool);
+  vtkGetMacro(LODColoring, bool);
+  //@}
+
   /**
    * WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
    * DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
    * Used by vtkHardwareSelector to determine if the prop supports hardware
    * selection.
    */
-  bool GetSupportsSelection() VTK_OVERRIDE
-    { return true; }
+  bool GetSupportsSelection() override { return true; }
 
 protected:
   vtkGlyph3DMapper();
-  ~vtkGlyph3DMapper() VTK_OVERRIDE;
+  ~vtkGlyph3DMapper() override;
 
-  virtual int RequestUpdateExtent(vtkInformation *request,
-    vtkInformationVector **inInfo,
-    vtkInformationVector *outInfo);
+  virtual int RequestUpdateExtent(
+    vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo);
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  vtkPolyData *GetSource(int idx, vtkInformationVector *sourceInfo);
-  vtkPolyData *GetSourceTable(int idx, vtkInformationVector *sourceInfo);
+  vtkPolyData* GetSource(int idx, vtkInformationVector* sourceInfo);
+  vtkPolyData* GetSourceTable(int idx, vtkInformationVector* sourceInfo);
 
   //@{
   /**
@@ -428,32 +472,35 @@ protected:
   vtkUnsignedCharArray* GetColors(vtkDataSet* input);
   //@}
 
-  bool Scaling; // Determine whether scaling of geometry is performed
+  vtkCompositeDataDisplayAttributes* BlockAttributes;
+  bool Scaling;       // Determine whether scaling of geometry is performed
   double ScaleFactor; // Scale factor to use to scale geometry
-  int ScaleMode; // Scale by scalar value or vector magnitude
+  int ScaleMode;      // Scale by scalar value or vector magnitude
 
-  double Range[2]; // Range to use to perform scalar scaling
-  bool Orient; // boolean controls whether to "orient" data
-  bool Clamping; // whether to clamp scale factor
-  bool SourceIndexing; // Enable/disable indexing into the glyph table
+  double Range[2];      // Range to use to perform scalar scaling
+  bool Orient;          // boolean controls whether to "orient" data
+  bool Clamping;        // whether to clamp scale factor
+  bool SourceIndexing;  // Enable/disable indexing into the glyph table
   bool UseSelectionIds; // Enable/disable custom pick ids
-  bool Masking; // Enable/disable masking.
+  bool Masking;         // Enable/disable masking.
   int OrientationMode;
-  bool NestedDisplayLists; // boolean
 
   bool UseSourceTableTree; // Map DataObjectTree glyph source into table
 
   unsigned int SelectionColorId;
 
+  bool CullingAndLOD = false; // Disable culling
+  std::vector<std::pair<float, float> > LODs;
+  bool LODColoring = false;
+
 private:
-  vtkGlyph3DMapper(const vtkGlyph3DMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkGlyph3DMapper&) VTK_DELETE_FUNCTION;
+  vtkGlyph3DMapper(const vtkGlyph3DMapper&) = delete;
+  void operator=(const vtkGlyph3DMapper&) = delete;
 
   /**
    * Returns true when valid bounds are returned.
    */
   bool GetBoundsInternal(vtkDataSet* ds, double ds_bounds[6]);
-
 };
 
 #endif

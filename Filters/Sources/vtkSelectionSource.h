@@ -34,9 +34,9 @@ class vtkSelectionSourceInternals;
 class VTKFILTERSSOURCES_EXPORT vtkSelectionSource : public vtkSelectionAlgorithm
 {
 public:
-  static vtkSelectionSource *New();
-  vtkTypeMacro(vtkSelectionSource,vtkSelectionAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkSelectionSource* New();
+  vtkTypeMacro(vtkSelectionSource, vtkSelectionAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -61,7 +61,7 @@ public:
   /**
    * Set a frustum to choose within.
    */
-  void SetFrustum(double *vertices);
+  void SetFrustum(double* vertices);
 
   /**
    * Add the flat-index/composite index for a block.
@@ -122,6 +122,14 @@ public:
 
   //@{
   /**
+   * Specify number of layers to extract connected to the selected elements.
+   */
+  vtkSetClampMacro(NumberOfLayers, int, 0, VTK_INT_MAX);
+  vtkGetMacro(NumberOfLayers, int);
+  //@}
+
+  //@{
+  /**
    * Determines whether the selection describes what to include or exclude.
    * Default is 0, meaning include.
    */
@@ -175,14 +183,12 @@ public:
 
 protected:
   vtkSelectionSource();
-  ~vtkSelectionSource() VTK_OVERRIDE;
+  ~vtkSelectionSource() override;
 
-  int RequestInformation(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   vtkSelectionSourceInternals* Internal;
 
@@ -194,13 +200,14 @@ protected:
   int CompositeIndex;
   int HierarchicalLevel;
   int HierarchicalIndex;
-  char *ArrayName;
+  char* ArrayName;
   int ArrayComponent;
-  char *QueryString;
+  char* QueryString;
+  int NumberOfLayers;
 
 private:
-  vtkSelectionSource(const vtkSelectionSource&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSelectionSource&) VTK_DELETE_FUNCTION;
+  vtkSelectionSource(const vtkSelectionSource&) = delete;
+  void operator=(const vtkSelectionSource&) = delete;
 };
 
 #endif

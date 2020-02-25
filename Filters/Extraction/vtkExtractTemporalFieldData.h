@@ -16,33 +16,20 @@
  * @class   vtkExtractTemporalFieldData
  * @brief   Extract temporal arrays from input field data
  *
- * vtkExtractTemporalFieldData extracts arrays from the input vtkFieldData.
- * These arrays are assumed to contain temporal data, where the nth tuple
- * contains the value for the nth timestep.
+ * @deprecated in VTK 8.3. Use vtkExtractExodusGlobalTemporalVariables instead.
+ * The global temporal variable concept is a very Exodus specific thing and
+ * hence the filter is now maybe to work closely with the exodus reader and
+ * hence can better support other exodus use-cases like restart files.
  *
- * For composite datasets, the filter has two modes, it can treat each block in
- * the dataset individually (default) or just look at the first non-empty field data
- * (common for readers vtkExodusIIReader). For latter, set
- * HandleCompositeDataBlocksIndividually to false.
- *
- * The output is a vtkTable (or a multiblock of vtkTables) based of whether
- * HandleCompositeDataBlocksIndividually is true and input is a composite
- * dataset.
- *
- * This algorithm does not produce a TIME_STEPS or TIME_RANGE information
- * because it works across time.
- *
- * @par Caveat:
- * This algorithm works only with source that produce TIME_STEPS().
- * Continuous time range is not yet supported.
-*/
+ */
 
 #ifndef vtkExtractTemporalFieldData_h
 #define vtkExtractTemporalFieldData_h
 
-#include "vtkFiltersExtractionModule.h" // For export macro
 #include "vtkDataObjectAlgorithm.h"
+#include "vtkFiltersExtractionModule.h" // For export macro
 
+#if !defined(VTK_LEGACY_REMOVE)
 class vtkDataSet;
 class vtkTable;
 class vtkDataSetAttributes;
@@ -50,9 +37,9 @@ class vtkDataSetAttributes;
 class VTKFILTERSEXTRACTION_EXPORT vtkExtractTemporalFieldData : public vtkDataObjectAlgorithm
 {
 public:
-  static vtkExtractTemporalFieldData *New();
-  vtkTypeMacro(vtkExtractTemporalFieldData,vtkDataObjectAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkExtractTemporalFieldData* New();
+  vtkTypeMacro(vtkExtractTemporalFieldData, vtkDataObjectAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Get the number of time steps
@@ -72,33 +59,31 @@ public:
 
 protected:
   vtkExtractTemporalFieldData();
-  ~vtkExtractTemporalFieldData() VTK_OVERRIDE;
+  ~vtkExtractTemporalFieldData() override;
 
-  int RequestDataObject(vtkInformation*,
-                        vtkInformationVector**,
-                        vtkInformationVector*) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation* request,
-                         vtkInformationVector** inputVector,
-                         vtkInformationVector* outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation* request,
-                  vtkInformationVector** inputVector,
-                  vtkInformationVector* outputVector) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   /**
    * This looks at the arrays in the vtkFieldData of input and copies them
    * to the output point data.
    * Returns true if the input had an "appropriate" field data.
    */
-  bool CopyDataToOutput(vtkDataSet *input, vtkTable *output);
+  bool CopyDataToOutput(vtkDataSet* input, vtkTable* output);
 
   bool HandleCompositeDataBlocksIndividually;
+
 private:
-  vtkExtractTemporalFieldData(const vtkExtractTemporalFieldData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractTemporalFieldData&) VTK_DELETE_FUNCTION;
+  vtkExtractTemporalFieldData(const vtkExtractTemporalFieldData&) = delete;
+  void operator=(const vtkExtractTemporalFieldData&) = delete;
 
   class vtkInternals;
   vtkInternals* Internals;
 };
 
+#endif // !defined(VTK_LEGACY_REMOVE)
 #endif

@@ -13,16 +13,16 @@
 
 =========================================================================*/
 
-#include "vtkChartXY.h"
 #include "vtkChartLegend.h"
+#include "vtkChartXY.h"
 #include "vtkContextScene.h"
 #include "vtkContextView.h"
 #include "vtkDoubleArray.h"
 #include "vtkLookupTable.h"
-#include "vtkPlotFunctionalBag.h"
 #include "vtkMath.h"
 #include "vtkNew.h"
 #include "vtkPen.h"
+#include "vtkPlotFunctionalBag.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkStringArray.h"
@@ -30,7 +30,7 @@
 #include <sstream>
 
 //----------------------------------------------------------------------------
-int TestFunctionalBagPlot(int, char * [])
+int TestFunctionalBagPlot(int, char*[])
 {
   // Creates an input table
   const int numCols = 7;
@@ -46,11 +46,10 @@ int TestFunctionalBagPlot(int, char * [])
     arr[i]->SetNumberOfValues(numVals);
     for (int j = 0; j < numVals; j++)
     {
-      arr[i]->SetValue(j, (i+1) *
-        fabs(sin((j * 2.f *vtkMath::Pi()) /
-        static_cast<float>(numVals))) * j + i * 20);
+      arr[i]->SetValue(j,
+        (i + 1) * fabs(sin((j * 2.f * vtkMath::Pi()) / static_cast<float>(numVals))) * j + i * 20);
     }
-    inputTable->AddColumn(arr[i].GetPointer());
+    inputTable->AddColumn(arr[i]);
   }
 
   // Create a X-axis column
@@ -61,7 +60,7 @@ int TestFunctionalBagPlot(int, char * [])
   {
     xArr->SetValue(j, j * 2.0);
   }
-  inputTable->AddColumn(xArr.GetPointer());
+  inputTable->AddColumn(xArr);
 
   // Create the bag columns
   vtkNew<vtkDoubleArray> q3Arr;
@@ -85,15 +84,15 @@ int TestFunctionalBagPlot(int, char * [])
     q2Arr->SetTuple2(i, v0, v1);
   }
 
-  inputTable->AddColumn(q3Arr.GetPointer());
-  inputTable->AddColumn(q2Arr.GetPointer());
+  inputTable->AddColumn(q3Arr);
+  inputTable->AddColumn(q2Arr);
 
   // Set up a 2D scene and add an XY chart to it
   vtkNew<vtkContextView> view;
   view->GetRenderWindow()->SetSize(400, 400);
   view->GetRenderWindow()->SetMultiSamples(0);
   vtkNew<vtkChartXY> chart;
-  view->GetScene()->AddItem(chart.GetPointer());
+  view->GetScene()->AddItem(chart);
   chart->SetShowLegend(true);
   chart->GetLegend()->SetHorizontalAlignment(vtkChartLegend::LEFT);
   chart->GetLegend()->SetVerticalAlignment(vtkChartLegend::TOP);
@@ -101,17 +100,17 @@ int TestFunctionalBagPlot(int, char * [])
   // Create the functional bag plots
   vtkNew<vtkPlotFunctionalBag> q3Plot;
   q3Plot->SetColor(0.5, 0, 0);
-  q3Plot->SetInputData(inputTable.GetPointer(), "X", "Q3");
-  chart->AddPlot(q3Plot.GetPointer());
+  q3Plot->SetInputData(inputTable, "X", "Q3");
+  chart->AddPlot(q3Plot);
 
   vtkNew<vtkPlotFunctionalBag> q2Plot;
   q2Plot->SetColor(1., 0, 0);
-  q2Plot->SetInputData(inputTable.GetPointer(), "X", "Q2");
-  chart->AddPlot(q2Plot.GetPointer());
+  q2Plot->SetInputData(inputTable, "X", "Q2");
+  chart->AddPlot(q2Plot);
 
   vtkNew<vtkLookupTable> lookup;
   lookup->SetNumberOfColors(numCols);
-  lookup->SetRange(0, numCols-1);
+  lookup->SetRange(0, numCols - 1);
   lookup->Build();
   for (int j = 0; j < numCols; j++)
   {
@@ -119,9 +118,8 @@ int TestFunctionalBagPlot(int, char * [])
     double rgb[3];
     lookup->GetColor(j, rgb);
     plot->SetColor(rgb[0], rgb[1], rgb[2]);
-    plot->SetInputData(inputTable.GetPointer(), "X",
-      inputTable->GetColumn(j)->GetName());
-    chart->AddPlot(plot.GetPointer());
+    plot->SetInputData(inputTable, "X", inputTable->GetColumn(j)->GetName());
+    chart->AddPlot(plot);
   }
 
   // Render the scene

@@ -20,11 +20,10 @@
  * and then scaled (multiplied by a scalar. As a convenience, this class
  * allows you to set the output scalar type similar to vtkImageCast.
  * This is because shift scale operations frequently convert data types.
-*/
+ */
 
 #ifndef vtkImageShiftScale_h
 #define vtkImageShiftScale_h
-
 
 #include "vtkImagingCoreModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
@@ -32,24 +31,24 @@
 class VTKIMAGINGCORE_EXPORT vtkImageShiftScale : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageShiftScale *New();
-  vtkTypeMacro(vtkImageShiftScale,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageShiftScale* New();
+  vtkTypeMacro(vtkImageShiftScale, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Set/Get the shift value. This value is added to each pixel
    */
-  vtkSetMacro(Shift,double);
-  vtkGetMacro(Shift,double);
+  vtkSetMacro(Shift, double);
+  vtkGetMacro(Shift, double);
   //@}
 
   //@{
   /**
    * Set/Get the scale value. Each pixel is multiplied by this value.
    */
-  vtkSetMacro(Scale,double);
-  vtkGetMacro(Scale,double);
+  vtkSetMacro(Scale, double);
+  vtkGetMacro(Scale, double);
   //@}
 
   //@{
@@ -59,26 +58,16 @@ public:
    */
   vtkSetMacro(OutputScalarType, int);
   vtkGetMacro(OutputScalarType, int);
-  void SetOutputScalarTypeToDouble()
-    {this->SetOutputScalarType(VTK_DOUBLE);}
-  void SetOutputScalarTypeToFloat()
-    {this->SetOutputScalarType(VTK_FLOAT);}
-  void SetOutputScalarTypeToLong()
-    {this->SetOutputScalarType(VTK_LONG);}
-  void SetOutputScalarTypeToUnsignedLong()
-    {this->SetOutputScalarType(VTK_UNSIGNED_LONG);};
-  void SetOutputScalarTypeToInt()
-    {this->SetOutputScalarType(VTK_INT);}
-  void SetOutputScalarTypeToUnsignedInt()
-    {this->SetOutputScalarType(VTK_UNSIGNED_INT);}
-  void SetOutputScalarTypeToShort()
-    {this->SetOutputScalarType(VTK_SHORT);}
-  void SetOutputScalarTypeToUnsignedShort()
-    {this->SetOutputScalarType(VTK_UNSIGNED_SHORT);}
-  void SetOutputScalarTypeToChar()
-    {this->SetOutputScalarType(VTK_CHAR);}
-  void SetOutputScalarTypeToUnsignedChar()
-    {this->SetOutputScalarType(VTK_UNSIGNED_CHAR);}
+  void SetOutputScalarTypeToDouble() { this->SetOutputScalarType(VTK_DOUBLE); }
+  void SetOutputScalarTypeToFloat() { this->SetOutputScalarType(VTK_FLOAT); }
+  void SetOutputScalarTypeToLong() { this->SetOutputScalarType(VTK_LONG); }
+  void SetOutputScalarTypeToUnsignedLong() { this->SetOutputScalarType(VTK_UNSIGNED_LONG); }
+  void SetOutputScalarTypeToInt() { this->SetOutputScalarType(VTK_INT); }
+  void SetOutputScalarTypeToUnsignedInt() { this->SetOutputScalarType(VTK_UNSIGNED_INT); }
+  void SetOutputScalarTypeToShort() { this->SetOutputScalarType(VTK_SHORT); }
+  void SetOutputScalarTypeToUnsignedShort() { this->SetOutputScalarType(VTK_UNSIGNED_SHORT); }
+  void SetOutputScalarTypeToChar() { this->SetOutputScalarType(VTK_CHAR); }
+  void SetOutputScalarTypeToUnsignedChar() { this->SetOutputScalarType(VTK_UNSIGNED_CHAR); }
   //@}
 
   //@{
@@ -90,34 +79,28 @@ public:
    * of the data type.  On the other hand, clamping is slower.
    * By default, ClampOverflow is off.
    */
-  vtkSetMacro(ClampOverflow, int);
-  vtkGetMacro(ClampOverflow, int);
-  vtkBooleanMacro(ClampOverflow, int);
+  vtkSetMacro(ClampOverflow, vtkTypeBool);
+  vtkGetMacro(ClampOverflow, vtkTypeBool);
+  vtkBooleanMacro(ClampOverflow, vtkTypeBool);
   //@}
 
 protected:
   vtkImageShiftScale();
-  ~vtkImageShiftScale() VTK_OVERRIDE;
+  ~vtkImageShiftScale() override;
 
   double Shift;
   double Scale;
   int OutputScalarType;
-  int ClampOverflow;
+  vtkTypeBool ClampOverflow;
 
-  int RequestInformation(vtkInformation*,
-                                 vtkInformationVector**,
-                                 vtkInformationVector*) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void ThreadedRequestData(vtkInformation*,
-                                   vtkInformationVector**,
-                                   vtkInformationVector*,
-                                   vtkImageData*** inData,
-                                   vtkImageData** outData,
-                                   int outExt[6],
-                                   int threadId) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*,
+    vtkImageData*** inData, vtkImageData** outData, int outExt[6], int threadId) override;
+
 private:
-  vtkImageShiftScale(const vtkImageShiftScale&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageShiftScale&) VTK_DELETE_FUNCTION;
+  vtkImageShiftScale(const vtkImageShiftScale&) = delete;
+  void operator=(const vtkImageShiftScale&) = delete;
 };
 
 #endif

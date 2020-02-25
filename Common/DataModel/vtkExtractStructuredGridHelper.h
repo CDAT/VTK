@@ -25,7 +25,7 @@
  *
  * @sa
  * vtkExtractGrid vtkExtractVOI vtkExtractRectilinearGrid
-*/
+ */
 
 #ifndef vtkExtractStructuredGridHelper_h
 #define vtkExtractStructuredGridHelper_h
@@ -48,16 +48,15 @@ struct vtkIndexMap;
 } // END namespace detail
 } // END namespace vtk
 
-class VTKCOMMONDATAMODEL_EXPORT vtkExtractStructuredGridHelper :
-  public vtkObject
+class VTKCOMMONDATAMODEL_EXPORT vtkExtractStructuredGridHelper : public vtkObject
 {
 public:
-  static vtkExtractStructuredGridHelper *New();
-  vtkTypeMacro(vtkExtractStructuredGridHelper,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkExtractStructuredGridHelper* New();
+  vtkTypeMacro(vtkExtractStructuredGridHelper, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Get & Set Macros
-  vtkGetVector6Macro(OutputWholeExtent,int);
+  vtkGetVector6Macro(OutputWholeExtent, int);
 
   /**
    * \brief Initializes the index map.
@@ -66,8 +65,7 @@ public:
    * \param smapleRate the sampling rate
    * \param includeBoundary indicates whether to include the boundary or not.
    */
-  void Initialize(int voi[6], int wholeExt[6], int sampleRate[3],
-                  bool includeBoundary);
+  void Initialize(int voi[6], int wholeExt[6], int sampleRate[3], bool includeBoundary);
 
   /**
    * Returns true if the helper is properly initialized.
@@ -158,9 +156,8 @@ public:
    * \pre pd != nullptr.
    * \pre outPD != nullptr.
    */
-  void CopyPointsAndPointData( int inExt[6], int outExt[6],
-                    vtkPointData* pd, vtkPoints* inpnts,
-                    vtkPointData* outPD, vtkPoints* outpnts);
+  void CopyPointsAndPointData(int inExt[6], int outExt[6], vtkPointData* pd, vtkPoints* inpnts,
+    vtkPointData* outPD, vtkPoints* outpnts);
 
   /**
    * \brief Copies the cell data to the output.
@@ -171,8 +168,7 @@ public:
    * \pre cd != nullptr.
    * \pre outCD != nullptr.
    */
-  void CopyCellData(int inExt[6], int outExt[6],
-                    vtkCellData* cd, vtkCellData* outCD);
+  void CopyCellData(int inExt[6], int outExt[6], vtkCellData* cd, vtkCellData* outCD);
 
   /**
    * Calculate the VOI for a partitioned structured dataset. This method sets
@@ -187,11 +183,8 @@ public:
    * \param partitionedVOI The extent of the process's partitioned dataset that
    * should be extracted by a serial extraction filter.
    */
-  static void GetPartitionedVOI(const int globalVOI[6],
-                                const int partitionedExtent[6],
-                                const int sampleRate[3],
-                                bool includeBoundary,
-                                int partitionedVOI[6]);
+  static void GetPartitionedVOI(const int globalVOI[6], const int partitionedExtent[6],
+    const int sampleRate[3], bool includeBoundary, int partitionedVOI[6]);
   /**
    * Calculate the partitioned output extent for a partitioned structured
    * dataset. This method sets \a partitionedOutputExtent to the correct extent
@@ -207,16 +200,13 @@ public:
    * \param partitionedOutputExtent The correct output extent of the extracted
    * dataset.
    */
-  static void GetPartitionedOutputExtent(const int globalVOI[6],
-                                         const int partitionedVOI[6],
-                                         const int outputWholeExtent[6],
-                                         const int sampleRate[3],
-                                         bool includeBoundary,
-                                         int partitionedOutputExtent[6]);
+  static void GetPartitionedOutputExtent(const int globalVOI[6], const int partitionedVOI[6],
+    const int outputWholeExtent[6], const int sampleRate[3], bool includeBoundary,
+    int partitionedOutputExtent[6]);
 
 protected:
   vtkExtractStructuredGridHelper();
-  ~vtkExtractStructuredGridHelper() VTK_OVERRIDE;
+  ~vtkExtractStructuredGridHelper() override;
 
   // Input parameters -- used to reinitialize when data changes.
   int VOI[6];
@@ -233,8 +223,8 @@ protected:
   void Invalidate();
 
 private:
-  vtkExtractStructuredGridHelper(const vtkExtractStructuredGridHelper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractStructuredGridHelper&) VTK_DELETE_FUNCTION;
+  vtkExtractStructuredGridHelper(const vtkExtractStructuredGridHelper&) = delete;
+  void operator=(const vtkExtractStructuredGridHelper&) = delete;
 };
 
 #endif /* VTKEXTRACTSTRUCTUREDGRIDHELPER_H_ */

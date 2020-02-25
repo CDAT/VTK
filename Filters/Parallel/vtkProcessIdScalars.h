@@ -23,13 +23,13 @@
  *
  * @sa
  * vtkPolyDataStreamer
-*/
+ */
 
 #ifndef vtkProcessIdScalars_h
 #define vtkProcessIdScalars_h
 
-#include "vtkFiltersParallelModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersParallelModule.h" // For export macro
 
 class vtkFloatArray;
 class vtkIntArray;
@@ -38,57 +38,55 @@ class vtkMultiProcessController;
 class VTKFILTERSPARALLEL_EXPORT vtkProcessIdScalars : public vtkDataSetAlgorithm
 {
 public:
-  static vtkProcessIdScalars *New();
+  static vtkProcessIdScalars* New();
 
-  vtkTypeMacro(vtkProcessIdScalars,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkProcessIdScalars, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Option to centerate cell scalars of points scalars.  Default is point
    * scalars.
    */
-  void SetScalarModeToCellData() {this->SetCellScalarsFlag(1);}
-  void SetScalarModeToPointData() {this->SetCellScalarsFlag(0);}
-  int GetScalarMode() {return this->CellScalarsFlag;}
+  void SetScalarModeToCellData() { this->SetCellScalarsFlag(1); }
+  void SetScalarModeToPointData() { this->SetCellScalarsFlag(0); }
+  int GetScalarMode() { return this->CellScalarsFlag; }
 
   // Dscription:
   // This option uses a random mapping between pieces and scalar values.
   // The scalar values are chosen between 0 and 1.  By default, random
   // mode is off.
-  vtkSetMacro(RandomMode, int);
-  vtkGetMacro(RandomMode, int);
-  vtkBooleanMacro(RandomMode, int);
+  vtkSetMacro(RandomMode, vtkTypeBool);
+  vtkGetMacro(RandomMode, vtkTypeBool);
+  vtkBooleanMacro(RandomMode, vtkTypeBool);
 
   //@{
   /**
-   * By defualt this filter uses the global controller,
+   * By default this filter uses the global controller,
    * but this method can be used to set another instead.
    */
   virtual void SetController(vtkMultiProcessController*);
   vtkGetObjectMacro(Controller, vtkMultiProcessController);
   //@}
 
-
 protected:
   vtkProcessIdScalars();
-  ~vtkProcessIdScalars() VTK_OVERRIDE;
+  ~vtkProcessIdScalars() override;
 
   // Append the pieces.
-  int RequestData(
-    vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  vtkIntArray *MakeProcessIdScalars(int piece, vtkIdType numScalars);
-  vtkFloatArray *MakeRandomScalars(int piece, vtkIdType numScalars);
+  vtkIntArray* MakeProcessIdScalars(int piece, vtkIdType numScalars);
+  vtkFloatArray* MakeRandomScalars(int piece, vtkIdType numScalars);
 
-  vtkSetMacro(CellScalarsFlag,int);
+  vtkSetMacro(CellScalarsFlag, int);
   int CellScalarsFlag;
-  int RandomMode;
+  vtkTypeBool RandomMode;
 
   vtkMultiProcessController* Controller;
 
 private:
-  vtkProcessIdScalars(const vtkProcessIdScalars&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProcessIdScalars&) VTK_DELETE_FUNCTION;
+  vtkProcessIdScalars(const vtkProcessIdScalars&) = delete;
+  void operator=(const vtkProcessIdScalars&) = delete;
 };
 
 #endif

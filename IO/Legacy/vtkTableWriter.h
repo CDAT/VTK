@@ -20,21 +20,21 @@
  * vtkTable data files in vtk format. See text for format details.
  * @warning
  * Binary files written on one system may not be readable on other systems.
-*/
+ */
 
 #ifndef vtkTableWriter_h
 #define vtkTableWriter_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataWriter.h"
+#include "vtkIOLegacyModule.h" // For export macro
 class vtkTable;
 
 class VTKIOLEGACY_EXPORT vtkTableWriter : public vtkDataWriter
 {
 public:
-  static vtkTableWriter *New();
-  vtkTypeMacro(vtkTableWriter,vtkDataWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTableWriter* New();
+  vtkTypeMacro(vtkTableWriter, vtkDataWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -46,15 +46,15 @@ public:
 
 protected:
   vtkTableWriter() {}
-  ~vtkTableWriter() VTK_OVERRIDE {}
+  ~vtkTableWriter() override {}
 
-  void WriteData() VTK_OVERRIDE;
+  void WriteData() override;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkTableWriter(const vtkTableWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTableWriter&) VTK_DELETE_FUNCTION;
+  vtkTableWriter(const vtkTableWriter&) = delete;
+  void operator=(const vtkTableWriter&) = delete;
 };
 
 #endif

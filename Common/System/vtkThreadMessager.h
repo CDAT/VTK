@@ -16,9 +16,9 @@
  * @class   vtkThreadMessager
  * @brief   A class for performing inter-thread messaging
  *
- * vtkMultithreader is a class that provides support for messaging between
+ * vtkThreadMessager is a class that provides support for messaging between
  * threads multithreaded using pthreads or Windows messaging.
-*/
+ */
 
 #ifndef vtkThreadMessager_h
 #define vtkThreadMessager_h
@@ -26,17 +26,17 @@
 #include "vtkCommonSystemModule.h" // For export macro
 #include "vtkObject.h"
 
-#if defined(VTK_USE_PTHREADS) || defined(VTK_HP_PTHREADS)
+#if defined(VTK_USE_PTHREADS)
 #include <pthread.h> // Needed for pthread types
 #endif
 
 class VTKCOMMONSYSTEM_EXPORT vtkThreadMessager : public vtkObject
 {
 public:
-  static vtkThreadMessager *New();
+  static vtkThreadMessager* New();
 
-  vtkTypeMacro(vtkThreadMessager,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkThreadMessager, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Wait (block, non-busy) until another thread sends a
@@ -73,7 +73,7 @@ public:
 
 protected:
   vtkThreadMessager();
-  ~vtkThreadMessager() VTK_OVERRIDE;
+  ~vtkThreadMessager() override;
 
 #ifdef VTK_USE_PTHREADS
   pthread_mutex_t Mutex;
@@ -85,8 +85,8 @@ protected:
 #endif
 
 private:
-  vtkThreadMessager(const vtkThreadMessager&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkThreadMessager&) VTK_DELETE_FUNCTION;
+  vtkThreadMessager(const vtkThreadMessager&) = delete;
+  void operator=(const vtkThreadMessager&) = delete;
 };
 
 #endif

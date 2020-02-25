@@ -20,24 +20,24 @@
  *
  * @sa
  * vtkImporter
-*/
+ */
 
 #ifndef vtk3DSImporter_h
 #define vtk3DSImporter_h
 
+#include "vtk3DS.h"            // Needed for all the 3DS structures
 #include "vtkIOImportModule.h" // For export macro
 #include "vtkImporter.h"
-#include "vtk3DS.h"  // Needed for all the 3DS structures
 
 class vtkPolyData;
 
 class VTKIOIMPORT_EXPORT vtk3DSImporter : public vtkImporter
 {
 public:
-  static vtk3DSImporter *New();
+  static vtk3DSImporter* New();
 
-  vtkTypeMacro(vtk3DSImporter,vtkImporter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtk3DSImporter, vtkImporter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -52,43 +52,48 @@ public:
    * Set/Get the computation of normals. If on, imported geometry will
    * be run through vtkPolyDataNormals.
    */
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, vtkTypeBool);
+  vtkGetMacro(ComputeNormals, vtkTypeBool);
+  vtkBooleanMacro(ComputeNormals, vtkTypeBool);
   //@}
+
+  /**
+   * Get a printable string describing the outputs
+   */
+  std::string GetOutputsDescription() override;
 
   /**
    * Return the file pointer to the open file.
    */
-  FILE *GetFileFD() {return this->FileFD;};
+  FILE* GetFileFD() { return this->FileFD; }
 
-  vtk3DSOmniLight *OmniList;
-  vtk3DSSpotLight *SpotLightList;
-  vtk3DSCamera    *CameraList;
-  vtk3DSMesh      *MeshList;
-  vtk3DSMaterial  *MaterialList;
-  vtk3DSMatProp   *MatPropList;
+  vtk3DSOmniLight* OmniList;
+  vtk3DSSpotLight* SpotLightList;
+  vtk3DSCamera* CameraList;
+  vtk3DSMesh* MeshList;
+  vtk3DSMaterial* MaterialList;
+  vtk3DSMatProp* MatPropList;
 
 protected:
   vtk3DSImporter();
-  ~vtk3DSImporter() VTK_OVERRIDE;
+  ~vtk3DSImporter() override;
 
-  int ImportBegin () VTK_OVERRIDE;
-  void ImportEnd () VTK_OVERRIDE;
-  void ImportActors (vtkRenderer *renderer) VTK_OVERRIDE;
-  void ImportCameras (vtkRenderer *renderer) VTK_OVERRIDE;
-  void ImportLights (vtkRenderer *renderer) VTK_OVERRIDE;
-  void ImportProperties (vtkRenderer *renderer) VTK_OVERRIDE;
-  vtkPolyData *GeneratePolyData (vtk3DSMesh *meshPtr);
-  int Read3DS ();
+  int ImportBegin() override;
+  void ImportEnd() override;
+  void ImportActors(vtkRenderer* renderer) override;
+  void ImportCameras(vtkRenderer* renderer) override;
+  void ImportLights(vtkRenderer* renderer) override;
+  void ImportProperties(vtkRenderer* renderer) override;
+  vtkPolyData* GeneratePolyData(vtk3DSMesh* meshPtr);
+  int Read3DS();
 
-  char *FileName;
-  FILE *FileFD;
-  int ComputeNormals;
+  char* FileName;
+  FILE* FileFD;
+  vtkTypeBool ComputeNormals;
+
 private:
-  vtk3DSImporter(const vtk3DSImporter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtk3DSImporter&) VTK_DELETE_FUNCTION;
+  vtk3DSImporter(const vtk3DSImporter&) = delete;
+  void operator=(const vtk3DSImporter&) = delete;
 };
 
 #endif
-

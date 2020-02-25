@@ -33,7 +33,7 @@
  *
  * @sa
  * vtkGeometryFilter vtkStructuredGridSource
-*/
+ */
 
 #ifndef vtkImageDataGeometryFilter_h
 #define vtkImageDataGeometryFilter_h
@@ -44,13 +44,13 @@
 class VTKFILTERSGEOMETRY_EXPORT vtkImageDataGeometryFilter : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkImageDataGeometryFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImageDataGeometryFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct with initial extent of all the data
    */
-  static vtkImageDataGeometryFilter *New();
+  static vtkImageDataGeometryFilter* New();
 
   //@{
   /**
@@ -58,7 +58,7 @@ public:
    */
   void SetExtent(int extent[6]);
   void SetExtent(int iMin, int iMax, int jMin, int jMax, int kMin, int kMax);
-  int *GetExtent() { return this->Extent;};
+  int* GetExtent() { return this->Extent; }
   //@}
 
   //@{
@@ -67,19 +67,20 @@ public:
    * values less than the specified threshold.
    * Currently this functionality is only implemented for 2D imagedata
    */
-  vtkSetMacro(ThresholdCells,int);
-  vtkGetMacro(ThresholdCells,int);
-  vtkBooleanMacro(ThresholdCells,int);
+  vtkSetMacro(ThresholdCells, vtkTypeBool);
+  vtkGetMacro(ThresholdCells, vtkTypeBool);
+  vtkBooleanMacro(ThresholdCells, vtkTypeBool);
   //@}
 
   //@{
   /**
    * Set ThresholdValue to the scalar value by which to threshold cells when extracting geometry
-   * when ThresholdCells is true. Cells with scalar values greater than the threshold will be output.
+   * when ThresholdCells is true. Cells with scalar values greater than the threshold will be
+   * output.
    */
-  vtkSetMacro(ThresholdValue,double);
-  vtkGetMacro(ThresholdValue,double);
-  vtkBooleanMacro(ThresholdValue,double);
+  vtkSetMacro(ThresholdValue, double);
+  vtkGetMacro(ThresholdValue, double);
+  vtkBooleanMacro(ThresholdValue, double);
   //@}
 
   //@{
@@ -88,26 +89,26 @@ public:
    * when extracting cells from 2D imagedata
    * Currently this functionality is only implemented for 2D imagedata
    */
-  vtkSetMacro(OutputTriangles,int);
-  vtkGetMacro(OutputTriangles,int);
-  vtkBooleanMacro(OutputTriangles,int);
+  vtkSetMacro(OutputTriangles, vtkTypeBool);
+  vtkGetMacro(OutputTriangles, vtkTypeBool);
+  vtkBooleanMacro(OutputTriangles, vtkTypeBool);
   //@}
 
 protected:
   vtkImageDataGeometryFilter();
-  ~vtkImageDataGeometryFilter() VTK_OVERRIDE {}
+  ~vtkImageDataGeometryFilter() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int    Extent[6];
-  int    ThresholdCells;
+  int Extent[6];
+  vtkTypeBool ThresholdCells;
   double ThresholdValue;
-  int    OutputTriangles;
+  vtkTypeBool OutputTriangles;
 
 private:
-  vtkImageDataGeometryFilter(const vtkImageDataGeometryFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageDataGeometryFilter&) VTK_DELETE_FUNCTION;
+  vtkImageDataGeometryFilter(const vtkImageDataGeometryFilter&) = delete;
+  void operator=(const vtkImageDataGeometryFilter&) = delete;
 };
 
 #endif

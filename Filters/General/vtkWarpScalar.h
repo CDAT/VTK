@@ -33,7 +33,7 @@
  * Note that the filter passes both its point data and cell data to
  * its output, except for normals, since these are distorted by the
  * warping.
-*/
+ */
 
 #ifndef vtkWarpScalar_h
 #define vtkWarpScalar_h
@@ -46,16 +46,16 @@ class vtkDataArray;
 class VTKFILTERSGENERAL_EXPORT vtkWarpScalar : public vtkPointSetAlgorithm
 {
 public:
-  static vtkWarpScalar *New();
-  vtkTypeMacro(vtkWarpScalar,vtkPointSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkWarpScalar* New();
+  vtkTypeMacro(vtkWarpScalar, vtkPointSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Specify value to scale displacement.
    */
-  vtkSetMacro(ScaleFactor,double);
-  vtkGetMacro(ScaleFactor,double);
+  vtkSetMacro(ScaleFactor, double);
+  vtkGetMacro(ScaleFactor, double);
   //@}
 
   //@{
@@ -63,9 +63,9 @@ public:
    * Turn on/off use of user specified normal. If on, data normals
    * will be ignored and instance variable Normal will be used instead.
    */
-  vtkSetMacro(UseNormal,int);
-  vtkGetMacro(UseNormal,int);
-  vtkBooleanMacro(UseNormal,int);
+  vtkSetMacro(UseNormal, vtkTypeBool);
+  vtkGetMacro(UseNormal, vtkTypeBool);
+  vtkBooleanMacro(UseNormal, vtkTypeBool);
   //@}
 
   //@{
@@ -73,8 +73,8 @@ public:
    * Normal (i.e., direction) along which to warp geometry. Only used
    * if UseNormal boolean set to true or no normals available in data.
    */
-  vtkSetVector3Macro(Normal,double);
-  vtkGetVectorMacro(Normal,double,3);
+  vtkSetVector3Macro(Normal, double);
+  vtkGetVectorMacro(Normal, double, 3);
   //@}
 
   //@{
@@ -83,37 +83,34 @@ public:
    * then the z value is used to warp the surface in the z-axis direction
    * (times the scale factor) and scalars are used to color the surface.
    */
-  vtkSetMacro(XYPlane,int);
-  vtkGetMacro(XYPlane,int);
-  vtkBooleanMacro(XYPlane,int);
+  vtkSetMacro(XYPlane, vtkTypeBool);
+  vtkGetMacro(XYPlane, vtkTypeBool);
+  vtkBooleanMacro(XYPlane, vtkTypeBool);
   //@}
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 protected:
   vtkWarpScalar();
-  ~vtkWarpScalar() VTK_OVERRIDE;
+  ~vtkWarpScalar() override;
 
-  int RequestDataObject(vtkInformation *request,
-                        vtkInformationVector **inputVector,
-                        vtkInformationVector *outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation *,
-                  vtkInformationVector **,
-                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   double ScaleFactor;
-  int UseNormal;
+  vtkTypeBool UseNormal;
   double Normal[3];
-  int XYPlane;
+  vtkTypeBool XYPlane;
 
-  double *(vtkWarpScalar::*PointNormal)(vtkIdType id, vtkDataArray *normals);
-  double *DataNormal(vtkIdType id, vtkDataArray *normals=nullptr);
-  double *InstanceNormal(vtkIdType id, vtkDataArray *normals=nullptr);
-  double *ZNormal(vtkIdType id, vtkDataArray *normals=nullptr);
+  double* (vtkWarpScalar::*PointNormal)(vtkIdType id, vtkDataArray* normals);
+  double* DataNormal(vtkIdType id, vtkDataArray* normals = nullptr);
+  double* InstanceNormal(vtkIdType id, vtkDataArray* normals = nullptr);
+  double* ZNormal(vtkIdType id, vtkDataArray* normals = nullptr);
 
 private:
-  vtkWarpScalar(const vtkWarpScalar&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkWarpScalar&) VTK_DELETE_FUNCTION;
+  vtkWarpScalar(const vtkWarpScalar&) = delete;
+  void operator=(const vtkWarpScalar&) = delete;
 };
 
 #endif

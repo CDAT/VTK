@@ -32,7 +32,7 @@ PURPOSE.  See the above copyright notice for more information.
  * @sa
  * vtkASCIITextCodecFactory
  *
-*/
+ */
 
 #ifndef vtkASCIITextCodec_h
 #define vtkASCIITextCodec_h
@@ -40,51 +40,46 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkIOCoreModule.h" // For export macro
 #include "vtkTextCodec.h"
 
-
 class VTKIOCORE_EXPORT vtkASCIITextCodec : public vtkTextCodec
 {
 public:
   vtkTypeMacro(vtkASCIITextCodec, vtkTextCodec);
-  static vtkASCIITextCodec* New() ;
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkASCIITextCodec* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * The name this codec goes by - should match the string the factory will take to create it
    */
-  const char* Name() VTK_OVERRIDE;
-  bool CanHandle(const char* NameString) VTK_OVERRIDE;
+  const char* Name() override;
+  bool CanHandle(const char* NameString) override;
   //@}
 
   /**
    * is the given sample valid for this codec?
    */
-  bool IsValid(istream& InputStream) VTK_OVERRIDE;
-
+  bool IsValid(istream& InputStream) override;
 
   /**
    * Iterate through the sequence represented by the stream assigning the result
    * to the output iterator.  The stream will be advanced to its end so subsequent use
    * would need to reset it.
    */
-  void ToUnicode(istream& InputStream,
-                         vtkTextCodec::OutputIterator& output) VTK_OVERRIDE ;
+  void ToUnicode(istream& InputStream, vtkTextCodec::OutputIterator& output) override;
 
   /**
    * Return the next code point from the sequence represented by the stream
    * advancing the stream through however many places needed to assemble that code point
    */
-  vtkUnicodeString::value_type NextUnicode(istream& inputStream) VTK_OVERRIDE ;
+  vtkUnicodeString::value_type NextUnicode(istream& inputStream) override;
 
 protected:
-  vtkASCIITextCodec() ;
-  ~vtkASCIITextCodec() VTK_OVERRIDE;
+  vtkASCIITextCodec();
+  ~vtkASCIITextCodec() override;
 
 private:
-  vtkASCIITextCodec(const vtkASCIITextCodec &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkASCIITextCodec &) VTK_DELETE_FUNCTION;
-
+  vtkASCIITextCodec(const vtkASCIITextCodec&) = delete;
+  void operator=(const vtkASCIITextCodec&) = delete;
 };
-
 
 #endif

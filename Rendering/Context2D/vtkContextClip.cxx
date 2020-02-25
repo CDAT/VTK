@@ -14,12 +14,14 @@
 =========================================================================*/
 
 #include "vtkContextClip.h"
-#include "vtkObjectFactory.h"
-#include "vtkContextScenePrivate.h"
 #include "vtkContext2D.h"
 #include "vtkContextDevice2D.h"
+#include "vtkContextScenePrivate.h"
+#include "vtkObjectFactory.h"
 #include "vtkTransform2D.h"
 #include "vtkVector.h"
+
+#include <cassert>
 
 vtkStandardNewMacro(vtkContextClip);
 
@@ -33,21 +35,17 @@ vtkContextClip::vtkContextClip()
 }
 
 //-----------------------------------------------------------------------------
-vtkContextClip::~vtkContextClip()
-{
-}
+vtkContextClip::~vtkContextClip() = default;
 
 //-----------------------------------------------------------------------------
-bool vtkContextClip::Paint(vtkContext2D *painter)
+bool vtkContextClip::Paint(vtkContext2D* painter)
 {
   // Clip rendering for all child items.
   // Check whether the scene has a transform - use it if so
-  float *clipBy = this->Dims;
+  float* clipBy = this->Dims;
 
-  int clipi[] = { vtkContext2D::FloatToInt(clipBy[0]),
-                  vtkContext2D::FloatToInt(clipBy[1]),
-                  vtkContext2D::FloatToInt(clipBy[2]),
-                  vtkContext2D::FloatToInt(clipBy[3]) };
+  int clipi[] = { vtkContext2D::FloatToInt(clipBy[0]), vtkContext2D::FloatToInt(clipBy[1]),
+    vtkContext2D::FloatToInt(clipBy[2]), vtkContext2D::FloatToInt(clipBy[3]) };
 
   painter->GetDevice()->SetClipping(clipi);
   painter->GetDevice()->EnableClipping(true);
@@ -57,9 +55,7 @@ bool vtkContextClip::Paint(vtkContext2D *painter)
 }
 
 //-----------------------------------------------------------------------------
-void vtkContextClip::Update()
-{
-}
+void vtkContextClip::Update() {}
 
 //-----------------------------------------------------------------------------
 void vtkContextClip::SetClip(float x, float y, float width, float height)
@@ -68,10 +64,11 @@ void vtkContextClip::SetClip(float x, float y, float width, float height)
   this->Dims[1] = y;
   this->Dims[2] = width;
   this->Dims[3] = height;
+  assert(width >= 0 && height >= 0);
 }
 
 //-----------------------------------------------------------------------------
-void vtkContextClip::PrintSelf(ostream &os, vtkIndent indent)
+void vtkContextClip::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }

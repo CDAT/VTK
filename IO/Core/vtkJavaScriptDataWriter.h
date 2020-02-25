@@ -22,7 +22,7 @@
  * @class   vtkJavaScriptDataWriter
  * @brief   A Javascript data writer for vtkTable
  * Writes a vtkTable into a Javascript data format.
-*/
+ */
 
 #ifndef vtkJavaScriptDataWriter_h
 #define vtkJavaScriptDataWriter_h
@@ -38,7 +38,7 @@ class VTKIOCORE_EXPORT vtkJavaScriptDataWriter : public vtkWriter
 public:
   static vtkJavaScriptDataWriter* New();
   vtkTypeMacro(vtkJavaScriptDataWriter, vtkWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -80,33 +80,33 @@ public:
   //@}
 
   // Get/Set the OutputStream for writing output.
-  void SetOutputStream(ostream *my_stream);
+  void SetOutputStream(ostream* my_stream);
   ostream* GetOutputStream();
 
 protected:
   vtkJavaScriptDataWriter();
-  ~vtkJavaScriptDataWriter() VTK_OVERRIDE;
+  ~vtkJavaScriptDataWriter() override;
 
-  ofstream* OpenFile();
+  bool OpenFile();
+  void CloseFile();
 
-  void WriteData() VTK_OVERRIDE;
-  virtual void WriteTable(vtkTable* table, ostream *stream_ptr);
+  void WriteData() override;
+  virtual void WriteTable(vtkTable* table, ostream* stream_ptr);
 
   // see algorithm for more info.
   // This writer takes in vtkTable.
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   char* VariableName;
   char* FileName;
   bool IncludeFieldNames;
   ostream* OutputStream;
-private:
-  vtkJavaScriptDataWriter(const vtkJavaScriptDataWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkJavaScriptDataWriter&) VTK_DELETE_FUNCTION;
 
+private:
+  vtkJavaScriptDataWriter(const vtkJavaScriptDataWriter&) = delete;
+  void operator=(const vtkJavaScriptDataWriter&) = delete;
+
+  ostream* OutputFile;
 };
 
-
-
 #endif
-

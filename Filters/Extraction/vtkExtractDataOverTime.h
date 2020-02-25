@@ -23,7 +23,7 @@
  * corresponding to the PointIndex are extracted at each time step and added to
  * the output.  A PointData array is added called "Time" (or "TimeData" if
  * there is already an array called "Time"), which is the time at each index.
-*/
+ */
 
 #ifndef vtkExtractDataOverTime_h
 #define vtkExtractDataOverTime_h
@@ -34,48 +34,44 @@
 class VTKFILTERSEXTRACTION_EXPORT vtkExtractDataOverTime : public vtkPointSetAlgorithm
 {
 public:
-  static vtkExtractDataOverTime *New();
-  vtkTypeMacro(vtkExtractDataOverTime,vtkPointSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkExtractDataOverTime* New();
+  vtkTypeMacro(vtkExtractDataOverTime, vtkPointSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Index of point to extract at each time step
    */
-  vtkSetMacro(PointIndex,int);
-  vtkGetMacro(PointIndex,int);
+  vtkSetMacro(PointIndex, int);
+  vtkGetMacro(PointIndex, int);
   //@}
 
   //@{
   /**
    * Get the number of time steps
    */
-  vtkGetMacro(NumberOfTimeSteps,int);
+  vtkGetMacro(NumberOfTimeSteps, int);
   //@}
 
 protected:
   vtkExtractDataOverTime();
-  ~vtkExtractDataOverTime()VTK_OVERRIDE {}
+  ~vtkExtractDataOverTime() override {}
 
-  int RequestInformation( vtkInformation *request,
-    vtkInformationVector **inputVector, vtkInformationVector *outputVector);
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector);
 
-  int ProcessRequest(vtkInformation*,
-                     vtkInformationVector**,
-                     vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int AllocateOutputData(vtkPointSet *input, vtkPointSet *output);
+  int AllocateOutputData(vtkPointSet* input, vtkPointSet* output);
 
-  int            PointIndex;
-  int            CurrentTimeIndex;
-  int            NumberOfTimeSteps;
+  int PointIndex;
+  int CurrentTimeIndex;
+  int NumberOfTimeSteps;
 
 private:
-  vtkExtractDataOverTime(const vtkExtractDataOverTime&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractDataOverTime&) VTK_DELETE_FUNCTION;
+  vtkExtractDataOverTime(const vtkExtractDataOverTime&) = delete;
+  void operator=(const vtkExtractDataOverTime&) = delete;
 };
 
 #endif
-
-
-

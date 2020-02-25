@@ -19,26 +19,19 @@
 vtkObjectFactoryNewMacro(vtkOSPRayVolumeInterface);
 
 // ----------------------------------------------------------------------------
-vtkOSPRayVolumeInterface::vtkOSPRayVolumeInterface()
-{
-}
+vtkOSPRayVolumeInterface::vtkOSPRayVolumeInterface() = default;
 
 // ----------------------------------------------------------------------------
-vtkOSPRayVolumeInterface::~vtkOSPRayVolumeInterface()
-{
-}
+vtkOSPRayVolumeInterface::~vtkOSPRayVolumeInterface() = default;
 
 // ----------------------------------------------------------------------------
 void vtkOSPRayVolumeInterface::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
 // ----------------------------------------------------------------------------
-void vtkOSPRayVolumeInterface::Render(vtkRenderer *vtkNotUsed(ren),
-                                            vtkVolume *vtkNotUsed(vol))
+void vtkOSPRayVolumeInterface::Render(vtkRenderer* vtkNotUsed(ren), vtkVolume* vtkNotUsed(vol))
 {
-  cerr
-    << "Warning VTK is not linked to OSPRay so can not VolumeRender with it"
-    << endl;
+  cerr << "Warning VTK is not linked to OSPRay so can not VolumeRender with it" << endl;
 }

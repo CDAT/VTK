@@ -27,7 +27,7 @@
  *
  * @sa
  * vtkQtAbstractModelAdapter vtkQtTreeModelAdapter
-*/
+ */
 
 #ifndef vtkQtTableModelAdapter_h
 #define vtkQtTableModelAdapter_h
@@ -48,30 +48,28 @@ class VTKGUISUPPORTQT_EXPORT vtkQtTableModelAdapter : public vtkQtAbstractModelA
   Q_OBJECT
 
 public:
-  vtkQtTableModelAdapter(QObject *parent = 0);
-  vtkQtTableModelAdapter(vtkTable* table, QObject *parent = 0);
-  ~vtkQtTableModelAdapter() VTK_OVERRIDE;
+  vtkQtTableModelAdapter(QObject* parent = nullptr);
+  vtkQtTableModelAdapter(vtkTable* table, QObject* parent = nullptr);
+  ~vtkQtTableModelAdapter() override;
 
   //@{
   /**
    * Set/Get the VTK data object as input to this adapter
    */
-  void SetVTKDataObject(vtkDataObject *data) VTK_OVERRIDE;
-  vtkDataObject* GetVTKDataObject() const VTK_OVERRIDE;
+  void SetVTKDataObject(vtkDataObject* data) override;
+  vtkDataObject* GetVTKDataObject() const override;
   //@}
 
   //@{
   /**
    * Selection conversion from VTK land to Qt land
    */
-  vtkSelection* QModelIndexListToVTKIndexSelection(
-    const QModelIndexList qmil) const VTK_OVERRIDE;
-  QItemSelection VTKIndexSelectionToQItemSelection(
-    vtkSelection *vtksel) const VTK_OVERRIDE;
+  vtkSelection* QModelIndexListToVTKIndexSelection(const QModelIndexList qmil) const override;
+  QItemSelection VTKIndexSelectionToQItemSelection(vtkSelection* vtksel) const override;
   //@}
 
-  void SetKeyColumnName(const char* name) VTK_OVERRIDE;
-  void SetColorColumnName(const char* name) VTK_OVERRIDE;
+  void SetKeyColumnName(const char* name) override;
+  void SetColorColumnName(const char* name) override;
   void SetIconIndexColumnName(const char* name);
 
   enum
@@ -108,22 +106,22 @@ public:
    */
   void setTable(vtkTable* table);
   vtkTable* table() const { return this->Table; }
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const VTK_OVERRIDE;
-  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) VTK_OVERRIDE;
-  Qt::ItemFlags flags(const QModelIndex &index) const VTK_OVERRIDE;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const VTK_OVERRIDE;
-  QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const VTK_OVERRIDE;
-  QModelIndex parent(const QModelIndex &index) const VTK_OVERRIDE;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const VTK_OVERRIDE;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const VTK_OVERRIDE;
+  QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+  bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
+  QVariant headerData(
+    int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   //@}
 
-  bool dropMimeData(const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent) VTK_OVERRIDE ;
-  QMimeData * mimeData ( const QModelIndexList & indexes ) const VTK_OVERRIDE;
-  QStringList mimeTypes () const VTK_OVERRIDE;
-  Qt::DropActions supportedDropActions() const VTK_OVERRIDE;
+  bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column,
+    const QModelIndex& parent) override;
+  QMimeData* mimeData(const QModelIndexList& indexes) const override;
+  QStringList mimeTypes() const override;
+  Qt::DropActions supportedDropActions() const override;
 
   void SetIconSheet(QImage sheet);
   void SetIconSize(int w, int h);
@@ -133,27 +131,27 @@ signals:
   void selectionDropped(vtkSelection*);
 
 private:
-
   void getValue(int row, int column, vtkVariant& retVal) const;
   bool noTableCheck() const;
   void updateModelColumnHashTables();
   QVariant getColorIcon(int row) const;
   QVariant getIcon(int row) const;
 
-  bool        SplitMultiComponentColumns;
-  vtkTable*   Table;
-  int         DecorationLocation;
-  int         DecorationStrategy;
-  QImage      IconSheet;
-  int         IconSize[2];
-  int         IconSheetSize[2];
-  int         IconIndexColumn;
+  bool SplitMultiComponentColumns;
+  vtkTable* Table;
+  int DecorationLocation;
+  int DecorationStrategy;
+  QImage IconSheet;
+  int IconSize[2];
+  int IconSheetSize[2];
+  int IconIndexColumn;
 
   class vtkInternal;
   vtkInternal* Internal;
 
-  vtkQtTableModelAdapter(const vtkQtTableModelAdapter &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQtTableModelAdapter&) VTK_DELETE_FUNCTION;
+  vtkQtTableModelAdapter(const vtkQtTableModelAdapter&) = delete;
+  void operator=(const vtkQtTableModelAdapter&) = delete;
 };
 
 #endif
+// VTK-HeaderTest-Exclude: vtkQtTableModelAdapter.h

@@ -1,42 +1,39 @@
-project(VTKPNG)
+set(sources
+  png.c
+  pngerror.c
+  pngget.c
+  pngmem.c
+  pngpread.c
+  pngread.c
+  pngrio.c
+  pngrtran.c
+  pngrutil.c
+  pngset.c
+  pngtrans.c
+  pngwio.c
+  pngwrite.c
+  pngwtran.c
+  pngwutil.c)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+set(headers
+  png.h
+  pngconf.h
+  pnglibconf.h
+  vtk_png_mangle.h)
 
-# source files for png
-set(PNG_SRCS
-pngget.c    pngrio.c    pngwrite.c
-png.c       pngmem.c    pngrtran.c  pngtrans.c  pngwtran.c
-pngerror.c  pngpread.c  pngrutil.c  pngvcrd.c   pngwutil.c
-pnggccrd.c  pngread.c   pngset.c   pngwio.c
-)
+vtk_module_add_module(VTK::png
+  SOURCES ${sources}
+  HEADERS ${headers}
+  HEADERS_SUBDIR vtkpng)
+if (WIN32)
+  set_target_properties(png
+    PROPERTIES
+      DEFINE_SYMBOL PNG_BUILD_DLL)
+endif ()
 
-if(WIN32)
-  if(BUILD_SHARED_LIBS)
-    add_definitions(-DPNG_BUILD_DLL)
-    set(PNG_NO_MODULEDEF 1)
-  else()
-    set(PNG_STATIC 1)
-  endif()
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vtkpngConfig.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/vtkpngConfig.h)
-
-vtk_add_library(vtkpng ${PNG_SRCS})
-
-target_link_libraries(vtkpng ${vtkzlib_LIBRARIES})
-
-# link against the math library
-if(UNIX)
-  target_link_libraries(vtkpng -lm)
-endif()
-
-if(NOT VTK_INSTALL_NO_DEVELOPMENT)
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/vtkpngConfig.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/png.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/pngconf.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/vtk_png_mangle.h
-    DESTINATION ${VTK_INSTALL_INCLUDE_DIR}/vtkpng
-    COMPONENT Development)
-endif()
+# Link against the math library
+if (UNIX)
+  target_link_libraries(png
+    PRIVATE
+      m)
+endif ()

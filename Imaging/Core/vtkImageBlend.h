@@ -54,6 +54,8 @@
  * The alpha value of the first input, if present, is NOT copied to the alpha
  * value of the output.  The output always has the same number of components
  * and the same extent as the first input.
+ * If CompoundAlpha is set, the alpha value of the output is also computed using
+ * the alpha weighted blend calculation.
  *
  * \code
  * output <- 0
@@ -69,26 +71,25 @@
  *   output(px) <- output(px) / sum
  * }
  * \endcode
-*/
+ */
 
 #ifndef vtkImageBlend_h
 #define vtkImageBlend_h
-
 
 #include "vtkImagingCoreModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
 
 class vtkImageStencilData;
 
-#define VTK_IMAGE_BLEND_MODE_NORMAL   0
+#define VTK_IMAGE_BLEND_MODE_NORMAL 0
 #define VTK_IMAGE_BLEND_MODE_COMPOUND 1
 
 class VTKIMAGINGCORE_EXPORT vtkImageBlend : public vtkThreadedImageAlgorithm
 {
 public:
-  static vtkImageBlend *New();
-  vtkTypeMacro(vtkImageBlend,vtkThreadedImageAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageBlend* New();
+  vtkTypeMacro(vtkImageBlend, vtkThreadedImageAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Replace one of the input connections with a new input.  You can
@@ -104,8 +105,8 @@ public:
    * establish a pipeline connection. Use SetInputConnection() to
    * setup a pipeline connection.
    */
-  void SetInputData(int num, vtkDataObject *input);
-  void SetInputData(vtkDataObject *input) { this->SetInputData(0, input); };
+  void SetInputData(int num, vtkDataObject* input);
+  void SetInputData(vtkDataObject* input) { this->SetInputData(0, input); }
   //@}
 
   //@{
@@ -114,8 +115,8 @@ public:
    * old-style pipeline connections.  When writing new code you should
    * use vtkAlgorithm::GetInputConnection(0, num).
    */
-  vtkDataObject *GetInput(int num);
-  vtkDataObject *GetInput() { return this->GetInput(0); };
+  vtkDataObject* GetInput(int num);
+  vtkDataObject* GetInput() { return this->GetInput(0); }
   //@}
 
   /**
@@ -123,7 +124,7 @@ public:
    * support of old-style pipeline connections.  When writing new code
    * you should use vtkAlgorithm::GetNumberOfInputConnections(0).
    */
-  int GetNumberOfInputs() { return this->GetNumberOfInputConnections(0); };
+  int GetNumberOfInputs() { return this->GetNumberOfInputConnections(0); }
 
   //@{
   /**
@@ -138,29 +139,25 @@ public:
    * Set a stencil to apply when blending the data.
    * Create a pipeline connection.
    */
-  void SetStencilConnection(vtkAlgorithmOutput *algOutput);
+  void SetStencilConnection(vtkAlgorithmOutput* algOutput);
 
   //@{
   /**
    * Set a stencil to apply when blending the data.
    */
-  void SetStencilData(vtkImageStencilData *stencil);
-  vtkImageStencilData *GetStencil();
+  void SetStencilData(vtkImageStencilData* stencil);
+  vtkImageStencilData* GetStencil();
   //@}
 
   //@{
   /**
    * Set the blend mode
    */
-  vtkSetClampMacro(BlendMode,int,
-                   VTK_IMAGE_BLEND_MODE_NORMAL,
-                   VTK_IMAGE_BLEND_MODE_COMPOUND );
-  vtkGetMacro(BlendMode,int);
-  void SetBlendModeToNormal()
-        {this->SetBlendMode(VTK_IMAGE_BLEND_MODE_NORMAL);};
-  void SetBlendModeToCompound()
-        {this->SetBlendMode(VTK_IMAGE_BLEND_MODE_COMPOUND);};
-  const char *GetBlendModeAsString(void);
+  vtkSetClampMacro(BlendMode, int, VTK_IMAGE_BLEND_MODE_NORMAL, VTK_IMAGE_BLEND_MODE_COMPOUND);
+  vtkGetMacro(BlendMode, int);
+  void SetBlendModeToNormal() { this->SetBlendMode(VTK_IMAGE_BLEND_MODE_NORMAL); }
+  void SetBlendModeToCompound() { this->SetBlendMode(VTK_IMAGE_BLEND_MODE_COMPOUND); }
+  const char* GetBlendModeAsString(void);
   //@}
 
   //@{
@@ -168,51 +165,57 @@ public:
    * Specify a threshold in compound mode. Pixels with opacity*alpha less
    * or equal the threshold are ignored.
    */
-  vtkSetMacro(CompoundThreshold,double);
-  vtkGetMacro(CompoundThreshold,double);
+  vtkSetMacro(CompoundThreshold, double);
+  vtkGetMacro(CompoundThreshold, double);
+  //@}
+
+  //@{
+  /**
+   * Set whether to use the alpha weighted blending calculation on the alpha
+   * component. If false, the alpha component is set to the sum of the product
+   * of opacity and alpha from all inputs.
+   */
+  vtkSetMacro(CompoundAlpha, vtkTypeBool);
+  vtkGetMacro(CompoundAlpha, vtkTypeBool);
+  vtkBooleanMacro(CompoundAlpha, vtkTypeBool);
   //@}
 
 protected:
   vtkImageBlend();
-  ~vtkImageBlend() VTK_OVERRIDE;
+  ~vtkImageBlend() override;
 
-  int RequestUpdateExtent(vtkInformation *,
-                                  vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void InternalComputeInputUpdateExtent(int inExt[6], int outExt[6],
-                                        int inWExtent[6]);
+  void InternalComputeInputUpdateExtent(int inExt[6], int outExt[6], int inWExtent[6]);
 
-  void ThreadedRequestData (vtkInformation* request,
-                            vtkInformationVector** inputVector,
-                            vtkInformationVector* outputVector,
-                            vtkImageData ***inData, vtkImageData **outData,
-                            int ext[6], int id) VTK_OVERRIDE;
+  void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData, int ext[6],
+    int id) override;
 
   // see vtkAlgorithm for docs.
-  int FillInputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
+  int FillInputPortInformation(int, vtkInformation*) override;
 
   // see vtkAlgorithm for docs.
-  int RequestData(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  double *Opacity;
+  double* Opacity;
   int OpacityArrayLength;
   int BlendMode;
   double CompoundThreshold;
   int DataWasPassed;
+  vtkTypeBool CompoundAlpha;
 
 private:
-  vtkImageBlend(const vtkImageBlend&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageBlend&) VTK_DELETE_FUNCTION;
+  vtkImageBlend(const vtkImageBlend&) = delete;
+  void operator=(const vtkImageBlend&) = delete;
 };
 
 //@{
 /**
  * Get the blending mode as a descriptive string
  */
-inline const char *vtkImageBlend::GetBlendModeAsString()
+inline const char* vtkImageBlend::GetBlendModeAsString()
 {
   switch (this->BlendMode)
   {
@@ -226,9 +229,4 @@ inline const char *vtkImageBlend::GetBlendModeAsString()
 }
 //@}
 
-
 #endif
-
-
-
-

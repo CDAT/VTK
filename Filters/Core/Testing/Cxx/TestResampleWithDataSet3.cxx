@@ -24,54 +24,54 @@
 #include "vtkMultiBlockDataSet.h"
 #include "vtkNew.h"
 #include "vtkPointData.h"
+#include "vtkRTAnalyticSource.h"
 #include "vtkRandomAttributeGenerator.h"
 #include "vtkRegressionTestImage.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRTAnalyticSource.h"
+#include "vtkRenderer.h"
 #include "vtkSphere.h"
 #include "vtkTableBasedClipDataSet.h"
 #include "vtkThreshold.h"
 #include "vtkTransform.h"
 #include "vtkTransformFilter.h"
 
-
-namespace {
+namespace
+{
 
 void CreateInputDataSet(vtkMultiBlockDataSet* dataset, int numberOfBlocks)
 {
   dataset->SetNumberOfBlocks(numberOfBlocks);
 
   vtkNew<vtkExtentTranslator> extentTranslator;
-  extentTranslator->SetWholeExtent(-16, 16, -16, 16, -16, 16);
+  extentTranslator->SetWholeExtent(-11, 11, -11, 11, -11, 11);
   extentTranslator->SetNumberOfPieces(numberOfBlocks);
   extentTranslator->SetSplitModeToBlock();
 
   vtkNew<vtkRTAnalyticSource> wavelet;
-  wavelet->SetWholeExtent(-16, 16, -16, 16, -16, 16);
+  wavelet->SetWholeExtent(-11, 11, -11, 11, -11, 11);
   wavelet->SetCenter(0, 0, 0);
 
   vtkNew<vtkCylinder> cylinder;
   cylinder->SetCenter(0, 0, 0);
-  cylinder->SetRadius(15);
+  cylinder->SetRadius(10);
   cylinder->SetAxis(0, 1, 0);
   vtkNew<vtkTableBasedClipDataSet> clipCyl;
-  clipCyl->SetClipFunction(cylinder.GetPointer());
+  clipCyl->SetClipFunction(cylinder);
   clipCyl->InsideOutOn();
 
   vtkNew<vtkSphere> sphere;
   sphere->SetCenter(0, 0, 4);
-  sphere->SetRadius(12);
+  sphere->SetRadius(7);
   vtkNew<vtkTableBasedClipDataSet> clipSphr;
   clipSphr->SetInputConnection(clipCyl->GetOutputPort());
-  clipSphr->SetClipFunction(sphere.GetPointer());
+  clipSphr->SetClipFunction(sphere);
 
   vtkNew<vtkTransform> transform;
   transform->RotateZ(45);
   vtkNew<vtkTransformFilter> transFilter;
   transFilter->SetInputConnection(clipSphr->GetOutputPort());
-  transFilter->SetTransform(transform.GetPointer());
+  transFilter->SetTransform(transform);
 
   vtkNew<vtkRandomAttributeGenerator> randomAttrs;
   randomAttrs->SetInputConnection(transFilter->GetOutputPort());
@@ -91,7 +91,7 @@ void CreateInputDataSet(vtkMultiBlockDataSet* dataset, int numberOfBlocks)
     clipCyl->SetInputData(wavelet->GetOutputDataObject(0));
     randomAttrs->Update();
 
-    vtkDataObject *block = randomAttrs->GetOutputDataObject(0)->NewInstance();
+    vtkDataObject* block = randomAttrs->GetOutputDataObject(0)->NewInstance();
     block->DeepCopy(randomAttrs->GetOutputDataObject(0));
     dataset->SetBlock(i, block);
     block->Delete();
@@ -103,12 +103,12 @@ void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int numberOfBlocks)
   dataset->SetNumberOfBlocks(numberOfBlocks);
 
   vtkNew<vtkExtentTranslator> extentTranslator;
-  extentTranslator->SetWholeExtent(-22, 22, -22, 22, -16, 16);
+  extentTranslator->SetWholeExtent(-17, 17, -17, 17, -11, 11);
   extentTranslator->SetNumberOfPieces(numberOfBlocks);
   extentTranslator->SetSplitModeToBlock();
 
   vtkNew<vtkRTAnalyticSource> wavelet;
-  wavelet->SetWholeExtent(-22, 22, -22, 22, -16, 16);
+  wavelet->SetWholeExtent(-17, 17, -17, 17, -11, 11);
   wavelet->SetCenter(0, 0, 0);
 
   vtkNew<vtkThreshold> threshold;
@@ -125,7 +125,7 @@ void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int numberOfBlocks)
     wavelet->UpdateExtent(blockExtent);
     threshold->Update();
 
-    vtkDataObject *block = threshold->GetOutputDataObject(0)->NewInstance();
+    vtkDataObject* block = threshold->GetOutputDataObject(0)->NewInstance();
     block->DeepCopy(threshold->GetOutputDataObject(0));
     dataset->SetBlock(i, block);
     block->Delete();
@@ -134,23 +134,21 @@ void CreateSourceDataSet(vtkMultiBlockDataSet* dataset, int numberOfBlocks)
 
 } // anonymous namespace
 
-
-int TestResampleWithDataSet3(int argc, char *argv[])
+int TestResampleWithDataSet3(int argc, char* argv[])
 {
   // create input dataset
   vtkNew<vtkMultiBlockDataSet> input;
-  CreateInputDataSet(input.GetPointer(), 3);
+  CreateInputDataSet(input, 3);
 
   vtkNew<vtkMultiBlockDataSet> source;
-  CreateSourceDataSet(source.GetPointer(), 5);
+  CreateSourceDataSet(source, 4);
 
   vtkNew<vtkResampleWithDataSet> resample;
-  resample->SetInputData(input.GetPointer());
-  resample->SetSourceData(source.GetPointer());
+  resample->SetInputData(input);
+  resample->SetSourceData(source);
 
-
-  vtkMultiBlockDataSet *result;
-  vtkDataSet *block0;
+  vtkMultiBlockDataSet* result;
+  vtkDataSet* block0;
 
   // Test that ghost arrays are not generated
   resample->MarkBlankPointsAndCellsOff();
@@ -159,7 +157,8 @@ int TestResampleWithDataSet3(int argc, char *argv[])
   block0 = vtkDataSet::SafeDownCast(result->GetBlock(0));
   if (block0->GetPointGhostArray() || block0->GetCellGhostArray())
   {
-    std::cout << "Error: ghost arrays were generated with MarkBlankPointsAndCellsOff()" << std::endl;
+    std::cout << "Error: ghost arrays were generated with MarkBlankPointsAndCellsOff()"
+              << std::endl;
     return !vtkTesting::FAILED;
   }
 
@@ -186,21 +185,22 @@ int TestResampleWithDataSet3(int argc, char *argv[])
   mapper->SetScalarRange(scalarRange);
 
   vtkNew<vtkActor> actor;
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   vtkNew<vtkRenderer> renderer;
-  renderer->AddActor(actor.GetPointer());
+  renderer->AddActor(actor);
   renderer->ResetCamera();
 
   vtkNew<vtkRenderWindow> renWin;
-  renWin->AddRenderer(renderer.GetPointer());
+  renWin->SetMultiSamples(0);
+  renWin->AddRenderer(renderer);
 
   vtkNew<vtkRenderWindowInteractor> iren;
-  iren->SetRenderWindow(renWin.GetPointer());
+  iren->SetRenderWindow(renWin);
   iren->Initialize();
 
   renWin->Render();
-  int retVal = vtkRegressionTestImage(renWin.GetPointer());
+  int retVal = vtkRegressionTestImage(renWin);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     iren->Start();

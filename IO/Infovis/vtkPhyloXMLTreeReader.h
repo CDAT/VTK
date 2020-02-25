@@ -30,7 +30,7 @@
  *
  * @sa
  * vtkTree vtkXMLReader vtkPhyloXMLTreeWriter
-*/
+ */
 
 #ifndef vtkPhyloXMLTreeReader_h
 #define vtkPhyloXMLTreeReader_h
@@ -47,34 +47,33 @@ class vtkXMLDataElement;
 class VTKIOINFOVIS_EXPORT vtkPhyloXMLTreeReader : public vtkXMLReader
 {
 public:
-  static vtkPhyloXMLTreeReader *New();
-  vtkTypeMacro(vtkPhyloXMLTreeReader,vtkXMLReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPhyloXMLTreeReader* New();
+  vtkTypeMacro(vtkPhyloXMLTreeReader, vtkXMLReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the output of this reader.
    */
-  vtkTree *GetOutput();
-  vtkTree *GetOutput(int idx);
+  vtkTree* GetOutput();
+  vtkTree* GetOutput(int idx);
   //@}
 
 protected:
   vtkPhyloXMLTreeReader();
-  ~vtkPhyloXMLTreeReader() VTK_OVERRIDE;
+  ~vtkPhyloXMLTreeReader() override;
 
   /**
    * Read the input PhyloXML and populate our output vtkTree.
    */
-  void ReadXMLData() VTK_OVERRIDE;
+  void ReadXMLData() override;
 
   /**
    * Read one particular XML element.  This method calls the more specific
    * methods (ReadCladeElement, ReadNameElement, etc) based on what type
    * of tag it encounters.
    */
-  void ReadXMLElement(vtkXMLDataElement *element, vtkMutableDirectedGraph *g,
-                      vtkIdType vertex);
+  void ReadXMLElement(vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType vertex);
 
   /**
    * Read a clade element.  This method does not parse the subelements of
@@ -82,92 +81,89 @@ protected:
    * This method returns the vtkIdType of the newly created vertex in our
    * output vtkTree.
    */
-  vtkIdType ReadCladeElement(vtkXMLDataElement *element,
-                             vtkMutableDirectedGraph *g, vtkIdType parent);
+  vtkIdType ReadCladeElement(
+    vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType parent);
 
   /**
    * Read a name and assign it to the specified vertex, or the whole tree
    * if vertex is -1.
    */
-  void ReadNameElement(vtkXMLDataElement *element, vtkMutableDirectedGraph *g,
-                       vtkIdType vertex);
+  void ReadNameElement(vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType vertex);
 
   /**
    * Read the description for the tree.
    */
-  void ReadDescriptionElement(vtkXMLDataElement *element,
-                              vtkMutableDirectedGraph *g);
+  void ReadDescriptionElement(vtkXMLDataElement* element, vtkMutableDirectedGraph* g);
 
   /**
    * Read a property and assign it to our output vtkTree's VertexData for the
    * specified vertex.  If this property has not been encountered yet, this
    * method creates a new array and adds it to the VertexData.
    */
-  void ReadPropertyElement(vtkXMLDataElement *element,
-    vtkMutableDirectedGraph *g, vtkIdType vertex);
+  void ReadPropertyElement(
+    vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType vertex);
 
   /**
    * Read & store the branch length for this clade.  Branch length is defined
    * as the edge weight from this vertex to its parent.  Note that this
    * value can also be specified as an attribute of the clade element.
    */
-  void ReadBranchLengthElement(vtkXMLDataElement *element,
-    vtkMutableDirectedGraph *g, vtkIdType vertex);
+  void ReadBranchLengthElement(
+    vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType vertex);
 
   /**
    * Read confidence value and store it for the specified vertex, or the
    * whole tree is vertex is -1.
    */
-  void ReadConfidenceElement(vtkXMLDataElement *element,
-    vtkMutableDirectedGraph *g, vtkIdType vertex);
+  void ReadConfidenceElement(
+    vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType vertex);
 
   /**
    * Read RGB color value for this vertex.  Note that this color is also
    * applied to all children of this vertex until a new value is specified.
    */
-  void ReadColorElement(vtkXMLDataElement *element, vtkMutableDirectedGraph *g,
-    vtkIdType vertex);
+  void ReadColorElement(vtkXMLDataElement* element, vtkMutableDirectedGraph* g, vtkIdType vertex);
 
   /**
    * Assign the parent's branch color to child vertices where none is
    * otherwise specified.
    */
-  void PropagateBranchColor(vtkTree *tree);
+  void PropagateBranchColor(vtkTree* tree);
 
   /**
    * Count the number of vertices in the tree.
    */
-  void CountNodes(vtkXMLDataElement *element);
+  void CountNodes(vtkXMLDataElement* element);
 
   /**
    * Return a copy of the input string with all leading & trailing
    * whitespace removed.
    */
-  std::string GetTrimmedString(const char *input);
+  std::string GetTrimmedString(const char* input);
 
   /**
    * Return the portion of the input string that occurs before the
    * first colon (:).
    */
-  std::string GetStringBeforeColon(const char *input);
+  std::string GetStringBeforeColon(const char* input);
 
   /**
    * Return the portion of the input string that occurs after the
    * first colon (:).
    */
-  std::string GetStringAfterColon(const char *input);
+  std::string GetStringAfterColon(const char* input);
 
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
-  const char* GetDataSetName() VTK_OVERRIDE;
-  void SetOutput(vtkTree *output);
-  void SetupEmptyOutput() VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
+  const char* GetDataSetName() override;
+  void SetOutput(vtkTree* output);
+  void SetupEmptyOutput() override;
 
 private:
   vtkIdType NumberOfNodes;
   bool HasBranchColor;
   vtkSmartPointer<vtkBitArray> ColoredVertices;
-  vtkPhyloXMLTreeReader(const vtkPhyloXMLTreeReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPhyloXMLTreeReader&) VTK_DELETE_FUNCTION;
+  vtkPhyloXMLTreeReader(const vtkPhyloXMLTreeReader&) = delete;
+  void operator=(const vtkPhyloXMLTreeReader&) = delete;
 };
 
 #endif

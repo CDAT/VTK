@@ -50,7 +50,7 @@
  *
  * @sa
  * vtkQuaternion
-*/
+ */
 
 #ifndef vtkQuaternionInterpolator_h
 #define vtkQuaternionInterpolator_h
@@ -65,7 +65,7 @@ class VTKCOMMONMATH_EXPORT vtkQuaternionInterpolator : public vtkObject
 {
 public:
   vtkTypeMacro(vtkQuaternionInterpolator, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Instantiate the class.
@@ -100,7 +100,7 @@ public:
    * Add another quaternion to the list of quaternions to be interpolated.
    * Note that using the same time t value more than once replaces the
    * previous quaternion at t. At least one quaternions must be added to
-   * define an interpolation functios.
+   * define an interpolation functions.
    */
   void AddQuaternion(double t, const vtkQuaterniond& q);
   void AddQuaternion(double t, double q[4]);
@@ -125,8 +125,10 @@ public:
   /**
    * Enums to control the type of interpolation to use.
    */
-  enum {INTERPOLATION_TYPE_LINEAR=0,
-        INTERPOLATION_TYPE_SPLINE
+  enum
+  {
+    INTERPOLATION_TYPE_LINEAR = 0,
+    INTERPOLATION_TYPE_SPLINE
   };
 
   //@{
@@ -137,29 +139,25 @@ public:
    * SetInterpolationFunctionToLinear() is invoked, linear spherical interpolation
    * is used between each pair of quaternions.
    */
-  vtkSetClampMacro(InterpolationType,int,INTERPOLATION_TYPE_LINEAR,
-                   INTERPOLATION_TYPE_SPLINE);
-  vtkGetMacro(InterpolationType,int);
-  void SetInterpolationTypeToLinear()
-    {this->SetInterpolationType(INTERPOLATION_TYPE_LINEAR);}
-  void SetInterpolationTypeToSpline()
-    {this->SetInterpolationType(INTERPOLATION_TYPE_SPLINE);}
+  vtkSetClampMacro(InterpolationType, int, INTERPOLATION_TYPE_LINEAR, INTERPOLATION_TYPE_SPLINE);
+  vtkGetMacro(InterpolationType, int);
+  void SetInterpolationTypeToLinear() { this->SetInterpolationType(INTERPOLATION_TYPE_LINEAR); }
+  void SetInterpolationTypeToSpline() { this->SetInterpolationType(INTERPOLATION_TYPE_SPLINE); }
   //@}
 
 protected:
   vtkQuaternionInterpolator();
-  ~vtkQuaternionInterpolator() VTK_OVERRIDE;
+  ~vtkQuaternionInterpolator() override;
 
   // Specify the type of interpolation to use
   int InterpolationType;
 
   // Internal variables for interpolation functions
-  vtkQuaternionList *QuaternionList; //used for linear quaternion interpolation
+  vtkQuaternionList* QuaternionList; // used for linear quaternion interpolation
 
 private:
-  vtkQuaternionInterpolator(const vtkQuaternionInterpolator&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkQuaternionInterpolator&) VTK_DELETE_FUNCTION;
-
+  vtkQuaternionInterpolator(const vtkQuaternionInterpolator&) = delete;
+  void operator=(const vtkQuaternionInterpolator&) = delete;
 };
 
 #endif

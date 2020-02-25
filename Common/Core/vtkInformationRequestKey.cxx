@@ -16,18 +16,15 @@
 
 #include "vtkInformation.h"
 
-
 //----------------------------------------------------------------------------
-vtkInformationRequestKey::vtkInformationRequestKey(const char* name, const char* location):
-  vtkInformationKey(name, location)
+vtkInformationRequestKey::vtkInformationRequestKey(const char* name, const char* location)
+  : vtkInformationKey(name, location)
 {
   vtkCommonInformationKeyManager::Register(this);
 }
 
 //----------------------------------------------------------------------------
-vtkInformationRequestKey::~vtkInformationRequestKey()
-{
-}
+vtkInformationRequestKey::~vtkInformationRequestKey() = default;
 
 //----------------------------------------------------------------------------
 void vtkInformationRequestKey::PrintSelf(ostream& os, vtkIndent indent)
@@ -42,7 +39,8 @@ void vtkInformationRequestKey::Set(vtkInformation* info)
   {
     if (info->GetRequest())
     {
-      vtkGenericWarningMacro("Setting request key when one is already set. Current request is " << info->GetRequest()->GetName() << " while setting " << this->GetName() << "\n");
+      vtkGenericWarningMacro("Setting request key when one is already set. Current request is "
+        << info->GetRequest()->GetName() << " while setting " << this->GetName() << "\n");
     }
     info->SetRequest(this);
     info->Modified(this);
@@ -52,7 +50,7 @@ void vtkInformationRequestKey::Set(vtkInformation* info)
 //----------------------------------------------------------------------------
 int vtkInformationRequestKey::Has(vtkInformation* info)
 {
-  return (info->GetRequest() == this)?1:0;
+  return (info->GetRequest() == this) ? 1 : 0;
 }
 
 //----------------------------------------------------------------------------
@@ -71,7 +69,7 @@ void vtkInformationRequestKey::ShallowCopy(vtkInformation* from, vtkInformation*
 void vtkInformationRequestKey::Print(ostream& os, vtkInformation* info)
 {
   // Print the value.
-  if(this->Has(info))
+  if (this->Has(info))
   {
     os << "1\n";
   }

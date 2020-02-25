@@ -26,13 +26,13 @@
  * constructor for the default. This class also provides a FillInputPortInfo
  * method that by default says that all inputs will be UnstructuredGrid. If that
  * isn't the case then please override this method in your subclass.
-*/
+ */
 
 #ifndef vtkUnstructuredGridAlgorithm_h
 #define vtkUnstructuredGridAlgorithm_h
 
-#include "vtkCommonExecutionModelModule.h" // For export macro
 #include "vtkAlgorithm.h"
+#include "vtkCommonExecutionModelModule.h" // For export macro
 
 class vtkDataSet;
 class vtkUnstructuredGrid;
@@ -40,9 +40,9 @@ class vtkUnstructuredGrid;
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkUnstructuredGridAlgorithm : public vtkAlgorithm
 {
 public:
-  static vtkUnstructuredGridAlgorithm *New();
-  vtkTypeMacro(vtkUnstructuredGridAlgorithm,vtkAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkUnstructuredGridAlgorithm* New();
+  vtkTypeMacro(vtkUnstructuredGridAlgorithm, vtkAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -56,15 +56,14 @@ public:
   /**
    * see vtkAlgorithm for details
    */
-  int ProcessRequest(vtkInformation*,
-                             vtkInformationVector**,
-                             vtkInformationVector*) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   // this method is not recommended for use, but lots of old style filters
   // use it
-  vtkDataObject *GetInput(int port);
-  vtkDataObject *GetInput() { return this->GetInput(0); };
-  vtkUnstructuredGrid *GetUnstructuredGridInput(int port);
+  vtkDataObject* GetInput(int port);
+  vtkDataObject* GetInput() { return this->GetInput(0); }
+  vtkUnstructuredGrid* GetUnstructuredGridInput(int port);
 
   //@{
   /**
@@ -72,7 +71,7 @@ public:
    * establish a pipeline connection. Use SetInputConnection() to
    * setup a pipeline connection.
    */
-  void SetInputData(vtkDataObject *);
+  void SetInputData(vtkDataObject*);
   void SetInputData(int, vtkDataObject*);
   //@}
 
@@ -82,42 +81,38 @@ public:
    * establish a pipeline connection. Use SetInputConnection() to
    * setup a pipeline connection.
    */
-  void AddInputData(vtkDataObject *);
+  void AddInputData(vtkDataObject*);
   void AddInputData(int, vtkDataObject*);
   //@}
 
 protected:
   vtkUnstructuredGridAlgorithm();
-  ~vtkUnstructuredGridAlgorithm() VTK_OVERRIDE;
+  ~vtkUnstructuredGridAlgorithm() override;
 
   // convenience method
-  virtual int RequestInformation(vtkInformation* request,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector);
+  virtual int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector);
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestData(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector);
+  virtual int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector);
 
   /**
    * This is called by the superclass.
    * This is the method you should override.
    */
-  virtual int RequestUpdateExtent(vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*);
+  virtual int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
   // see algorithm for more info
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkUnstructuredGridAlgorithm(const vtkUnstructuredGridAlgorithm&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkUnstructuredGridAlgorithm&) VTK_DELETE_FUNCTION;
+  vtkUnstructuredGridAlgorithm(const vtkUnstructuredGridAlgorithm&) = delete;
+  void operator=(const vtkUnstructuredGridAlgorithm&) = delete;
 };
 
 #endif

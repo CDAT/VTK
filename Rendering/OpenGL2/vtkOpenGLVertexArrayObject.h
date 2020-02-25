@@ -14,9 +14,9 @@
 #ifndef vtkOpenGLVertexArrayObject_h
 #define vtkOpenGLVertexArrayObject_h
 
-#include "vtkRenderingOpenGL2Module.h" // for export macro
 #include "vtkObject.h"
-#include <string> // For API.
+#include "vtkRenderingOpenGL2Module.h" // for export macro
+#include <string>                      // For API.
 
 class vtkShaderProgram;
 class vtkOpenGLBufferObject;
@@ -37,8 +37,8 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLVertexArrayObject : public vtkObject
 {
 public:
   static vtkOpenGLVertexArrayObject* New();
-  vtkTypeMacro(vtkOpenGLVertexArrayObject, vtkObject)
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkOpenGLVertexArrayObject, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void Bind();
 
@@ -48,48 +48,41 @@ public:
 
   void ShaderProgramChanged();
 
-  bool AddAttributeArray(vtkShaderProgram *program,
-                         vtkOpenGLBufferObject *buffer,
-                         const std::string &name, int offset, size_t stride,
-                         int elementType, int elementTupleSize, bool normalize)
+  bool AddAttributeArray(vtkShaderProgram* program, vtkOpenGLBufferObject* buffer,
+    const std::string& name, int offset, size_t stride, int elementType, int elementTupleSize,
+    bool normalize)
   {
-    return this->AddAttributeArrayWithDivisor(program, buffer, name,
-      offset,stride,elementType, elementTupleSize, normalize, 0, false);
+    return this->AddAttributeArrayWithDivisor(
+      program, buffer, name, offset, stride, elementType, elementTupleSize, normalize, 0, false);
   }
 
-  bool AddAttributeArray(vtkShaderProgram *program,
-                         vtkOpenGLVertexBufferObject *buffer,
-                         const std::string &name, int offset, bool normalize);
+  bool AddAttributeArray(vtkShaderProgram* program, vtkOpenGLVertexBufferObject* buffer,
+    const std::string& name, int offset, bool normalize);
 
-  bool AddAttributeArrayWithDivisor(vtkShaderProgram *program,
-                         vtkOpenGLBufferObject *buffer,
-                         const std::string &name, int offset, size_t stride,
-                         int elementType, int elementTupleSize, bool normalize,
-                         int divisor, bool isMatrix);
+  bool AddAttributeArrayWithDivisor(vtkShaderProgram* program, vtkOpenGLBufferObject* buffer,
+    const std::string& name, int offset, size_t stride, int elementType, int elementTupleSize,
+    bool normalize, int divisor, bool isMatrix);
 
-  bool AddAttributeMatrixWithDivisor(vtkShaderProgram *program,
-                         vtkOpenGLBufferObject *buffer,
-                         const std::string &name, int offset, size_t stride,
-                         int elementType, int elementTupleSize, bool normalize,
-                         int divisor);
+  bool AddAttributeMatrixWithDivisor(vtkShaderProgram* program, vtkOpenGLBufferObject* buffer,
+    const std::string& name, int offset, size_t stride, int elementType, int elementTupleSize,
+    bool normalize, int divisor, int tupleOffset);
 
-  bool RemoveAttributeArray(const std::string &name);
+  bool RemoveAttributeArray(const std::string& name);
 
-  // Force this VAO to emulate a vertex aray object even if
+  // Force this VAO to emulate a vertex array object even if
   // the system supports VAOs. This can be useful in cases where
   // the vertex array object does not handle all extensions.
   void SetForceEmulation(bool val);
 
 protected:
   vtkOpenGLVertexArrayObject();
-  ~vtkOpenGLVertexArrayObject() VTK_OVERRIDE;
+  ~vtkOpenGLVertexArrayObject() override;
 
 private:
-  vtkOpenGLVertexArrayObject(
-    const vtkOpenGLVertexArrayObject&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLVertexArrayObject&) VTK_DELETE_FUNCTION;
+  vtkOpenGLVertexArrayObject(const vtkOpenGLVertexArrayObject&) = delete;
+  void operator=(const vtkOpenGLVertexArrayObject&) = delete;
   class Private;
-  Private *Internal;
+  Private* Internal;
 };
 
 #endif // vtkOpenGLVertexArrayObject_h

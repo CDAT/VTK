@@ -52,28 +52,39 @@
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkObject.h"
 
-#include "vtkToolkits.h" // Needed for VTK_DEBUG_LEAKS macro setting.
 #include "vtkDebugLeaksManager.h" // Needed for proper singleton initialization
+#include "vtkToolkits.h"          // Needed for VTK_DEBUG_LEAKS macro setting.
 
 class vtkDebugLeaksHashTable;
+class vtkDebugLeaksTraceManager;
 class vtkSimpleCriticalSection;
 class vtkDebugLeaksObserver;
 
 class VTKCOMMONCORE_EXPORT vtkDebugLeaks : public vtkObject
 {
 public:
-  static vtkDebugLeaks *New();
-  vtkTypeMacro(vtkDebugLeaks,vtkObject);
+  static vtkDebugLeaks* New();
+  vtkTypeMacro(vtkDebugLeaks, vtkObject);
 
   /**
-   * Call this when creating a class of a given name.
+   * Call this when creating a class.
    */
-  static void ConstructClass(const char* classname);
+  static void ConstructClass(vtkObjectBase* object);
 
   /**
-   * Call this when deleting a class of a given name.
+   * Call this when creating a vtkCommand or subclasses.
    */
-  static void DestructClass(const char* classname);
+  static void ConstructClass(const char* className);
+
+  /**
+   * Call this when deleting a class.
+   */
+  static void DestructClass(vtkObjectBase* object);
+
+  /**
+   * Call this when deleting vtkCommand or a subclass.
+   */
+  static void DestructClass(const char* className);
 
   /**
    * Print all the values in the table.  Returns non-zero if there
@@ -94,8 +105,8 @@ public:
   static vtkDebugLeaksObserver* GetDebugLeaksObserver();
 
 protected:
-  vtkDebugLeaks(){}
-  ~vtkDebugLeaks() VTK_OVERRIDE{}
+  vtkDebugLeaks() {}
+  ~vtkDebugLeaks() override {}
 
   static int DisplayMessageBox(const char*);
 
@@ -110,18 +121,20 @@ protected:
 
 private:
   static vtkDebugLeaksHashTable* MemoryTable;
+  static vtkDebugLeaksTraceManager* TraceManager;
   static vtkSimpleCriticalSection* CriticalSection;
   static vtkDebugLeaksObserver* Observer;
   static int ExitError;
 
-  vtkDebugLeaks(const vtkDebugLeaks&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkDebugLeaks&) VTK_DELETE_FUNCTION;
+  vtkDebugLeaks(const vtkDebugLeaks&) = delete;
+  void operator=(const vtkDebugLeaks&) = delete;
 };
 
 // This class defines callbacks for debugging tools. The callbacks are not for general use.
 // The objects passed as arguments to the callbacks are in partially constructed or destructed
 // state and accessing them may cause undefined behavior.
-class VTKCOMMONCORE_EXPORT vtkDebugLeaksObserver {
+class VTKCOMMONCORE_EXPORT vtkDebugLeaksObserver
+{
 public:
   virtual ~vtkDebugLeaksObserver() {}
   virtual void ConstructingObject(vtkObjectBase*) = 0;

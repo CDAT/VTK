@@ -25,14 +25,10 @@
 
 vtkStandardNewMacro(vtkAppendArcLength);
 //----------------------------------------------------------------------------
-vtkAppendArcLength::vtkAppendArcLength()
-{
-}
+vtkAppendArcLength::vtkAppendArcLength() = default;
 
 //----------------------------------------------------------------------------
-vtkAppendArcLength::~vtkAppendArcLength()
-{
-}
+vtkAppendArcLength::~vtkAppendArcLength() = default;
 
 //----------------------------------------------------------------------------
 int vtkAppendArcLength::RequestData(
@@ -66,7 +62,7 @@ int vtkAppendArcLength::RequestData(
 
   vtkCellArray* lines = output->GetLines();
   vtkIdType numCellPoints;
-  vtkIdType* cellPoints;
+  const vtkIdType* cellPoints;
   lines->InitTraversal();
   while (lines->GetNextCell(numCellPoints, cellPoints))
   {

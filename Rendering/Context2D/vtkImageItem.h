@@ -20,14 +20,14 @@
  *
  *
  * This vtkContextItem draws the supplied image in the scene.
-*/
+ */
 
 #ifndef vtkImageItem_h
 #define vtkImageItem_h
 
-#include "vtkRenderingContext2DModule.h" // For export macro
 #include "vtkContextItem.h"
-#include "vtkSmartPointer.h" // For SP ivars.
+#include "vtkRenderingContext2DModule.h" // For export macro
+#include "vtkSmartPointer.h"             // For SP ivars.
 
 class vtkImageData;
 
@@ -35,19 +35,19 @@ class VTKRENDERINGCONTEXT2D_EXPORT vtkImageItem : public vtkContextItem
 {
 public:
   vtkTypeMacro(vtkImageItem, vtkContextItem);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkImageItem *New();
+  static vtkImageItem* New();
 
   /**
    * Paint event for the item.
    */
-  bool Paint(vtkContext2D *painter) VTK_OVERRIDE;
+  bool Paint(vtkContext2D* painter) override;
 
   /**
    * Set the image of the item.
    */
-  void SetImage(vtkImageData *image);
+  void SetImage(vtkImageData* image);
 
   //@{
   /**
@@ -72,16 +72,15 @@ public:
 
 protected:
   vtkImageItem();
-  ~vtkImageItem() VTK_OVERRIDE;
+  ~vtkImageItem() override;
 
   float Position[2];
 
-  vtkImageData *Image;
+  vtkImageData* Image;
 
 private:
-  vtkImageItem(const vtkImageItem &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageItem &) VTK_DELETE_FUNCTION;
-
+  vtkImageItem(const vtkImageItem&) = delete;
+  void operator=(const vtkImageItem&) = delete;
 };
 
-#endif //vtkImageItem_h
+#endif // vtkImageItem_h

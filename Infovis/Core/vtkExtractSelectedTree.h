@@ -23,7 +23,7 @@
  * A vertex selection preserves the edges that connect selected vertices.
  * An edge selection perserves the vertices that are adjacent to at least one
  * selected edges.
-*/
+ */
 
 #ifndef vtkExtractSelectedTree_h
 #define vtkExtractSelectedTree_h
@@ -39,30 +39,27 @@ class VTKINFOVISCORE_EXPORT vtkExtractSelectedTree : public vtkTreeAlgorithm
 {
 public:
   static vtkExtractSelectedTree* New();
-  vtkTypeMacro(vtkExtractSelectedTree,vtkTreeAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkExtractSelectedTree, vtkTreeAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * A convenience method for setting the second input (i.e. the selection).
    */
   void SetSelectionConnection(vtkAlgorithmOutput* in);
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+
 protected:
   vtkExtractSelectedTree();
-  ~vtkExtractSelectedTree() VTK_OVERRIDE;
+  ~vtkExtractSelectedTree() override;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int BuildTree(vtkTree * inputTree, vtkIdTypeArray * list, vtkMutableDirectedGraph * builder);
-
+  int BuildTree(vtkTree* inputTree, vtkIdTypeArray* list, vtkMutableDirectedGraph* builder);
 
 private:
-  vtkExtractSelectedTree(const vtkExtractSelectedTree&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractSelectedTree&) VTK_DELETE_FUNCTION;
+  vtkExtractSelectedTree(const vtkExtractSelectedTree&) = delete;
+  void operator=(const vtkExtractSelectedTree&) = delete;
 };
 
 #endif

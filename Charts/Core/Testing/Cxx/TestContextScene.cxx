@@ -13,20 +13,20 @@
 
 =========================================================================*/
 
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkSmartPointer.h"
 #include "vtkBlockItem.h"
+#include "vtkContextScene.h"
 #include "vtkContextTransform.h"
 #include "vtkContextView.h"
-#include "vtkContextScene.h"
 #include "vtkNew.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
 
 #include "vtkRegressionTestImage.h"
 
 //----------------------------------------------------------------------------
-int TestContextScene( int argc, char * argv [] )
+int TestContextScene(int argc, char* argv[])
 {
   // Set up a 2D context view, context test object and add it to the scene
   vtkNew<vtkContextView> view;
@@ -49,18 +49,18 @@ int TestContextScene( int argc, char * argv [] )
   child2->SetLabel("Child2");
 
   vtkNew<vtkContextTransform> transform;
-  transform->AddItem(parent.GetPointer());
+  transform->AddItem(parent);
   transform->Translate(50, -190);
 
   // Build up our multi-level scene
-  view->GetScene()->AddItem(test.GetPointer());   // scene
-  view->GetScene()->AddItem(test2.GetPointer());  // scene
-  view->GetScene()->AddItem(parent.GetPointer()); // scene
-  parent->AddItem(child.GetPointer());            // scene->parent
-  child->AddItem(child2.GetPointer());            // scene->parent->child
+  view->GetScene()->AddItem(test);   // scene
+  view->GetScene()->AddItem(test2);  // scene
+  view->GetScene()->AddItem(parent); // scene
+  parent->AddItem(child);            // scene->parent
+  child->AddItem(child2);            // scene->parent->child
 
   // Add our transformed item
-  view->GetScene()->AddItem(transform.GetPointer());
+  view->GetScene()->AddItem(transform);
 
   // Turn off the color buffer
   view->GetScene()->SetUseBufferId(false);
@@ -70,11 +70,11 @@ int TestContextScene( int argc, char * argv [] )
   view->Render();
 
   int retVal = vtkRegressionTestImage(view->GetRenderWindow());
-  if(retVal == vtkRegressionTester::DO_INTERACTOR)
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     view->GetInteractor()->Initialize();
     view->GetInteractor()->Start();
   }
   return 0;
-  //return !retVal;
+  // return !retVal;
 }

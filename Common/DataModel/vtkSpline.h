@@ -49,7 +49,7 @@
  * @sa
  * vtkCardinalSpline vtkKochanekSpline vtkParametricSpline
  * vtkParametricFunctionSource
-*/
+ */
 
 #ifndef vtkSpline_h
 #define vtkSpline_h
@@ -62,8 +62,8 @@ class vtkPiecewiseFunction;
 class VTKCOMMONDATAMODEL_EXPORT vtkSpline : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkSpline,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSpline, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -73,8 +73,7 @@ public:
    * within the specified range.
    */
   void SetParametricRange(double tMin, double tMax);
-  void SetParametricRange(double tRange[2])
-    {this->SetParametricRange(tRange[0],tRange[1]);}
+  void SetParametricRange(double tRange[2]) { this->SetParametricRange(tRange[0], tRange[1]); }
   void GetParametricRange(double tRange[2]) const;
   //@}
 
@@ -83,20 +82,20 @@ public:
    * Set/Get ClampValue. If On, results of the interpolation will be
    * clamped to the min/max of the input data.
    */
-  vtkSetMacro(ClampValue,int);
-  vtkGetMacro(ClampValue,int);
-  vtkBooleanMacro(ClampValue,int);
+  vtkSetMacro(ClampValue, vtkTypeBool);
+  vtkGetMacro(ClampValue, vtkTypeBool);
+  vtkBooleanMacro(ClampValue, vtkTypeBool);
   //@}
 
   /**
    * Compute the coefficients for the spline.
    */
-  virtual void Compute () = 0;
+  virtual void Compute() = 0;
 
   /**
    * Interpolate the value of the spline at parametric location of t.
    */
-  virtual double Evaluate (double t) = 0;
+  virtual double Evaluate(double t) = 0;
 
   /**
    * Return the number of points inserted thus far.
@@ -106,17 +105,17 @@ public:
   /**
    * Add a pair of points to be fit with the spline.
    */
-  void AddPoint (double t, double x);
+  void AddPoint(double t, double x);
 
   /**
    * Remove a point from the data to be fit with the spline.
    */
-  void RemovePoint (double t);
+  void RemovePoint(double t);
 
   /**
    * Remove all points from the data.
    */
-  void RemoveAllPoints ();
+  void RemoveAllPoints();
 
   //@{
   /**
@@ -124,9 +123,9 @@ public:
    * a continuous loop: the first and last points are the same, and
    * derivatives are continuous.
    */
-  vtkSetMacro(Closed,int);
-  vtkGetMacro(Closed,int);
-  vtkBooleanMacro(Closed,int);
+  vtkSetMacro(Closed, vtkTypeBool);
+  vtkGetMacro(Closed, vtkTypeBool);
+  vtkBooleanMacro(Closed, vtkTypeBool);
   //@}
 
   //@{
@@ -146,10 +145,10 @@ public:
    * 3: the second derivative at left(right)most points is Left(Right)Value
    * times second derivative at first interior point.
    */
-  vtkSetClampMacro(LeftConstraint,int,0,3);
-  vtkGetMacro(LeftConstraint,int);
-  vtkSetClampMacro(RightConstraint,int,0,3);
-  vtkGetMacro(RightConstraint,int);
+  vtkSetClampMacro(LeftConstraint, int, 0, 3);
+  vtkGetMacro(LeftConstraint, int);
+  vtkSetClampMacro(RightConstraint, int, 0, 3);
+  vtkGetMacro(RightConstraint, int);
   //@}
 
   //@{
@@ -157,36 +156,36 @@ public:
    * The values of the derivative on the left and right sides. The value
    * is used only if the left(right) constraint is type 1-3.
    */
-  vtkSetMacro(LeftValue,double);
-  vtkGetMacro(LeftValue,double);
-  vtkSetMacro(RightValue,double);
-  vtkGetMacro(RightValue,double);
+  vtkSetMacro(LeftValue, double);
+  vtkGetMacro(LeftValue, double);
+  vtkSetMacro(RightValue, double);
+  vtkGetMacro(RightValue, double);
   //@}
 
   /**
    * Return the MTime also considering the Piecewise function.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   /**
    * Deep copy of spline data.
    */
-  virtual void DeepCopy(vtkSpline *s);
+  virtual void DeepCopy(vtkSpline* s);
 
 protected:
   vtkSpline();
-  ~vtkSpline() VTK_OVERRIDE;
+  ~vtkSpline() override;
 
   vtkMTimeType ComputeTime;
-  int ClampValue;
-  double *Intervals;
-  double *Coefficients;
+  vtkTypeBool ClampValue;
+  double* Intervals;
+  double* Coefficients;
   int LeftConstraint;
   double LeftValue;
   int RightConstraint;
   double RightValue;
-  vtkPiecewiseFunction *PiecewiseFunction;
-  int Closed;
+  vtkPiecewiseFunction* PiecewiseFunction;
+  vtkTypeBool Closed;
 
   // Explicitly specify the parametric range.
   double ParametricRange[2];
@@ -197,9 +196,8 @@ protected:
   int FindIndex(int size, double t);
 
 private:
-  vtkSpline(const vtkSpline&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSpline&) VTK_DELETE_FUNCTION;
+  vtkSpline(const vtkSpline&) = delete;
+  void operator=(const vtkSpline&) = delete;
 };
 
 #endif
-

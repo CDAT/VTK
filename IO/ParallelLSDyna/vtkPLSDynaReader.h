@@ -60,7 +60,7 @@
  * - Where exactly may breaks to a new file occur in the pre-state
  * information? At each section?
  * - Will state data sections (node/cell data, element deletion, sph data,
- * rigid body motion) be moved to  the beginning of a new file if their data
+ * rigid body motion) be moved to the beginning of a new file if their data
  * will be too large for a given file, or are all the sections
  * counted together as a single state (makes more sense for keeping time
  * word at start of every file).
@@ -79,7 +79,7 @@
  * surfaces? It appears that the nodes and connectivity of the road surface
  * are given separately (p.13) while on p.7 the Material
  *   Type Data subsection says that shells in a rigid body will just have a
- * certain material ID but be  interspersed among deformable shell elements.
+ * certain material ID but be interspersed among deformable shell elements.
  * - Word 37 of the control section serves two possible purposes... it can
  * mean NMSPH or EDLOPT.
  *   I assume that different versions of the code use that word differently.
@@ -103,7 +103,8 @@
  * - The reader doesn't handle printer files (d3hsp)
  * - The reader doesn't handle modal neutral files (d3mnf)
  * - The reader doesn't handle packed connectivity.
- * - The reader doesn't handle adapted element parent lists (but the 2002 specification says LSDyna doesn't implement it).
+ * - The reader doesn't handle adapted element parent lists (but the 2002 specification says LSDyna
+ * doesn't implement it).
  * - All the sample datasets have MATTYP = 0. Need something to test MATTYP = 1.
  * - I have no test datasets with rigid body and/or road surfaces, so the
  * implementation is half-baked.
@@ -118,7 +119,7 @@
  * so we shouldn't eliminate the ability to get at the raw simulation data.
  * Perhaps a filter could be applied to "fancify" the geometry.
  *
-*/
+ */
 
 #ifndef vtkPLSDynaReader_h
 #define vtkPLSDynaReader_h
@@ -130,43 +131,42 @@ class vtkMultiProcessController;
 class VTKIOPARALLELLSDYNA_EXPORT vtkPLSDynaReader : public vtkLSDynaReader
 {
 public:
-  vtkTypeMacro(vtkPLSDynaReader,vtkLSDynaReader);
-  virtual void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkPLSDynaReader *New();
+  vtkTypeMacro(vtkPLSDynaReader, vtkLSDynaReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkPLSDynaReader* New();
 
   /**
-   * Determine if the file can be readed with this reader.
+   * Determine if the file can be read with this reader.
    */
-  virtual int CanReadFile( const char* fname ) VTK_OVERRIDE;
+  int CanReadFile(const char* fname) override;
 
   //@{
   /**
    * Set/Get the communicator object. By default we use the world controller
    */
-  void SetController(vtkMultiProcessController *c);
+  void SetController(vtkMultiProcessController* c);
   vtkGetObjectMacro(Controller, vtkMultiProcessController);
   //@}
 
 protected:
   vtkPLSDynaReader();
-  virtual ~vtkPLSDynaReader();
+  ~vtkPLSDynaReader() override;
 
-  virtual int RequestInformation( vtkInformation*, vtkInformationVector**, vtkInformationVector* ) VTK_OVERRIDE;
-  virtual int RequestData( vtkInformation*, vtkInformationVector**, vtkInformationVector* ) VTK_OVERRIDE;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  virtual int ReadTopology() VTK_OVERRIDE;
+  int ReadTopology() override;
 
 private:
+  vtkPLSDynaReader(const vtkPLSDynaReader&) = delete;
+  void operator=(const vtkPLSDynaReader&) = delete;
 
-  vtkPLSDynaReader( const vtkPLSDynaReader& ) VTK_DELETE_FUNCTION;
-  void operator = ( const vtkPLSDynaReader& ) VTK_DELETE_FUNCTION;
+  void GetPartRanges(vtkIdType* mins, vtkIdType* maxs);
 
-  void GetPartRanges(vtkIdType* mins,vtkIdType* maxs);
-
-  vtkMultiProcessController *Controller;
+  vtkMultiProcessController* Controller;
 
   struct vtkPLSDynaReaderInternal;
-  vtkPLSDynaReaderInternal *Internal;
+  vtkPLSDynaReaderInternal* Internal;
 };
 
 #endif // vtkPLSDynaReader_h

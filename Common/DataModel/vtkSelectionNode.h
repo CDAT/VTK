@@ -41,7 +41,7 @@
  *
  * @warning
  * No SelectionList is created by default. It should be assigned.
-*/
+ */
 
 #ifndef vtkSelectionNode_h
 #define vtkSelectionNode_h
@@ -61,8 +61,8 @@ class vtkTable;
 class VTKCOMMONDATAMODEL_EXPORT vtkSelectionNode : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkSelectionNode,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkSelectionNode, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkSelectionNode* New();
 
   /**
@@ -108,7 +108,7 @@ public:
   /**
    * Return the MTime taking into account changes to the properties
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   // vtkSelectionNode specific keys follow:
   /**
@@ -126,17 +126,18 @@ public:
    */
   enum SelectionContent
   {
-    SELECTIONS,   //!< Deprecated.
-    GLOBALIDS,    //!< Select entities called out by their globally-unique IDs.
-    PEDIGREEIDS,  //!< Select entities that have some identifiable pedigree.
-    VALUES,       //!< Select entities that take on specific array values.
-    INDICES,      //!< Select entities by their offsets into the dataset.
-    FRUSTUM,      //!< Select entities contained within a viewing frustum.
-    LOCATIONS,    //!< Select entities near the supplied world coordinates.
-    THRESHOLDS,   //!< Select entities whose array values fall within a given threshold.
-    BLOCKS,       //!< Select blocks within a composite dataset by their flat index.
-    QUERY,        //!< Select entities with a text query.
-    USER          //!< Select entities with user-supplied, application-specific logic.
+    SELECTIONS,  //!< Deprecated.
+    GLOBALIDS,   //!< Select entities called out by their globally-unique IDs.
+    PEDIGREEIDS, //!< Select entities that have some identifiable pedigree.
+    VALUES,      //!< Select entities that take on specific array values.
+    INDICES,     //!< Select entities by their offsets into the dataset.
+    FRUSTUM,     //!< Select entities contained within a viewing frustum.
+    LOCATIONS,   //!< Select entities near the supplied world coordinates.
+    THRESHOLDS,  //!< Select entities whose array values fall within a given threshold.
+    BLOCKS,      //!< Select blocks within a composite dataset by their flat index.
+    QUERY,       //!< Select entities with a text query.
+    USER,        //!< Select entities with user-supplied, application-specific logic.
+    NUM_CONTENT_TYPES
   };
 
   //@{
@@ -147,6 +148,11 @@ public:
   virtual void SetContentType(int type);
   virtual int GetContentType();
   //@}
+
+  /**
+   * Get the content type as a string.
+   */
+  static const char* GetContentTypeAsString(int type);
 
   /**
    * Controls whether cell, point, or field data determine what is inside and out.
@@ -164,7 +170,8 @@ public:
     FIELD,  //!< The selection data provided is field-data.
     VERTEX, //!< The selection data provided is graph vertex-data.
     EDGE,   //!< The selection data provided is graph edge-data.
-    ROW     //!< The selection data provided is table row-data.
+    ROW,    //!< The selection data provided is table row-data.
+    NUM_FIELD_TYPES
   };
 
   //@{
@@ -175,6 +182,11 @@ public:
   virtual void SetFieldType(int type);
   virtual int GetFieldType();
   //@}
+
+  /**
+   * Get the field type as a string.
+   */
+  static const char* GetFieldTypeAsString(int type);
 
   //@{
   /**
@@ -199,10 +211,22 @@ public:
   static vtkInformationDoubleKey* EPSILON();
 
   /**
+   * If present, closest zbuffer value of this selection
+   */
+  static vtkInformationDoubleKey* ZBUFFER_VALUE();
+
+  /**
    * This flag tells the extraction filter, when FIELD_TYPE==POINT, that
    * it should also extract the cells that contain any of the extracted points.
    */
   static vtkInformationIntegerKey* CONTAINING_CELLS();
+
+  /**
+   * When specified, this indicates how many layers of *connected* elements
+   * in addition to those chosen explicitly are being selected. Currently,
+   * this is only supported for cells and points.
+   */
+  static vtkInformationIntegerKey* CONNECTED_LAYERS();
 
   /**
    * When ContentType==THRESHOLDS  or ContentType==VALUES
@@ -287,20 +311,25 @@ public:
   /**
    * Compares Properties of self and other to ensure that they are exactly same.
    */
-  bool EqualProperties(vtkSelectionNode* other, bool fullcompare=true);
+  bool EqualProperties(vtkSelectionNode* other, bool fullcompare = true);
 
 protected:
   vtkSelectionNode();
-  ~vtkSelectionNode() VTK_OVERRIDE;
+  ~vtkSelectionNode() override;
 
   vtkInformation* Properties;
   vtkDataSetAttributes* SelectionData;
   char* QueryString;
 
-private:
-  vtkSelectionNode(const vtkSelectionNode&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSelectionNode&) VTK_DELETE_FUNCTION;
+  // Map from content type to content type name
+  static const char ContentTypeNames[SelectionContent::NUM_CONTENT_TYPES][14];
 
+  // Map from integer field type to field type name
+  static const char FieldTypeNames[SelectionField::NUM_FIELD_TYPES][8];
+
+private:
+  vtkSelectionNode(const vtkSelectionNode&) = delete;
+  void operator=(const vtkSelectionNode&) = delete;
 };
 
 #endif

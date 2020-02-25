@@ -22,37 +22,36 @@
  * necessary) and can be retrieved via the GetNextExtent() method.
  * @sa
  * vtkImageStencilSource vtkImageStencil
-*/
+ */
 
 #ifndef vtkImageStencilData_h
 #define vtkImageStencilData_h
 
-
-#include "vtkImagingCoreModule.h" // For export macro
 #include "vtkDataObject.h"
+#include "vtkImagingCoreModule.h" // For export macro
 
 class VTKIMAGINGCORE_EXPORT vtkImageStencilData : public vtkDataObject
 {
 public:
-  static vtkImageStencilData *New();
+  static vtkImageStencilData* New();
   vtkTypeMacro(vtkImageStencilData, vtkDataObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void Initialize() VTK_OVERRIDE;
-  void DeepCopy(vtkDataObject *o) VTK_OVERRIDE;
-  void ShallowCopy(vtkDataObject *f) VTK_OVERRIDE;
-  void InternalImageStencilDataCopy(vtkImageStencilData *s);
+  void Initialize() override;
+  void DeepCopy(vtkDataObject* o) override;
+  void ShallowCopy(vtkDataObject* f) override;
+  void InternalImageStencilDataCopy(vtkImageStencilData* s);
 
   /**
    * Get the data type as an integer (this will return VTK_DATA_OBJECT
    * for now, maybe a proper type constant will be reserved later).
    */
-  int GetDataObjectType() VTK_OVERRIDE { return VTK_DATA_OBJECT; }
+  int GetDataObjectType() override { return VTK_DATA_OBJECT; }
 
   /**
    * The extent type is 3D, just like vtkImageData.
    */
-  int GetExtentType() VTK_OVERRIDE { return VTK_3D_EXTENT; };
+  int GetExtentType() override { return VTK_3D_EXTENT; }
 
   /**
    * Given the total output x extent [xMin,xMax] and the current y, z indices,
@@ -63,8 +62,7 @@ public:
    * case you must initialize 'iter' to -1.  The variable 'iter' is used
    * internally to keep track of which sub-extent should be returned next.
    */
-  int GetNextExtent(int &r1, int &r2, int xMin, int xMax,
-                    int yIdx, int zIdx, int &iter);
+  int GetNextExtent(int& r1, int& r2, int xMin, int xMax, int yIdx, int zIdx, int& iter);
 
   /**
    * Checks if an image index is inside the stencil.
@@ -126,7 +124,7 @@ public:
    * by vtkImageStencilSource, as it is part of the basic pipeline
    * functionality.
    */
-  void SetExtent(int extent[6]);
+  void SetExtent(const int extent[6]);
   void SetExtent(int x1, int x2, int y1, int y2, int z1, int z2);
   vtkGetVector6Macro(Extent, int);
   //@}
@@ -147,8 +145,8 @@ public:
    * Override these to handle origin, spacing, scalar type, and scalar
    * number of components.  See vtkDataObject for details.
    */
-  void CopyInformationFromPipeline(vtkInformation *info) VTK_OVERRIDE;
-  void CopyInformationToPipeline(vtkInformation *info) VTK_OVERRIDE;
+  void CopyInformationFromPipeline(vtkInformation* info) override;
+  void CopyInformationToPipeline(vtkInformation* info) override;
   //@}
 
   //@{
@@ -156,25 +154,25 @@ public:
    * Retrieve an instance of this class from an information object.
    */
   static vtkImageStencilData* GetData(vtkInformation* info);
-  static vtkImageStencilData* GetData(vtkInformationVector* v, int i=0);
+  static vtkImageStencilData* GetData(vtkInformationVector* v, int i = 0);
   //@}
 
   /**
    * Add merges the stencil supplied as argument into Self.
    */
-  virtual void Add(vtkImageStencilData *);
+  virtual void Add(vtkImageStencilData*);
 
   /**
    * Subtract removes the portion of the stencil, supplied as argument,
    * that lies within Self from Self.
    */
-  virtual void Subtract(vtkImageStencilData *);
+  virtual void Subtract(vtkImageStencilData*);
 
   /**
    * Replaces the portion of the stencil, supplied as argument,
    * that lies within Self from Self.
    */
-  virtual void Replace(vtkImageStencilData *);
+  virtual void Replace(vtkImageStencilData*);
 
   /**
    * Clip the stencil with the supplied extents. In other words, discard data
@@ -184,21 +182,23 @@ public:
 
 protected:
   vtkImageStencilData();
-  ~vtkImageStencilData() VTK_OVERRIDE;
+  ~vtkImageStencilData() override;
 
-  enum Operation { Merge, Erase };
+  enum Operation
+  {
+    Merge,
+    Erase
+  };
 
   /**
    * Apply the given operation over the given (r1, r2) extent.
    */
-  void LogicalOperationExtent(
-    int r1, int r2, int yIdx, int zIdx, Operation operation);
+  void LogicalOperationExtent(int r1, int r2, int yIdx, int zIdx, Operation operation);
 
   /**
    * Combine with the given stencil, using the given operation.
    */
-  void LogicalOperationInPlace(
-    vtkImageStencilData *stencil, Operation operation);
+  void LogicalOperationInPlace(vtkImageStencilData* stencil, Operation operation);
 
   /**
    * Change the extent while preserving the data.
@@ -210,7 +210,7 @@ protected:
   /**
    * Get important info from pipeline.
    */
-  void CopyOriginAndSpacingFromPipeline(vtkInformation *info);
+  void CopyOriginAndSpacingFromPipeline(vtkInformation* info);
 
   //@{
   /**
@@ -227,13 +227,13 @@ protected:
    * The actual 'data' is stored here.
    */
   int NumberOfExtentEntries;
-  int *ExtentListLengths;
-  int **ExtentLists;
+  int* ExtentListLengths;
+  int** ExtentLists;
   //@}
 
 private:
-  vtkImageStencilData(const vtkImageStencilData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageStencilData&) VTK_DELETE_FUNCTION;
+  vtkImageStencilData(const vtkImageStencilData&) = delete;
+  void operator=(const vtkImageStencilData&) = delete;
 
   friend class vtkImageStencilIteratorFriendship;
 };
@@ -276,8 +276,7 @@ public:
    * Fill the specified extent of a vtkImageStencilData with the raster,
    * after permuting the raster according to xj and yj.
    */
-  void FillStencilData(vtkImageStencilData *data, const int extent[6],
-                       int xj = 0, int yj = 1);
+  void FillStencilData(vtkImageStencilData* data, const int extent[6], int xj = 0, int yj = 1);
 
   /**
    * The tolerance for float-to-int conversions.
@@ -301,15 +300,12 @@ protected:
 
   int Extent[2];
   int UsedExtent[2];
-  double **Raster;
+  double** Raster;
   double Tolerance;
 
 private:
-  vtkImageStencilRaster(const vtkImageStencilRaster&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageStencilRaster&) VTK_DELETE_FUNCTION;
+  vtkImageStencilRaster(const vtkImageStencilRaster&) = delete;
+  void operator=(const vtkImageStencilRaster&) = delete;
 };
 
 #endif
-
-
-

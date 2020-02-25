@@ -26,33 +26,34 @@
  *
  * @sa
  * vtkGenericDataArray vtkSOADataArrayTemplate
-*/
+ */
 
 #ifndef vtkAOSDataArrayTemplate_h
 #define vtkAOSDataArrayTemplate_h
 
+#include "vtkBuffer.h"           // For storage buffer.
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkGenericDataArray.h"
-#include "vtkBuffer.h" // For storage buffer.
 
 // The export macro below makes no sense, but is necessary for older compilers
 // when we export instantiations of this class from vtkCommonCore.
 template <class ValueTypeT>
-class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate :
-    public vtkGenericDataArray<vtkAOSDataArrayTemplate<ValueTypeT>, ValueTypeT>
+class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate
+  : public vtkGenericDataArray<vtkAOSDataArrayTemplate<ValueTypeT>, ValueTypeT>
 {
-  typedef vtkGenericDataArray<vtkAOSDataArrayTemplate<ValueTypeT>, ValueTypeT>
-          GenericDataArrayType;
+  typedef vtkGenericDataArray<vtkAOSDataArrayTemplate<ValueTypeT>, ValueTypeT> GenericDataArrayType;
+
 public:
   typedef vtkAOSDataArrayTemplate<ValueTypeT> SelfType;
-  vtkTemplateTypeMacro(SelfType, GenericDataArrayType)
+  vtkTemplateTypeMacro(SelfType, GenericDataArrayType);
   typedef typename Superclass::ValueType ValueType;
 
   enum DeleteMethod
   {
-    VTK_DATA_ARRAY_FREE=vtkAbstractArray::VTK_DATA_ARRAY_FREE,
-    VTK_DATA_ARRAY_DELETE=vtkAbstractArray::VTK_DATA_ARRAY_DELETE,
-    VTK_DATA_ARRAY_ALIGNED_FREE=vtkAbstractArray::VTK_DATA_ARRAY_ALIGNED_FREE
+    VTK_DATA_ARRAY_FREE = vtkAbstractArray::VTK_DATA_ARRAY_FREE,
+    VTK_DATA_ARRAY_DELETE = vtkAbstractArray::VTK_DATA_ARRAY_DELETE,
+    VTK_DATA_ARRAY_ALIGNED_FREE = vtkAbstractArray::VTK_DATA_ARRAY_ALIGNED_FREE,
+    VTK_DATA_ARRAY_USER_DEFINED = vtkAbstractArray::VTK_DATA_ARRAY_USER_DEFINED
   };
 
   static vtkAOSDataArrayTemplate* New();
@@ -60,7 +61,8 @@ public:
   /**
    * Get the value at @a valueIdx. @a valueIdx assumes AOS ordering.
    */
-  inline ValueType GetValue(vtkIdType valueIdx) const
+  ValueType GetValue(vtkIdType valueIdx) const
+    VTK_EXPECTS(0 <= valueIdx && valueIdx < GetNumberOfValues())
   {
     return this->Buffer->GetBuffer()[valueIdx];
   }
@@ -68,7 +70,8 @@ public:
   /**
    * Set the value at @a valueIdx to @a value. @a valueIdx assumes AOS ordering.
    */
-  inline void SetValue(vtkIdType valueIdx, ValueType value)
+  void SetValue(vtkIdType valueIdx, ValueType value)
+    VTK_EXPECTS(0 <= valueIdx && valueIdx < GetNumberOfValues())
   {
     this->Buffer->GetBuffer()[valueIdx] = value;
   }
@@ -77,12 +80,12 @@ public:
   /**
    * Copy the tuple at @a tupleIdx into @a tuple.
    */
-  inline void GetTypedTuple(vtkIdType tupleIdx, ValueType* tuple) const
+  void GetTypedTuple(vtkIdType tupleIdx, ValueType* tuple) const
+    VTK_EXPECTS(0 <= tupleIdx && tupleIdx < GetNumberOfTuples())
   {
     const vtkIdType valueIdx = tupleIdx * this->NumberOfComponents;
     std::copy(this->Buffer->GetBuffer() + valueIdx,
-              this->Buffer->GetBuffer() + valueIdx + this->NumberOfComponents,
-              tuple);
+      this->Buffer->GetBuffer() + valueIdx + this->NumberOfComponents, tuple);
   }
   //@}
 
@@ -90,27 +93,29 @@ public:
   /**
    * Set this array's tuple at @a tupleIdx to the values in @a tuple.
    */
-  inline void SetTypedTuple(vtkIdType tupleIdx, const ValueType* tuple)
+  void SetTypedTuple(vtkIdType tupleIdx, const ValueType* tuple)
+    VTK_EXPECTS(0 <= tupleIdx && tupleIdx < GetNumberOfTuples())
   {
     const vtkIdType valueIdx = tupleIdx * this->NumberOfComponents;
-    std::copy(tuple, tuple + this->NumberOfComponents,
-              this->Buffer->GetBuffer() + valueIdx);
+    std::copy(tuple, tuple + this->NumberOfComponents, this->Buffer->GetBuffer() + valueIdx);
   }
   //@}
 
   /**
    * Get component @a comp of the tuple at @a tupleIdx.
    */
-  inline ValueType GetTypedComponent(vtkIdType tupleIdx, int comp) const
+  ValueType GetTypedComponent(vtkIdType tupleIdx, int comp) const VTK_EXPECTS(0 <= tupleIdx &&
+    tupleIdx < GetNumberOfTuples()) VTK_EXPECTS(0 <= comp && comp < GetNumberOfComponents())
   {
-    return this->Buffer->GetBuffer()[this->NumberOfComponents*tupleIdx + comp];
+    return this->Buffer->GetBuffer()[this->NumberOfComponents * tupleIdx + comp];
   }
 
   //@{
   /**
    * Set component @a comp of the tuple at @a tupleIdx to @a value.
    */
-  inline void SetTypedComponent(vtkIdType tupleIdx, int comp, ValueType value)
+  void SetTypedComponent(vtkIdType tupleIdx, int comp, ValueType value) VTK_EXPECTS(0 <= tupleIdx &&
+    tupleIdx < GetNumberOfTuples()) VTK_EXPECTS(0 <= comp && comp < GetNumberOfComponents())
   {
     const vtkIdType valueIdx = tupleIdx * this->NumberOfComponents + comp;
     this->SetValue(valueIdx, value);
@@ -121,15 +126,15 @@ public:
   /**
    * Set component @a comp of all tuples to @a value.
    */
-  void FillTypedComponent(int compIdx, ValueType value) VTK_OVERRIDE;
+  void FillTypedComponent(int compIdx, ValueType value) override;
   //@}
 
   //@{
   /**
    * Set all the values in array to @a value.
    */
-  void FillValue(ValueType value) VTK_OVERRIDE;
-  void Fill(double value) VTK_OVERRIDE;
+  void FillValue(ValueType value) override;
+  void Fill(double value) override;
   //@}
 
   //@{
@@ -139,7 +144,7 @@ public:
    * data values requested.
    */
   ValueType* WritePointer(vtkIdType valueIdx, vtkIdType numValues);
-  void* WriteVoidPointer(vtkIdType valueIdx, vtkIdType numValues) VTK_OVERRIDE;
+  void* WriteVoidPointer(vtkIdType valueIdx, vtkIdType numValues) override;
   //@}
 
   //@{
@@ -151,57 +156,66 @@ public:
    * for a safer alternative for fast data access.
    */
   ValueType* GetPointer(vtkIdType valueIdx);
-  void* GetVoidPointer(vtkIdType valueIdx) VTK_OVERRIDE;
+  void* GetVoidPointer(vtkIdType valueIdx) override;
   //@}
 
   //@{
   /**
    * This method lets the user specify data to be held by the array.  The
    * array argument is a pointer to the data.  size is the size of the
-   * array supplied by the user.  Set save to 1 to keep the class from
+   * array supplied by the user (as number of values, not in bytes).
+   * Set save to 1 to prevent the class from
    * deleting the array when it cleans up or reallocates memory.  The class
    * uses the actual array provided; it does not copy the data from the
    * suppled array. If specified, the delete method determines how the data
    * array will be deallocated. If the delete method is
    * VTK_DATA_ARRAY_FREE, free() will be used. If the delete method is
    * VTK_DATA_ARRAY_DELETE, delete[] will be used. If the delete method is
-   * VTK_DATA_ARRAY_ALIGNED_FREE _aligned_free() will be used on windows, while
+   * VTK_DATA_ARRAY_ALIGNED_FREE _aligned_free() will be used on Windows, while
    * free() will be used everywhere else. The default is FREE.
    */
-  void SetArray(VTK_ZEROCOPY ValueType* array, vtkIdType size, int save,
-                int deleteMethod);
+  void SetArray(VTK_ZEROCOPY ValueType* array, vtkIdType size, int save, int deleteMethod);
   void SetArray(VTK_ZEROCOPY ValueType* array, vtkIdType size, int save);
-  void SetVoidArray(void* array, vtkIdType size, int save) VTK_OVERRIDE;
-  void SetVoidArray(void* array, vtkIdType size, int save,
-                    int deleteMethod) VTK_OVERRIDE;
+  void SetVoidArray(void* array, vtkIdType size, int save) override;
+  void SetVoidArray(void* array, vtkIdType size, int save, int deleteMethod) override;
   //@}
 
+  /**
+   * This method allows the user to specify a custom free function to be
+   * called when the array is deallocated. Calling this method will implicitly
+   * mean that the given free function will be called when the class
+   * cleans up or reallocates memory.
+   **/
+  void SetArrayFreeFunction(void (*callback)(void*)) override;
+
   // Overridden for optimized implementations:
-  void SetTuple(vtkIdType tupleIdx, const float *tuple) VTK_OVERRIDE;
-  void SetTuple(vtkIdType tupleIdx, const double *tuple) VTK_OVERRIDE;
+  void SetTuple(vtkIdType tupleIdx, const float* tuple) override;
+  void SetTuple(vtkIdType tupleIdx, const double* tuple) override;
   // MSVC doesn't like 'using' here (error C2487). Just forward instead:
   // using Superclass::SetTuple;
-  void SetTuple(vtkIdType dstTupleIdx, vtkIdType srcTupleIdx,
-                vtkAbstractArray *source) VTK_OVERRIDE
-  { this->Superclass::SetTuple(dstTupleIdx, srcTupleIdx, source); }
-  void InsertTuple(vtkIdType tupleIdx, const float *source) VTK_OVERRIDE;
-  void InsertTuple(vtkIdType tupleIdx, const double *source) VTK_OVERRIDE;
+  void SetTuple(vtkIdType dstTupleIdx, vtkIdType srcTupleIdx, vtkAbstractArray* source) override
+  {
+    this->Superclass::SetTuple(dstTupleIdx, srcTupleIdx, source);
+  }
+  void InsertTuple(vtkIdType tupleIdx, const float* source) override;
+  void InsertTuple(vtkIdType tupleIdx, const double* source) override;
   // MSVC doesn't like 'using' here (error C2487). Just forward instead:
   // using Superclass::InsertTuple;
-  void InsertTuple(vtkIdType dstTupleIdx, vtkIdType srcTupleIdx,
-                   vtkAbstractArray *source) VTK_OVERRIDE
-  { this->Superclass::InsertTuple(dstTupleIdx, srcTupleIdx, source); }
-  void InsertComponent(vtkIdType tupleIdx, int compIdx,
-                       double value) VTK_OVERRIDE;
-  vtkIdType InsertNextTuple(const float *tuple) VTK_OVERRIDE;
-  vtkIdType InsertNextTuple(const double *tuple) VTK_OVERRIDE;
+  void InsertTuple(vtkIdType dstTupleIdx, vtkIdType srcTupleIdx, vtkAbstractArray* source) override
+  {
+    this->Superclass::InsertTuple(dstTupleIdx, srcTupleIdx, source);
+  }
+  void InsertComponent(vtkIdType tupleIdx, int compIdx, double value) override;
+  vtkIdType InsertNextTuple(const float* tuple) override;
+  vtkIdType InsertNextTuple(const double* tuple) override;
   // MSVC doesn't like 'using' here (error C2487). Just forward instead:
   // using Superclass::InsertNextTuple;
-  vtkIdType InsertNextTuple(vtkIdType srcTupleIdx,
-                            vtkAbstractArray *source) VTK_OVERRIDE
-  { return this->Superclass::InsertNextTuple(srcTupleIdx, source); }
-  void GetTuple(vtkIdType tupleIdx, double * tuple) VTK_OVERRIDE;
-  double *GetTuple(vtkIdType tupleIdx) VTK_OVERRIDE;
+  vtkIdType InsertNextTuple(vtkIdType srcTupleIdx, vtkAbstractArray* source) override
+  {
+    return this->Superclass::InsertNextTuple(srcTupleIdx, source);
+  }
+  void GetTuple(vtkIdType tupleIdx, double* tuple) override;
+  double* GetTuple(vtkIdType tupleIdx) override;
 
   /**
    * Tell the array explicitly that a single data element has
@@ -227,20 +241,18 @@ public:
   /**
    * Perform a fast, safe cast from a vtkAbstractArray to a
    * vtkAOSDataArrayTemplate.
-   * This method checks if source->GetArrayType() returns DataArray
-   * or a more derived type, and performs a static_cast to return
-   * source as a vtkDataArray pointer. Otherwise, nullptr is returned.
+   * This method checks if source->GetArrayType() returns AOSDataArrayTemplate
+   * or a more derived type, checks the data types, and performs a static_cast
+   * to return source as a vtkDataArray pointer. Otherwise, nullptr is returned.
    */
-  static vtkAOSDataArrayTemplate<ValueType>*
-  FastDownCast(vtkAbstractArray *source)
+  static vtkAOSDataArrayTemplate<ValueType>* FastDownCast(vtkAbstractArray* source)
   {
     if (source)
     {
       switch (source->GetArrayType())
       {
         case vtkAbstractArray::AoSDataArrayTemplate:
-          if (vtkDataTypesCompare(source->GetDataType(),
-                                  vtkTypeTraits<ValueType>::VTK_TYPE_ID))
+          if (vtkDataTypesCompare(source->GetDataType(), vtkTypeTraits<ValueType>::VTK_TYPE_ID))
           {
             return static_cast<vtkAOSDataArrayTemplate<ValueType>*>(source);
           }
@@ -251,34 +263,24 @@ public:
   }
   //@}
 
-  int GetArrayType() VTK_OVERRIDE { return vtkAbstractArray::AoSDataArrayTemplate; }
-  VTK_NEWINSTANCE vtkArrayIterator *NewIterator() VTK_OVERRIDE;
-  bool HasStandardMemoryLayout() VTK_OVERRIDE { return true; }
-  void ShallowCopy(vtkDataArray *other) VTK_OVERRIDE;
-
-  //@{
-  /**
-   * @deprecated Replace TupleValue with TypedTuple to use the new method
-   * names. Note that the new signatures are also const-correct.
-   */
-  VTK_LEGACY(void GetTupleValue(vtkIdType tupleIdx, ValueType *tuple));
-  VTK_LEGACY(void SetTupleValue(vtkIdType tupleIdx, const ValueType *tuple));
-  VTK_LEGACY(void InsertTupleValue(vtkIdType tupleIdx, const ValueType *tuple));
-  VTK_LEGACY(vtkIdType InsertNextTupleValue(const ValueType *tuple));
-  //@}
+  int GetArrayType() const override { return vtkAbstractArray::AoSDataArrayTemplate; }
+  VTK_NEWINSTANCE vtkArrayIterator* NewIterator() override;
+  bool HasStandardMemoryLayout() const override { return true; }
+  void ShallowCopy(vtkDataArray* other) override;
 
   // Reimplemented for efficiency:
-  void InsertTuples(vtkIdType dstStart, vtkIdType n, vtkIdType srcStart,
-                    vtkAbstractArray* source) VTK_OVERRIDE;
+  void InsertTuples(
+    vtkIdType dstStart, vtkIdType n, vtkIdType srcStart, vtkAbstractArray* source) override;
   // MSVC doesn't like 'using' here (error C2487). Just forward instead:
   // using Superclass::InsertTuples;
-  void InsertTuples(vtkIdList *dstIds, vtkIdList *srcIds,
-                    vtkAbstractArray *source) VTK_OVERRIDE
-  { this->Superclass::InsertTuples(dstIds, srcIds, source); }
+  void InsertTuples(vtkIdList* dstIds, vtkIdList* srcIds, vtkAbstractArray* source) override
+  {
+    this->Superclass::InsertTuples(dstIds, srcIds, source);
+  }
 
 protected:
   vtkAOSDataArrayTemplate();
-  ~vtkAOSDataArrayTemplate() VTK_OVERRIDE;
+  ~vtkAOSDataArrayTemplate() override;
 
   /**
    * Allocate space for numTuples. Old data is not preserved. If numTuples == 0,
@@ -292,39 +294,37 @@ protected:
    */
   bool ReallocateTuples(vtkIdType numTuples);
 
-  vtkBuffer<ValueType> *Buffer;
+  vtkBuffer<ValueType>* Buffer;
 
 private:
-  vtkAOSDataArrayTemplate(const vtkAOSDataArrayTemplate&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAOSDataArrayTemplate&) VTK_DELETE_FUNCTION;
+  vtkAOSDataArrayTemplate(const vtkAOSDataArrayTemplate&) = delete;
+  void operator=(const vtkAOSDataArrayTemplate&) = delete;
 
-  friend class vtkGenericDataArray<vtkAOSDataArrayTemplate<ValueTypeT>,
-                                   ValueTypeT>;
-
+  friend class vtkGenericDataArray<vtkAOSDataArrayTemplate<ValueTypeT>, ValueTypeT>;
 };
 
 // Declare vtkArrayDownCast implementations for AoS containers:
-vtkArrayDownCast_TemplateFastCastMacro(vtkAOSDataArrayTemplate)
+vtkArrayDownCast_TemplateFastCastMacro(vtkAOSDataArrayTemplate);
 
 // This macro is used by the subclasses to create dummy
 // declarations for these functions such that the wrapper
 // can see them. The wrappers ignore vtkAOSDataArrayTemplate.
-#define vtkCreateWrappedArrayInterface(T) \
-  int GetDataType(); \
-  void GetTypedTuple(vtkIdType i, T* tuple); \
-  void SetTypedTuple(vtkIdType i, const T* tuple); \
-  void InsertTypedTuple(vtkIdType i, const T* tuple); \
-  vtkIdType InsertNextTypedTuple(const T* tuple); \
-  T GetValue(vtkIdType id); \
-  void SetValue(vtkIdType id, T value); \
-  void SetNumberOfValues(vtkIdType number); \
-  void InsertValue(vtkIdType id, T f); \
-  vtkIdType InsertNextValue(T f); \
-  T *GetValueRange(int comp); \
-  T *GetValueRange(); \
-  T* WritePointer(vtkIdType id, vtkIdType number); \
-  T* GetPointer(vtkIdType id); \
-  void SetArray(VTK_ZEROCOPY T* array, vtkIdType size, int save); \
+#define vtkCreateWrappedArrayInterface(T)                                                          \
+  int GetDataType() const override;                                                                \
+  void GetTypedTuple(vtkIdType i, T* tuple) VTK_EXPECTS(0 <= i && i < GetNumberOfTuples());        \
+  void SetTypedTuple(vtkIdType i, const T* tuple) VTK_EXPECTS(0 <= i && i < GetNumberOfTuples());  \
+  void InsertTypedTuple(vtkIdType i, const T* tuple) VTK_EXPECTS(0 <= i);                          \
+  vtkIdType InsertNextTypedTuple(const T* tuple);                                                  \
+  T GetValue(vtkIdType id) const VTK_EXPECTS(0 <= id && id < GetNumberOfValues());                 \
+  void SetValue(vtkIdType id, T value) VTK_EXPECTS(0 <= id && id < GetNumberOfValues());           \
+  bool SetNumberOfValues(vtkIdType number) override;                                               \
+  void InsertValue(vtkIdType id, T f) VTK_EXPECTS(0 <= id);                                        \
+  vtkIdType InsertNextValue(T f);                                                                  \
+  T* GetValueRange(int comp) VTK_SIZEHINT(2);                                                      \
+  T* GetValueRange() VTK_SIZEHINT(2);                                                              \
+  T* WritePointer(vtkIdType id, vtkIdType number);                                                 \
+  T* GetPointer(vtkIdType id);                                                                     \
+  void SetArray(VTK_ZEROCOPY T* array, vtkIdType size, int save);                                  \
   void SetArray(VTK_ZEROCOPY T* array, vtkIdType size, int save, int deleteMethod)
 
 #endif // header guard
@@ -334,33 +334,32 @@ vtkArrayDownCast_TemplateFastCastMacro(vtkAOSDataArrayTemplate)
 // vtkAOSDataArrayTemplate can be found externally. This prevents each library
 // from instantiating these on their own.
 #ifdef VTK_AOS_DATA_ARRAY_TEMPLATE_INSTANTIATING
-#define VTK_AOS_DATA_ARRAY_TEMPLATE_INSTANTIATE(T) \
-  template class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate< T >
+#define VTK_AOS_DATA_ARRAY_TEMPLATE_INSTANTIATE(T)                                                 \
+  template class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate<T>
 #elif defined(VTK_USE_EXTERN_TEMPLATE)
 #ifndef VTK_AOS_DATA_ARRAY_TEMPLATE_EXTERN
 #define VTK_AOS_DATA_ARRAY_TEMPLATE_EXTERN
 #ifdef _MSC_VER
-#pragma warning (push)
+#pragma warning(push)
 // The following is needed when the vtkAOSDataArrayTemplate is declared
 // dllexport and is used from another class in vtkCommonCore
-#pragma warning (disable: 4910) // extern and dllexport incompatible
+#pragma warning(disable : 4910) // extern and dllexport incompatible
 #endif
-vtkExternTemplateMacro(
-  extern template class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate)
+vtkExternTemplateMacro(extern template class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate);
 #ifdef _MSC_VER
-#pragma warning (pop)
+#pragma warning(pop)
 #endif
 #endif // VTK_AOS_DATA_ARRAY_TEMPLATE_EXTERN
 
-// The following clause is only for MSVC 2008 and 2010
+// The following clause is only for MSVC
 #elif defined(_MSC_VER) && !defined(VTK_BUILD_SHARED_LIBS)
-#pragma warning (push)
+#pragma warning(push)
 
 // C4091: 'extern ' : ignored on left of 'int' when no variable is declared
-#pragma warning (disable: 4091)
+#pragma warning(disable : 4091)
 
 // Compiler-specific extension warning.
-#pragma warning (disable: 4231)
+#pragma warning(disable : 4231)
 
 // We need to disable warning 4910 and do an extern dllexport
 // anyway.  When deriving vtkCharArray and other types from an
@@ -368,19 +367,18 @@ vtkExternTemplateMacro(
 // instantiation of the base class.  From outside the vtkCommon
 // library we block this using an extern dllimport instantiation.
 // For classes inside vtkCommon we should be able to just do an
-// extern instantiation, but VS 2008 complains about missing
+// extern instantiation, but VS complains about missing
 // definitions.  We cannot do an extern dllimport inside vtkCommon
 // since the symbols are local to the dll.  An extern dllexport
-// seems to be the only way to convince VS 2008 to do the right
+// seems to be the only way to convince VS to do the right
 // thing, so we just disable the warning.
-#pragma warning (disable: 4910) // extern and dllexport incompatible
+#pragma warning(disable : 4910) // extern and dllexport incompatible
 
 // Use an "extern explicit instantiation" to give the class a DLL
 // interface.  This is a compiler-specific extension.
-vtkInstantiateTemplateMacro(
-  extern template class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate)
+vtkInstantiateTemplateMacro(extern template class VTKCOMMONCORE_EXPORT vtkAOSDataArrayTemplate);
 
-#pragma warning (pop)
+#pragma warning(pop)
 
 #endif
 

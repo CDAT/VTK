@@ -25,13 +25,13 @@
  * Neurosciences, Foothills Medical Centre, Calgary, for providing this class.
  * @sa
  * vtkImageSlice vtkImageProperty vtkImageResliceMapper
-*/
+ */
 
 #ifndef vtkImageSliceMapper_h
 #define vtkImageSliceMapper_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkImageMapper3D.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkCamera;
 class vtkPoints;
@@ -39,9 +39,9 @@ class vtkPoints;
 class VTKRENDERINGCORE_EXPORT vtkImageSliceMapper : public vtkImageMapper3D
 {
 public:
-  static vtkImageSliceMapper *New();
-  vtkTypeMacro(vtkImageSliceMapper,vtkImageMapper3D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageSliceMapper* New();
+  vtkTypeMacro(vtkImageSliceMapper, vtkImageMapper3D);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -64,10 +64,15 @@ public:
   //@{
   /**
    * Set the orientation of the slices to display.  The default
-   * orientation is 2, which is Z.
+   * orientation is 2, which is K. Not the orientaiton here
+   * is in index space. Not physical or world.
    */
   vtkSetClampMacro(Orientation, int, 0, 2);
   vtkGetMacro(Orientation, int);
+  void SetOrientationToI() { this->SetOrientation(0); }
+  void SetOrientationToJ() { this->SetOrientation(1); }
+  void SetOrientationToK() { this->SetOrientation(2); }
+  // old methods
   void SetOrientationToX() { this->SetOrientation(0); }
   void SetOrientationToY() { this->SetOrientation(1); }
   void SetOrientationToZ() { this->SetOrientation(2); }
@@ -78,9 +83,9 @@ public:
    * Use the specified CroppingRegion.  The default is to display
    * the full slice.
    */
-  vtkSetMacro(Cropping, int);
-  vtkBooleanMacro(Cropping, int);
-  vtkGetMacro(Cropping, int);
+  vtkSetMacro(Cropping, vtkTypeBool);
+  vtkBooleanMacro(Cropping, vtkTypeBool);
+  vtkGetMacro(Cropping, vtkTypeBool);
   //@}
 
   //@{
@@ -95,82 +100,82 @@ public:
   /**
    * This should only be called by the renderer.
    */
-  void Render(vtkRenderer *renderer, vtkImageSlice *prop) VTK_OVERRIDE;
+  void Render(vtkRenderer* renderer, vtkImageSlice* prop) override;
 
   /**
    * Release any graphics resources that are being consumed by
    * this mapper.  The parameter window is used to determine
    * which graphic resources to release.
    */
-  void ReleaseGraphicsResources(vtkWindow *) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow*) override;
 
   /**
    * Get the mtime for the mapper.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
    * The bounding box (array of six doubles) of data expressed as
    * (xmin,xmax, ymin,ymax, zmin,zmax).
    */
-  double *GetBounds() VTK_OVERRIDE;
-  void GetBounds(double bounds[6]) VTK_OVERRIDE {
-    this->vtkAbstractMapper3D::GetBounds(bounds); };
+  double* GetBounds() override;
+  void GetBounds(double bounds[6]) override { this->vtkAbstractMapper3D::GetBounds(bounds); }
   //@}
+
+  // return the bounds in index space
+  void GetIndexBounds(double extent[6]) override;
 
   /**
    * Get the plane as a homogeneous 4-vector that gives the plane
    * equation coefficients.  It is computed from the Orientation
    * and SliceNumber, the propMatrix is unused and can be zero.
    */
-  void GetSlicePlaneInDataCoords(vtkMatrix4x4 *propMatrix,
-                                         double plane[4]) VTK_OVERRIDE;
+  void GetSlicePlaneInDataCoords(vtkMatrix4x4* propMatrix, double plane[4]) override;
 
   /**
    * Handle requests from the pipeline executive.
    */
-  int ProcessRequest(vtkInformation* request,
-                             vtkInformationVector** inInfo,
-                             vtkInformationVector* outInfo) VTK_OVERRIDE;
+  vtkTypeBool ProcessRequest(
+    vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo) override;
 
 protected:
   vtkImageSliceMapper();
-  ~vtkImageSliceMapper() VTK_OVERRIDE;
+  ~vtkImageSliceMapper() override;
 
   /**
    * Set points that describe a polygon on which the slice will
    * be rendered.
    */
-  void SetPoints(vtkPoints *points);
-  vtkPoints *GetPoints() { return this->Points; }
+  void SetPoints(vtkPoints* points);
+  vtkPoints* GetPoints() { return this->Points; }
 
   /**
    * Force linear interpolation.  Internal method, for when this
    * mapper is used as a helper class.
    */
-  void SetExactPixelMatch(int v) {
-    this->ExactPixelMatch = (v != 0); }
+  void SetExactPixelMatch(int v) { this->ExactPixelMatch = (v != 0); }
 
   /**
    * Pass color data.  Internal method, for when this mapper is
    * used as a helper class.
    */
-  void SetPassColorData(int v) {
-    this->PassColorData = (v != 0); }
+  void SetPassColorData(int v) { this->PassColorData = (v != 0); }
 
   //@{
   /**
    * Set the display extent.  Internal method, for when this mapper
    * is used as a helper class.
    */
-  void SetDisplayExtent(int extent[6]) {
+  void SetDisplayExtent(const int extent[6])
+  {
     this->DisplayExtent[0] = extent[0];
     this->DisplayExtent[1] = extent[1];
     this->DisplayExtent[2] = extent[2];
     this->DisplayExtent[3] = extent[3];
     this->DisplayExtent[4] = extent[4];
-    this->DisplayExtent[5] = extent[5]; }
+    this->DisplayExtent[5] = extent[5];
+  }
   //@}
 
   /**
@@ -178,32 +183,32 @@ protected:
    * that indicates one of the six major directions.  The integers
    * 0,1,2 are x,y,z and 3,4,5 are -x,-y,-z.
    */
-  int GetOrientationFromCamera(vtkMatrix4x4 *propMatrix, vtkCamera *camera);
+  int GetOrientationFromCamera(double const* propMatrix, vtkCamera* camera);
 
   /**
    * Get the current slice as the one closest to the focal point.
    */
-  int GetSliceFromCamera(vtkMatrix4x4 *propMatrix, vtkCamera *camera);
+  int GetSliceFromCamera(double const* propMatrix, vtkCamera* camera);
 
   /**
    * Get the dimension indices according to the orientation.
    */
-  static void GetDimensionIndices(int orientation, int &xdim, int &ydim);
+  static void GetDimensionIndices(int orientation, int& xdim, int& ydim);
 
   int SliceNumber;
   int SliceNumberMinValue;
   int SliceNumberMaxValue;
   int Orientation;
-  int Cropping;
+  vtkTypeBool Cropping;
   int CroppingRegion[6];
   int DisplayExtent[6];
   int ExactPixelMatch;
   int PassColorData;
-  vtkPoints *Points;
+  vtkPoints* Points;
 
 private:
-  vtkImageSliceMapper(const vtkImageSliceMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageSliceMapper&) VTK_DELETE_FUNCTION;
+  vtkImageSliceMapper(const vtkImageSliceMapper&) = delete;
+  void operator=(const vtkImageSliceMapper&) = delete;
 
   friend class vtkImageResliceMapper;
 };

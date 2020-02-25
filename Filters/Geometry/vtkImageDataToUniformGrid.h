@@ -21,26 +21,25 @@
  * array will result in the point or cell being blanked. Set Reverse
  * to 1 to indicate that values of 0 will result in the point or
  * cell to not be blanked.
-*/
+ */
 
 #ifndef vtkImageDataToUniformGrid_h
 #define vtkImageDataToUniformGrid_h
 
-#include "vtkFiltersGeometryModule.h" // For export macro
 #include "vtkDataObjectAlgorithm.h"
+#include "vtkFiltersGeometryModule.h" // For export macro
 
 class vtkDataArray;
 class vtkFieldData;
 class vtkImageData;
 class vtkUniformGrid;
 
-class VTKFILTERSGEOMETRY_EXPORT vtkImageDataToUniformGrid
-: public vtkDataObjectAlgorithm
+class VTKFILTERSGEOMETRY_EXPORT vtkImageDataToUniformGrid : public vtkDataObjectAlgorithm
 {
- public:
-  static vtkImageDataToUniformGrid *New();
-  vtkTypeMacro(vtkImageDataToUniformGrid,vtkDataObjectAlgorithm);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+public:
+  static vtkImageDataToUniformGrid* New();
+  vtkTypeMacro(vtkImageDataToUniformGrid, vtkDataObjectAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -49,33 +48,31 @@ class VTKFILTERSGEOMETRY_EXPORT vtkImageDataToUniformGrid
    * 1 to make points or cells to not be blanked for array values
    * of 0.
    */
-  vtkSetClampMacro(Reverse, int, 0, 1);
-  vtkGetMacro(Reverse, int);
-  vtkBooleanMacro(Reverse, int);
+  vtkSetClampMacro(Reverse, vtkTypeBool, 0, 1);
+  vtkGetMacro(Reverse, vtkTypeBool);
+  vtkBooleanMacro(Reverse, vtkTypeBool);
   //@}
 
 protected:
   vtkImageDataToUniformGrid();
-  ~vtkImageDataToUniformGrid() VTK_OVERRIDE;
+  ~vtkImageDataToUniformGrid() override;
 
-  int RequestData(vtkInformation *req,
-                  vtkInformationVector **inV,
-                  vtkInformationVector *outV) VTK_OVERRIDE;
-  int RequestDataObject(vtkInformation *req,
-                        vtkInformationVector **inV,
-                        vtkInformationVector *outV) VTK_OVERRIDE;
+  int RequestData(
+    vtkInformation* req, vtkInformationVector** inV, vtkInformationVector* outV) override;
+  int RequestDataObject(
+    vtkInformation* req, vtkInformationVector** inV, vtkInformationVector* outV) override;
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
-  int FillOutputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
-  virtual int Process(vtkImageData* input, int association, const char* arrayName,
-                      vtkUniformGrid* output);
+  virtual int Process(
+    vtkImageData* input, int association, const char* arrayName, vtkUniformGrid* output);
 
 private:
-  vtkImageDataToUniformGrid(const vtkImageDataToUniformGrid&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageDataToUniformGrid&) VTK_DELETE_FUNCTION;
+  vtkImageDataToUniformGrid(const vtkImageDataToUniformGrid&) = delete;
+  void operator=(const vtkImageDataToUniformGrid&) = delete;
 
-  int Reverse;
+  vtkTypeBool Reverse;
 };
 
 #endif

@@ -14,7 +14,8 @@
 =========================================================================*/
 /**
  * @class   vtkExtractPolyDataGeometry
- * @brief   extract vtkPolyData cells that lies either entirely inside or outside of a specified implicit function
+ * @brief   extract vtkPolyData cells that lies either entirely inside or outside of a specified
+ * implicit function
  *
  *
  * vtkExtractPolyDataGeometry extracts from its input vtkPolyData all cells
@@ -38,7 +39,7 @@
  *
  * @sa
  * vtkExtractGeometry vtkClipPolyData
-*/
+ */
 
 #ifndef vtkExtractPolyDataGeometry_h
 #define vtkExtractPolyDataGeometry_h
@@ -51,25 +52,25 @@ class vtkImplicitFunction;
 class VTKFILTERSEXTRACTION_EXPORT vtkExtractPolyDataGeometry : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkExtractPolyDataGeometry,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkExtractPolyDataGeometry, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object with ExtractInside turned on.
    */
-  static vtkExtractPolyDataGeometry *New();
+  static vtkExtractPolyDataGeometry* New();
 
   /**
    * Return the MTime taking into account changes to the implicit function
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
    * Specify the implicit function for inside/outside checks.
    */
   virtual void SetImplicitFunction(vtkImplicitFunction*);
-  vtkGetObjectMacro(ImplicitFunction,vtkImplicitFunction);
+  vtkGetObjectMacro(ImplicitFunction, vtkImplicitFunction);
   //@}
 
   //@{
@@ -78,9 +79,9 @@ public:
    * function (ExtractInside == 1) or outside of implicit function
    * (ExtractInside == 0).
    */
-  vtkSetMacro(ExtractInside,int);
-  vtkGetMacro(ExtractInside,int);
-  vtkBooleanMacro(ExtractInside,int);
+  vtkSetMacro(ExtractInside, vtkTypeBool);
+  vtkGetMacro(ExtractInside, vtkTypeBool);
+  vtkBooleanMacro(ExtractInside, vtkTypeBool);
   //@}
 
   //@{
@@ -88,9 +89,9 @@ public:
    * Boolean controls whether to extract cells that are partially inside.
    * By default, ExtractBoundaryCells is off.
    */
-  vtkSetMacro(ExtractBoundaryCells,int);
-  vtkGetMacro(ExtractBoundaryCells,int);
-  vtkBooleanMacro(ExtractBoundaryCells,int);
+  vtkSetMacro(ExtractBoundaryCells, vtkTypeBool);
+  vtkGetMacro(ExtractBoundaryCells, vtkTypeBool);
+  vtkBooleanMacro(ExtractBoundaryCells, vtkTypeBool);
   //@}
 
   //@{
@@ -98,36 +99,36 @@ public:
    * Boolean controls whether points are culled or simply passed through
    * to the output.
    */
-  vtkSetMacro(PassPoints,int);
-  vtkGetMacro(PassPoints,int);
-  vtkBooleanMacro(PassPoints,int);
+  vtkSetMacro(PassPoints, vtkTypeBool);
+  vtkGetMacro(PassPoints, vtkTypeBool);
+  vtkBooleanMacro(PassPoints, vtkTypeBool);
   //@}
 
 protected:
-  vtkExtractPolyDataGeometry(vtkImplicitFunction *f=nullptr);
-  ~vtkExtractPolyDataGeometry() VTK_OVERRIDE;
+  vtkExtractPolyDataGeometry(vtkImplicitFunction* f = nullptr);
+  ~vtkExtractPolyDataGeometry() override;
 
   // Usual data generation method
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  vtkImplicitFunction *ImplicitFunction;
-  int ExtractInside;
-  int ExtractBoundaryCells;
-  int PassPoints;
+  vtkImplicitFunction* ImplicitFunction;
+  vtkTypeBool ExtractInside;
+  vtkTypeBool ExtractBoundaryCells;
+  vtkTypeBool PassPoints;
 
-  vtkIdType InsertPointInMap(vtkIdType i, vtkPoints *inPts, vtkPoints *newPts, vtkIdType *pointMap);
+  vtkIdType InsertPointInMap(vtkIdType i, vtkPoints* inPts, vtkPoints* newPts, vtkIdType* pointMap);
 
 private:
-  vtkExtractPolyDataGeometry(const vtkExtractPolyDataGeometry&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkExtractPolyDataGeometry&) VTK_DELETE_FUNCTION;
+  vtkExtractPolyDataGeometry(const vtkExtractPolyDataGeometry&) = delete;
+  void operator=(const vtkExtractPolyDataGeometry&) = delete;
 };
 
 //@{
 /**
  * When not passing points, have to use a point map to keep track of things.
  */
-inline vtkIdType vtkExtractPolyDataGeometry::InsertPointInMap(vtkIdType i, vtkPoints *inPts,
-                                                              vtkPoints *newPts, vtkIdType *pointMap)
+inline vtkIdType vtkExtractPolyDataGeometry::InsertPointInMap(
+  vtkIdType i, vtkPoints* inPts, vtkPoints* newPts, vtkIdType* pointMap)
 {
   double x[3];
   inPts->GetPoint(i, x);
@@ -135,6 +136,5 @@ inline vtkIdType vtkExtractPolyDataGeometry::InsertPointInMap(vtkIdType i, vtkPo
   return pointMap[i];
 }
 //@}
-
 
 #endif

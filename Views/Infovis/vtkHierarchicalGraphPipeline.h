@@ -26,13 +26,13 @@
  * viewed as an overlay on a tree. This class is not for general use, but
  * is used in the internals of vtkRenderedHierarchyRepresentation and
  * vtkRenderedTreeAreaRepresentation.
-*/
+ */
 
 #ifndef vtkHierarchicalGraphPipeline_h
 #define vtkHierarchicalGraphPipeline_h
 
-#include "vtkViewsInfovisModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkViewsInfovisModule.h" // For export macro
 
 class vtkActor;
 class vtkActor2D;
@@ -55,7 +55,7 @@ class VTKVIEWSINFOVIS_EXPORT vtkHierarchicalGraphPipeline : public vtkObject
 public:
   static vtkHierarchicalGraphPipeline* New();
   vtkTypeMacro(vtkHierarchicalGraphPipeline, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -143,9 +143,7 @@ public:
    * annConn is the annotation link connection.
    */
   virtual void PrepareInputConnections(
-    vtkAlgorithmOutput* graphConn,
-    vtkAlgorithmOutput* treeConn,
-    vtkAlgorithmOutput* annConn);
+    vtkAlgorithmOutput* graphConn, vtkAlgorithmOutput* treeConn, vtkAlgorithmOutput* annConn);
 
   /**
    * Applies the view theme to this graph.
@@ -178,18 +176,18 @@ public:
 
 protected:
   vtkHierarchicalGraphPipeline();
-  ~vtkHierarchicalGraphPipeline() VTK_OVERRIDE;
+  ~vtkHierarchicalGraphPipeline() override;
 
-  vtkApplyColors*                  ApplyColors;
+  vtkApplyColors* ApplyColors;
   vtkGraphHierarchicalBundleEdges* Bundle;
-  vtkGraphToPolyData*              GraphToPoly;
-  vtkSplineGraphEdges*             Spline;
-  vtkPolyDataMapper*               Mapper;
-  vtkActor*                        Actor;
-  vtkTextProperty*                 TextProperty;
-  vtkEdgeCenters*                  EdgeCenters;
-  vtkDynamic2DLabelMapper*         LabelMapper;
-  vtkActor2D*                      LabelActor;
+  vtkGraphToPolyData* GraphToPoly;
+  vtkSplineGraphEdges* Spline;
+  vtkPolyDataMapper* Mapper;
+  vtkActor* Actor;
+  vtkTextProperty* TextProperty;
+  vtkEdgeCenters* EdgeCenters;
+  vtkDynamic2DLabelMapper* LabelMapper;
+  vtkActor2D* LabelActor;
 
   char* HoverArrayName;
 
@@ -202,8 +200,8 @@ protected:
   char* LabelArrayNameInternal;
 
 private:
-  vtkHierarchicalGraphPipeline(const vtkHierarchicalGraphPipeline&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHierarchicalGraphPipeline&) VTK_DELETE_FUNCTION;
+  vtkHierarchicalGraphPipeline(const vtkHierarchicalGraphPipeline&) = delete;
+  void operator=(const vtkHierarchicalGraphPipeline&) = delete;
 };
 
 #endif

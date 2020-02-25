@@ -26,8 +26,9 @@
  * individual data points on the node that owns it.
  *
  * @par Thanks:
- * Thanks to Janine Bennett, Philippe Pebay and David Thompson from Sandia National Laboratories for implementing this class.
-*/
+ * Thanks to Janine Bennett, Philippe Pebay and David Thompson from Sandia National Laboratories for
+ * implementing this class.
+ */
 
 #ifndef vtkPKMeansStatistics_h
 #define vtkPKMeansStatistics_h
@@ -43,7 +44,7 @@ class VTKFILTERSPARALLELSTATISTICS_EXPORT vtkPKMeansStatistics : public vtkKMean
 public:
   static vtkPKMeansStatistics* New();
   vtkTypeMacro(vtkPKMeansStatistics, vtkKMeansStatistics);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -57,40 +58,31 @@ public:
   /**
    * Subroutine to update new cluster centers from the old centers.
    */
-  virtual void UpdateClusterCenters( vtkTable* newClusterElements,
-                                     vtkTable* curClusterElements,
-                                     vtkIdTypeArray* numMembershipChanges,
-                                     vtkIdTypeArray* numElementsInCluster,
-                                     vtkDoubleArray* error,
-                                     vtkIdTypeArray* startRunID,
-                                     vtkIdTypeArray* endRunID,
-                                     vtkIntArray *computeRun ) VTK_OVERRIDE;
+  void UpdateClusterCenters(vtkTable* newClusterElements, vtkTable* curClusterElements,
+    vtkIdTypeArray* numMembershipChanges, vtkIdTypeArray* numElementsInCluster,
+    vtkDoubleArray* error, vtkIdTypeArray* startRunID, vtkIdTypeArray* endRunID,
+    vtkIntArray* computeRun) override;
 
   /**
    * Subroutine to get the total number of data objects.
    */
-  virtual vtkIdType GetTotalNumberOfObservations( vtkIdType numObservations ) VTK_OVERRIDE;
+  vtkIdType GetTotalNumberOfObservations(vtkIdType numObservations) override;
 
   /**
    * Subroutine to initialize cluster centerss if not provided by the user.
    */
-  virtual void CreateInitialClusterCenters(vtkIdType numToAllocate,
-                                           vtkIdTypeArray* numberOfClusters,
-                                           vtkTable* inData,
-                                           vtkTable* curClusterElements,
-                                           vtkTable* newClusterElements) VTK_OVERRIDE;
-
+  void CreateInitialClusterCenters(vtkIdType numToAllocate, vtkIdTypeArray* numberOfClusters,
+    vtkTable* inData, vtkTable* curClusterElements, vtkTable* newClusterElements) override;
 
 protected:
   vtkPKMeansStatistics();
-  ~vtkPKMeansStatistics();
+  ~vtkPKMeansStatistics() override;
 
   vtkMultiProcessController* Controller;
 
-
 private:
-  vtkPKMeansStatistics(const vtkPKMeansStatistics&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPKMeansStatistics&) VTK_DELETE_FUNCTION;
+  vtkPKMeansStatistics(const vtkPKMeansStatistics&) = delete;
+  void operator=(const vtkPKMeansStatistics&) = delete;
 };
 
 #endif

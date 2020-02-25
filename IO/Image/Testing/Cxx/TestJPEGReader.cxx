@@ -16,21 +16,18 @@
 // .SECTION Description
 //
 
-
-#include "vtkSmartPointer.h"
-
-#include "vtkJPEGReader.h"
-
 #include "vtkImageData.h"
 #include "vtkImageViewer.h"
-#include "vtkRenderer.h"
+#include "vtkJPEGReader.h"
+#include "vtkRegressionTestImage.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
 
-
-int TestJPEGReader(int argc, char *argv[])
+int TestJPEGReader(int argc, char* argv[])
 {
 
-  if ( argc <= 1 )
+  if (argc <= 1)
   {
     cout << "Usage: " << argv[0] << " <jpeg file>" << endl;
     return EXIT_FAILURE;
@@ -38,8 +35,7 @@ int TestJPEGReader(int argc, char *argv[])
 
   std::string filename = argv[1];
 
-  vtkSmartPointer<vtkJPEGReader> JPEGReader =
-    vtkSmartPointer<vtkJPEGReader>::New();
+  vtkSmartPointer<vtkJPEGReader> JPEGReader = vtkSmartPointer<vtkJPEGReader>::New();
 
   // Check the image can be read
   if (!JPEGReader->CanReadFile(filename.c_str()))
@@ -59,14 +55,22 @@ int TestJPEGReader(int argc, char *argv[])
   const char* descriptiveName = JPEGReader->GetDescriptiveName();
   cout << "Descriptive name: " << descriptiveName << endl;
 
-
   // Visualize
-  vtkSmartPointer<vtkImageViewer> imageViewer =
-    vtkSmartPointer<vtkImageViewer>::New();
+  vtkSmartPointer<vtkImageViewer> imageViewer = vtkSmartPointer<vtkImageViewer>::New();
   imageViewer->SetInputConnection(JPEGReader->GetOutputPort());
   imageViewer->SetColorWindow(256);
   imageViewer->SetColorLevel(127.5);
+
+  vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+  imageViewer->SetupInteractor(renderWindowInteractor);
   imageViewer->Render();
 
-  return EXIT_SUCCESS;
+  vtkRenderWindow* renWin = imageViewer->GetRenderWindow();
+  int retVal = vtkRegressionTestImage(renWin);
+  if (retVal == vtkRegressionTester::DO_INTERACTOR)
+  {
+    renderWindowInteractor->Start();
+  }
+
+  return !retVal;
 }

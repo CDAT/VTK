@@ -40,13 +40,13 @@
  * O. Cuisenaire. Distance Transformation: fast algorithms and applications
  * to medical image processing. PhD Thesis, Universite catholique de Louvain,
  * October 1999. http://ltswww.epfl.ch/~cuisenai/papers/oc_thesis.pdf
-*/
+ */
 
 #ifndef vtkImageEuclideanDistance_h
 #define vtkImageEuclideanDistance_h
 
-#include "vtkImagingGeneralModule.h" // For export macro
 #include "vtkImageDecomposeFilter.h"
+#include "vtkImagingGeneralModule.h" // For export macro
 
 #define VTK_EDT_SAITO_CACHED 0
 #define VTK_EDT_SAITO 1
@@ -54,9 +54,9 @@
 class VTKIMAGINGGENERAL_EXPORT vtkImageEuclideanDistance : public vtkImageDecomposeFilter
 {
 public:
-  static vtkImageEuclideanDistance *New();
-  vtkTypeMacro(vtkImageEuclideanDistance,vtkImageDecomposeFilter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkImageEuclideanDistance* New();
+  vtkTypeMacro(vtkImageEuclideanDistance, vtkImageDecomposeFilter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -65,9 +65,9 @@ public:
    * value in the input image as starting point. This allows to superimpose
    * several distance maps.
    */
-  vtkSetMacro(Initialize, int);
-  vtkGetMacro(Initialize, int);
-  vtkBooleanMacro(Initialize, int);
+  vtkSetMacro(Initialize, vtkTypeBool);
+  vtkGetMacro(Initialize, vtkTypeBool);
+  vtkBooleanMacro(Initialize, vtkTypeBool);
   //@}
 
   //@{
@@ -75,9 +75,9 @@ public:
    * Used to define whether Spacing should be used in the computation of the
    * distances
    */
-  vtkSetMacro(ConsiderAnisotropy, int);
-  vtkGetMacro(ConsiderAnisotropy, int);
-  vtkBooleanMacro(ConsiderAnisotropy, int);
+  vtkSetMacro(ConsiderAnisotropy, vtkTypeBool);
+  vtkGetMacro(ConsiderAnisotropy, vtkTypeBool);
+  vtkBooleanMacro(ConsiderAnisotropy, vtkTypeBool);
   //@}
 
   //@{
@@ -98,48 +98,30 @@ public:
    */
   vtkSetMacro(Algorithm, int);
   vtkGetMacro(Algorithm, int);
-  void SetAlgorithmToSaito ()
-    { this->SetAlgorithm(VTK_EDT_SAITO); }
-  void SetAlgorithmToSaitoCached ()
-    { this->SetAlgorithm(VTK_EDT_SAITO_CACHED); }
+  void SetAlgorithmToSaito() { this->SetAlgorithm(VTK_EDT_SAITO); }
+  void SetAlgorithmToSaitoCached() { this->SetAlgorithm(VTK_EDT_SAITO_CACHED); }
   //@}
 
-  int IterativeRequestData(vtkInformation*,
-                                   vtkInformationVector**,
-                                   vtkInformationVector*) VTK_OVERRIDE;
+  int IterativeRequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 protected:
   vtkImageEuclideanDistance();
-  ~vtkImageEuclideanDistance()VTK_OVERRIDE {}
+  ~vtkImageEuclideanDistance() override {}
 
   double MaximumDistance;
-  int Initialize;
-  int ConsiderAnisotropy;
+  vtkTypeBool Initialize;
+  vtkTypeBool ConsiderAnisotropy;
   int Algorithm;
 
   // Replaces "EnlargeOutputUpdateExtent"
-  virtual void AllocateOutputScalars(vtkImageData *outData,
-                                     int outExt[6],
-                                     vtkInformation* outInfo);
+  virtual void AllocateOutputScalars(vtkImageData* outData, int outExt[6], vtkInformation* outInfo);
 
-  int IterativeRequestInformation(vtkInformation* in,
-                                          vtkInformation* out) VTK_OVERRIDE;
-  int IterativeRequestUpdateExtent(vtkInformation* in,
-                                           vtkInformation* out) VTK_OVERRIDE;
+  int IterativeRequestInformation(vtkInformation* in, vtkInformation* out) override;
+  int IterativeRequestUpdateExtent(vtkInformation* in, vtkInformation* out) override;
 
 private:
-  vtkImageEuclideanDistance(const vtkImageEuclideanDistance&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImageEuclideanDistance&) VTK_DELETE_FUNCTION;
+  vtkImageEuclideanDistance(const vtkImageEuclideanDistance&) = delete;
+  void operator=(const vtkImageEuclideanDistance&) = delete;
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-

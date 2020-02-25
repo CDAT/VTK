@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    TestParallelCoodinatesDouble.cxx
+  Module:    TestParallelCoordinatesDouble.cxx
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -13,40 +13,40 @@
 
 =========================================================================*/
 
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
 #include "vtkChartParallelCoordinates.h"
-#include "vtkPlot.h"
-#include "vtkTable.h"
-#include "vtkDoubleArray.h"
-#include "vtkContextView.h"
 #include "vtkContextScene.h"
-#include "vtkRenderWindowInteractor.h"
+#include "vtkContextView.h"
+#include "vtkDoubleArray.h"
 #include "vtkNew.h"
+#include "vtkPlot.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkTable.h"
 
 //----------------------------------------------------------------------------
-int TestParallelCoordinatesDouble(int , char* [])
+int TestParallelCoordinatesDouble(int, char*[])
 {
   // Set up a 2D scene, add an XY chart to it
   vtkNew<vtkContextView> view;
   view->GetRenderWindow()->SetSize(600, 400);
   vtkNew<vtkChartParallelCoordinates> chart;
-  view->GetScene()->AddItem(chart.GetPointer());
+  view->GetScene()->AddItem(chart);
 
   // Create a table with some points in it...
   vtkNew<vtkTable> table;
   vtkNew<vtkDoubleArray> arrX;
   arrX->SetName("x");
-  table->AddColumn(arrX.GetPointer());
+  table->AddColumn(arrX);
   vtkNew<vtkDoubleArray> arrC;
   arrC->SetName("cosine");
-  table->AddColumn(arrC.GetPointer());
+  table->AddColumn(arrC);
   vtkNew<vtkDoubleArray> arrS;
   arrS->SetName("sine");
-  table->AddColumn(arrS.GetPointer());
+  table->AddColumn(arrS);
   vtkNew<vtkDoubleArray> arrS2;
   arrS2->SetName("tangent");
-  table->AddColumn(arrS2.GetPointer());
+  table->AddColumn(arrS2);
   // Test charting with a few more points...
   int numPoints = 200;
   float inc = 7.5 / (numPoints - 1);
@@ -59,7 +59,7 @@ int TestParallelCoordinatesDouble(int , char* [])
     table->SetValue(i, 3, tan(i * inc) + 0.5);
   }
 
-  chart->GetPlot(0)->SetInputData(table.GetPointer());
+  chart->GetPlot(0)->SetInputData(table);
 
   view->GetRenderWindow()->SetMultiSamples(0);
   view->GetInteractor()->Initialize();

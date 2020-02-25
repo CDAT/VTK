@@ -29,12 +29,12 @@
 #include "vtkMatrix4x4.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
+#include "vtkPNGWriter.h"
 #include "vtkPath.h"
 #include "vtkPen.h"
-#include "vtkPNGWriter.h"
 #include "vtkPointData.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
+#include "vtkRenderer.h"
 #include "vtkTextProperty.h"
 #include "vtkTextRenderer.h"
 #include "vtkTransform.h"
@@ -53,9 +53,10 @@
 #include <sstream>
 #include <utility>
 
-namespace {
+namespace
+{
 
-std::string ColorToString(const unsigned char *rgb)
+std::string ColorToString(const unsigned char* rgb)
 {
   std::ostringstream out;
   out << "#";
@@ -69,7 +70,7 @@ std::string ColorToString(const unsigned char *rgb)
 
 // Bbox is xmin, xmax, ymin, ymax. Writes:
 // "xmin,ymin,xmax,ymax"
-std::string BBoxToString(const std::array<int, 4> &bbox)
+std::string BBoxToString(const std::array<int, 4>& bbox)
 {
   std::ostringstream out;
   out << bbox[0] << "," << bbox[2] << "," << bbox[1] << "," << bbox[3];
@@ -79,9 +80,7 @@ std::string BBoxToString(const std::array<int, 4> &bbox)
 std::string Transform2DToString(const std::array<double, 9> xform)
 {
   std::ostringstream out;
-  out << "matrix("
-      << xform[0] << "," << xform[3] << ","
-      << xform[1] << "," << xform[4] << ","
+  out << "matrix(" << xform[0] << "," << xform[3] << "," << xform[1] << "," << xform[4] << ","
       << xform[2] << "," << xform[5] << ")";
   return out.str();
 }
@@ -89,13 +88,16 @@ std::string Transform2DToString(const std::array<double, 9> xform)
 struct EllipseHelper
 {
   EllipseHelper(float cx, float cy, float rx, float ry)
-    : X(0.f), Y(0.f), Cx(cx), Cy(cy), Rx(rx), Ry(ry)
-  { }
-
-  void UpdateDegrees(float degrees)
+    : X(0.f)
+    , Y(0.f)
+    , Cx(cx)
+    , Cy(cy)
+    , Rx(rx)
+    , Ry(ry)
   {
-    this->UpdateRadians(vtkMath::RadiansFromDegrees(degrees));
   }
+
+  void UpdateDegrees(float degrees) { this->UpdateRadians(vtkMath::RadiansFromDegrees(degrees)); }
 
   void UpdateRadians(float radians)
   {
@@ -117,7 +119,7 @@ struct FontKey
 {
   vtkSmartPointer<vtkTextProperty> TextProperty;
 
-  explicit FontKey(vtkTextProperty *tprop)
+  explicit FontKey(vtkTextProperty* tprop)
     : TextProperty(vtkSmartPointer<vtkTextProperty>::New())
   {
     // Clone into an internal tprop. The property will likely be modified by
@@ -129,11 +131,12 @@ struct FontKey
     this->TextProperty->SetOrientation(0.);
   }
 
-  FontKey(const FontKey &o)
+  FontKey(const FontKey& o)
     : TextProperty(o.TextProperty)
-  { }
+  {
+  }
 
-  bool operator<(const FontKey &other) const
+  bool operator<(const FontKey& other) const
   {
     const int thisFontFamily = this->TextProperty->GetFontFamily();
     const int otherFontFamily = other.TextProperty->GetFontFamily();
@@ -170,8 +173,8 @@ struct FontKey
 
     if (thisFontFamily == VTK_FONT_FILE)
     {
-      const char *thisFile = this->TextProperty->GetFontFile();
-      const char *otherFile = other.TextProperty->GetFontFile();
+      const char* thisFile = this->TextProperty->GetFontFile();
+      const char* otherFile = other.TextProperty->GetFontFile();
       if (thisFile < otherFile)
       {
         return true;
@@ -191,9 +194,12 @@ struct FontInfo
   using CharType = vtkUnicodeString::value_type;
   using KerningPairType = std::pair<CharType, CharType>;
 
-  explicit FontInfo(const std::string &svgId) : SVGId(svgId) {}
+  explicit FontInfo(const std::string& svgId)
+    : SVGId(svgId)
+  {
+  }
 
-  void ProcessString(const vtkUnicodeString &str)
+  void ProcessString(const vtkUnicodeString& str)
   {
     vtkUnicodeString::const_iterator it = str.begin();
     vtkUnicodeString::const_iterator end = str.end();
@@ -221,13 +227,13 @@ struct FontInfo
   std::set<KerningPairType> KerningPairs;
 
 private:
-  FontInfo(const FontInfo&) VTK_DELETE_FUNCTION;
-  void operator=(const FontInfo&) VTK_DELETE_FUNCTION;
+  FontInfo(const FontInfo&) = delete;
+  void operator=(const FontInfo&) = delete;
 };
 
 struct ImageInfo
 {
-  explicit ImageInfo(vtkImageData *img)
+  explicit ImageInfo(vtkImageData* img)
   {
     vtkNew<vtkPNGWriter> pngWriter;
     pngWriter->WriteToMemoryOn();
@@ -235,7 +241,7 @@ struct ImageInfo
     pngWriter->SetInputData(img);
     pngWriter->Write();
 
-    vtkUnsignedCharArray *png = pngWriter->GetResult();
+    vtkUnsignedCharArray* png = pngWriter->GetResult();
     if (!png || png->GetNumberOfValues() == 0)
     {
       return;
@@ -247,26 +253,27 @@ struct ImageInfo
     vtkNew<vtkBase64OutputStream> base64Encoder;
     base64Encoder->SetStream(&base64Stream);
     if (!base64Encoder->StartWriting() ||
-        !base64Encoder->Write(png->GetPointer(0), png->GetNumberOfValues()) ||
-        !base64Encoder->EndWriting())
+      !base64Encoder->Write(png->GetPointer(0), png->GetNumberOfValues()) ||
+      !base64Encoder->EndWriting())
     {
       return;
     }
 
-    int *dims = img->GetDimensions();
+    int* dims = img->GetDimensions();
     this->Size[0] = dims[0];
     this->Size[1] = dims[1];
 
     this->PNGBase64 = base64Stream.str();
   }
 
-  ImageInfo(ImageInfo &&o)
-    : Size(std::move(o.Size)),
-      Id(std::move(o.Id)),
-      PNGBase64(std::move(o.PNGBase64))
-  { }
+  ImageInfo(ImageInfo&& o)
+    : Size(std::move(o.Size))
+    , Id(std::move(o.Id))
+    , PNGBase64(std::move(o.PNGBase64))
+  {
+  }
 
-  bool operator<(const ImageInfo &other) const
+  bool operator<(const ImageInfo& other) const
   {
     if (this->Size[0] < other.Size[0])
     {
@@ -294,35 +301,35 @@ struct ImageInfo
     return false;
   }
 
-
   std::array<int, 2> Size;
   std::string Id;
   std::string PNGBase64;
 
 private:
-  ImageInfo(const ImageInfo&) VTK_DELETE_FUNCTION;
-  void operator=(const ImageInfo&) VTK_DELETE_FUNCTION;
+  ImageInfo(const ImageInfo&) = delete;
+  void operator=(const ImageInfo&) = delete;
 };
 
 struct PatternInfo
 {
-  explicit PatternInfo(const ImageInfo &img, int textureProperty)
-  // We only care about Repeat and Stretch, since SVG doesn't allow control
-  // over Nearest/Linear interpolation.
-    : TextureProperty(textureProperty & (vtkBrush::Repeat | vtkBrush::Stretch)),
-      ImageSize(img.Size),
-      ImageId(img.Id)
+  explicit PatternInfo(const ImageInfo& img, int textureProperty)
+    // We only care about Repeat and Stretch, since SVG doesn't allow control
+    // over Nearest/Linear interpolation.
+    : TextureProperty(textureProperty & (vtkBrush::Repeat | vtkBrush::Stretch))
+    , ImageSize(img.Size)
+    , ImageId(img.Id)
   {
   }
 
-  PatternInfo(PatternInfo &&o)
-    : TextureProperty(std::move(o.TextureProperty)),
-      ImageSize(std::move(o.ImageSize)),
-      ImageId(std::move(o.ImageId)),
-      PatternId(std::move(o.PatternId))
-  { }
+  PatternInfo(PatternInfo&& o)
+    : TextureProperty(std::move(o.TextureProperty))
+    , ImageSize(std::move(o.ImageSize))
+    , ImageId(std::move(o.ImageId))
+    , PatternId(std::move(o.PatternId))
+  {
+  }
 
-  bool operator<(const PatternInfo &other) const
+  bool operator<(const PatternInfo& other) const
   {
     if (this->TextureProperty < other.TextureProperty)
     {
@@ -341,29 +348,30 @@ struct PatternInfo
     return false;
   }
 
-
   int TextureProperty;
   std::array<int, 2> ImageSize;
   std::string ImageId;
   std::string PatternId;
 
 private:
-  PatternInfo(const PatternInfo&) VTK_DELETE_FUNCTION;
-  void operator=(const PatternInfo&) VTK_DELETE_FUNCTION;
+  PatternInfo(const PatternInfo&) = delete;
+  void operator=(const PatternInfo&) = delete;
 };
 
 struct ClipRectInfo
 {
-  explicit ClipRectInfo(const std::array<int, 4> &rect)
+  explicit ClipRectInfo(const std::array<int, 4>& rect)
     : Rect(rect)
-  { }
+  {
+  }
 
-  ClipRectInfo(ClipRectInfo &&o)
-    : Rect(std::move(o.Rect)),
-      Id(std::move(o.Id))
-  { }
+  ClipRectInfo(ClipRectInfo&& o)
+    : Rect(std::move(o.Rect))
+    , Id(std::move(o.Id))
+  {
+  }
 
-  bool operator<(const ClipRectInfo &other) const
+  bool operator<(const ClipRectInfo& other) const
   {
     for (size_t i = 0; i < this->Rect.size(); ++i)
     {
@@ -384,8 +392,8 @@ struct ClipRectInfo
   std::string Id;
 
 private:
-  ClipRectInfo(const ClipRectInfo&) VTK_DELETE_FUNCTION;
-  void operator=(const ClipRectInfo&) VTK_DELETE_FUNCTION;
+  ClipRectInfo(const ClipRectInfo&) = delete;
+  void operator=(const ClipRectInfo&) = delete;
 };
 
 // SVG's y axis is inverted compared to VTK's:
@@ -393,19 +401,19 @@ struct YConverter
 {
   float Height;
 
-  explicit YConverter(float height) : Height(height) { }
-
-  float operator()(float inY)
+  explicit YConverter(float height)
+    : Height(height)
   {
-    return this->Height - inY;
   }
+
+  float operator()(float inY) { return this->Height - inY; }
 };
 
 } // end anon namespace
 
 // Need to be able to use vtkColor4f in a std::map. Must be outside of the anon
 // namespace to work.
-static bool operator<(const vtkColor4f &a, const vtkColor4f &b)
+static bool operator<(const vtkColor4f& a, const vtkColor4f& b)
 {
   for (int i = 0; i < 4; ++i)
   {
@@ -434,26 +442,23 @@ struct vtkSVGContextDevice2D::Details
   PatternSetType PatternSet;
   ClipRectSetType ClipRectSet;
 
-  ~Details()
-  {
-    this->FreeFontMap();
-  }
+  ~Details() { this->FreeFontMap(); }
 
   void FreeFontMap()
   {
-    for (auto &it : this->FontMap)
+    for (auto& it : this->FontMap)
     {
       delete it.second;
     }
     this->FontMap.clear();
   }
 
-  const ImageInfo& GetImageInfo(vtkImageData *img)
+  const ImageInfo& GetImageInfo(vtkImageData* img)
   {
     ImageInfo newInfo(img);
 
     auto insertResult = this->ImageSet.insert(std::move(newInfo));
-    const ImageInfo &info = *insertResult.first;
+    const ImageInfo& info = *insertResult.first;
     if (insertResult.second)
     {
       std::ostringstream id;
@@ -465,13 +470,13 @@ struct vtkSVGContextDevice2D::Details
     return info;
   }
 
-  const PatternInfo& GetPatternInfo(vtkImageData *texture, int textureProperty)
+  const PatternInfo& GetPatternInfo(vtkImageData* texture, int textureProperty)
   {
-    const ImageInfo &imageInfo = this->GetImageInfo(texture);
+    const ImageInfo& imageInfo = this->GetImageInfo(texture);
     PatternInfo newInfo(imageInfo, textureProperty);
 
     auto insertResult = this->PatternSet.insert(std::move(newInfo));
-    const PatternInfo &info = *insertResult.first;
+    const PatternInfo& info = *insertResult.first;
     if (insertResult.second)
     {
       std::ostringstream id;
@@ -483,12 +488,12 @@ struct vtkSVGContextDevice2D::Details
     return info;
   }
 
-  const ClipRectInfo& GetClipRectInfo(const std::array<int, 4> &rect)
+  const ClipRectInfo& GetClipRectInfo(const std::array<int, 4>& rect)
   {
     ClipRectInfo newInfo(rect);
 
     auto insertResult = this->ClipRectSet.insert(std::move(newInfo));
-    const ClipRectInfo &info = *insertResult.first;
+    const ClipRectInfo& info = *insertResult.first;
     if (insertResult.second)
     {
       std::ostringstream id;
@@ -500,16 +505,15 @@ struct vtkSVGContextDevice2D::Details
     return info;
   }
 
-  FontInfo& GetFontInfo(vtkTextProperty *tprop)
+  FontInfo& GetFontInfo(vtkTextProperty* tprop)
   {
     FontKey key(tprop);
     FontMapType::const_iterator it = this->FontMap.find(key);
     if (it == this->FontMap.end())
     {
       std::ostringstream tmp;
-      tmp << "vtkExportedFont-" << std::hex << this << "_"
-         << std::dec << this->FontMap.size() << "_"
-         << tprop->GetFontFamilyAsString();
+      tmp << "vtkExportedFont-" << std::hex << this << "_" << std::dec << this->FontMap.size()
+          << "_" << tprop->GetFontFamilyAsString();
       std::string id = tmp.str();
       auto result = this->FontMap.insert(std::make_pair(key, new FontInfo(id)));
       it = result.first;
@@ -520,18 +524,17 @@ struct vtkSVGContextDevice2D::Details
 };
 
 //------------------------------------------------------------------------------
-vtkStandardNewMacro(vtkSVGContextDevice2D)
-vtkCxxSetObjectMacro(vtkSVGContextDevice2D, Viewport, vtkViewport)
+vtkStandardNewMacro(vtkSVGContextDevice2D);
+vtkCxxSetObjectMacro(vtkSVGContextDevice2D, Viewport, vtkViewport);
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::PrintSelf(std::ostream &os, vtkIndent indent)
+void vtkSVGContextDevice2D::PrintSelf(std::ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::SetSVGContext(vtkXMLDataElement *context,
-                                          vtkXMLDataElement *defs)
+void vtkSVGContextDevice2D::SetSVGContext(vtkXMLDataElement* context, vtkXMLDataElement* defs)
 {
   this->ContextNode = context;
   this->ActiveNode = context;
@@ -552,7 +555,7 @@ void vtkSVGContextDevice2D::GenerateDefinitions()
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::Begin(vtkViewport *vp)
+void vtkSVGContextDevice2D::Begin(vtkViewport* vp)
 {
   // Recreate the pen/brush to reset state:
   this->Pen->Delete();
@@ -563,10 +566,8 @@ void vtkSVGContextDevice2D::Begin(vtkViewport *vp)
   this->SetViewport(vp);
   this->CanvasHeight = static_cast<float>(vp->GetVTKWindow()->GetSize()[1]);
   std::fill(this->ClipRect.begin(), this->ClipRect.end(), 0);
-  std::fill(this->ActiveNodeClipRect.begin(), this->ActiveNodeClipRect.end(),
-            0);
-  std::fill(this->ActiveNodeTransform.begin(),
-            this->ActiveNodeTransform.end(), 0.);
+  std::fill(this->ActiveNodeClipRect.begin(), this->ActiveNodeClipRect.end(), 0);
+  std::fill(this->ActiveNodeTransform.begin(), this->ActiveNodeTransform.end(), 0.);
   this->ActiveNodeTransform[0] = 1.;
   this->ActiveNodeTransform[4] = 1.;
   this->ActiveNodeTransform[8] = 1.;
@@ -580,15 +581,14 @@ void vtkSVGContextDevice2D::End()
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawPoly(float *points, int n,
-                                     unsigned char *colors, int nc_comps)
+void vtkSVGContextDevice2D::DrawPoly(float* points, int n, unsigned char* colors, int nc_comps)
 {
   if (!colors)
   {
     vtkNew<vtkXMLDataElement> polyLine;
     polyLine->SetName("polyline");
-    this->ActiveNode->AddNestedElement(polyLine.Get());
-    this->ApplyPenStateToNode(polyLine.Get());
+    this->ActiveNode->AddNestedElement(polyLine);
+    this->ApplyPenStateToNode(polyLine);
 
     YConverter y(this->CanvasHeight);
 
@@ -596,7 +596,7 @@ void vtkSVGContextDevice2D::DrawPoly(float *points, int n,
     verts << "\n";
     for (int i = 0; i < n; ++i)
     {
-      verts << points[i*2] << "," << y(points[i*2+1]) << "\n";
+      verts << points[i * 2] << "," << y(points[i * 2 + 1]) << "\n";
     }
     polyLine->SetAttribute("points", verts.str().c_str());
   }
@@ -626,16 +626,15 @@ void vtkSVGContextDevice2D::DrawPoly(float *points, int n,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawLines(float *points, int n,
-                                      unsigned char *colors, int nc_comps)
+void vtkSVGContextDevice2D::DrawLines(float* points, int n, unsigned char* colors, int nc_comps)
 {
   if (!colors)
   {
     // Use path instead of lines for a more efficient/compact representation:
     vtkNew<vtkXMLDataElement> path;
     path->SetName("path");
-    this->ActiveNode->AddNestedElement(path.Get());
-    this->ApplyPenStateToNode(path.Get());
+    this->ActiveNode->AddNestedElement(path);
+    this->ApplyPenStateToNode(path);
 
     YConverter y(this->CanvasHeight);
 
@@ -644,10 +643,9 @@ void vtkSVGContextDevice2D::DrawLines(float *points, int n,
     int numLines = n / 2;
     for (int i = 0; i < numLines; ++i)
     {
-      const float *p1 = points + i * 4;
-      const float *p2 = points + i * 4 + 2;
-      d << "M" << p1[0] << "," << y(p1[1])
-        << "L" << p2[0] << "," << y(p2[1]) << "\n";
+      const float* p1 = points + i * 4;
+      const float* p2 = points + i * 4 + 2;
+      d << "M" << p1[0] << "," << y(p1[1]) << "L" << p2[0] << "," << y(p2[1]) << "\n";
     }
     path->SetAttribute("d", d.str().c_str());
   }
@@ -678,18 +676,17 @@ void vtkSVGContextDevice2D::DrawLines(float *points, int n,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawPoints(float *points, int n,
-                                       unsigned char *colors, int nc_comps)
+void vtkSVGContextDevice2D::DrawPoints(float* points, int n, unsigned char* colors, int nc_comps)
 {
   if (!colors)
   {
     // Use path instead of rects for a more efficient/compact representation.
     vtkNew<vtkXMLDataElement> path;
     path->SetName("path");
-    this->ActiveNode->AddNestedElement(path.Get());
+    this->ActiveNode->AddNestedElement(path);
 
-    this->ApplyPenAsFillColorToNode(path.Get());
-    this->ApplyPenAsFillOpacityToNode(path.Get());
+    this->ApplyPenAsFillColorToNode(path);
+    this->ApplyPenAsFillOpacityToNode(path);
 
     YConverter y(this->CanvasHeight);
 
@@ -703,11 +700,13 @@ void vtkSVGContextDevice2D::DrawPoints(float *points, int n,
     d << "\n";
     for (int i = 0; i < n; ++i)
     {
-      const float *p = points + i * 2;
-      d << "M" << p[0] - deltaX << "," << y(p[1] - deltaY) << "\n"
-           "L" << p[0] + deltaX << "," << y(p[1] - deltaY) << "\n"
-               << p[0] + deltaX << "," << y(p[1] + deltaY) << "\n"
-               << p[0] - deltaX << "," << y(p[1] + deltaY) << "\nz\n";
+      const float* p = points + i * 2;
+      d << "M" << p[0] - deltaX << "," << y(p[1] - deltaY)
+        << "\n"
+           "L"
+        << p[0] + deltaX << "," << y(p[1] - deltaY) << "\n"
+        << p[0] + deltaX << "," << y(p[1] + deltaY) << "\n"
+        << p[0] - deltaX << "," << y(p[1] + deltaY) << "\nz\n";
     }
     path->SetAttribute("d", d.str().c_str());
   }
@@ -727,11 +726,11 @@ void vtkSVGContextDevice2D::DrawPoints(float *points, int n,
 
     for (int i = 0; i < n; ++i)
     {
-      const float *p = points + i * 2;
-      const unsigned char *c = colors + i * nc_comps;
+      const float* p = points + i * 2;
+      const unsigned char* c = colors + i * nc_comps;
 
       vtkNew<vtkXMLDataElement> point;
-      this->ActiveNode->AddNestedElement(point.Get());
+      this->ActiveNode->AddNestedElement(point);
 
       point->SetName("rect");
       point->SetFloatAttribute("x", p[0] - halfWidth);
@@ -753,10 +752,8 @@ void vtkSVGContextDevice2D::DrawPoints(float *points, int n,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
-                                             float *points, int n,
-                                             unsigned char *colors,
-                                             int nc_comps)
+void vtkSVGContextDevice2D::DrawPointSprites(
+  vtkImageData* spriteIn, float* points, int n, unsigned char* colors, int nc_comps)
 {
   if (nc_comps != 3 && nc_comps != 4)
   {
@@ -764,7 +761,7 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
     return;
   }
 
-  vtkImageData *rgba = this->PreparePointSprite(spriteIn);
+  vtkImageData* rgba = this->PreparePointSprite(spriteIn);
   if (!rgba)
   {
     vtkErrorMacro("Unsupported point sprite format.");
@@ -777,11 +774,10 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
   int dims[3];
   rgba->GetDimensions(dims);
   vtkIdType numPoints = rgba->GetNumberOfPoints();
-  vtkUnsignedCharArray *colorArray =
-      vtkArrayDownCast<vtkUnsignedCharArray>(
-        rgba->GetPointData()->GetScalars());
-  const float sizeFactor = this->GetScaledPenWidth() /
-                           static_cast<float>(std::max(dims[0], dims[1]));
+  vtkUnsignedCharArray* colorArray =
+    vtkArrayDownCast<vtkUnsignedCharArray>(rgba->GetPointData()->GetScalars());
+  const float sizeFactor =
+    this->GetScaledPenWidth() / static_cast<float>(std::max(dims[0], dims[1]));
   const float spriteWidth = dims[0] * sizeFactor;
   const float spriteHeight = dims[1] * sizeFactor;
   const float halfWidth = spriteWidth * 0.5f;
@@ -794,12 +790,12 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
 
   for (int i = 0; i < n; ++i)
   {
-    const float *p = points + 2 * i;
+    const float* p = points + 2 * i;
 
     vtkColor4f color;
     if (colors)
     {
-      unsigned char *c = colors + nc_comps * i;
+      unsigned char* c = colors + nc_comps * i;
       switch (nc_comps)
       {
         case 3:
@@ -818,8 +814,8 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
     else
     {
       vtkColor4ub penColor = this->Pen->GetColorObject();
-      color = vtkColor4f(penColor[0] / 255.f, penColor[1] / 255.f,
-                         penColor[2] / 255.f, penColor[3] / 255.f);
+      color = vtkColor4f(
+        penColor[0] / 255.f, penColor[1] / 255.f, penColor[2] / 255.f, penColor[3] / 255.f);
     }
 
     std::string sprite;
@@ -839,17 +835,16 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
         // This is what the OpenGL implementation does:
         for (int c = 0; c < 4; ++c)
         {
-          spriteColor->SetTypedComponent(t, c,
-            static_cast<unsigned char>(
-              colorArray->GetTypedComponent(t, c) * color[c] + .5f));
+          spriteColor->SetTypedComponent(
+            t, c, static_cast<unsigned char>(colorArray->GetTypedComponent(t, c) * color[c] + .5f));
         }
       }
 
       vtkNew<vtkImageData> spriteImage;
       spriteImage->ShallowCopy(rgba);
-      spriteImage->GetPointData()->SetScalars(spriteColor.Get());
+      spriteImage->GetPointData()->SetScalars(spriteColor);
 
-      const ImageInfo &info = this->Impl->GetImageInfo(spriteImage.Get());
+      const ImageInfo& info = this->Impl->GetImageInfo(spriteImage);
       sprite = info.Id;
 
       spriteMap.insert(std::make_pair(color, sprite));
@@ -872,14 +867,11 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
     // [T2] = translate(0, -pos.H); Anchor at bottom corner instead of top
     // [T3] = translate(pos.X, pos.Y); Move back to anchor point
     std::ostringstream xform;
-    xform << "matrix("
-          << xScale << ",0,0,"
-          << yScale << ","
-          << anchorX - xScale * anchorX << ","
+    xform << "matrix(" << xScale << ",0,0," << yScale << "," << anchorX - xScale * anchorX << ","
           << anchorY - (yScale * anchorY + spriteHeight) << ")";
 
     vtkNew<vtkXMLDataElement> use;
-    this->ActiveNode->AddNestedElement(use.Get());
+    this->ActiveNode->AddNestedElement(use);
     use->SetName("use");
     use->SetFloatAttribute("x", anchorX);
     use->SetFloatAttribute("y", anchorY); // YConverter already applied
@@ -893,9 +885,8 @@ void vtkSVGContextDevice2D::DrawPointSprites(vtkImageData *spriteIn,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawMarkers(int shape, bool highlight,
-                                        float *points, int n,
-                                        unsigned char *colors, int nc_comps)
+void vtkSVGContextDevice2D::DrawMarkers(
+  int shape, bool highlight, float* points, int n, unsigned char* colors, int nc_comps)
 {
   bool fill = false;
   bool stroke = false;
@@ -963,10 +954,10 @@ void vtkSVGContextDevice2D::DrawMarkers(int shape, bool highlight,
 
     for (int i = 0; i < n; ++i)
     {
-      const float *p = points + i * 2;
+      const float* p = points + i * 2;
 
       vtkNew<vtkXMLDataElement> node;
-      this->ActiveNode->AddNestedElement(node.Get());
+      this->ActiveNode->AddNestedElement(node);
       node->SetName("use");
       node->SetFloatAttribute("x", p[0] - halfWidth);
       node->SetFloatAttribute("y", y(p[1]) - halfWidth);
@@ -996,12 +987,12 @@ void vtkSVGContextDevice2D::DrawMarkers(int shape, bool highlight,
 
     for (int i = 0; i < n; ++i)
     {
-      const float *p = points + i * 2;
-      const unsigned char *c = colors + i * nc_comps;
+      const float* p = points + i * 2;
+      const unsigned char* c = colors + i * nc_comps;
       const std::string colStr = ColorToString(c);
 
       vtkNew<vtkXMLDataElement> node;
-      this->ActiveNode->AddNestedElement(node.Get());
+      this->ActiveNode->AddNestedElement(node);
       node->SetName("use");
       node->SetFloatAttribute("x", p[0] - halfWidth);
       node->SetFloatAttribute("y", y(p[1]) - halfWidth);
@@ -1039,13 +1030,13 @@ void vtkSVGContextDevice2D::DrawMarkers(int shape, bool highlight,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawQuad(float *points, int n)
+void vtkSVGContextDevice2D::DrawQuad(float* points, int n)
 {
   this->DrawPolygon(points, n);
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawQuadStrip(float *points, int n)
+void vtkSVGContextDevice2D::DrawQuadStrip(float* points, int n)
 {
   if (n < 4 || n % 2 != 0)
   { // Must be at least one quad, and a whole number of quads.
@@ -1056,21 +1047,21 @@ void vtkSVGContextDevice2D::DrawQuadStrip(float *points, int n)
   // odd verts on the other):
   vtkNew<vtkXMLDataElement> path;
   path->SetName("path");
-  this->ActiveNode->AddNestedElement(path.Get());
+  this->ActiveNode->AddNestedElement(path);
 
-  this->ApplyBrushStateToNode(path.Get());
+  this->ApplyBrushStateToNode(path);
 
   YConverter y(this->CanvasHeight);
   std::ostringstream d;
   d << "\nM" << points[0] << "," << y(points[1]) << "\nL\n";
   for (int i = 2; i < n; i += 2)
   {
-    d << points[i*2] << "," << y(points[i*2 + 1]) << "\n";
+    d << points[i * 2] << "," << y(points[i * 2 + 1]) << "\n";
   }
 
   for (int i = n - 1; i >= 0; i -= 2)
   {
-    d << points[i*2] << "," << y(points[i*2 + 1]) << "\n";
+    d << points[i * 2] << "," << y(points[i * 2 + 1]) << "\n";
   }
   d << "z";
 
@@ -1078,20 +1069,20 @@ void vtkSVGContextDevice2D::DrawQuadStrip(float *points, int n)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawPolygon(float *points, int n)
+void vtkSVGContextDevice2D::DrawPolygon(float* points, int n)
 {
   vtkNew<vtkXMLDataElement> path;
   path->SetName("path");
-  this->ActiveNode->AddNestedElement(path.Get());
+  this->ActiveNode->AddNestedElement(path);
 
-  this->ApplyBrushStateToNode(path.Get());
+  this->ApplyBrushStateToNode(path);
 
   YConverter y(this->CanvasHeight);
   std::ostringstream d;
   d << "\nM" << points[0] << "," << y(points[1]) << "\nL";
   for (int i = 1; i < n; ++i)
   {
-    d << points[i*2] << "," << y(points[i*2 + 1]) << "\n";
+    d << points[i * 2] << "," << y(points[i * 2 + 1]) << "\n";
   }
   d << "z";
 
@@ -1099,17 +1090,16 @@ void vtkSVGContextDevice2D::DrawPolygon(float *points, int n)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawColoredPolygon(float *points, int numPoints,
-                                               unsigned char *colors,
-                                               int nc_comps)
+void vtkSVGContextDevice2D::DrawColoredPolygon(
+  float* points, int numPoints, unsigned char* colors, int nc_comps)
 {
   assert(numPoints > 0);
+  assert(nc_comps >= 3 && nc_comps <= 4);
   assert(points != nullptr);
 
   // Just use the standard draw method if there is a texture or colors are not
   // specified:
-  if (this->Brush->GetTexture() != nullptr ||
-      nc_comps == 0)
+  if (this->Brush->GetTexture() != nullptr || nc_comps == 0)
   {
     this->DrawPolygon(points, numPoints);
     return;
@@ -1148,22 +1138,24 @@ void vtkSVGContextDevice2D::DrawColoredPolygon(float *points, int numPoints,
   const vtkVector2f p0(points);
   const vtkColor4ub c0(colors);
 
+  // We may have 3 or 4 components, so initialize these with a sane alpha value:
+  vtkColor4ub c1{ 0, 0, 0, 255 };
+  vtkColor4ub c2{ 0, 0, 0, 255 };
+
   for (int i = 1; i < numPoints - 1; ++i)
   {
     const vtkVector2f p1(points + 2 * i);
-    const vtkColor4ub c1(colors + nc_comps * i);
     const vtkVector2f p2(points + 2 * (i + 1));
-    const vtkColor4ub c2(colors + nc_comps * (i + 1));
+    std::copy_n(colors + nc_comps * i, nc_comps, c1.GetData());
+    std::copy_n(colors + nc_comps * (i + 1), nc_comps, c2.GetData());
 
     this->DrawTriangleGradient(p0, c0, p1, c1, p2, c2, useAlpha);
   }
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
-                                             float outRx, float outRy,
-                                             float inRx, float inRy,
-                                             float startAngle, float stopAngle)
+void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy, float outRx, float outRy,
+  float inRx, float inRy, float startAngle, float stopAngle)
 {
   if (stopAngle < startAngle)
   {
@@ -1186,8 +1178,8 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
       if (isCircle)
       {
         vtkNew<vtkXMLDataElement> circle;
-        this->ActiveNode->AddNestedElement(circle.Get());
-        this->ApplyBrushStateToNode(circle.Get());
+        this->ActiveNode->AddNestedElement(circle);
+        this->ApplyBrushStateToNode(circle);
         circle->SetName("circle");
         circle->SetFloatAttribute("cx", cx);
         circle->SetFloatAttribute("cy", y(cy));
@@ -1196,8 +1188,8 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
       else // !isCircle
       {
         vtkNew<vtkXMLDataElement> ellipse;
-        this->ActiveNode->AddNestedElement(ellipse.Get());
-        this->ApplyBrushStateToNode(ellipse.Get());
+        this->ActiveNode->AddNestedElement(ellipse);
+        this->ApplyBrushStateToNode(ellipse);
         ellipse->SetName("ellipse");
         ellipse->SetFloatAttribute("cx", cx);
         ellipse->SetFloatAttribute("cy", y(cy));
@@ -1208,8 +1200,8 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
     else // !isFilled
     {
       vtkNew<vtkXMLDataElement> path;
-      this->ActiveNode->AddNestedElement(path.Get());
-      this->ApplyBrushStateToNode(path.Get());
+      this->ActiveNode->AddNestedElement(path);
+      this->ApplyBrushStateToNode(path);
       path->SetName("path");
       path->SetAttribute("fill-rule", "evenodd");
 
@@ -1220,22 +1212,18 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
       helper.UpdateDegrees(0.f);
       d << "M" << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(180.f);
-      d << "A" << outRx << "," << outRy << " 0 1 1 "
-        << helper.X << "," << y(helper.Y) << "\n";
+      d << "A" << outRx << "," << outRy << " 0 1 1 " << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(360.f);
-      d << "A" << outRx << "," << outRy << " 0 1 1 "
-        << helper.X << "," << y(helper.Y) << "\nz\n";
+      d << "A" << outRx << "," << outRy << " 0 1 1 " << helper.X << "," << y(helper.Y) << "\nz\n";
 
       // Inner ellipse:
       helper = EllipseHelper(cx, cy, inRx, inRy);
       helper.UpdateDegrees(0.f);
       d << "M" << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(180.f);
-      d << "A" << inRx << "," << inRy << " 0 1 1 "
-        << helper.X << "," << y(helper.Y) << "\n";
+      d << "A" << inRx << "," << inRy << " 0 1 1 " << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(360.f);
-      d << "A" << inRx << "," << inRy << " 0 1 1 "
-        << helper.X << "," << y(helper.Y) << "\nz\n";
+      d << "A" << inRx << "," << inRy << " 0 1 1 " << helper.X << "," << y(helper.Y) << "\nz\n";
 
       path->SetAttribute("d", d.str().c_str());
     }
@@ -1245,8 +1233,8 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
     if (isFilled)
     {
       vtkNew<vtkXMLDataElement> path;
-      this->ActiveNode->AddNestedElement(path.Get());
-      this->ApplyBrushStateToNode(path.Get());
+      this->ActiveNode->AddNestedElement(path);
+      this->ApplyBrushStateToNode(path);
       path->SetName("path");
 
       std::ostringstream d;
@@ -1256,16 +1244,15 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
       helper.UpdateDegrees(startAngle);
       d << "L" << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(stopAngle);
-      d << "A" << outRx << "," << outRy << " 0 "
-        << largeArcFlag << " " << sweepFlag << " "
+      d << "A" << outRx << "," << outRy << " 0 " << largeArcFlag << " " << sweepFlag << " "
         << helper.X << "," << y(helper.Y) << "\nz\n";
       path->SetAttribute("d", d.str().c_str());
     }
     else // !isFilled
     {
       vtkNew<vtkXMLDataElement> path;
-      this->ActiveNode->AddNestedElement(path.Get());
-      this->ApplyBrushStateToNode(path.Get());
+      this->ActiveNode->AddNestedElement(path);
+      this->ApplyBrushStateToNode(path);
       path->SetName("path");
       path->SetAttribute("fill-rule", "evenodd");
 
@@ -1276,8 +1263,7 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
       helper.UpdateDegrees(startAngle);
       d << "M" << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(stopAngle);
-      d << "A" << outRx << "," << outRy << " 0 "
-        << largeArcFlag << " " << sweepFlag << " "
+      d << "A" << outRx << "," << outRy << " 0 " << largeArcFlag << " " << sweepFlag << " "
         << helper.X << "," << y(helper.Y) << "\n";
       path->SetAttribute("d", d.str().c_str());
 
@@ -1287,8 +1273,7 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
       helper.UpdateDegrees(stopAngle);
       d << "L" << helper.X << "," << y(helper.Y) << "\n";
       helper.UpdateDegrees(startAngle);
-      d << "A" << inRx << "," << inRy << " 0 "
-        << largeArcFlag << " " << innerSweepFlag << " "
+      d << "A" << inRx << "," << inRy << " 0 " << largeArcFlag << " " << innerSweepFlag << " "
         << helper.X << "," << y(helper.Y) << "\nz\n";
       path->SetAttribute("d", d.str().c_str());
     }
@@ -1296,9 +1281,8 @@ void vtkSVGContextDevice2D::DrawEllipseWedge(float cx, float cy,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawEllipticArc(float cx, float cy,
-                                            float rX, float rY,
-                                            float startAngle, float stopAngle)
+void vtkSVGContextDevice2D::DrawEllipticArc(
+  float cx, float cy, float rX, float rY, float startAngle, float stopAngle)
 {
   if (stopAngle < startAngle)
   {
@@ -1318,9 +1302,9 @@ void vtkSVGContextDevice2D::DrawEllipticArc(float cx, float cy,
     if (isCircle)
     {
       vtkNew<vtkXMLDataElement> circle;
-      this->ActiveNode->AddNestedElement(circle.Get());
-      this->ApplyPenStateToNode(circle.Get());
-      this->ApplyBrushStateToNode(circle.Get());
+      this->ActiveNode->AddNestedElement(circle);
+      this->ApplyPenStateToNode(circle);
+      this->ApplyBrushStateToNode(circle);
       circle->SetName("circle");
       circle->SetFloatAttribute("cx", cx);
       circle->SetFloatAttribute("cy", y(cy));
@@ -1329,9 +1313,9 @@ void vtkSVGContextDevice2D::DrawEllipticArc(float cx, float cy,
     else // !isCircle
     {
       vtkNew<vtkXMLDataElement> ellipse;
-      this->ActiveNode->AddNestedElement(ellipse.Get());
-      this->ApplyPenStateToNode(ellipse.Get());
-      this->ApplyBrushStateToNode(ellipse.Get());
+      this->ActiveNode->AddNestedElement(ellipse);
+      this->ApplyPenStateToNode(ellipse);
+      this->ApplyBrushStateToNode(ellipse);
       ellipse->SetName("ellipse");
       ellipse->SetFloatAttribute("cx", cx);
       ellipse->SetFloatAttribute("cy", y(cy));
@@ -1342,9 +1326,9 @@ void vtkSVGContextDevice2D::DrawEllipticArc(float cx, float cy,
   else // isArc
   {
     vtkNew<vtkXMLDataElement> path;
-    this->ActiveNode->AddNestedElement(path.Get());
-    this->ApplyPenStateToNode(path.Get());
-    this->ApplyBrushStateToNode(path.Get());
+    this->ActiveNode->AddNestedElement(path);
+    this->ApplyPenStateToNode(path);
+    this->ApplyBrushStateToNode(path);
     path->SetName("path");
 
     std::ostringstream d;
@@ -1352,31 +1336,28 @@ void vtkSVGContextDevice2D::DrawEllipticArc(float cx, float cy,
     helper.UpdateDegrees(startAngle);
     d << "M" << helper.X << "," << y(helper.Y) << "\n";
     helper.UpdateDegrees(stopAngle);
-    d << "A" << rX << "," << rY << " 0 "
-      << largeArcFlag << " " << sweepFlag << " "
-      << helper.X << "," << y(helper.Y) << "\n";
+    d << "A" << rX << "," << rY << " 0 " << largeArcFlag << " " << sweepFlag << " " << helper.X
+      << "," << y(helper.Y) << "\n";
     path->SetAttribute("d", d.str().c_str());
   }
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawString(float *point, const vtkStdString &string)
+void vtkSVGContextDevice2D::DrawString(float* point, const vtkStdString& string)
 {
   this->DrawString(point, vtkUnicodeString::from_utf8(string));
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ComputeStringBounds(const vtkStdString &string,
-                                                float bounds[4])
+void vtkSVGContextDevice2D::ComputeStringBounds(const vtkStdString& string, float bounds[4])
 {
   this->ComputeStringBounds(vtkUnicodeString::from_utf8(string), bounds);
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawString(float *point,
-                                       const vtkUnicodeString &string)
+void vtkSVGContextDevice2D::DrawString(float* point, const vtkUnicodeString& string)
 {
-  vtkTextRenderer *tren = vtkTextRenderer::GetInstance();
+  vtkTextRenderer* tren = vtkTextRenderer::GetInstance();
   if (!tren)
   {
     vtkErrorMacro("vtkTextRenderer unavailable. Link to vtkRenderingFreeType "
@@ -1384,54 +1365,51 @@ void vtkSVGContextDevice2D::DrawString(float *point,
     return;
   }
 
-  int backend = this->TextAsPath ? vtkTextRenderer::Default
-                                 : tren->DetectBackend(string);
+  int backend = this->TextAsPath ? vtkTextRenderer::Default : tren->DetectBackend(string);
 
   if (backend == vtkTextRenderer::FreeType)
   {
     // Embed freetype text and fonts in the SVG:
-    FontInfo &info = this->Impl->GetFontInfo(this->TextProp);
+    FontInfo& info = this->Impl->GetFontInfo(this->TextProp);
     info.ProcessString(string);
 
     vtkNew<vtkXMLDataElement> text;
-    this->ActiveNode->AddNestedElement(text.Get());
+    this->ActiveNode->AddNestedElement(text);
     text->SetName("text");
-    this->ApplyTextPropertyStateToNode(text.Get(), point[0], point[1]);
+    this->ApplyTextPropertyStateToNode(text, point[0], point[1]);
     // Position is encoded in the transform:
     text->SetFloatAttribute("x", 0.f);
     text->SetFloatAttribute("y", 0.f);
 
     std::string utf8String = string.utf8_str();
-    text->SetCharacterData(utf8String.c_str(), utf8String.size());
+    text->SetCharacterData(utf8String.c_str(), static_cast<int>(utf8String.size()));
   }
   else
   {
     // Export other text (e.g. MathText) as a path:
     vtkNew<vtkPath> tPath;
     int dpi = this->Viewport->GetVTKWindow()->GetDPI();
-    if (!tren->StringToPath(this->TextProp, string, tPath.Get(), dpi, backend))
+    if (!tren->StringToPath(this->TextProp, string, tPath, dpi, backend))
     {
-      vtkErrorMacro("Error generating path for MathText string '"
-                    << string << "'.");
+      vtkErrorMacro("Error generating path for MathText string '" << string << "'.");
       return;
     }
 
     vtkNew<vtkXMLDataElement> path;
-    this->ActiveNode->AddNestedElement(path.Get());
+    this->ActiveNode->AddNestedElement(path);
     path->SetName("path");
-    this->ApplyTextPropertyStateToNodeForPath(path.Get(), point[0], point[1]);
+    this->ApplyTextPropertyStateToNodeForPath(path, point[0], point[1]);
 
     std::ostringstream d;
-    this->DrawPath(tPath.Get(), d);
+    this->DrawPath(tPath, d);
     path->SetAttribute("d", d.str().c_str());
   }
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ComputeStringBounds(const vtkUnicodeString &string,
-                                                float bounds[4])
+void vtkSVGContextDevice2D::ComputeStringBounds(const vtkUnicodeString& string, float bounds[4])
 {
-  vtkTextRenderer *tren = vtkTextRenderer::GetInstance();
+  vtkTextRenderer* tren = vtkTextRenderer::GetInstance();
   if (!tren)
   {
     vtkErrorMacro("vtkTextRenderer unavailable. Link to vtkRenderingFreeType "
@@ -1458,22 +1436,19 @@ void vtkSVGContextDevice2D::ComputeStringBounds(const vtkUnicodeString &string,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ComputeJustifiedStringBounds(const char *string,
-                                                         float bounds[4])
+void vtkSVGContextDevice2D::ComputeJustifiedStringBounds(const char* string, float bounds[4])
 {
   this->ComputeStringBounds(vtkUnicodeString::from_utf8(string), bounds);
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawMathTextString(float *point,
-                                               const vtkStdString &str)
+void vtkSVGContextDevice2D::DrawMathTextString(float* point, const vtkStdString& str)
 {
   this->DrawString(point, str);
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawImage(float p[2], float scale,
-                                      vtkImageData *image)
+void vtkSVGContextDevice2D::DrawImage(float p[2], float scale, vtkImageData* image)
 {
   int dims[3];
   image->GetDimensions(dims);
@@ -1483,9 +1458,9 @@ void vtkSVGContextDevice2D::DrawImage(float p[2], float scale,
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawImage(const vtkRectf &pos, vtkImageData *image)
+void vtkSVGContextDevice2D::DrawImage(const vtkRectf& pos, vtkImageData* image)
 {
-  const ImageInfo &info = this->Impl->GetImageInfo(image);
+  const ImageInfo& info = this->Impl->GetImageInfo(image);
   YConverter y(this->CanvasHeight);
 
   const float xScale = pos.GetWidth() / info.Size[0];
@@ -1501,14 +1476,11 @@ void vtkSVGContextDevice2D::DrawImage(const vtkRectf &pos, vtkImageData *image)
   // [T2] = translate(0, -pos.H); Anchor at bottom corner instead of top
   // [T3] = translate(pos.X, pos.Y); Move back to anchor point
   std::ostringstream xform;
-  xform << "matrix("
-        << xScale << ",0,0,"
-        << yScale << ","
-        << pos.GetX() - xScale * pos.GetX() << ","
-        << y(pos.GetY()) - (yScale * y(pos.GetY()) + pos.GetHeight()) << ")";
+  xform << "matrix(" << xScale << ",0,0," << yScale << "," << pos.GetX() - xScale * pos.GetX()
+        << "," << y(pos.GetY()) - (yScale * y(pos.GetY()) + pos.GetHeight()) << ")";
 
   vtkNew<vtkXMLDataElement> use;
-  this->ActiveNode->AddNestedElement(use.Get());
+  this->ActiveNode->AddNestedElement(use);
   use->SetName("use");
   use->SetFloatAttribute("x", pos.GetX());
   use->SetFloatAttribute("y", y(pos.GetY()));
@@ -1519,14 +1491,14 @@ void vtkSVGContextDevice2D::DrawImage(const vtkRectf &pos, vtkImageData *image)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::SetColor4(unsigned char [])
+void vtkSVGContextDevice2D::SetColor4(unsigned char[])
 {
   // This is how the OpenGL2 impl handles this...
   vtkErrorMacro("color cannot be set this way.");
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::SetTexture(vtkImageData *image, int properties)
+void vtkSVGContextDevice2D::SetTexture(vtkImageData* image, int properties)
 {
   this->Brush->SetTexture(image);
   this->Brush->SetTextureProperties(properties);
@@ -1551,7 +1523,7 @@ void vtkSVGContextDevice2D::SetLineType(int type)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::SetMatrix(vtkMatrix3x3 *m)
+void vtkSVGContextDevice2D::SetMatrix(vtkMatrix3x3* m)
 {
   // Adjust the transform to account for the fact that SVG's y-axis is reversed:
   std::array<double, 9> mat3;
@@ -1565,15 +1537,14 @@ void vtkSVGContextDevice2D::SetMatrix(vtkMatrix3x3 *m)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::GetMatrix(vtkMatrix3x3 *mat3)
+void vtkSVGContextDevice2D::GetMatrix(vtkMatrix3x3* mat3)
 {
-  vtkSVGContextDevice2D::Matrix4ToMatrix3(this->Matrix->GetMatrix()->GetData(),
-                                          mat3->GetData());
+  vtkSVGContextDevice2D::Matrix4ToMatrix3(this->Matrix->GetMatrix()->GetData(), mat3->GetData());
   vtkSVGContextDevice2D::AdjustMatrixForSVG(mat3->GetData(), mat3->GetData());
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::MultiplyMatrix(vtkMatrix3x3 *m)
+void vtkSVGContextDevice2D::MultiplyMatrix(vtkMatrix3x3* m)
 {
   // Adjust the transform to account for the fact that SVG's y-axis is reversed:
   std::array<double, 9> mat3;
@@ -1599,7 +1570,7 @@ void vtkSVGContextDevice2D::PopMatrix()
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::SetClipping(int *x)
+void vtkSVGContextDevice2D::SetClipping(int* x)
 {
   if (!std::equal(this->ClipRect.begin(), this->ClipRect.end(), x))
   {
@@ -1620,24 +1591,22 @@ void vtkSVGContextDevice2D::EnableClipping(bool enable)
 
 //------------------------------------------------------------------------------
 vtkSVGContextDevice2D::vtkSVGContextDevice2D()
-  : Impl(new Details),
-    Viewport(nullptr),
-    ContextNode(nullptr),
-    ActiveNode(nullptr),
-    DefinitionNode(nullptr),
-    CanvasHeight(0.f),
-    SubdivisionThreshold(1.f),
-    IsClipping(false),
-    ActiveNodeIsClipping(false),
-    EmbedFonts(false),
-    TextAsPath(true)
+  : Impl(new Details)
+  , Viewport(nullptr)
+  , ContextNode(nullptr)
+  , ActiveNode(nullptr)
+  , DefinitionNode(nullptr)
+  , CanvasHeight(0.f)
+  , SubdivisionThreshold(1.f)
+  , IsClipping(false)
+  , ActiveNodeIsClipping(false)
+  , EmbedFonts(false)
+  , TextAsPath(true)
 {
   std::fill(this->ClipRect.begin(), this->ClipRect.end(), 0);
-  std::fill(this->ActiveNodeClipRect.begin(),
-            this->ActiveNodeClipRect.end(), 0);
+  std::fill(this->ActiveNodeClipRect.begin(), this->ActiveNodeClipRect.end(), 0);
 
-  std::fill(this->ActiveNodeTransform.begin(),
-            this->ActiveNodeTransform.end(), 0.);
+  std::fill(this->ActiveNodeTransform.begin(), this->ActiveNodeTransform.end(), 0.);
   this->ActiveNodeTransform[0] = 1.;
   this->ActiveNodeTransform[4] = 1.;
   this->ActiveNodeTransform[8] = 1.;
@@ -1655,8 +1624,8 @@ void vtkSVGContextDevice2D::PushGraphicsState()
 {
   vtkNew<vtkXMLDataElement> newGState;
   newGState->SetName("g");
-  this->ActiveNode->AddNestedElement(newGState.Get());
-  this->ActiveNode = newGState.Get();
+  this->ActiveNode->AddNestedElement(newGState);
+  this->ActiveNode = newGState;
 }
 
 //------------------------------------------------------------------------------
@@ -1670,7 +1639,7 @@ void vtkSVGContextDevice2D::PopGraphicsState()
     return;
   }
 
-  vtkXMLDataElement *oldActive = this->ActiveNode;
+  vtkXMLDataElement* oldActive = this->ActiveNode;
   this->ActiveNode = this->ActiveNode->GetParent();
 
   // If the old active node is empty, remove it completely:
@@ -1692,8 +1661,7 @@ void vtkSVGContextDevice2D::SetupClippingAndTransform()
 
   // If we're more than one node nested under ContextNode, that's an error.
   // See above.
-  if (this->ContextNode != this->ActiveNode &&
-      this->ContextNode != this->ActiveNode->GetParent())
+  if (this->ContextNode != this->ActiveNode && this->ContextNode != this->ActiveNode->GetParent())
   {
     vtkErrorMacro("This method must only be called when there is, at most, one "
                   "<g> element between ActiveNode and ContextNode.");
@@ -1701,26 +1669,20 @@ void vtkSVGContextDevice2D::SetupClippingAndTransform()
   }
 
   // Have the transform/clipping settings actually changed?
-  double *mat4 = this->Matrix->GetMatrix()->GetData();
+  double* mat4 = this->Matrix->GetMatrix()->GetData();
   const bool isClippingChanged = this->IsClipping == this->ActiveNodeIsClipping;
-  const bool clipRectChanged = !std::equal(this->ClipRect.begin(),
-                                           this->ClipRect.end(),
-                                           this->ActiveNodeClipRect.begin());
+  const bool clipRectChanged =
+    !std::equal(this->ClipRect.begin(), this->ClipRect.end(), this->ActiveNodeClipRect.begin());
   const bool transformChanged =
-      vtkSVGContextDevice2D::Transform2DEqual(this->ActiveNodeTransform.data(),
-                                              mat4);
-  if (!isClippingChanged &&
-      (!this->IsClipping || !clipRectChanged) &&
-      !transformChanged)
+    vtkSVGContextDevice2D::Transform2DEqual(this->ActiveNodeTransform.data(), mat4);
+  if (!isClippingChanged && (!this->IsClipping || !clipRectChanged) && !transformChanged)
   {
     return;
   }
 
   // Sync the cached values:
-  vtkSVGContextDevice2D::Matrix4ToMatrix3(mat4,
-                                          this->ActiveNodeTransform.data());
-  std::copy(this->ClipRect.begin(), this->ClipRect.end(),
-            this->ActiveNodeClipRect.begin());
+  vtkSVGContextDevice2D::Matrix4ToMatrix3(mat4, this->ActiveNodeTransform.data());
+  std::copy(this->ClipRect.begin(), this->ClipRect.end(), this->ActiveNodeClipRect.begin());
   this->ActiveNodeIsClipping = this->IsClipping;
 
   // Strip the old transform/clip node out if needed:
@@ -1732,9 +1694,8 @@ void vtkSVGContextDevice2D::SetupClippingAndTransform()
 
   // If no clipping or transform is present, no need for a new <g> element,
   // just add new primitives to the ContextNode directly.
-  const std::array<double, 9> ident = {{ 1., 0., 0., 0., 1., 0., 0., 0., 1. }};
-  const bool isIdentity =
-      vtkSVGContextDevice2D::Transform2DEqual(ident.data(), mat4);
+  const std::array<double, 9> ident = { { 1., 0., 0., 0., 1., 0., 0., 0., 1. } };
+  const bool isIdentity = vtkSVGContextDevice2D::Transform2DEqual(ident.data(), mat4);
 
   if (!this->IsClipping && isIdentity)
   {
@@ -1746,18 +1707,17 @@ void vtkSVGContextDevice2D::SetupClippingAndTransform()
   if (!isIdentity)
   {
     this->ActiveNode->SetAttribute(
-          "transform", Transform2DToString(this->ActiveNodeTransform).c_str());
+      "transform", Transform2DToString(this->ActiveNodeTransform).c_str());
   }
   if (this->IsClipping)
   {
-    const ClipRectInfo &info = this->Impl->GetClipRectInfo(this->ClipRect);
-    this->ActiveNode->SetAttribute(
-          "clip-path", (std::string("url(#") + info.Id + ")").c_str());
+    const ClipRectInfo& info = this->Impl->GetClipRectInfo(this->ClipRect);
+    this->ActiveNode->SetAttribute("clip-path", (std::string("url(#") + info.Id + ")").c_str());
   }
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenStateToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenStateToNode(vtkXMLDataElement* node)
 {
   this->ApplyPenColorToNode(node);
   this->ApplyPenOpacityToNode(node);
@@ -1766,13 +1726,13 @@ void vtkSVGContextDevice2D::ApplyPenStateToNode(vtkXMLDataElement *node)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenColorToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenColorToNode(vtkXMLDataElement* node)
 {
   node->SetAttribute("stroke", ColorToString(this->Pen->GetColor()).c_str());
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenOpacityToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenOpacityToNode(vtkXMLDataElement* node)
 {
   if (this->Pen->GetOpacity() != 255)
   {
@@ -1781,7 +1741,7 @@ void vtkSVGContextDevice2D::ApplyPenOpacityToNode(vtkXMLDataElement *node)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenWidthToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenWidthToNode(vtkXMLDataElement* node)
 {
   float width = this->GetScaledPenWidth();
   if (std::fabs(width - 1.f) > 1e-5)
@@ -1791,7 +1751,7 @@ void vtkSVGContextDevice2D::ApplyPenWidthToNode(vtkXMLDataElement *node)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenStippleToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenStippleToNode(vtkXMLDataElement* node)
 {
   // These match the OpenGL2 implementation:
   switch (this->Pen->GetLineType())
@@ -1824,17 +1784,21 @@ void vtkSVGContextDevice2D::ApplyPenStippleToNode(vtkXMLDataElement *node)
       // This is dash-dot-dash, but eh. It matches the OpenGL2 0x1C47 pattern.
       node->SetAttribute("stroke-dasharray", "3,3,1,3,3,3");
       break;
+
+    case vtkPen::DENSE_DOT_LINE:
+      node->SetAttribute("stroke-dasharray", "1,3");
+      break;
   }
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenAsFillColorToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenAsFillColorToNode(vtkXMLDataElement* node)
 {
   node->SetAttribute("fill", ColorToString(this->Pen->GetColor()).c_str());
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyPenAsFillOpacityToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyPenAsFillOpacityToNode(vtkXMLDataElement* node)
 {
   if (this->Pen->GetOpacity() != 255)
   {
@@ -1843,7 +1807,7 @@ void vtkSVGContextDevice2D::ApplyPenAsFillOpacityToNode(vtkXMLDataElement *node)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyBrushStateToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyBrushStateToNode(vtkXMLDataElement* node)
 {
   if (!this->Brush->GetTexture())
   {
@@ -1858,13 +1822,13 @@ void vtkSVGContextDevice2D::ApplyBrushStateToNode(vtkXMLDataElement *node)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyBrushColorToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyBrushColorToNode(vtkXMLDataElement* node)
 {
   node->SetAttribute("fill", ColorToString(this->Brush->GetColor()).c_str());
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyBrushOpacityToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyBrushOpacityToNode(vtkXMLDataElement* node)
 {
   if (this->Brush->GetOpacity() != 255)
   {
@@ -1873,22 +1837,21 @@ void vtkSVGContextDevice2D::ApplyBrushOpacityToNode(vtkXMLDataElement *node)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::ApplyBrushTextureToNode(vtkXMLDataElement *node)
+void vtkSVGContextDevice2D::ApplyBrushTextureToNode(vtkXMLDataElement* node)
 {
-  vtkImageData *img = this->Brush->GetTexture();
+  vtkImageData* img = this->Brush->GetTexture();
   int prop = this->Brush->GetTextureProperties();
 
-  const PatternInfo &info = this->Impl->GetPatternInfo(img, prop);
+  const PatternInfo& info = this->Impl->GetPatternInfo(img, prop);
   std::ostringstream fill;
   fill << "url(#" << info.PatternId << ")";
   node->SetAttribute("fill", fill.str().c_str());
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::
-ApplyTextPropertyStateToNode(vtkXMLDataElement *node, float x, float y)
+void vtkSVGContextDevice2D::ApplyTextPropertyStateToNode(vtkXMLDataElement* node, float x, float y)
 {
-  vtkFreeTypeTools *ftt = vtkFreeTypeTools::GetInstance();
+  vtkFreeTypeTools* ftt = vtkFreeTypeTools::GetInstance();
   if (!ftt)
   {
     vtkErrorMacro("Error embedding fonts: No vtkFreeTypeTools instance "
@@ -1904,13 +1867,13 @@ ApplyTextPropertyStateToNode(vtkXMLDataElement *node, float x, float y)
   vtkVector3d colord;
   this->TextProp->GetColor(colord.GetData());
   vtkColor3ub color = {
-      static_cast<unsigned char>((colord[0] * 255.) + 0.5),
-      static_cast<unsigned char>((colord[1] * 255.) + 0.5),
-      static_cast<unsigned char>((colord[2] * 255.) + 0.5),
+    static_cast<unsigned char>((colord[0] * 255.) + 0.5),
+    static_cast<unsigned char>((colord[1] * 255.) + 0.5),
+    static_cast<unsigned char>((colord[2] * 255.) + 0.5),
   };
 
   std::ostringstream xform;
-  xform <<  "translate(" << x << "," << yConv(y) << ")";
+  xform << "translate(" << x << "," << yConv(y) << ")";
   if (this->TextProp->GetOrientation() != 0.)
   {
     xform << "rotate(" << this->TextProp->GetOrientation() << ") ";
@@ -1920,14 +1883,11 @@ ApplyTextPropertyStateToNode(vtkXMLDataElement *node, float x, float y)
   fontSize << this->TextProp->GetFontSize() << "pt";
 
   node->SetAttribute("fill", ColorToString(color.GetData()).c_str());
-  node->SetFloatAttribute("fill-opacity",
-                          static_cast<float>(this->TextProp->GetOpacity()));
+  node->SetFloatAttribute("fill-opacity", static_cast<float>(this->TextProp->GetOpacity()));
   node->SetAttribute("font-family", faceMetrics.FamilyName.c_str());
   node->SetAttribute("font-size", fontSize.str().c_str());
-  node->SetAttribute("font-style", this->TextProp->GetItalic() != 0 ? "italic"
-                                                                    : "normal");
-  node->SetAttribute("font-weight", this->TextProp->GetBold() != 0 ? "bold"
-                                                                   : "normal");
+  node->SetAttribute("font-style", this->TextProp->GetItalic() != 0 ? "italic" : "normal");
+  node->SetAttribute("font-weight", this->TextProp->GetBold() != 0 ? "bold" : "normal");
 
   switch (this->TextProp->GetJustification())
   {
@@ -1972,24 +1932,23 @@ ApplyTextPropertyStateToNode(vtkXMLDataElement *node, float x, float y)
 
 //------------------------------------------------------------------------------
 void vtkSVGContextDevice2D::ApplyTextPropertyStateToNodeForPath(
-    vtkXMLDataElement *node, float x, float y)
+  vtkXMLDataElement* node, float x, float y)
 {
   vtkVector3d colord;
   this->TextProp->GetColor(colord.GetData());
   vtkColor3ub color = {
-      static_cast<unsigned char>((colord[0] * 255.) + 0.5),
-      static_cast<unsigned char>((colord[1] * 255.) + 0.5),
-      static_cast<unsigned char>((colord[2] * 255.) + 0.5),
+    static_cast<unsigned char>((colord[0] * 255.) + 0.5),
+    static_cast<unsigned char>((colord[1] * 255.) + 0.5),
+    static_cast<unsigned char>((colord[2] * 255.) + 0.5),
   };
 
   YConverter yConv(this->CanvasHeight);
 
   std::ostringstream xform;
-  xform <<  "translate(" << x << "," << yConv(y) << ")";
+  xform << "translate(" << x << "," << yConv(y) << ")";
 
   node->SetAttribute("fill", ColorToString(color.GetData()).c_str());
-  node->SetFloatAttribute("fill-opacity",
-                          static_cast<float>(this->TextProp->GetOpacity()));
+  node->SetFloatAttribute("fill-opacity", static_cast<float>(this->TextProp->GetOpacity()));
 
   node->SetAttribute("transform", xform.str().c_str());
 }
@@ -2008,11 +1967,10 @@ std::string vtkSVGContextDevice2D::AddCrossSymbol(bool)
 
   std::string id = idStream.str();
 
-  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol",
-                                                            id.c_str()))
+  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol", id.c_str()))
   {
     vtkNew<vtkXMLDataElement> symbol;
-    this->DefinitionNode->AddNestedElement(symbol.Get());
+    this->DefinitionNode->AddNestedElement(symbol);
 
     symbol->SetName("symbol");
     symbol->SetId(id.c_str());
@@ -2020,7 +1978,7 @@ std::string vtkSVGContextDevice2D::AddCrossSymbol(bool)
     symbol->SetAttribute("viewBox", "0,0 1,1");
 
     vtkNew<vtkXMLDataElement> path;
-    symbol->AddNestedElement(path.Get());
+    symbol->AddNestedElement(path);
 
     path->SetName("path");
     path->SetAttribute("d", "M0,0L1,1M0,1L1,0");
@@ -2037,11 +1995,10 @@ std::string vtkSVGContextDevice2D::AddPlusSymbol(bool)
 
   std::string id = idStream.str();
 
-  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol",
-                                                            id.c_str()))
+  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol", id.c_str()))
   {
     vtkNew<vtkXMLDataElement> symbol;
-    this->DefinitionNode->AddNestedElement(symbol.Get());
+    this->DefinitionNode->AddNestedElement(symbol);
 
     symbol->SetName("symbol");
     symbol->SetId(id.c_str());
@@ -2049,7 +2006,7 @@ std::string vtkSVGContextDevice2D::AddPlusSymbol(bool)
     symbol->SetAttribute("viewBox", "0,0 1,1");
 
     vtkNew<vtkXMLDataElement> path;
-    symbol->AddNestedElement(path.Get());
+    symbol->AddNestedElement(path);
 
     path->SetName("path");
     path->SetAttribute("d", "M0.5,0L0.5,1M0,0.5L1,0.5");
@@ -2066,11 +2023,10 @@ std::string vtkSVGContextDevice2D::AddSquareSymbol(bool)
 
   std::string id = idStream.str();
 
-  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol",
-                                                            id.c_str()))
+  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol", id.c_str()))
   {
     vtkNew<vtkXMLDataElement> symbol;
-    this->DefinitionNode->AddNestedElement(symbol.Get());
+    this->DefinitionNode->AddNestedElement(symbol);
 
     symbol->SetName("symbol");
     symbol->SetId(id.c_str());
@@ -2078,7 +2034,7 @@ std::string vtkSVGContextDevice2D::AddSquareSymbol(bool)
     symbol->SetAttribute("viewBox", "0,0 1,1");
 
     vtkNew<vtkXMLDataElement> rect;
-    symbol->AddNestedElement(rect.Get());
+    symbol->AddNestedElement(rect);
 
     rect->SetName("rect");
     rect->SetFloatAttribute("x", 0.f);
@@ -2098,11 +2054,10 @@ std::string vtkSVGContextDevice2D::AddCircleSymbol(bool)
 
   std::string id = idStream.str();
 
-  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol",
-                                                            id.c_str()))
+  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol", id.c_str()))
   {
     vtkNew<vtkXMLDataElement> symbol;
-    this->DefinitionNode->AddNestedElement(symbol.Get());
+    this->DefinitionNode->AddNestedElement(symbol);
 
     symbol->SetName("symbol");
     symbol->SetId(id.c_str());
@@ -2110,7 +2065,7 @@ std::string vtkSVGContextDevice2D::AddCircleSymbol(bool)
     symbol->SetAttribute("viewBox", "0,0 1,1");
 
     vtkNew<vtkXMLDataElement> circle;
-    symbol->AddNestedElement(circle.Get());
+    symbol->AddNestedElement(circle);
 
     circle->SetName("circle");
     circle->SetFloatAttribute("cx", 0.5f);
@@ -2129,11 +2084,10 @@ std::string vtkSVGContextDevice2D::AddDiamondSymbol(bool)
 
   std::string id = idStream.str();
 
-  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol",
-                                                            id.c_str()))
+  if (!this->DefinitionNode->FindNestedElementWithNameAndId("symbol", id.c_str()))
   {
     vtkNew<vtkXMLDataElement> symbol;
-    this->DefinitionNode->AddNestedElement(symbol.Get());
+    this->DefinitionNode->AddNestedElement(symbol);
 
     symbol->SetName("symbol");
     symbol->SetId(id.c_str());
@@ -2141,7 +2095,7 @@ std::string vtkSVGContextDevice2D::AddDiamondSymbol(bool)
     symbol->SetAttribute("viewBox", "0,0 1,1");
 
     vtkNew<vtkXMLDataElement> path;
-    symbol->AddNestedElement(path.Get());
+    symbol->AddNestedElement(path);
 
     path->SetName("path");
     path->SetAttribute("d", "M0,.5L.5,1 1,.5 .5,0z");
@@ -2151,13 +2105,12 @@ std::string vtkSVGContextDevice2D::AddDiamondSymbol(bool)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawPath(vtkPath *path, std::ostream &out)
+void vtkSVGContextDevice2D::DrawPath(vtkPath* path, std::ostream& out)
 {
   // The text renderer always uses floats to generate paths, so we'll optimize
   // a bit here:
-  vtkFloatArray *points =
-      vtkArrayDownCast<vtkFloatArray>(path->GetPoints()->GetData());
-  vtkIntArray *codes = path->GetCodes();
+  vtkFloatArray* points = vtkArrayDownCast<vtkFloatArray>(path->GetPoints()->GetData());
+  vtkIntArray* codes = path->GetCodes();
 
   if (!points)
   {
@@ -2166,9 +2119,8 @@ void vtkSVGContextDevice2D::DrawPath(vtkPath *path, std::ostream &out)
   }
 
   vtkIdType numTuples = points->GetNumberOfTuples();
-  if (numTuples != codes->GetNumberOfTuples() ||
-      codes->GetNumberOfComponents() != 1 ||
-      points->GetNumberOfComponents() != 3)
+  if (numTuples != codes->GetNumberOfTuples() || codes->GetNumberOfComponents() != 1 ||
+    points->GetNumberOfComponents() != 3)
   {
     vtkErrorMacro("Invalid path data.");
     return;
@@ -2180,24 +2132,21 @@ void vtkSVGContextDevice2D::DrawPath(vtkPath *path, std::ostream &out)
   }
 
   // Use a lambda to invert the y positions for SVG:
-  auto y = [](float yIn) -> float
-  {
-    return -yIn;
-  };
+  auto y = [](float yIn) -> float { return -yIn; };
 
   typedef vtkPath::ControlPointType CodeEnum;
   typedef vtkIntArray::ValueType CodeType;
-  CodeType *code = codes->GetPointer(0);
-  CodeType *codeEnd = code + numTuples;
+  CodeType* code = codes->GetPointer(0);
+  CodeType* codeEnd = code + numTuples;
 
   typedef vtkFloatArray::ValueType PointType;
-  PointType *point = points->GetPointer(0);
+  PointType* point = points->GetPointer(0);
 
   // These are only used in an assertion, ifdef silences warning on non-debug
   // builds
 #ifndef NDEBUG
-  PointType *pointBegin = point;
-  CodeType *codeBegin = code;
+  PointType* pointBegin = point;
+  CodeType* codeBegin = code;
 #endif
 
   // Track the last code so we can save a little space by chaining draw commands
@@ -2238,8 +2187,7 @@ void vtkSVGContextDevice2D::DrawPath(vtkPath *path, std::ostream &out)
           lastCode = *code;
           out << "Q";
         }
-        out << point[0] << "," << y(point[1]) << " "
-            << point[3] << "," << y(point[4]) << "\n";
+        out << point[0] << "," << y(point[1]) << " " << point[3] << "," << y(point[4]) << "\n";
         point += 6;
         code += 2;
         break;
@@ -2252,8 +2200,7 @@ void vtkSVGContextDevice2D::DrawPath(vtkPath *path, std::ostream &out)
           lastCode = *code;
           out << "C";
         }
-        out << point[0] << "," << y(point[1]) << " "
-            << point[3] << "," << y(point[4]) << " "
+        out << point[0] << "," << y(point[1]) << " " << point[3] << "," << y(point[4]) << " "
             << point[6] << "," << y(point[7]) << "\n";
         point += 9;
         code += 3;
@@ -2266,31 +2213,27 @@ void vtkSVGContextDevice2D::DrawPath(vtkPath *path, std::ostream &out)
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawLineGradient(
-    const vtkVector2f &p1, const vtkColor4ub &c1,
-    const vtkVector2f &p2, const vtkColor4ub &c2, bool useAlpha)
+void vtkSVGContextDevice2D::DrawLineGradient(const vtkVector2f& p1, const vtkColor4ub& c1,
+  const vtkVector2f& p2, const vtkColor4ub& c2, bool useAlpha)
 {
-  const vtkColor4ub aveColor = {
-    static_cast<unsigned char>(static_cast<int>(c1[0] + c2[0]) / 2),
+  const vtkColor4ub aveColor = { static_cast<unsigned char>(static_cast<int>(c1[0] + c2[0]) / 2),
     static_cast<unsigned char>(static_cast<int>(c1[1] + c2[1]) / 2),
     static_cast<unsigned char>(static_cast<int>(c1[2] + c2[2]) / 2),
-    static_cast<unsigned char>(static_cast<int>(c1[3] + c2[3]) / 2)
-  };
+    static_cast<unsigned char>(static_cast<int>(c1[3] + c2[3]) / 2) };
 
   // If the colors are more or less the same, go ahead and draw this segment.
   // Same if the segment is small enough to fit on a single pixel.
-  if (this->LengthLessThanTolerance(p1, p2) ||
-      this->ColorsAreClose(c1, c2, useAlpha))
+  if (this->LengthLessThanTolerance(p1, p2) || this->ColorsAreClose(c1, c2, useAlpha))
   {
     YConverter y(this->CanvasHeight);
     vtkNew<vtkXMLDataElement> line;
-    this->ActiveNode->AddNestedElement(line.Get());
+    this->ActiveNode->AddNestedElement(line);
     line->SetName("line");
     line->SetFloatAttribute("x1", p1[0]);
     line->SetFloatAttribute("y1", y(p1[1]));
     line->SetFloatAttribute("x2", p2[0]);
     line->SetFloatAttribute("y2", y(p2[1]));
-    this->ApplyPenWidthToNode(line.Get());
+    this->ApplyPenWidthToNode(line);
     line->SetAttribute("stroke", ColorToString(aveColor.GetData()).c_str());
     if (useAlpha && aveColor[3] != 255)
     {
@@ -2310,25 +2253,22 @@ void vtkSVGContextDevice2D::DrawLineGradient(
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::DrawTriangleGradient(
-    const vtkVector2f &p1, const vtkColor4ub &c1,
-    const vtkVector2f &p2, const vtkColor4ub &c2,
-    const vtkVector2f &p3, const vtkColor4ub &c3, bool useAlpha)
+void vtkSVGContextDevice2D::DrawTriangleGradient(const vtkVector2f& p1, const vtkColor4ub& c1,
+  const vtkVector2f& p2, const vtkColor4ub& c2, const vtkVector2f& p3, const vtkColor4ub& c3,
+  bool useAlpha)
 {
   // If the colors are more or less the same, go ahead and draw this triangle.
   // Same if the triangle is small enough to fit on a single pixel.
-  if (this->AreaLessThanTolerance(p1, p2, p3) ||
-      this->ColorsAreClose(c1, c2, c3, useAlpha))
+  if (this->AreaLessThanTolerance(p1, p2, p3) || this->ColorsAreClose(c1, c2, c3, useAlpha))
   {
     YConverter y(this->CanvasHeight);
-    const vtkColor4ub aveColor = {
-      static_cast<unsigned char>(static_cast<int>(c1[0] + c2[0] + c3[0]) / 3),
+    const vtkColor4ub aveColor = { static_cast<unsigned char>(
+                                     static_cast<int>(c1[0] + c2[0] + c3[0]) / 3),
       static_cast<unsigned char>(static_cast<int>(c1[1] + c2[1] + c3[1]) / 3),
       static_cast<unsigned char>(static_cast<int>(c1[2] + c2[2] + c3[2]) / 3),
-      static_cast<unsigned char>(static_cast<int>(c1[3] + c2[3] + c3[3]) / 3)
-    };
+      static_cast<unsigned char>(static_cast<int>(c1[3] + c2[3] + c3[3]) / 3) };
     vtkNew<vtkXMLDataElement> polygon;
-    this->ActiveNode->AddNestedElement(polygon.Get());
+    this->ActiveNode->AddNestedElement(polygon);
     polygon->SetName("polygon");
     polygon->SetAttribute("fill", ColorToString(aveColor.GetData()).c_str());
     if (useAlpha && aveColor[3] != 255)
@@ -2341,11 +2281,9 @@ void vtkSVGContextDevice2D::DrawTriangleGradient(
     polygon->SetAttribute("shape-rendering", "crispEdges");
 
     std::ostringstream points;
-    points << p1[0] << "," << y(p1[1]) << " "
-           << p2[0] << "," << y(p2[1]) << " "
-           << p3[0] << "," << y(p3[1]);
+    points << p1[0] << "," << y(p1[1]) << " " << p2[0] << "," << y(p2[1]) << " " << p3[0] << ","
+           << y(p3[1]);
     polygon->SetAttribute("points", points.str().c_str());
-
 
     return;
   }
@@ -2367,51 +2305,42 @@ void vtkSVGContextDevice2D::DrawTriangleGradient(
   const vtkVector2f p12 = (p1 + p2) * 0.5;
   const vtkVector2f p23 = (p2 + p3) * 0.5;
   const vtkVector2f p13 = (p1 + p3) * 0.5;
-  const vtkColor4ub c12 = {
-    static_cast<unsigned char>(static_cast<int>(c1[0] + c2[0]) / 2),
+  const vtkColor4ub c12 = { static_cast<unsigned char>(static_cast<int>(c1[0] + c2[0]) / 2),
     static_cast<unsigned char>(static_cast<int>(c1[1] + c2[1]) / 2),
     static_cast<unsigned char>(static_cast<int>(c1[2] + c2[2]) / 2),
-    static_cast<unsigned char>(static_cast<int>(c1[3] + c2[3]) / 2)
-  };
-  const vtkColor4ub c23 = {
-    static_cast<unsigned char>(static_cast<int>(c2[0] + c3[0]) / 2),
+    static_cast<unsigned char>(static_cast<int>(c1[3] + c2[3]) / 2) };
+  const vtkColor4ub c23 = { static_cast<unsigned char>(static_cast<int>(c2[0] + c3[0]) / 2),
     static_cast<unsigned char>(static_cast<int>(c2[1] + c3[1]) / 2),
     static_cast<unsigned char>(static_cast<int>(c2[2] + c3[2]) / 2),
-    static_cast<unsigned char>(static_cast<int>(c2[3] + c3[3]) / 2)
-  };
-  const vtkColor4ub c13 = {
-    static_cast<unsigned char>(static_cast<int>(c1[0] + c3[0]) / 2),
+    static_cast<unsigned char>(static_cast<int>(c2[3] + c3[3]) / 2) };
+  const vtkColor4ub c13 = { static_cast<unsigned char>(static_cast<int>(c1[0] + c3[0]) / 2),
     static_cast<unsigned char>(static_cast<int>(c1[1] + c3[1]) / 2),
     static_cast<unsigned char>(static_cast<int>(c1[2] + c3[2]) / 2),
-    static_cast<unsigned char>(static_cast<int>(c1[3] + c3[3]) / 2)
-  };
+    static_cast<unsigned char>(static_cast<int>(c1[3] + c3[3]) / 2) };
 
-  this->DrawTriangleGradient(p1,  c1,  p12, c12, p13, c13, useAlpha);
-  this->DrawTriangleGradient(p2,  c2,  p12, c12, p23, c23, useAlpha);
-  this->DrawTriangleGradient(p3,  c3,  p13, c13, p23, c23, useAlpha);
+  this->DrawTriangleGradient(p1, c1, p12, c12, p13, c13, useAlpha);
+  this->DrawTriangleGradient(p2, c2, p12, c12, p23, c23, useAlpha);
+  this->DrawTriangleGradient(p3, c3, p13, c13, p23, c23, useAlpha);
   this->DrawTriangleGradient(p12, c12, p13, c13, p23, c23, useAlpha);
 }
 
 //------------------------------------------------------------------------------
-bool vtkSVGContextDevice2D::AreaLessThanTolerance(const vtkVector2f &p1,
-                                                  const vtkVector2f &p2,
-                                                  const vtkVector2f &p3)
+bool vtkSVGContextDevice2D::AreaLessThanTolerance(
+  const vtkVector2f& p1, const vtkVector2f& p2, const vtkVector2f& p3)
 {
-  return this->LengthLessThanTolerance(p1, p2) &&
-         this->LengthLessThanTolerance(p1, p3) &&
-         this->LengthLessThanTolerance(p2, p3);
+  return this->LengthLessThanTolerance(p1, p2) && this->LengthLessThanTolerance(p1, p3) &&
+    this->LengthLessThanTolerance(p2, p3);
 }
 
 //------------------------------------------------------------------------------
-bool vtkSVGContextDevice2D::LengthLessThanTolerance(const vtkVector2f &p1,
-                                                    const vtkVector2f &p2)
+bool vtkSVGContextDevice2D::LengthLessThanTolerance(const vtkVector2f& p1, const vtkVector2f& p2)
 {
-  return (p2-p1).SquaredNorm() < this->SubdivisionThreshold;
+  return (p2 - p1).SquaredNorm() < this->SubdivisionThreshold;
 }
 
 //------------------------------------------------------------------------------
-bool vtkSVGContextDevice2D::ColorsAreClose(const vtkColor4ub &c1,
-                                           const vtkColor4ub &c2, bool useAlpha)
+bool vtkSVGContextDevice2D::ColorsAreClose(
+  const vtkColor4ub& c1, const vtkColor4ub& c2, bool useAlpha)
 {
   const std::array<unsigned char, 4> tol = { { 16, 8, 32, 32 } };
   int comps = useAlpha ? 4 : 3;
@@ -2427,19 +2356,17 @@ bool vtkSVGContextDevice2D::ColorsAreClose(const vtkColor4ub &c1,
 }
 
 //------------------------------------------------------------------------------
-bool vtkSVGContextDevice2D::ColorsAreClose(const vtkColor4ub &c1,
-                                           const vtkColor4ub &c2,
-                                           const vtkColor4ub &c3, bool useAlpha)
+bool vtkSVGContextDevice2D::ColorsAreClose(
+  const vtkColor4ub& c1, const vtkColor4ub& c2, const vtkColor4ub& c3, bool useAlpha)
 {
-  return (this->ColorsAreClose(c1, c2, useAlpha) &&
-          this->ColorsAreClose(c2, c3, useAlpha) &&
-          this->ColorsAreClose(c1, c3, useAlpha));
+  return (this->ColorsAreClose(c1, c2, useAlpha) && this->ColorsAreClose(c2, c3, useAlpha) &&
+    this->ColorsAreClose(c1, c3, useAlpha));
 }
 
 //------------------------------------------------------------------------------
 void vtkSVGContextDevice2D::WriteFonts()
 {
-  vtkFreeTypeTools *ftt = vtkFreeTypeTools::GetInstance();
+  vtkFreeTypeTools* ftt = vtkFreeTypeTools::GetInstance();
   if (!ftt)
   {
     vtkErrorMacro("Error embedding fonts: No vtkFreeTypeTools instance "
@@ -2450,28 +2377,28 @@ void vtkSVGContextDevice2D::WriteFonts()
   using FaceMetrics = vtkFreeTypeTools::FaceMetrics;
   using GlyphOutline = vtkFreeTypeTools::GlyphOutline;
 
-  for (const auto &fontEntry : this->Impl->FontMap)
+  for (const auto& fontEntry : this->Impl->FontMap)
   {
-    const FontKey &key = fontEntry.first;
-    const FontInfo *info = fontEntry.second;
+    const FontKey& key = fontEntry.first;
+    const FontInfo* info = fontEntry.second;
     FaceMetrics faceMetrics = ftt->GetFaceMetrics(key.TextProperty);
 
     // We only embed scalable fonts for now.
     if (!faceMetrics.Scalable)
     {
-      vtkWarningMacro("Cannot embed non-scalable fonts (refering to font file: "
-                      << key.TextProperty->GetFontFile() << ")");
+      vtkWarningMacro("Cannot embed non-scalable fonts (referring to font file: "
+        << key.TextProperty->GetFontFile() << ")");
       continue;
     }
 
     vtkNew<vtkXMLDataElement> font;
-    this->DefinitionNode->AddNestedElement(font.Get());
+    this->DefinitionNode->AddNestedElement(font);
     font->SetName("font");
     font->SetAttribute("id", info->SVGId.c_str());
     font->SetIntAttribute("horiz-adv-x", faceMetrics.HorizAdvance);
 
     vtkNew<vtkXMLDataElement> face;
-    font->AddNestedElement(face.Get());
+    font->AddNestedElement(face);
     face->SetName("font-face");
     face->SetAttribute("font-family", faceMetrics.FamilyName.c_str());
     face->SetAttribute("font-style", faceMetrics.Italic ? "italic" : "normal");
@@ -2485,19 +2412,18 @@ void vtkSVGContextDevice2D::WriteFonts()
 
     for (auto charId : info->Chars)
     {
-      GlyphOutline glyphInfo = ftt->GetUnscaledGlyphOutline(key.TextProperty,
-                                                            charId);
+      GlyphOutline glyphInfo = ftt->GetUnscaledGlyphOutline(key.TextProperty, charId);
       vtkUnicodeString unicode(1, charId);
 
       vtkNew<vtkXMLDataElement> glyph;
-      face->AddNestedElement(glyph.Get());
+      face->AddNestedElement(glyph);
       glyph->SetName("glyph");
       glyph->SetAttributeEncoding(VTK_ENCODING_UTF_8);
       glyph->SetAttribute("unicode", unicode.utf8_str());
       glyph->SetIntAttribute("horiz-adv-x", glyphInfo.HorizAdvance);
 
       std::ostringstream d;
-      this->DrawPath(glyphInfo.Path.Get(), d);
+      this->DrawPath(glyphInfo.Path, d);
       glyph->SetAttribute("d", d.str().c_str());
     }
 
@@ -2506,8 +2432,7 @@ void vtkSVGContextDevice2D::WriteFonts()
       const vtkUnicodeString unicode1(1, charPair.first);
       const vtkUnicodeString unicode2(1, charPair.second);
       std::array<int, 2> kerning =
-          ftt->GetUnscaledKerning(key.TextProperty.Get(),
-                                  charPair.first, charPair.second);
+        ftt->GetUnscaledKerning(key.TextProperty, charPair.first, charPair.second);
 
       if (std::abs(kerning[0]) == 0)
       {
@@ -2515,7 +2440,7 @@ void vtkSVGContextDevice2D::WriteFonts()
       }
 
       vtkNew<vtkXMLDataElement> hkern;
-      font->AddNestedElement(hkern.Get());
+      font->AddNestedElement(hkern);
       hkern->SetName("hkern");
       hkern->SetAttributeEncoding(VTK_ENCODING_UTF_8);
       hkern->SetAttribute("u1", unicode1.utf8_str());
@@ -2528,10 +2453,10 @@ void vtkSVGContextDevice2D::WriteFonts()
 //------------------------------------------------------------------------------
 void vtkSVGContextDevice2D::WriteImages()
 {
-  for (const ImageInfo &info : this->Impl->ImageSet)
+  for (const ImageInfo& info : this->Impl->ImageSet)
   {
     vtkNew<vtkXMLDataElement> image;
-    this->DefinitionNode->AddNestedElement(image.Get());
+    this->DefinitionNode->AddNestedElement(image);
     image->SetName("image");
     image->SetAttribute("id", info.Id.c_str());
     image->SetIntAttribute("width", info.Size[0]);
@@ -2543,10 +2468,10 @@ void vtkSVGContextDevice2D::WriteImages()
 //------------------------------------------------------------------------------
 void vtkSVGContextDevice2D::WritePatterns()
 {
-  for (const PatternInfo &info : this->Impl->PatternSet)
+  for (const PatternInfo& info : this->Impl->PatternSet)
   {
     vtkNew<vtkXMLDataElement> pattern;
-    this->DefinitionNode->AddNestedElement(pattern.Get());
+    this->DefinitionNode->AddNestedElement(pattern);
     pattern->SetName("pattern");
     pattern->SetAttribute("id", info.PatternId.c_str());
 
@@ -2570,7 +2495,7 @@ void vtkSVGContextDevice2D::WritePatterns()
     }
 
     vtkNew<vtkXMLDataElement> use;
-    pattern->AddNestedElement(use.Get());
+    pattern->AddNestedElement(use);
     use->SetName("use");
     use->SetFloatAttribute("x", 0);
     use->SetFloatAttribute("y", 0);
@@ -2583,16 +2508,16 @@ void vtkSVGContextDevice2D::WritePatterns()
 //------------------------------------------------------------------------------
 void vtkSVGContextDevice2D::WriteClipRects()
 {
-  for (const auto &info : this->Impl->ClipRectSet)
+  for (const auto& info : this->Impl->ClipRectSet)
   {
     vtkNew<vtkXMLDataElement> clipPath;
-    this->DefinitionNode->AddNestedElement(clipPath.Get());
+    this->DefinitionNode->AddNestedElement(clipPath);
     clipPath->SetName("clipPath");
     clipPath->SetAttribute("id", info.Id.c_str());
 
     // Get rect
     vtkNew<vtkXMLDataElement> rect;
-    clipPath->AddNestedElement(rect.Get());
+    clipPath->AddNestedElement(rect);
     rect->SetName("rect");
     rect->SetAttribute("fill", "#000");
     rect->SetIntAttribute("x", info.Rect[0]);
@@ -2603,8 +2528,7 @@ void vtkSVGContextDevice2D::WriteClipRects()
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::AdjustMatrixForSVG(const double in[9],
-                                               double out[9])
+void vtkSVGContextDevice2D::AdjustMatrixForSVG(const double in[9], double out[9])
 {
   // Adjust the transform to account for the fact that SVG's y-axis is reversed:
   //
@@ -2639,8 +2563,7 @@ void vtkSVGContextDevice2D::GetSVGMatrix(double svg[9])
 }
 
 //------------------------------------------------------------------------------
-bool vtkSVGContextDevice2D::Transform2DEqual(const double mat3[9],
-                                             const double mat4[16])
+bool vtkSVGContextDevice2D::Transform2DEqual(const double mat3[9], const double mat4[16])
 {
   const double tol = 1e-5;
 
@@ -2659,19 +2582,18 @@ bool vtkSVGContextDevice2D::Transform2DEqual(const double mat3[9],
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::Matrix3ToMatrix4(const double mat3[9],
-                                             double mat4[16])
+void vtkSVGContextDevice2D::Matrix3ToMatrix4(const double mat3[9], double mat4[16])
 {
-  mat4[ 0] = mat3[0];
-  mat4[ 1] = mat3[1];
-  mat4[ 2] = 0.;
-  mat4[ 3] = mat3[2];
-  mat4[ 4] = mat3[3];
-  mat4[ 5] = mat3[4];
-  mat4[ 6] = 0.;
-  mat4[ 7] = mat3[5];
-  mat4[ 8] = 0.;
-  mat4[ 9] = 0.;
+  mat4[0] = mat3[0];
+  mat4[1] = mat3[1];
+  mat4[2] = 0.;
+  mat4[3] = mat3[2];
+  mat4[4] = mat3[3];
+  mat4[5] = mat3[4];
+  mat4[6] = 0.;
+  mat4[7] = mat3[5];
+  mat4[8] = 0.;
+  mat4[9] = 0.;
   mat4[10] = 1.;
   mat4[11] = 0.;
   mat4[12] = 0.;
@@ -2681,18 +2603,17 @@ void vtkSVGContextDevice2D::Matrix3ToMatrix4(const double mat3[9],
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::Matrix4ToMatrix3(const double mat4[16],
-                                             double mat3[9])
+void vtkSVGContextDevice2D::Matrix4ToMatrix3(const double mat4[16], double mat3[9])
 {
-  mat3[ 0] = mat4[0];
-  mat3[ 1] = mat4[1];
-  mat3[ 2] = mat4[3];
-  mat3[ 3] = mat4[4];
-  mat3[ 4] = mat4[5];
-  mat3[ 5] = mat4[7];
-  mat3[ 6] = 0.;
-  mat3[ 7] = 0.;
-  mat3[ 8] = 1.;
+  mat3[0] = mat4[0];
+  mat3[1] = mat4[1];
+  mat3[2] = mat4[3];
+  mat3[3] = mat4[4];
+  mat3[4] = mat4[5];
+  mat3[5] = mat4[7];
+  mat3[6] = 0.;
+  mat3[7] = 0.;
+  mat3[8] = 1.;
 }
 
 //------------------------------------------------------------------------------
@@ -2704,33 +2625,32 @@ float vtkSVGContextDevice2D::GetScaledPenWidth()
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::GetScaledPenWidth(float &x, float &y)
+void vtkSVGContextDevice2D::GetScaledPenWidth(float& x, float& y)
 {
   x = y = this->Pen->GetWidth();
   this->TransformSize(x, y);
 }
 
 //------------------------------------------------------------------------------
-void vtkSVGContextDevice2D::TransformSize(float &x, float &y)
+void vtkSVGContextDevice2D::TransformSize(float& x, float& y)
 {
   // Get current 3x3 SVG transform:
   std::array<double, 9> m;
-  vtkSVGContextDevice2D::Matrix4ToMatrix3(this->Matrix->GetMatrix()->GetData(),
-                                          m.data());
+  vtkSVGContextDevice2D::Matrix4ToMatrix3(this->Matrix->GetMatrix()->GetData(), m.data());
 
   // Invert it (we want to go from local space --> global space)
   vtkMatrix3x3::Invert(m.data(), m.data());
 
   // Extract the scale values:
-  const double xScale = std::copysign(std::sqrt(m[0]*m[0] + m[1]*m[1]), m[0]);
-  const double yScale = std::copysign(std::sqrt(m[3]*m[3] + m[4]*m[4]), m[4]);
+  const double xScale = std::copysign(std::sqrt(m[0] * m[0] + m[1] * m[1]), m[0]);
+  const double yScale = std::copysign(std::sqrt(m[3] * m[3] + m[4] * m[4]), m[4]);
 
   x *= static_cast<float>(xScale);
   y *= static_cast<float>(yScale);
 }
 
 //------------------------------------------------------------------------------
-vtkImageData *vtkSVGContextDevice2D::PreparePointSprite(vtkImageData *in)
+vtkImageData* vtkSVGContextDevice2D::PreparePointSprite(vtkImageData* in)
 {
   int numComps = in->GetNumberOfScalarComponents();
 
@@ -2761,9 +2681,8 @@ vtkImageData *vtkSVGContextDevice2D::PreparePointSprite(vtkImageData *in)
     vtkNew<vtkImageData> rgba;
     rgba->ShallowCopy(in);
 
-    vtkUnsignedCharArray *data =
-        vtkArrayDownCast<vtkUnsignedCharArray>(
-          rgba->GetPointData()->GetScalars());
+    vtkUnsignedCharArray* data =
+      vtkArrayDownCast<vtkUnsignedCharArray>(rgba->GetPointData()->GetScalars());
     if (!data)
     {
       vtkErrorMacro("Internal error: vtkImageCast failed.");
@@ -2788,10 +2707,10 @@ vtkImageData *vtkSVGContextDevice2D::PreparePointSprite(vtkImageData *in)
       newData->SetTypedComponent(t, 2, data->GetTypedComponent(t, 2));
       newData->SetTypedComponent(t, 3, 255);
     }
-    rgba->GetPointData()->SetScalars(newData.Get());
+    rgba->GetPointData()->SetScalars(newData);
 
     in->UnRegister(this);
-    in = rgba.Get();
+    in = rgba;
     in->Register(this);
   }
 

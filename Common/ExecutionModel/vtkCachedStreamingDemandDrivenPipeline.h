@@ -16,7 +16,7 @@
  * @class   vtkCachedStreamingDemandDrivenPipeline
  *
  * vtkCachedStreamingDemandDrivenPipeline
-*/
+ */
 
 #ifndef vtkCachedStreamingDemandDrivenPipeline_h
 #define vtkCachedStreamingDemandDrivenPipeline_h
@@ -27,14 +27,13 @@
 class vtkInformationIntegerKey;
 class vtkInformationIntegerVectorKey;
 
-class VTKCOMMONEXECUTIONMODEL_EXPORT vtkCachedStreamingDemandDrivenPipeline :
-  public vtkStreamingDemandDrivenPipeline
+class VTKCOMMONEXECUTIONMODEL_EXPORT vtkCachedStreamingDemandDrivenPipeline
+  : public vtkStreamingDemandDrivenPipeline
 {
 public:
   static vtkCachedStreamingDemandDrivenPipeline* New();
-  vtkTypeMacro(vtkCachedStreamingDemandDrivenPipeline,
-                       vtkStreamingDemandDrivenPipeline);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkCachedStreamingDemandDrivenPipeline, vtkStreamingDemandDrivenPipeline);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -47,23 +46,21 @@ public:
 
 protected:
   vtkCachedStreamingDemandDrivenPipeline();
-  ~vtkCachedStreamingDemandDrivenPipeline() VTK_OVERRIDE;
+  ~vtkCachedStreamingDemandDrivenPipeline() override;
 
-  int NeedToExecuteData(int outputPort,
-                                vtkInformationVector** inInfoVec,
-                                vtkInformationVector* outInfoVec) VTK_OVERRIDE;
-  int ExecuteData(vtkInformation* request,
-                          vtkInformationVector** inInfoVec,
-                          vtkInformationVector* outInfoVec) VTK_OVERRIDE;
+  int NeedToExecuteData(
+    int outputPort, vtkInformationVector** inInfoVec, vtkInformationVector* outInfoVec) override;
+  int ExecuteData(vtkInformation* request, vtkInformationVector** inInfoVec,
+    vtkInformationVector* outInfoVec) override;
 
   int CacheSize;
 
-  vtkDataObject **Data;
-  vtkMTimeType *Times;
+  vtkDataObject** Data;
+  vtkMTimeType* Times;
 
 private:
-  vtkCachedStreamingDemandDrivenPipeline(const vtkCachedStreamingDemandDrivenPipeline&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCachedStreamingDemandDrivenPipeline&) VTK_DELETE_FUNCTION;
+  vtkCachedStreamingDemandDrivenPipeline(const vtkCachedStreamingDemandDrivenPipeline&) = delete;
+  void operator=(const vtkCachedStreamingDemandDrivenPipeline&) = delete;
 };
 
 #endif

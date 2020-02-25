@@ -28,99 +28,72 @@
  * Note that vtkMultiPieceDataSet is intended to be included in other composite
  * datasets eg. vtkMultiBlockDataSet, vtkHierarchicalBoxDataSet. Hence the lack
  * of algorithms producting vtkMultiPieceDataSet.
-*/
+ */
 
 #ifndef vtkMultiPieceDataSet_h
 #define vtkMultiPieceDataSet_h
 
 #include "vtkCommonDataModelModule.h" // For export macro
-#include "vtkDataObjectTree.h"
+#include "vtkPartitionedDataSet.h"
 
 class vtkDataSet;
-class VTKCOMMONDATAMODEL_EXPORT vtkMultiPieceDataSet : public vtkDataObjectTree
+class VTKCOMMONDATAMODEL_EXPORT vtkMultiPieceDataSet : public vtkPartitionedDataSet
 {
 public:
   static vtkMultiPieceDataSet* New();
-  vtkTypeMacro(vtkMultiPieceDataSet, vtkDataObjectTree);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMultiPieceDataSet, vtkPartitionedDataSet);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Return class name of data type (see vtkType.h for
    * definitions).
    */
-  int GetDataObjectType() VTK_OVERRIDE {return VTK_MULTIPIECE_DATA_SET;}
+  int GetDataObjectType() override { return VTK_MULTIPIECE_DATA_SET; }
 
   /**
    * Set the number of pieces. This will cause allocation if the new number of
    * pieces is greater than the current size. All new pieces are initialized to
    * null.
    */
-  void SetNumberOfPieces(unsigned int numpieces);
+  void SetNumberOfPieces(unsigned int numpieces) { this->SetNumberOfPartitions(numpieces); }
 
   /**
    * Returns the number of pieces.
    */
-  unsigned int GetNumberOfPieces();
+  unsigned int GetNumberOfPieces() { return this->GetNumberOfPartitions(); }
 
   //@{
   /**
    * Returns the piece at the given index.
    */
-  vtkDataSet* GetPiece(unsigned int pieceno);
-  vtkDataObject* GetPieceAsDataObject(unsigned int pieceno);
+  vtkDataSet* GetPiece(unsigned int pieceno) { return this->GetPartition(pieceno); }
+  vtkDataObject* GetPieceAsDataObject(unsigned int pieceno)
+  {
+    return this->GetPartitionAsDataObject(pieceno);
+  }
   //@}
 
   /**
    * Sets the data object as the given piece. The total number of pieces will
    * be resized to fit the requested piece no.
    */
-  void SetPiece(unsigned int pieceno, vtkDataObject* piece);
-
-
-/**
- * Returns true if meta-data is available for a given piece.
- */
-  int HasMetaData(unsigned int piece)
-    { return this->Superclass::HasChildMetaData(piece); }
-
-  /**
-   * Returns the meta-data for the piece. If none is already present, a new
-   * vtkInformation object will be allocated. Use HasMetaData to avoid
-   * allocating vtkInformation objects.
-   */
-  vtkInformation* GetMetaData(unsigned int pieceno)
-    { return this->Superclass::GetChildMetaData(pieceno); }
+  void SetPiece(unsigned int pieceno, vtkDataObject* piece) { this->SetPartition(pieceno, piece); }
 
   //@{
   /**
    * Retrieve an instance of this class from an information object.
    */
   static vtkMultiPieceDataSet* GetData(vtkInformation* info);
-  static vtkMultiPieceDataSet* GetData(vtkInformationVector* v, int i=0);
+  static vtkMultiPieceDataSet* GetData(vtkInformationVector* v, int i = 0);
   //@}
-
-  /**
-   * Unhiding superclass method.
-   */
-  vtkInformation* GetMetaData(vtkCompositeDataIterator* iter) VTK_OVERRIDE
-    { return this->Superclass::GetMetaData(iter); }
-
-  /**
-   * Unhiding superclass method.
-   */
-  int HasMetaData(vtkCompositeDataIterator* iter) VTK_OVERRIDE
-    { return this->Superclass::HasMetaData(iter); }
 
 protected:
   vtkMultiPieceDataSet();
-  ~vtkMultiPieceDataSet() VTK_OVERRIDE;
+  ~vtkMultiPieceDataSet() override;
 
 private:
-  vtkMultiPieceDataSet(const vtkMultiPieceDataSet&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMultiPieceDataSet&) VTK_DELETE_FUNCTION;
-
+  vtkMultiPieceDataSet(const vtkMultiPieceDataSet&) = delete;
+  void operator=(const vtkMultiPieceDataSet&) = delete;
 };
 
 #endif
-
-

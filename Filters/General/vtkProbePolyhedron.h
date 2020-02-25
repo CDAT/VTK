@@ -47,14 +47,14 @@
  *
  * @sa
  * vtkProbeFilter vtkMeanValueCoordinatesInterpolator vtkPolyhedron
-*/
+ */
 
 #ifndef vtkProbePolyhedron_h
 #define vtkProbePolyhedron_h
 
-#include "vtkFiltersGeneralModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
-#include "vtkDataSetAttributes.h" // needed for vtkDataSetAttributes::FieldList
+#include "vtkDataSetAttributes.h"    // needed for vtkDataSetAttributes::FieldList
+#include "vtkFiltersGeneralModule.h" // For export macro
 
 class vtkIdTypeArray;
 class vtkCharArray;
@@ -67,9 +67,9 @@ public:
   /**
    * Standard methods for instantiable (i.e., concrete) class.
    */
-  static vtkProbePolyhedron *New();
-  vtkTypeMacro(vtkProbePolyhedron,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkProbePolyhedron* New();
+  vtkTypeMacro(vtkProbePolyhedron, vtkDataSetAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -77,8 +77,8 @@ public:
    * Specify the point locations used to probe input. Any geometry
    * can be used.
    */
-  void SetSourceData(vtkPolyData *source);
-  vtkPolyData *GetSource();
+  void SetSourceData(vtkPolyData* source);
+  vtkPolyData* GetSource();
   //@}
 
   /**
@@ -93,9 +93,9 @@ public:
    * interpolated point data of the source will produce the output
    * point data (output points are passed from the input points).
    */
-  vtkSetMacro(ProbePointData, int);
-  vtkGetMacro(ProbePointData, int);
-  vtkBooleanMacro(ProbePointData, int);
+  vtkSetMacro(ProbePointData, vtkTypeBool);
+  vtkGetMacro(ProbePointData, vtkTypeBool);
+  vtkBooleanMacro(ProbePointData, vtkTypeBool);
   //@}
 
   //@{
@@ -106,29 +106,25 @@ public:
    * that the probing of the input uses the centers of the cells as
    * the probe position.
    */
-  vtkSetMacro(ProbeCellData, int);
-  vtkGetMacro(ProbeCellData, int);
-  vtkBooleanMacro(ProbeCellData, int);
+  vtkSetMacro(ProbeCellData, vtkTypeBool);
+  vtkGetMacro(ProbeCellData, vtkTypeBool);
+  vtkBooleanMacro(ProbeCellData, vtkTypeBool);
   //@}
 
 protected:
   vtkProbePolyhedron();
-  ~vtkProbePolyhedron() VTK_OVERRIDE;
+  ~vtkProbePolyhedron() override;
 
-  int ProbePointData;
-  int ProbeCellData;
+  vtkTypeBool ProbePointData;
+  vtkTypeBool ProbeCellData;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkProbePolyhedron(const vtkProbePolyhedron&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProbePolyhedron&) VTK_DELETE_FUNCTION;
-
+  vtkProbePolyhedron(const vtkProbePolyhedron&) = delete;
+  void operator=(const vtkProbePolyhedron&) = delete;
 };
 
 #endif

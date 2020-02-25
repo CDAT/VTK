@@ -31,7 +31,7 @@
  *
  * @sa
  * vtkSQLDatabase vtkSQLQuery vtkODBCDatabase
-*/
+ */
 
 #ifndef vtkODBCQuery_h
 #define vtkODBCQuery_h
@@ -52,58 +52,58 @@ class VTKIOODBC_EXPORT vtkODBCQuery : public vtkSQLQuery
 
 public:
   vtkTypeMacro(vtkODBCQuery, vtkSQLQuery);
-  void PrintSelf(ostream& os, vtkIndent indent);
-  static vtkODBCQuery *New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkODBCQuery* New();
 
   /**
    * Execute the query.  This must be performed
    * before any field name or data access functions
    * are used.
    */
-  bool Execute();
+  bool Execute() override;
 
   /**
    * The number of fields in the query result.
    */
-  int GetNumberOfFields();
+  int GetNumberOfFields() override;
 
   /**
    * Return the name of the specified query field.
    */
-  const char* GetFieldName(int i);
+  const char* GetFieldName(int i) override;
 
   /**
    * Return the type of the field, using the constants defined in vtkType.h.
    */
-  int GetFieldType(int i);
+  int GetFieldType(int i) override;
 
   /**
    * Advance row, return false if past end.
    */
-  bool NextRow();
+  bool NextRow() override;
 
   /**
    * Return true if there is an error on the current query.
    */
-  bool HasError();
+  bool HasError() override;
 
   /**
    * Return data in current row, field c
    */
-  vtkVariant DataValue(vtkIdType c);
+  vtkVariant DataValue(vtkIdType c) override;
 
   /**
    * Get the last error text from the query
    */
-  const char* GetLastErrorText();
+  const char* GetLastErrorText() override;
 
   //@{
   /**
    * Begin, commit, or roll back a transaction.
    */
-  bool BeginTransaction();
-  bool CommitTransaction();
-  bool RollbackTransaction();
+  bool BeginTransaction() override;
+  bool CommitTransaction() override;
+  bool RollbackTransaction() override;
   //@}
 
   //@{
@@ -112,8 +112,8 @@ public:
    * OK; false if there's some problem with it that can be detected
    * before execution.
    */
-  bool SetQuery(const char *queryString);
-  const char *GetQuery();
+  bool SetQuery(const char* queryString) override;
+  const char* GetQuery() override;
   //@}
 
   /**
@@ -125,31 +125,31 @@ public:
    */
 
   using vtkSQLQuery::BindParameter;
-  bool BindParameter(int index, unsigned char value);
-  bool BindParameter(int index, signed char value);
-  bool BindParameter(int index, unsigned short value);
-  bool BindParameter(int index, signed short value);
-  bool BindParameter(int index, unsigned int value);
+  bool BindParameter(int index, unsigned char value) override;
+  bool BindParameter(int index, signed char value) override;
+  bool BindParameter(int index, unsigned short value) override;
+  bool BindParameter(int index, signed short value) override;
+  bool BindParameter(int index, unsigned int value) override;
 
-  bool BindParameter(int index, int value);
+  bool BindParameter(int index, int value) override;
 
-  bool BindParameter(int index, unsigned long value);
-  bool BindParameter(int index, signed long value);
-  bool BindParameter(int index, unsigned long long value);
-  bool BindParameter(int index, long long value);
+  bool BindParameter(int index, unsigned long value) override;
+  bool BindParameter(int index, signed long value) override;
+  bool BindParameter(int index, unsigned long long value) override;
+  bool BindParameter(int index, long long value) override;
 
-  bool BindParameter(int index, float value);
-  bool BindParameter(int index, double value);
+  bool BindParameter(int index, float value) override;
+  bool BindParameter(int index, double value) override;
   /**
    * Bind a string value -- string must be null-terminated
    */
-  bool BindParameter(int index, const char *stringValue);
+  bool BindParameter(int index, const char* stringValue) override;
   //@{
   /**
    * Bind a string value by specifying an array and a size
    */
-  bool BindParameter(int index, const char *stringValue, size_t length);
-  bool BindParameter(int index, const vtkStdString &string);
+  bool BindParameter(int index, const char* stringValue, size_t length) override;
+  bool BindParameter(int index, const vtkStdString& string) override;
   //@}
   //@{
   /**
@@ -157,23 +157,23 @@ public:
    * type.  Check vtkSQLDatabase::IsSupported(VTK_SQL_FEATURE_BLOB) to
    * make sure.
    */
-  bool BindParameter(int index, const void *data, size_t length);
-  bool ClearParameterBindings();
+  bool BindParameter(int index, const void* data, size_t length) override;
+  bool ClearParameterBindings() override;
   //@}
 
 protected:
   vtkODBCQuery();
-  ~vtkODBCQuery();
+  ~vtkODBCQuery() override;
 
   vtkSetStringMacro(LastErrorText);
   vtkSetStringMacro(QueryText);
   vtkGetStringMacro(QueryText);
 
-  char *QueryText;
+  char* QueryText;
 
 private:
-  vtkODBCQuery(const vtkODBCQuery &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkODBCQuery &) VTK_DELETE_FUNCTION;
+  vtkODBCQuery(const vtkODBCQuery&) = delete;
+  void operator=(const vtkODBCQuery&) = delete;
 
   void ClearCurrentRow();
   bool CacheCurrentRow();
@@ -192,10 +192,9 @@ private:
   bool CacheFloatColumn(int column);
   bool CacheDoubleColumn(int column);
 
-  vtkODBCQueryInternals *Internals;
+  vtkODBCQueryInternals* Internals;
   bool InitialFetch;
-  char *LastErrorText;
+  char* LastErrorText;
 };
 
 #endif // vtkODBCQuery_h
-

@@ -26,49 +26,46 @@
  * Binary files written on one system may not be readable on other systems.
  * @sa
  * vtkTree vtkDataReader vtkTreeWriter
-*/
+ */
 
 #ifndef vtkTreeReader_h
 #define vtkTreeReader_h
 
-#include "vtkIOLegacyModule.h" // For export macro
 #include "vtkDataReader.h"
+#include "vtkIOLegacyModule.h" // For export macro
 
 class vtkTree;
 
 class VTKIOLEGACY_EXPORT vtkTreeReader : public vtkDataReader
 {
 public:
-  static vtkTreeReader *New();
-  vtkTypeMacro(vtkTreeReader,vtkDataReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTreeReader* New();
+  vtkTypeMacro(vtkTreeReader, vtkDataReader);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Get the output of this reader.
    */
-  vtkTree *GetOutput();
-  vtkTree *GetOutput(int idx);
-  void SetOutput(vtkTree *output);
+  vtkTree* GetOutput();
+  vtkTree* GetOutput(int idx);
+  void SetOutput(vtkTree* output);
   //@}
+
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname, vtkDataObject* output) override;
 
 protected:
   vtkTreeReader();
-  ~vtkTreeReader() VTK_OVERRIDE;
+  ~vtkTreeReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
+  int FillOutputPortInformation(int, vtkInformation*) override;
 
-  // Since the Outputs[0] has the same UpdateExtent format
-  // as the generic DataObject we can copy the UpdateExtent
-  // as a default behavior.
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) VTK_OVERRIDE;
-
-  int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 private:
-  vtkTreeReader(const vtkTreeReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTreeReader&) VTK_DELETE_FUNCTION;
+  vtkTreeReader(const vtkTreeReader&) = delete;
+  void operator=(const vtkTreeReader&) = delete;
 };
 
 #endif

@@ -13,9 +13,9 @@
 
 =========================================================================*/
 //-------------------------------------------------------------------------
-//Copyright 2008 Sandia Corporation.
-//Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
-//the U.S. Government retains certain rights in this software.
+// Copyright 2008 Sandia Corporation.
+// Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+// the U.S. Government retains certain rights in this software.
 //-------------------------------------------------------------------------
 
 /**
@@ -29,7 +29,7 @@
  * @par Thanks:
  * Thanks to David Duke from the University of Leeds for providing this
  * implementation.
-*/
+ */
 
 #ifndef vtkXGMLReader_h
 #define vtkXGMLReader_h
@@ -40,9 +40,9 @@
 class VTKIOINFOVIS_EXPORT vtkXGMLReader : public vtkUndirectedGraphAlgorithm
 {
 public:
-  static vtkXGMLReader *New();
+  static vtkXGMLReader* New();
   vtkTypeMacro(vtkXGMLReader, vtkUndirectedGraphAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -54,18 +54,15 @@ public:
 
 protected:
   vtkXGMLReader();
-  ~vtkXGMLReader() VTK_OVERRIDE;
+  ~vtkXGMLReader() override;
 
-  int RequestData(
-    vtkInformation *,
-    vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
   char* FileName;
 
-  vtkXGMLReader(const vtkXGMLReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkXGMLReader&) VTK_DELETE_FUNCTION;
+  vtkXGMLReader(const vtkXGMLReader&) = delete;
+  void operator=(const vtkXGMLReader&) = delete;
 };
 
 #endif // vtkXGMLReader_h

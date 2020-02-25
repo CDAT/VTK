@@ -35,7 +35,7 @@
  * @sa
  * vtkImplicitFunction vtkImplicitVolume vtkClipPolyData vtkCutter
  * vtkImplicitWindowFunction
-*/
+ */
 
 #ifndef vtkImplicitDataSet_h
 #define vtkImplicitDataSet_h
@@ -48,19 +48,19 @@ class vtkDataSet;
 class VTKCOMMONDATAMODEL_EXPORT vtkImplicitDataSet : public vtkImplicitFunction
 {
 public:
-  vtkTypeMacro(vtkImplicitDataSet,vtkImplicitFunction);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkImplicitDataSet, vtkImplicitFunction);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct an vtkImplicitDataSet with no initial dataset; the OutValue
    * set to a large negative number; and the OutGradient set to (0,0,1).
    */
-  static vtkImplicitDataSet *New();
+  static vtkImplicitDataSet* New();
 
   /**
    * Return the MTime also considering the DataSet dependency.
    */
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
   //@{
   /**
@@ -68,56 +68,54 @@ public:
    * at x[3].
    */
   using vtkImplicitFunction::EvaluateFunction;
-  double EvaluateFunction(double x[3]) VTK_OVERRIDE;
+  double EvaluateFunction(double x[3]) override;
   //@}
 
   /**
    * Evaluate implicit function gradient.
    */
-  void EvaluateGradient(double x[3], double n[3]) VTK_OVERRIDE;
+  void EvaluateGradient(double x[3], double n[3]) override;
 
   //@{
   /**
    * Set / get the dataset used for the implicit function evaluation.
    */
   virtual void SetDataSet(vtkDataSet*);
-  vtkGetObjectMacro(DataSet,vtkDataSet);
+  vtkGetObjectMacro(DataSet, vtkDataSet);
   //@}
 
   //@{
   /**
    * Set / get the function value to use for points outside of the dataset.
    */
-  vtkSetMacro(OutValue,double);
-  vtkGetMacro(OutValue,double);
+  vtkSetMacro(OutValue, double);
+  vtkGetMacro(OutValue, double);
   //@}
 
   //@{
   /**
    * Set / get the function gradient to use for points outside of the dataset.
    */
-  vtkSetVector3Macro(OutGradient,double);
-  vtkGetVector3Macro(OutGradient,double);
+  vtkSetVector3Macro(OutGradient, double);
+  vtkGetVector3Macro(OutGradient, double);
   //@}
 
 protected:
   vtkImplicitDataSet();
-  ~vtkImplicitDataSet() VTK_OVERRIDE;
+  ~vtkImplicitDataSet() override;
 
-  void ReportReferences(vtkGarbageCollector*) VTK_OVERRIDE;
+  void ReportReferences(vtkGarbageCollector*) override;
 
-  vtkDataSet *DataSet;
+  vtkDataSet* DataSet;
   double OutValue;
   double OutGradient[3];
 
-  double *Weights; //used to compute interpolation weights
-  int Size; //keeps track of length of weights array
+  double* Weights; // used to compute interpolation weights
+  int Size;        // keeps track of length of weights array
 
 private:
-  vtkImplicitDataSet(const vtkImplicitDataSet&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkImplicitDataSet&) VTK_DELETE_FUNCTION;
+  vtkImplicitDataSet(const vtkImplicitDataSet&) = delete;
+  void operator=(const vtkImplicitDataSet&) = delete;
 };
 
 #endif
-
-

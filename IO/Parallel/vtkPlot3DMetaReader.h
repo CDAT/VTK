@@ -35,30 +35,38 @@
  *
  * \verbatim
  * {
- * "auto-detect-format" : true // Tells the reader to try to figure out the format automatically. Only works
- *                             // with binary file. This is on by default, negating the need for most other
- *                             // options for binary files (format, byte-order, precision, multi-grid,
+ * "auto-detect-format" : true // Tells the reader to try to figure out the format automatically.
+ * Only works
+ *                             // with binary file. This is on by default, negating the need for
+ * most other
+ *                             // options for binary files (format, byte-order, precision,
+ * multi-grid,
  *                             // blanking, 2D).
  * "format" : "binary",  // Is this a binary or ascii file, values : binary, ascii
- * "byte-order" : "big", // Byte order for binary files, values : little, big (denoting little or big endian)
- * "precision" : 32,     // Precision of floating point values, can be 32 or 64 (bits)
+ * "byte-order" : "big", // Byte order for binary files, values : little, big (denoting little or
+ * big endian) "precision" : 32,     // Precision of floating point values, can be 32 or 64 (bits)
  * "multi-grid" : false, // Is this a multi-grid file, values: true, false
  * "language" : "C",     // Which language was this file written in, values : C, fortran. This is
  *                       // used to determine if an binary PLOT3D file contains byte counts, used by
  *                       // Fortran IO routines.
  * "blanking" : false,   // Does this file have blanking information (iblanks), values : true, false
  * "2D" : false,         // Is this a 2D dataset, values : true, false
- * "R" : 8.314,          // The value of the gas constant, default is 1.0. Set this according to the dimensions you use
- * "gamma" : 1.4,        // Ratio of specific heats. Default is 1.4.
- * "functions": [ 110, 200, 201 ],  // Additional derived values to calculate. This is an array of integers formatted
+ * "R" : 8.314,          // The value of the gas constant, default is 1.0. Set this according to the
+ * dimensions you use "gamma" : 1.4,        // Ratio of specific heats. Default is 1.4. "functions":
+ * [ 110, 200, 201 ],  // Additional derived values to calculate. This is an array of integers
+ * formatted
  *                                  // as [ value, value, value, ...]
- * "filenames" : [     // List of xyz (geometry) and q (value) file names along with the time values.
+ * "filenames" : [     // List of xyz (geometry) and q (value) file names along with the time
+ * values.
  *                     // This is an array which contains items in the format:
- *                     // {"time" : values, "xyz" : "xyz file name", "q" : "q file name", "function" : "function file name"}
- *                     // Note that q and function are optional. Also, you can repeat the same file name for xyz or q
- *                     // if they don't change over time. The reader will not read files unnecessarily.
- *  { "time" : 3.5, "xyz" : "combxyz.bin", "q" : "combq.1.bin", "function" : "combf.1.bin" },
- *  { "time" : 4.5, "xyz" : "combxyz.bin", "q" : "combq.2.bin", "function" : "combf.2.bin" }
+ *                     // {"time" : values, "xyz" : "xyz file name", "q" : "q file name", "function"
+ * : "function file name"}
+ *                     // Note that q and function are optional. Also, you can repeat the same file
+ * name for xyz or q
+ *                     // if they don't change over time. The reader will not read files
+ * unnecessarily. { "time" : 3.5, "xyz" : "combxyz.bin", "q" : "combq.1.bin", "function" :
+ * "combf.1.bin" }, { "time" : 4.5, "xyz" : "combxyz.bin", "q" : "combq.2.bin", "function" :
+ * "combf.2.bin" }
  * ],
  * "function-names" : ["density", "velocity_x", "temperature"]
  *                   // list of names of functions in function files
@@ -66,14 +74,14 @@
  * \endverbatim
  *
  * This reader leverages vtkMultiBlockPLOT3DReader to do the actual
- * reading so you may want to refer to the documenation of
+ * reading so you may want to refer to the documentation of
  * vtkMultiBlockPLOT3DReader about the details of some of these
  * parameters including the function numbers for derived value
  * calculation.
  *
  * @sa
  * vtkMultiBlockPLOT3DReader
-*/
+ */
 
 #ifndef vtkPlot3DMetaReader_h
 #define vtkPlot3DMetaReader_h
@@ -92,7 +100,7 @@ class VTKIOPARALLEL_EXPORT vtkPlot3DMetaReader : public vtkMultiBlockDataSetAlgo
 public:
   static vtkPlot3DMetaReader* New();
   vtkTypeMacro(vtkPlot3DMetaReader, vtkMultiBlockDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -105,15 +113,11 @@ public:
 
 protected:
   vtkPlot3DMetaReader();
-  ~vtkPlot3DMetaReader() VTK_OVERRIDE;
+  ~vtkPlot3DMetaReader() override;
 
-  int RequestInformation(vtkInformation* request,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation*,
-                          vtkInformationVector**,
-                          vtkInformationVector*) VTK_OVERRIDE;
-
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   char* FileName;
 
@@ -132,8 +136,8 @@ protected:
   void SetFunctionNames(Json::Value* val);
 
 private:
-  vtkPlot3DMetaReader(const vtkPlot3DMetaReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPlot3DMetaReader&) VTK_DELETE_FUNCTION;
+  vtkPlot3DMetaReader(const vtkPlot3DMetaReader&) = delete;
+  void operator=(const vtkPlot3DMetaReader&) = delete;
 
   vtkMultiBlockPLOT3DReader* Reader;
   vtkPlot3DMetaReaderInternals* Internal;

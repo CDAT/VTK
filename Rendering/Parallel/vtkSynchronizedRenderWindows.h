@@ -15,17 +15,17 @@
 /**
  * @class   vtkSynchronizedRenderWindows
  * @brief   synchronizes render windows across
- * processess.
+ * processes.
  *
  * vtkSynchronizedRenderWindows is used to synchronize render windows across
  * processes for parallel rendering.
-*/
+ */
 
 #ifndef vtkSynchronizedRenderWindows_h
 #define vtkSynchronizedRenderWindows_h
 
-#include "vtkRenderingParallelModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkRenderingParallelModule.h" // For export macro
 
 class vtkRenderWindow;
 class vtkMultiProcessController;
@@ -37,7 +37,7 @@ class VTKRENDERINGPARALLEL_EXPORT vtkSynchronizedRenderWindows : public vtkObjec
 public:
   static vtkSynchronizedRenderWindows* New();
   vtkTypeMacro(vtkSynchronizedRenderWindows, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -112,9 +112,10 @@ public:
   {
     SYNC_RENDER_TAG = 15001,
   };
+
 protected:
   vtkSynchronizedRenderWindows();
-  ~vtkSynchronizedRenderWindows();
+  ~vtkSynchronizedRenderWindows() override;
 
   struct RenderWindowInfo
   {
@@ -148,15 +149,12 @@ protected:
   vtkMultiProcessController* ParallelController;
 
 private:
-  vtkSynchronizedRenderWindows(const vtkSynchronizedRenderWindows&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSynchronizedRenderWindows&) VTK_DELETE_FUNCTION;
+  vtkSynchronizedRenderWindows(const vtkSynchronizedRenderWindows&) = delete;
+  void operator=(const vtkSynchronizedRenderWindows&) = delete;
 
   class vtkObserver;
   vtkObserver* Observer;
   friend class vtkObserver;
-
 };
 
 #endif
-
-

@@ -18,7 +18,7 @@
  *
  * vtkTableToPostgreSQLWriter reads a vtkTable and inserts it into a PostgreSQL
  * database.
-*/
+ */
 
 #ifndef vtkTableToPostgreSQLWriter_h
 #define vtkTableToPostgreSQLWriter_h
@@ -31,9 +31,9 @@ class vtkPostgreSQLDatabase;
 class VTKIOPOSTGRESQL_EXPORT vtkTableToPostgreSQLWriter : public vtkTableToDatabaseWriter
 {
 public:
-  static vtkTableToPostgreSQLWriter *New();
-  vtkTypeMacro(vtkTableToPostgreSQLWriter,vtkTableToDatabaseWriter);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkTableToPostgreSQLWriter* New();
+  vtkTypeMacro(vtkTableToPostgreSQLWriter, vtkTableToDatabaseWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -44,17 +44,15 @@ public:
   //@}
 
 protected:
-   vtkTableToPostgreSQLWriter();
-  ~vtkTableToPostgreSQLWriter();
-  void WriteData();
+  vtkTableToPostgreSQLWriter();
+  ~vtkTableToPostgreSQLWriter() override;
+  void WriteData() override;
 
-  virtual int FillInputPortInformation(int port, vtkInformation *info);
-
-  vtkTable *Input;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkTableToPostgreSQLWriter(const vtkTableToPostgreSQLWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTableToPostgreSQLWriter&) VTK_DELETE_FUNCTION;
+  vtkTableToPostgreSQLWriter(const vtkTableToPostgreSQLWriter&) = delete;
+  void operator=(const vtkTableToPostgreSQLWriter&) = delete;
 };
 
 #endif

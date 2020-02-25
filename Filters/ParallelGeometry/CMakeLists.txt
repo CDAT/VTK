@@ -1,21 +1,28 @@
-set(Module_SRCS
-  vtkPDataSetGhostGenerator.cxx
-  vtkPStructuredGridConnectivity.cxx
-  vtkPStructuredGridGhostDataGenerator.cxx
-  vtkPUniformGridGhostDataGenerator.cxx
-  vtkPUnstructuredGridGhostCellsGenerator.cxx
-  )
+vtk_object_factory_declare(
+  BASE      vtkConnectivityFilter
+  OVERRIDE  vtkPConnectivityFilter)
+vtk_object_factory_declare(
+  BASE      vtkDistributedDataFilter
+  OVERRIDE  vtkPDistributedDataFilter)
+vtk_object_factory_declare(
+  BASE      vtkUnstructuredGridGhostCellsGenerator
+  OVERRIDE  vtkPUnstructuredGridGhostCellsGenerator)
 
-if (NOT VTK_LEGACY_REMOVE)
-  # only add those classes if not removing legacy code.
-  list(APPEND Module_SRCS
-    vtkPUnstructuredGridConnectivity.cxx
-    vtkPUnstructuredGridGhostDataGenerator.cxx)
-endif()
+vtk_object_factory_configure(
+  SOURCE_FILE vtk_object_factory_source
+  HEADER_FILE vtk_object_factory_header
+  EXPORT_MACRO "VTKFILTERSPARALLELGEOMETRY_EXPORT")
 
-set_source_files_properties(
+set(classes
+  vtkPConnectivityFilter
   vtkPDataSetGhostGenerator
-  ABSTRACT
-  )
+  vtkPDistributedDataFilter
+  vtkPStructuredGridConnectivity
+  vtkPStructuredGridGhostDataGenerator
+  vtkPUniformGridGhostDataGenerator
+  vtkPUnstructuredGridGhostCellsGenerator)
 
-vtk_module_library(vtkFiltersParallelGeometry ${Module_SRCS})
+vtk_module_add_module(VTK::FiltersParallelGeometry
+  CLASSES ${classes}
+  SOURCES ${vtk_object_factory_source}
+  PRIVATE_HEADERS ${vtk_object_factory_header})

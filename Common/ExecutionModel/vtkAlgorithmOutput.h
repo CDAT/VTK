@@ -23,7 +23,7 @@
  * an output and input port.  The connection is not stored in the
  * proxy object: it is simply a convenience for creating or removing
  * connections.
-*/
+ */
 
 #ifndef vtkAlgorithmOutput_h
 #define vtkAlgorithmOutput_h
@@ -36,9 +36,9 @@ class vtkAlgorithm;
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkAlgorithmOutput : public vtkObject
 {
 public:
-  static vtkAlgorithmOutput *New();
-  vtkTypeMacro(vtkAlgorithmOutput,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkAlgorithmOutput* New();
+  vtkTypeMacro(vtkAlgorithmOutput, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void SetIndex(int index);
   int GetIndex();
@@ -48,14 +48,14 @@ public:
 
 protected:
   vtkAlgorithmOutput();
-  ~vtkAlgorithmOutput() VTK_OVERRIDE;
+  ~vtkAlgorithmOutput() override;
 
   int Index;
   vtkAlgorithm* Producer;
 
 private:
-  vtkAlgorithmOutput(const vtkAlgorithmOutput&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAlgorithmOutput&) VTK_DELETE_FUNCTION;
+  vtkAlgorithmOutput(const vtkAlgorithmOutput&) = delete;
+  void operator=(const vtkAlgorithmOutput&) = delete;
 };
 
 #endif

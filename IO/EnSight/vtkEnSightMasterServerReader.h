@@ -14,14 +14,14 @@
 =========================================================================*/
 /**
  * @class   vtkEnSightMasterServerReader
- * @brief   reader for compund EnSight files
-*/
+ * @brief   reader for compound EnSight files
+ */
 
 #ifndef vtkEnSightMasterServerReader_h
 #define vtkEnSightMasterServerReader_h
 
-#include "vtkIOEnSightModule.h" // For export macro
 #include "vtkGenericEnSightReader.h"
+#include "vtkIOEnSightModule.h" // For export macro
 
 class vtkCollection;
 
@@ -29,7 +29,7 @@ class VTKIOENSIGHT_EXPORT vtkEnSightMasterServerReader : public vtkGenericEnSigh
 {
 public:
   vtkTypeMacro(vtkEnSightMasterServerReader, vtkGenericEnSightReader);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkEnSightMasterServerReader* New();
 
@@ -53,16 +53,14 @@ public:
   vtkGetMacro(CurrentPiece, int);
   //@}
 
-  int CanReadFile(const char *fname);
+  int CanReadFile(const char* fname) override;
 
 protected:
   vtkEnSightMasterServerReader();
-  ~vtkEnSightMasterServerReader() VTK_OVERRIDE;
+  ~vtkEnSightMasterServerReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                                 vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   vtkSetStringMacro(PieceCaseFileName);
   char* PieceCaseFileName;
@@ -70,8 +68,8 @@ protected:
   int CurrentPiece;
 
 private:
-  vtkEnSightMasterServerReader(const vtkEnSightMasterServerReader&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkEnSightMasterServerReader&) VTK_DELETE_FUNCTION;
+  vtkEnSightMasterServerReader(const vtkEnSightMasterServerReader&) = delete;
+  void operator=(const vtkEnSightMasterServerReader&) = delete;
 };
 
 #endif

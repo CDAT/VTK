@@ -1,8 +1,9 @@
-vtk_add_test_cxx(${vtk-module}CxxTests tests
+vtk_add_test_cxx(vtkDomainsChemistryOpenGL2CxxTests tests
   TestPDBBallAndStickShadows.cxx
   TestPDBBallAndStickShadowsDOFSSAA.cxx
+  TestPDBBallAndStickTranslucent.cxx
   )
-vtk_test_cxx_executable(${vtk-module}CxxTests tests
+vtk_test_cxx_executable(vtkDomainsChemistryOpenGL2CxxTests tests
   RENDERING_FACTORY
   )
 
@@ -11,6 +12,6 @@ vtk_test_cxx_executable(${vtk-module}CxxTests tests
 if(NOT VTK_TEST_TIMEOUT_TestPDBBallAndStickShadows)
   set(VTK_TEST_TIMEOUT_TestPDBBallAndStickShadows 360)
 endif()
-set_tests_properties(${vtk-module}Cxx-TestPDBBallAndStickShadows
+set_tests_properties(VTK::DomainsChemistryOpenGL2Cxx-TestPDBBallAndStickShadows
     PROPERTIES TIMEOUT ${VTK_TEST_TIMEOUT_TestPDBBallAndStickShadows}
                RUN_SERIAL ON)

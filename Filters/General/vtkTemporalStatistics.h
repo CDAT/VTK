@@ -47,7 +47,7 @@
  * This class was originally written by Kenneth Moreland (kmorel@sandia.gov)
  * from Sandia National Laboratories.
  *
-*/
+ */
 
 #ifndef vtkTemporalStatistics_h
 #define vtkTemporalStatistics_h
@@ -63,18 +63,23 @@ class vtkGraph;
 class VTKFILTERSGENERAL_EXPORT vtkTemporalStatistics : public vtkPassInputTypeAlgorithm
 {
 public:
+  //@{
+  /**
+   * Standard methods for instantiation, type information, and printing.
+   */
   vtkTypeMacro(vtkTemporalStatistics, vtkPassInputTypeAlgorithm);
-  static vtkTemporalStatistics *New();
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkTemporalStatistics* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  //@}
 
   //@{
   /**
    * Turn on/off the computation of the average values over time.  On by
    * default.  The resulting array names have "_average" appended to them.
    */
-  vtkGetMacro(ComputeAverage, int);
-  vtkSetMacro(ComputeAverage, int);
-  vtkBooleanMacro(ComputeAverage, int);
+  vtkGetMacro(ComputeAverage, vtkTypeBool);
+  vtkSetMacro(ComputeAverage, vtkTypeBool);
+  vtkBooleanMacro(ComputeAverage, vtkTypeBool);
   //@}
 
   //@{
@@ -82,9 +87,9 @@ public:
    * Turn on/off the computation of the minimum values over time.  On by
    * default.  The resulting array names have "_minimum" appended to them.
    */
-  vtkGetMacro(ComputeMinimum, int);
-  vtkSetMacro(ComputeMinimum, int);
-  vtkBooleanMacro(ComputeMinimum, int);
+  vtkGetMacro(ComputeMinimum, vtkTypeBool);
+  vtkSetMacro(ComputeMinimum, vtkTypeBool);
+  vtkBooleanMacro(ComputeMinimum, vtkTypeBool);
   //@}
 
   //@{
@@ -92,77 +97,67 @@ public:
    * Turn on/off the computation of the maximum values over time.  On by
    * default.  The resulting array names have "_maximum" appended to them.
    */
-  vtkGetMacro(ComputeMaximum, int);
-  vtkSetMacro(ComputeMaximum, int);
-  vtkBooleanMacro(ComputeMaximum, int);
+  vtkGetMacro(ComputeMaximum, vtkTypeBool);
+  vtkSetMacro(ComputeMaximum, vtkTypeBool);
+  vtkBooleanMacro(ComputeMaximum, vtkTypeBool);
   //@}
 
   // Definition:
   // Turn on/off the computation of the standard deviation of the values over
   // time.  On by default.  The resulting array names have "_stddev" appended to
   // them.
-  vtkGetMacro(ComputeStandardDeviation, int);
-  vtkSetMacro(ComputeStandardDeviation, int);
-  vtkBooleanMacro(ComputeStandardDeviation, int);
+  vtkGetMacro(ComputeStandardDeviation, vtkTypeBool);
+  vtkSetMacro(ComputeStandardDeviation, vtkTypeBool);
+  vtkBooleanMacro(ComputeStandardDeviation, vtkTypeBool);
 
 protected:
   vtkTemporalStatistics();
-  ~vtkTemporalStatistics() VTK_OVERRIDE;
+  ~vtkTemporalStatistics() override;
 
-  int ComputeAverage;
-  int ComputeMaximum;
-  int ComputeMinimum;
-  int ComputeStandardDeviation;
+  vtkTypeBool ComputeAverage;
+  vtkTypeBool ComputeMaximum;
+  vtkTypeBool ComputeMinimum;
+  vtkTypeBool ComputeStandardDeviation;
 
   // Used when iterating the pipeline to keep track of which timestep we are on.
   int CurrentTimeIndex;
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
-  int RequestDataObject(vtkInformation *request,
-                        vtkInformationVector **inputVector,
-                        vtkInformationVector *outputVector) VTK_OVERRIDE;
-  int RequestInformation(vtkInformation *request,
-                         vtkInformationVector **inputVector,
-                         vtkInformationVector *outputVector) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation *request,
-                          vtkInformationVector **inputVector,
-                          vtkInformationVector *outputVector) VTK_OVERRIDE;
-  int RequestData(vtkInformation *request,
-                  vtkInformationVector **inputVector,
-                  vtkInformationVector *outputVector) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  virtual void InitializeStatistics(vtkDataObject *input,
-                                    vtkDataObject *output);
-  virtual void InitializeStatistics(vtkDataSet *input, vtkDataSet *output);
-  virtual void InitializeStatistics(vtkGraph *input, vtkGraph *output);
-  virtual void InitializeStatistics(vtkCompositeDataSet *input,
-                                    vtkCompositeDataSet *output);
-  virtual void InitializeArrays(vtkFieldData *inFd, vtkFieldData *outFd);
-  virtual void InitializeArray(vtkDataArray *array, vtkFieldData *outFd);
+  virtual void InitializeStatistics(vtkDataObject* input, vtkDataObject* output);
+  virtual void InitializeStatistics(vtkDataSet* input, vtkDataSet* output);
+  virtual void InitializeStatistics(vtkGraph* input, vtkGraph* output);
+  virtual void InitializeStatistics(vtkCompositeDataSet* input, vtkCompositeDataSet* output);
+  virtual void InitializeArrays(vtkFieldData* inFd, vtkFieldData* outFd);
+  virtual void InitializeArray(vtkDataArray* array, vtkFieldData* outFd);
 
-  virtual void AccumulateStatistics(vtkDataObject *input,
-                                    vtkDataObject *output);
-  virtual void AccumulateStatistics(vtkDataSet *input, vtkDataSet *output);
-  virtual void AccumulateStatistics(vtkGraph *input, vtkGraph *output);
-  virtual void AccumulateStatistics(vtkCompositeDataSet *input,
-                                    vtkCompositeDataSet *output);
-  virtual void AccumulateArrays(vtkFieldData *inFd, vtkFieldData *outFd);
+  virtual void AccumulateStatistics(vtkDataObject* input, vtkDataObject* output);
+  virtual void AccumulateStatistics(vtkDataSet* input, vtkDataSet* output);
+  virtual void AccumulateStatistics(vtkGraph* input, vtkGraph* output);
+  virtual void AccumulateStatistics(vtkCompositeDataSet* input, vtkCompositeDataSet* output);
+  virtual void AccumulateArrays(vtkFieldData* inFd, vtkFieldData* outFd);
 
-  virtual void PostExecute(vtkDataObject *input, vtkDataObject *output);
-  virtual void PostExecute(vtkDataSet *input, vtkDataSet *output);
-  virtual void PostExecute(vtkGraph *input, vtkGraph *output);
-  virtual void PostExecute(vtkCompositeDataSet *input,
-                           vtkCompositeDataSet *output);
-  virtual void FinishArrays(vtkFieldData *inFd, vtkFieldData *outFd);
+  virtual void PostExecute(vtkDataObject* input, vtkDataObject* output);
+  virtual void PostExecute(vtkDataSet* input, vtkDataSet* output);
+  virtual void PostExecute(vtkGraph* input, vtkGraph* output);
+  virtual void PostExecute(vtkCompositeDataSet* input, vtkCompositeDataSet* output);
+  virtual void FinishArrays(vtkFieldData* inFd, vtkFieldData* outFd);
 
-  virtual vtkDataArray *GetArray(vtkFieldData *fieldData,
-                                 vtkDataArray *inArray,
-                                 const char *nameSuffix);
+  virtual vtkDataArray* GetArray(
+    vtkFieldData* fieldData, vtkDataArray* inArray, const char* nameSuffix);
 
 private:
-  vtkTemporalStatistics(const vtkTemporalStatistics &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkTemporalStatistics &) VTK_DELETE_FUNCTION;
+  vtkTemporalStatistics(const vtkTemporalStatistics&) = delete;
+  void operator=(const vtkTemporalStatistics&) = delete;
 
   //@{
   /**
@@ -171,7 +166,7 @@ private:
    * between time steps.
    */
   bool GeneratedChangingTopologyWarning;
-};
   //@}
+};
 
 #endif //_vtkTemporalStatistics_h

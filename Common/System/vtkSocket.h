@@ -18,7 +18,7 @@
  *
  * This abstract class encapsulates a BSD socket. It provides an API for
  * basic socket operations.
-*/
+ */
 
 #ifndef vtkSocket_h
 #define vtkSocket_h
@@ -31,13 +31,13 @@ class VTKCOMMONSYSTEM_EXPORT vtkSocket : public vtkObject
 {
 public:
   vtkTypeMacro(vtkSocket, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // ----- Status API ----
   /**
    * Check is the socket is alive.
    */
-  int GetConnected() { return (this->SocketDescriptor >=0); }
+  int GetConnected() { return (this->SocketDescriptor >= 0); }
 
   /**
    * Close the socket.
@@ -59,10 +59,10 @@ public:
    * 0 on error, else number of bytes read is returned. On error,
    * vtkCommand::ErrorEvent is raised.
    */
-  int Receive(void* data, int length, int readFully=1);
+  int Receive(void* data, int length, int readFully = 1);
 
   /**
-   * Provides access to  the internal socket descriptor. This is valid only when
+   * Provides access to the internal socket descriptor. This is valid only when
    * GetConnected() returns true.
    */
   vtkGetMacro(SocketDescriptor, int);
@@ -72,12 +72,12 @@ public:
    * 1 on success. Selected socket's index is returned through
    * selected_index
    */
-  static int SelectSockets(const int* sockets_to_select, int size,
-    unsigned long msec, int* selected_index);
+  static int SelectSockets(
+    const int* sockets_to_select, int size, unsigned long msec, int* selected_index);
 
 protected:
   vtkSocket();
-  ~vtkSocket() VTK_OVERRIDE;
+  ~vtkSocket() override;
 
   int SocketDescriptor;
 
@@ -130,10 +130,8 @@ protected:
   int GetPort(int socketdescriptor);
 
 private:
-  vtkSocket(const vtkSocket&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSocket&) VTK_DELETE_FUNCTION;
+  vtkSocket(const vtkSocket&) = delete;
+  void operator=(const vtkSocket&) = delete;
 };
 
-
 #endif
-

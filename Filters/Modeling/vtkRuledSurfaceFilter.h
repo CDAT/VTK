@@ -49,7 +49,7 @@
  *
  * @sa
  * vtkRibbonFilter vtkStreamTracer
-*/
+ */
 
 #ifndef vtkRuledSurfaceFilter_h
 #define vtkRuledSurfaceFilter_h
@@ -67,21 +67,21 @@ class vtkPolyData;
 class VTKFILTERSMODELING_EXPORT vtkRuledSurfaceFilter : public vtkPolyDataAlgorithm
 {
 public:
-  vtkTypeMacro(vtkRuledSurfaceFilter,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkRuledSurfaceFilter, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Construct object with OnRatio=1, Offset=0. DistanceFactor=3.0,
    * CloseSurface off, and PassLines off.
    */
-  static vtkRuledSurfaceFilter *New();
+  static vtkRuledSurfaceFilter* New();
 
   //@{
   /**
    * Set/Get the factor that controls tearing of the surface.
    */
-  vtkSetClampMacro(DistanceFactor,double,1.0,VTK_DOUBLE_MAX);
-  vtkGetMacro(DistanceFactor,double);
+  vtkSetClampMacro(DistanceFactor, double, 1.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(DistanceFactor, double);
   //@}
 
   //@{
@@ -90,8 +90,8 @@ public:
    * than 1, then every nth strip is turned on, beginning with the Offset
    * strip.
    */
-  vtkSetClampMacro(OnRatio,int,1,VTK_INT_MAX);
-  vtkGetMacro(OnRatio,int);
+  vtkSetClampMacro(OnRatio, int, 1, VTK_INT_MAX);
+  vtkGetMacro(OnRatio, int);
   //@}
 
   //@{
@@ -100,8 +100,8 @@ public:
    * first stripe that is visible. Offset is generally used with
    * OnRatio to create nifty striping effects.
    */
-  vtkSetClampMacro(Offset,int,0,VTK_INT_MAX);
-  vtkGetMacro(Offset,int);
+  vtkSetClampMacro(Offset, int, 0, VTK_INT_MAX);
+  vtkGetMacro(Offset, int);
   //@}
 
   //@{
@@ -112,9 +112,9 @@ public:
    * direction, repeat the first point in the polyline as the last
    * point in the polyline.)
    */
-  vtkSetMacro(CloseSurface,int);
-  vtkGetMacro(CloseSurface,int);
-  vtkBooleanMacro(CloseSurface,int);
+  vtkSetMacro(CloseSurface, vtkTypeBool);
+  vtkGetMacro(CloseSurface, vtkTypeBool);
+  vtkBooleanMacro(CloseSurface, vtkTypeBool);
   //@}
 
   //@{
@@ -125,14 +125,11 @@ public:
    * generates triangle strips. The point walk mode uses the existing
    * points and walks around the polyline using existing points.
    */
-  vtkSetClampMacro(RuledMode,int,
-                   VTK_RULED_MODE_RESAMPLE,VTK_RULED_MODE_POINT_WALK);
-  vtkGetMacro(RuledMode,int);
-  void SetRuledModeToResample()
-    {this->SetRuledMode(VTK_RULED_MODE_RESAMPLE);}
-  void SetRuledModeToPointWalk()
-    {this->SetRuledMode(VTK_RULED_MODE_POINT_WALK);}
-  const char *GetRuledModeAsString();
+  vtkSetClampMacro(RuledMode, int, VTK_RULED_MODE_RESAMPLE, VTK_RULED_MODE_POINT_WALK);
+  vtkGetMacro(RuledMode, int);
+  void SetRuledModeToResample() { this->SetRuledMode(VTK_RULED_MODE_RESAMPLE); }
+  void SetRuledModeToPointWalk() { this->SetRuledMode(VTK_RULED_MODE_POINT_WALK); }
+  const char* GetRuledModeAsString();
   //@}
 
   //@{
@@ -150,11 +147,11 @@ public:
   //@{
   /**
    * Indicate whether the generating lines are to be passed to the output.
-   * By defualt lines are not passed to the output.
+   * By default lines are not passed to the output.
    */
-  vtkSetMacro(PassLines,int);
-  vtkGetMacro(PassLines,int);
-  vtkBooleanMacro(PassLines,int);
+  vtkSetMacro(PassLines, vtkTypeBool);
+  vtkGetMacro(PassLines, vtkTypeBool);
+  vtkBooleanMacro(PassLines, vtkTypeBool);
   //@}
 
   //@{
@@ -162,42 +159,41 @@ public:
    * Indicate whether the starting points of the loops need to be determined.
    * If set to 0, then its assumes that the 0th point of each loop should be
    * always connected
-   * By defualt the loops are not oriented.
+   * By default the loops are not oriented.
    */
-  vtkSetMacro(OrientLoops,int);
-  vtkGetMacro(OrientLoops,int);
-  vtkBooleanMacro(OrientLoops,int);
+  vtkSetMacro(OrientLoops, vtkTypeBool);
+  vtkGetMacro(OrientLoops, vtkTypeBool);
+  vtkBooleanMacro(OrientLoops, vtkTypeBool);
   //@}
 
 protected:
   vtkRuledSurfaceFilter();
-  ~vtkRuledSurfaceFilter() VTK_OVERRIDE;
+  ~vtkRuledSurfaceFilter() override;
 
   // Usual data generation method
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   double DistanceFactor;
-  int   OnRatio;
-  int   Offset;
-  int   CloseSurface;
-  int   RuledMode;
-  int   Resolution[2];
-  int   PassLines;
-  int   OrientLoops;
+  int OnRatio;
+  int Offset;
+  vtkTypeBool CloseSurface;
+  int RuledMode;
+  int Resolution[2];
+  vtkTypeBool PassLines;
+  vtkTypeBool OrientLoops;
 
 private:
-  vtkIdList *Ids;
-  double     Weights[4];
+  vtkIdList* Ids;
+  double Weights[4];
 
-  void  Resample(vtkPolyData *output, vtkPolyData *input,
-                 vtkPoints *inPts, vtkPoints *newPts,
-                 int npts, vtkIdType *pts, int npts2, vtkIdType *pts2);
-  void  PointWalk(vtkPolyData *output, vtkPoints *inPts,
-                  int npts, vtkIdType *pts, int npts2, vtkIdType *pts2);
+  void Resample(vtkPolyData* output, vtkPolyData* input, vtkPoints* inPts, vtkPoints* newPts,
+    int npts, const vtkIdType* pts, int npts2, const vtkIdType* pts2);
+  void PointWalk(vtkPolyData* output, vtkPoints* inPts, int npts, const vtkIdType* pts, int npts2,
+    const vtkIdType* pts2);
 
 private:
-  vtkRuledSurfaceFilter(const vtkRuledSurfaceFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRuledSurfaceFilter&) VTK_DELETE_FUNCTION;
+  vtkRuledSurfaceFilter(const vtkRuledSurfaceFilter&) = delete;
+  void operator=(const vtkRuledSurfaceFilter&) = delete;
 };
 
 #endif

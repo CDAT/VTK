@@ -20,29 +20,29 @@
  *
  * @sa
  * vtkPolyDataMapper
-*/
+ */
 
 #ifndef vtkHierarchicalPolyDataMapper_h
 #define vtkHierarchicalPolyDataMapper_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkCompositePolyDataMapper.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class VTKRENDERINGCORE_EXPORT vtkHierarchicalPolyDataMapper : public vtkCompositePolyDataMapper
 {
 
 public:
-  static vtkHierarchicalPolyDataMapper *New();
+  static vtkHierarchicalPolyDataMapper* New();
   vtkTypeMacro(vtkHierarchicalPolyDataMapper, vtkCompositePolyDataMapper);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkHierarchicalPolyDataMapper();
-  ~vtkHierarchicalPolyDataMapper() VTK_OVERRIDE;
+  ~vtkHierarchicalPolyDataMapper() override;
 
 private:
-  vtkHierarchicalPolyDataMapper(const vtkHierarchicalPolyDataMapper&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkHierarchicalPolyDataMapper&) VTK_DELETE_FUNCTION;
+  vtkHierarchicalPolyDataMapper(const vtkHierarchicalPolyDataMapper&) = delete;
+  void operator=(const vtkHierarchicalPolyDataMapper&) = delete;
 };
 
 #endif

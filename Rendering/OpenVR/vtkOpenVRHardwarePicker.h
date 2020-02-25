@@ -13,52 +13,51 @@ PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
 /**
-* @class   vtkOpenVRHardwarePicker
-* @brief   pick an actor/prop given a controller position and orientation
-*
-* vtkOpenVRHardwarePicker is used to pick an actor/prop along a ray.
-* This version uses a hardware selector to do the picking.
-*
-* @sa
-* vtkProp3DPicker vtkOpenVRInteractorStylePointer
-*/
+ * @class   vtkOpenVRHardwarePicker
+ * @brief   pick an actor/prop given a controller position and orientation
+ *
+ * vtkOpenVRHardwarePicker is used to pick an actor/prop along a ray.
+ * This version uses a hardware selector to do the picking.
+ *
+ * @sa
+ * vtkProp3DPicker vtkOpenVRInteractorStylePointer
+ */
 
 #ifndef vtkOpenVRHardwarePicker_h
 #define vtkOpenVRHardwarePicker_h
 
+#include "vtkPropPicker.h"
 #include "vtkRenderingOpenVRModule.h" // For export macro
-#include "vtkOpenVRPropPicker.h"
 
 class vtkSelection;
 
-class VTKRENDERINGOPENVR_EXPORT vtkOpenVRHardwarePicker : public vtkOpenVRPropPicker
+class VTKRENDERINGOPENVR_EXPORT vtkOpenVRHardwarePicker : public vtkPropPicker
 {
 public:
-  static vtkOpenVRHardwarePicker *New();
+  static vtkOpenVRHardwarePicker* New();
 
-  vtkTypeMacro(vtkOpenVRHardwarePicker, vtkOpenVRPropPicker);
+  vtkTypeMacro(vtkOpenVRHardwarePicker, vtkPropPicker);
 
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
-  * Perform a pick from the user-provided list of vtkProps.
-  */
+   * Perform a pick from the user-provided list of vtkProps.
+   */
   virtual int PickProp(double selectionPt[3], double eventWorldOrientation[4],
-    vtkRenderer *renderer, vtkPropCollection* pickfrom);
+    vtkRenderer* renderer, vtkPropCollection* pickfrom, bool actorPassOnly);
 
-  vtkSelection *GetSelection() {
-    return this->Selection; }
+  vtkSelection* GetSelection() { return this->Selection; }
 
 protected:
   vtkOpenVRHardwarePicker();
-  ~vtkOpenVRHardwarePicker() VTK_OVERRIDE;
+  ~vtkOpenVRHardwarePicker() override;
 
-  void Initialize() VTK_OVERRIDE;
-  vtkSelection *Selection;
+  void Initialize() override;
+  vtkSelection* Selection;
 
 private:
-  vtkOpenVRHardwarePicker(const vtkOpenVRHardwarePicker&) VTK_DELETE_FUNCTION;// Not implemented.
-  void operator=(const vtkOpenVRHardwarePicker&) VTK_DELETE_FUNCTION;// Not implemented.
+  vtkOpenVRHardwarePicker(const vtkOpenVRHardwarePicker&) = delete; // Not implemented.
+  void operator=(const vtkOpenVRHardwarePicker&) = delete;          // Not implemented.
 };
 
 #endif

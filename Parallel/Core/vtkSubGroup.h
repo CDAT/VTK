@@ -37,13 +37,13 @@
  *
  * @sa
  *      vtkPKdTree vtkDistributedDataFilter
-*/
+ */
 
 #ifndef vtkSubGroup_h
 #define vtkSubGroup_h
 
-#include "vtkParallelCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkParallelCoreModule.h" // For export macro
 
 class vtkMultiProcessController;
 class vtkCommunicator;
@@ -52,11 +52,16 @@ class VTKPARALLELCORE_EXPORT vtkSubGroup : public vtkObject
 {
 public:
   vtkTypeMacro(vtkSubGroup, vtkObject);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
-  static vtkSubGroup *New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
+  static vtkSubGroup* New();
 
   // The wrapper gets confused here and falls down.
-  enum {MINOP = 1, MAXOP = 2, SUMOP = 3};
+  enum
+  {
+    MINOP = 1,
+    MAXOP = 2,
+    SUMOP = 3
+  };
 
   /**
    * Initialize a communication subgroup for the processes
@@ -67,31 +72,31 @@ public:
    * in the range from p0 through p1.
    */
 
-  int Initialize(int p0, int p1, int me, int tag, vtkCommunicator *c);
+  int Initialize(int p0, int p1, int me, int tag, vtkCommunicator* c);
 
-  int Gather(int *data, int *to, int length, int root);
-  int Gather(char *data, char *to, int length, int root);
-  int Gather(float *data, float *to, int length, int root);
+  int Gather(int* data, int* to, int length, int root);
+  int Gather(char* data, char* to, int length, int root);
+  int Gather(float* data, float* to, int length, int root);
 #ifdef VTK_USE_64BIT_IDS
-  int Gather(vtkIdType *data, vtkIdType *to, int length, int root);
+  int Gather(vtkIdType* data, vtkIdType* to, int length, int root);
 #endif
-  int Broadcast(float *data, int length, int root);
-  int Broadcast(double *data, int length, int root);
-  int Broadcast(int *data, int length, int root);
-  int Broadcast(char *data, int length, int root);
+  int Broadcast(float* data, int length, int root);
+  int Broadcast(double* data, int length, int root);
+  int Broadcast(int* data, int length, int root);
+  int Broadcast(char* data, int length, int root);
 #ifdef VTK_USE_64BIT_IDS
-  int Broadcast(vtkIdType *data, int length, int root);
+  int Broadcast(vtkIdType* data, int length, int root);
 #endif
-  int ReduceSum(int *data, int *to, int length, int root);
-  int ReduceMax(float *data, float *to, int length, int root);
-  int ReduceMax(double *data, double *to, int length, int root);
-  int ReduceMax(int *data, int *to, int length, int root);
-  int ReduceMin(float *data, float *to, int length, int root);
-  int ReduceMin(double *data, double *to, int length, int root);
-  int ReduceMin(int *data, int *to, int length, int root);
+  int ReduceSum(int* data, int* to, int length, int root);
+  int ReduceMax(float* data, float* to, int length, int root);
+  int ReduceMax(double* data, double* to, int length, int root);
+  int ReduceMax(int* data, int* to, int length, int root);
+  int ReduceMin(float* data, float* to, int length, int root);
+  int ReduceMin(double* data, double* to, int length, int root);
+  int ReduceMin(int* data, int* to, int length, int root);
 
-  int AllReduceUniqueList(int *list, int len, int **newList);
-  int MergeSortedUnique(int *list1, int len1, int *list2, int len2, int **newList);
+  int AllReduceUniqueList(int* list, int len, int** newList);
+  int MergeSortedUnique(int* list1, int len1, int* list2, int len2, int** newList);
 
   void setGatherPattern(int root, int length);
   int getLocalRank(int processID);
@@ -100,13 +105,13 @@ public:
 
   void PrintSubGroup() const;
 
-  static int MakeSortedUnique(int *list, int len, int **newList);
+  static int MakeSortedUnique(int* list, int len, int** newList);
 
   int tag;
 
 protected:
   vtkSubGroup();
-  ~vtkSubGroup() VTK_OVERRIDE;
+  ~vtkSubGroup() override;
 
 private:
   int computeFanInTargets();
@@ -117,14 +122,14 @@ private:
   int nFrom;
   int nTo;
 
-  int sendId;                // gather
+  int sendId; // gather
   int sendOffset;
   int sendLength;
 
   int recvId[20];
   int recvOffset[20];
   int recvLength[20];
-  int fanInFrom[20];         // reduce, broadcast
+  int fanInFrom[20]; // reduce, broadcast
 
   int fanInTo;
   int nSend;
@@ -132,13 +137,13 @@ private:
   int gatherRoot;
   int gatherLength;
 
-  int *members;
+  int* members;
   int nmembers;
   int myLocalRank;
 
-  vtkCommunicator *comm;
+  vtkCommunicator* comm;
 
-  vtkSubGroup(const vtkSubGroup&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSubGroup&) VTK_DELETE_FUNCTION;
+  vtkSubGroup(const vtkSubGroup&) = delete;
+  void operator=(const vtkSubGroup&) = delete;
 };
 #endif

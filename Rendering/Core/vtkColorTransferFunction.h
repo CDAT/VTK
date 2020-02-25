@@ -31,7 +31,7 @@
  *
  * @sa
  * vtkPiecewiseFunction
-*/
+ */
 
 #ifndef vtkColorTransferFunction_h
 #define vtkColorTransferFunction_h
@@ -41,26 +41,28 @@
 
 class vtkColorTransferFunctionInternals;
 
-#define VTK_CTF_RGB           0
-#define VTK_CTF_HSV           1
-#define VTK_CTF_LAB           2
-#define VTK_CTF_DIVERGING     3
+#define VTK_CTF_RGB 0
+#define VTK_CTF_HSV 1
+#define VTK_CTF_LAB 2
+#define VTK_CTF_DIVERGING 3
+#define VTK_CTF_LAB_CIEDE2000 4
+#define VTK_CTF_STEP 5
 
-#define VTK_CTF_LINEAR        0
-#define VTK_CTF_LOG10         1
+#define VTK_CTF_LINEAR 0
+#define VTK_CTF_LOG10 1
 
 class VTKRENDERINGCORE_EXPORT vtkColorTransferFunction : public vtkScalarsToColors
 {
 public:
-  static vtkColorTransferFunction *New();
-  vtkTypeMacro(vtkColorTransferFunction,vtkScalarsToColors);
-  void DeepCopy( vtkScalarsToColors *f ) VTK_OVERRIDE;
-  void ShallowCopy( vtkColorTransferFunction *f );
+  static vtkColorTransferFunction* New();
+  vtkTypeMacro(vtkColorTransferFunction, vtkScalarsToColors);
+  void DeepCopy(vtkScalarsToColors* f) override;
+  void ShallowCopy(vtkColorTransferFunction* f);
 
   /**
    * Print method for vtkColorTransferFunction
    */
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * How many nodes define this function?
@@ -74,13 +76,11 @@ public:
    * See the description of class vtkPiecewiseFunction for an explanation of
    * midpoint and sharpness.
    */
-  int AddRGBPoint( double x, double r, double g, double b );
-  int AddRGBPoint( double x, double r, double g, double b,
-                   double midpoint, double sharpness );
-  int AddHSVPoint( double x, double h, double s, double v );
-  int AddHSVPoint( double x, double h, double s, double v,
-                   double midpoint, double sharpness );
-  int RemovePoint( double x );
+  int AddRGBPoint(double x, double r, double g, double b);
+  int AddRGBPoint(double x, double r, double g, double b, double midpoint, double sharpness);
+  int AddHSVPoint(double x, double h, double s, double v);
+  int AddHSVPoint(double x, double h, double s, double v, double midpoint, double sharpness);
+  int RemovePoint(double x);
   //@}
 
   //@{
@@ -88,10 +88,10 @@ public:
    * Add two points to the function and remove all the points
    * between them
    */
-  void AddRGBSegment( double x1, double r1, double g1, double b1,
-                      double x2, double r2, double g2, double b2 );
-  void AddHSVSegment( double x1, double h1, double s1, double v1,
-                      double x2, double h2, double s2, double v2 );
+  void AddRGBSegment(
+    double x1, double r1, double g1, double b1, double x2, double r2, double g2, double b2);
+  void AddHSVSegment(
+    double x1, double h1, double s1, double v1, double x2, double h2, double s2, double v2);
   //@}
 
   /**
@@ -102,17 +102,16 @@ public:
   /**
    * Returns an RGB color for the specified scalar value
    */
-  double *GetColor(double x) {
-    return vtkScalarsToColors::GetColor(x); }
-  void GetColor(double x, double rgb[3]) VTK_OVERRIDE;
+  double* GetColor(double x) VTK_SIZEHINT(3) { return vtkScalarsToColors::GetColor(x); }
+  void GetColor(double x, double rgb[3]) override;
 
   //@{
   /**
    * Get the color components individually.
    */
-  double GetRedValue( double x );
-  double GetGreenValue( double x );
-  double GetBlueValue( double x );
+  double GetRedValue(double x);
+  double GetGreenValue(double x);
+  double GetBlueValue(double x);
   //@}
 
   //@{
@@ -121,29 +120,26 @@ public:
    * location (X), R, G, and B values, midpoint, and
    * sharpness values at the node.
    */
-  int GetNodeValue( int index, double val[6] );
-  int SetNodeValue( int index, double val[6] );
+  int GetNodeValue(int index, double val[6]);
+  int SetNodeValue(int index, double val[6]);
   //@}
 
   /**
    * Map one value through the lookup table.
    */
-  unsigned char *MapValue(double v) VTK_OVERRIDE;
+  const unsigned char* MapValue(double v) override;
 
   //@{
   /**
    * Returns min and max position of all function points.
    */
-  double* GetRange() VTK_OVERRIDE { return this->Range; }
+  double* GetRange() VTK_SIZEHINT(2) override { return this->Range; }
   virtual void GetRange(double& arg1, double& arg2)
   {
     arg1 = this->Range[0];
     arg2 = this->Range[1];
   }
-  virtual void GetRange(double _arg[2])
-  {
-    this->GetRange(_arg[0],_arg[1]);
-  }
+  virtual void GetRange(double _arg[2]) { this->GetRange(_arg[0], _arg[1]); }
   //@}
 
   /**
@@ -160,9 +156,9 @@ public:
 
    * Note that \a GetTable ignores \a IndexedLookup
    */
-  void GetTable( double x1, double x2, int n, double* table );
-  void GetTable( double x1, double x2, int n, float* table );
-  const unsigned char *GetTable( double x1, double x2, int n );
+  void GetTable(double x1, double x2, int n, double* table);
+  void GetTable(double x1, double x2, int n, float* table);
+  const unsigned char* GetTable(double x1, double x2, int n);
   //@}
 
   /**
@@ -174,7 +170,7 @@ public:
    * will have \p size nodes, and function values will be regularly spaced
    * between x1 and x2.
    */
-  void BuildFunctionFromTable( double x1, double x2, int size, double *table );
+  void BuildFunctionFromTable(double x1, double x2, int size, double* table);
 
   //@{
   /**
@@ -185,30 +181,35 @@ public:
    * last node color. If off, values outside the range are mapped to
    * black.
    */
-  vtkSetClampMacro( Clamping, int, 0, 1 );
-  vtkGetMacro( Clamping, int );
-  vtkBooleanMacro( Clamping, int );
+  vtkSetClampMacro(Clamping, vtkTypeBool, 0, 1);
+  vtkGetMacro(Clamping, vtkTypeBool);
+  vtkBooleanMacro(Clamping, vtkTypeBool);
   //@}
 
   //@{
   /**
-   * Set/Get the color space used for interpolation: RGB, HSV, CIELAB, or
-   * Diverging.  In HSV mode, if HSVWrap is on, it will take the shortest path
+   * Set/Get the color space used for interpolation: RGB, HSV, CIELAB,
+   * Diverging or Step.  In HSV mode, if HSVWrap is on, it will take the shortest path
    * in Hue (going back through 0 if that is the shortest way around the hue
    * circle) whereas if HSVWrap is off it will not go through 0 (in order the
-   * match the current functionality of vtkLookupTable).  Diverging is a special
+   * match the current functionality of vtkLookupTable).  In Lab/CIEDE2000 mode,
+   * it will take the shortest path in the Lab color space with respect to the
+   * CIE Delta E 2000 color distance measure. Diverging is a special
    * mode where colors will pass through white when interpolating between two
-   * saturated colors.
+   * saturated colors. Step is a mode where the color of an interval is the
+   * color of the second color of the interval.
    */
-  vtkSetClampMacro( ColorSpace, int, VTK_CTF_RGB, VTK_CTF_DIVERGING );
-  void SetColorSpaceToRGB(){this->SetColorSpace(VTK_CTF_RGB);};
-  void SetColorSpaceToHSV(){this->SetColorSpace(VTK_CTF_HSV);};
-  void SetColorSpaceToLab(){this->SetColorSpace(VTK_CTF_LAB);};
-  void SetColorSpaceToDiverging(){this->SetColorSpace(VTK_CTF_DIVERGING);}
-  vtkGetMacro( ColorSpace, int );
-  vtkSetMacro(HSVWrap, int);
-  vtkGetMacro(HSVWrap, int);
-  vtkBooleanMacro(HSVWrap, int);
+  vtkSetClampMacro(ColorSpace, int, VTK_CTF_RGB, VTK_CTF_STEP);
+  void SetColorSpaceToRGB() { this->SetColorSpace(VTK_CTF_RGB); }
+  void SetColorSpaceToHSV() { this->SetColorSpace(VTK_CTF_HSV); }
+  void SetColorSpaceToLab() { this->SetColorSpace(VTK_CTF_LAB); }
+  void SetColorSpaceToLabCIEDE2000() { this->SetColorSpace(VTK_CTF_LAB_CIEDE2000); }
+  void SetColorSpaceToDiverging() { this->SetColorSpace(VTK_CTF_DIVERGING); }
+  void SetColorSpaceToStep() { this->SetColorSpace(VTK_CTF_STEP); }
+  vtkGetMacro(ColorSpace, int);
+  vtkSetMacro(HSVWrap, vtkTypeBool);
+  vtkGetMacro(HSVWrap, vtkTypeBool);
+  vtkBooleanMacro(HSVWrap, vtkTypeBool);
   //@}
 
   //@{
@@ -217,10 +218,10 @@ public:
    * is linear.  If the scale is logarithmic, and the range contains
    * zero, the color mapping will be linear.
    */
-  vtkSetMacro(Scale,int);
-  void SetScaleToLinear() { this->SetScale(VTK_CTF_LINEAR); };
-  void SetScaleToLog10() { this->SetScale(VTK_CTF_LOG10); };
-  vtkGetMacro(Scale,int);
+  vtkSetMacro(Scale, int);
+  void SetScaleToLinear() { this->SetScale(VTK_CTF_LINEAR); }
+  void SetScaleToLog10() { this->SetScale(VTK_CTF_LOG10); }
+  vtkGetMacro(Scale, int);
   //@}
 
   //@{
@@ -231,6 +232,33 @@ public:
    */
   vtkSetVector3Macro(NanColor, double);
   vtkGetVector3Macro(NanColor, double);
+  //@}
+
+  //@{
+  /**
+   * Get/Set the opacity to use when a NaN (not a number) is
+   * encountered. This a double in the range [0,1].
+   */
+  vtkSetMacro(NanOpacity, double);
+  vtkGetMacro(NanOpacity, double);
+  //@}
+
+  //@{
+  /**
+   * Set the RGBA color to use when a NaN (not a number) is
+   * encountered.  This is an RGBA 4-tuple color of doubles in the
+   * range [0,1].
+   */
+  virtual void SetNanColorRGBA(double r, double g, double b, double a)
+  {
+    this->SetNanColor(r, g, b);
+    this->SetNanOpacity(a);
+  }
+
+  void SetNanColorRGBA(double rgba[4])
+  {
+    this->SetNanColorRGBA(rgba[0], rgba[1], rgba[2], rgba[3]);
+  }
   //@}
 
   //@{
@@ -246,9 +274,9 @@ public:
   /**
    * Set whether the below range color should be used.
    */
-  vtkSetMacro(UseBelowRangeColor, int);
-  vtkGetMacro(UseBelowRangeColor, int);
-  vtkBooleanMacro(UseBelowRangeColor, int);
+  vtkSetMacro(UseBelowRangeColor, vtkTypeBool);
+  vtkGetMacro(UseBelowRangeColor, vtkTypeBool);
+  vtkBooleanMacro(UseBelowRangeColor, vtkTypeBool);
   //@}
 
   //@{
@@ -264,9 +292,9 @@ public:
   /**
    * Set whether the below range color should be used.
    */
-  vtkSetMacro(UseAboveRangeColor, int);
-  vtkGetMacro(UseAboveRangeColor, int);
-  vtkBooleanMacro(UseAboveRangeColor, int);
+  vtkSetMacro(UseAboveRangeColor, vtkTypeBool);
+  vtkGetMacro(UseAboveRangeColor, vtkTypeBool);
+  vtkBooleanMacro(UseAboveRangeColor, vtkTypeBool);
   //@}
 
   /**
@@ -288,24 +316,23 @@ public:
   /**
    * Map a set of scalars through the lookup table.
    */
-  void MapScalarsThroughTable2(void *input, unsigned char *output,
-                                       int inputDataType, int numberOfValues,
-                                       int inputIncrement, int outputIncrement) VTK_OVERRIDE;
+  void MapScalarsThroughTable2(void* input, unsigned char* output, int inputDataType,
+    int numberOfValues, int inputIncrement, int outputIncrement) override;
 
   //@{
   /**
    * Toggle whether to allow duplicate scalar values in the color transfer
    * function (off by default).
    */
-  vtkSetMacro(AllowDuplicateScalars, int);
-  vtkGetMacro(AllowDuplicateScalars, int);
-  vtkBooleanMacro(AllowDuplicateScalars, int);
+  vtkSetMacro(AllowDuplicateScalars, vtkTypeBool);
+  vtkGetMacro(AllowDuplicateScalars, vtkTypeBool);
+  vtkBooleanMacro(AllowDuplicateScalars, vtkTypeBool);
   //@}
 
   /**
    * Get the number of available colors for mapping to.
    */
-  vtkIdType GetNumberOfAvailableColors() VTK_OVERRIDE;
+  vtkIdType GetNumberOfAvailableColors() override;
 
   /**
    * Return a color given an integer index.
@@ -313,19 +340,19 @@ public:
    * This is used to assign colors to annotations (given an offset into the list of annotations).
    * If there are no control points or \a idx < 0, then NanColor is returned.
    */
-  void GetIndexedColor(vtkIdType idx, double rgba[4]) VTK_OVERRIDE;
+  void GetIndexedColor(vtkIdType idx, double rgba[4]) override;
 
   /**
    * Estimates the minimum size of a table such that it would correctly sample this function.
    * The returned value should be passed as parameter 'n' when calling GetTable().
    */
-  int EstimateMinNumberOfSamples(double const & x1, double const & x2);
+  int EstimateMinNumberOfSamples(double const& x1, double const& x2);
 
 protected:
   vtkColorTransferFunction();
-  ~vtkColorTransferFunction() VTK_OVERRIDE;
+  ~vtkColorTransferFunction() override;
 
-  vtkColorTransferFunctionInternals *Internal;
+  vtkColorTransferFunctionInternals* Internal;
 
   /**
    * Determines the function value outside of defined points
@@ -333,7 +360,7 @@ protected:
    * One  = clamp to the lowest value below defined points and
    * highest value above defined points
    */
-  int Clamping;
+  vtkTypeBool Clamping;
 
   /**
    * The color space in which interpolation is performed.
@@ -343,7 +370,7 @@ protected:
   /**
    * Specify if HSV is wrap or not
    */
-  int HSVWrap;
+  vtkTypeBool HSVWrap;
 
   /**
    * The color interpolation scale (linear or logarithmic).
@@ -356,6 +383,11 @@ protected:
   double NanColor[3];
 
   /**
+   * The opacity to use for not-a-number.
+   */
+  double NanOpacity;
+
+  /**
    * The below-range color.
    */
   double BelowRangeColor[3];
@@ -363,7 +395,7 @@ protected:
   /**
    * Flag indicating whether below-range color should be used.
    */
-  int UseBelowRangeColor;
+  vtkTypeBool UseBelowRangeColor;
 
   /**
    * The above-range color.
@@ -373,7 +405,7 @@ protected:
   /**
    * Flag indicating whether below-range color should be used.
    */
-  int UseAboveRangeColor;
+  vtkTypeBool UseAboveRangeColor;
 
   /**
    * Temporary array to store data from the nodes.
@@ -393,10 +425,10 @@ protected:
   /**
    * If on, the same scalar value may have more than one node assigned to it.
    */
-  int AllowDuplicateScalars;
+  vtkTypeBool AllowDuplicateScalars;
 
   vtkTimeStamp BuildTime;
-  unsigned char *Table;
+  unsigned char* Table;
 
   /**
    * Temporary storage for the size of the table. Set in the method GetTable()
@@ -408,8 +440,8 @@ protected:
    * Set the range of scalars being mapped. This method has no functionality
    * in this subclass of vtkScalarsToColors.
    */
-  void SetRange(double, double) VTK_OVERRIDE {}
-  void SetRange(double rng[2]) {this->SetRange(rng[0],rng[1]);};
+  void SetRange(double, double) override {}
+  void SetRange(const double rng[2]) override { this->SetRange(rng[0], rng[1]); }
 
   /**
    * Internal method to sort the vector and update the
@@ -436,8 +468,8 @@ protected:
   double FindMinimumXDistance();
 
 private:
-  vtkColorTransferFunction(const vtkColorTransferFunction&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkColorTransferFunction&) VTK_DELETE_FUNCTION;
+  vtkColorTransferFunction(const vtkColorTransferFunction&) = delete;
+  void operator=(const vtkColorTransferFunction&) = delete;
 };
 
 #endif

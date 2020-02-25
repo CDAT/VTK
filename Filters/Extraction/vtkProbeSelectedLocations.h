@@ -23,41 +23,36 @@
  * by a vtkSelection. The FieldType of the input vtkSelection is immaterial and
  * is ignored. The ContentType of the input vtkSelection must be
  * vtkSelection::LOCATIONS.
-*/
+ */
 
 #ifndef vtkProbeSelectedLocations_h
 #define vtkProbeSelectedLocations_h
 
-#include "vtkFiltersExtractionModule.h" // For export macro
 #include "vtkExtractSelectionBase.h"
+#include "vtkFiltersExtractionModule.h" // For export macro
 
 class VTKFILTERSEXTRACTION_EXPORT vtkProbeSelectedLocations : public vtkExtractSelectionBase
 {
 public:
   static vtkProbeSelectedLocations* New();
   vtkTypeMacro(vtkProbeSelectedLocations, vtkExtractSelectionBase);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkProbeSelectedLocations();
-  ~vtkProbeSelectedLocations() VTK_OVERRIDE;
+  ~vtkProbeSelectedLocations() override;
 
   /**
    * Sets up empty output dataset
    */
-  int RequestDataObject(vtkInformation* request,
-                                vtkInformationVector** inputVector,
-                                vtkInformationVector* outputVector) VTK_OVERRIDE;
+  int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-    vtkInformationVector *) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkProbeSelectedLocations(const vtkProbeSelectedLocations&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProbeSelectedLocations&) VTK_DELETE_FUNCTION;
-
+  vtkProbeSelectedLocations(const vtkProbeSelectedLocations&) = delete;
+  void operator=(const vtkProbeSelectedLocations&) = delete;
 };
 
 #endif
-
-

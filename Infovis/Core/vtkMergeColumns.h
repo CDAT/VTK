@@ -37,7 +37,7 @@
  * If the arrays are numeric, the values are summed in the merged column.
  * If the arrays are strings, the values are concatenated.  The strings are
  * separated by a space if they are both nonempty.
-*/
+ */
 
 #ifndef vtkMergeColumns_h
 #define vtkMergeColumns_h
@@ -49,8 +49,8 @@ class VTKINFOVISCORE_EXPORT vtkMergeColumns : public vtkTableAlgorithm
 {
 public:
   static vtkMergeColumns* New();
-  vtkTypeMacro(vtkMergeColumns,vtkTableAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkMergeColumns, vtkTableAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -62,19 +62,15 @@ public:
 
 protected:
   vtkMergeColumns();
-  ~vtkMergeColumns() VTK_OVERRIDE;
+  ~vtkMergeColumns() override;
 
   char* MergedColumnName;
 
-  int RequestData(
-    vtkInformation*,
-    vtkInformationVector**,
-    vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
-  vtkMergeColumns(const vtkMergeColumns&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkMergeColumns&) VTK_DELETE_FUNCTION;
+  vtkMergeColumns(const vtkMergeColumns&) = delete;
+  void operator=(const vtkMergeColumns&) = delete;
 };
 
 #endif
-

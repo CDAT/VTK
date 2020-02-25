@@ -14,7 +14,8 @@
 =========================================================================*/
 /**
  * @class   vtkOrientedPolygonalHandleRepresentation3D
- * @brief   represent a user defined handle geometry in 3D while maintaining a fixed orientation w.r.t the camera.
+ * @brief   represent a user defined handle geometry in 3D while maintaining a fixed orientation
+ * w.r.t the camera.
  *
  * This class serves as the geometrical representation of a vtkHandleWidget.
  * The handle can be represented by an arbitrary polygonal data (vtkPolyData),
@@ -26,45 +27,45 @@
  * camera. This is done by using vtkFollowers internally to render the actors.
  * @sa
  * vtkPolygonalHandleRepresentation3D vtkHandleRepresentation vtkHandleWidget
-*/
+ */
 
 #ifndef vtkOrientedPolygonalHandleRepresentation3D_h
 #define vtkOrientedPolygonalHandleRepresentation3D_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAbstractPolygonalHandleRepresentation3D.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkOrientedPolygonalHandleRepresentation3D
-                : public vtkAbstractPolygonalHandleRepresentation3D
+  : public vtkAbstractPolygonalHandleRepresentation3D
 {
 public:
   /**
    * Instantiate this class.
    */
-  static vtkOrientedPolygonalHandleRepresentation3D *New();
+  static vtkOrientedPolygonalHandleRepresentation3D* New();
 
   //@{
   /**
    * Standard methods for instances of this class.
    */
-  vtkTypeMacro(vtkOrientedPolygonalHandleRepresentation3D,
-                       vtkAbstractPolygonalHandleRepresentation3D);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(
+    vtkOrientedPolygonalHandleRepresentation3D, vtkAbstractPolygonalHandleRepresentation3D);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
 protected:
   vtkOrientedPolygonalHandleRepresentation3D();
-  ~vtkOrientedPolygonalHandleRepresentation3D() VTK_OVERRIDE;
+  ~vtkOrientedPolygonalHandleRepresentation3D() override;
 
   /**
    * Override the superclass method.
    */
-  void UpdateHandle() VTK_OVERRIDE;
+  void UpdateHandle() override;
 
 private:
-  vtkOrientedPolygonalHandleRepresentation3D(const vtkOrientedPolygonalHandleRepresentation3D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOrientedPolygonalHandleRepresentation3D&) VTK_DELETE_FUNCTION;
+  vtkOrientedPolygonalHandleRepresentation3D(
+    const vtkOrientedPolygonalHandleRepresentation3D&) = delete;
+  void operator=(const vtkOrientedPolygonalHandleRepresentation3D&) = delete;
 };
 
 #endif
-

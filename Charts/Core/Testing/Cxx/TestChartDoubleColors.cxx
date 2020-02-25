@@ -13,47 +13,48 @@
 
 =========================================================================*/
 
-#include "vtkRenderWindow.h"
+#include "vtkAxis.h"
 #include "vtkChartXY.h"
-#include "vtkPlotPoints.h"
+#include "vtkContextScene.h"
+#include "vtkContextView.h"
+#include "vtkDoubleArray.h"
+#include "vtkLookupTable.h"
+#include "vtkMath.h"
+#include "vtkNew.h"
+#include "vtkPen.h"
 #include "vtkPlotBar.h"
 #include "vtkPlotLine.h"
-#include "vtkLookupTable.h"
-#include "vtkTable.h"
-#include "vtkDoubleArray.h"
-#include "vtkContextView.h"
-#include "vtkContextScene.h"
-#include "vtkPen.h"
+#include "vtkPlotPoints.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkNew.h"
-#include "vtkAxis.h"
+#include "vtkTable.h"
 
 //----------------------------------------------------------------------------
-int TestChartDoubleColors(int, char *[])
+int TestChartDoubleColors(int, char*[])
 {
   // Set up a 2D scene, add an XY chart to it
   vtkNew<vtkContextView> view;
   view->GetRenderWindow()->SetSize(400, 300);
   vtkNew<vtkChartXY> chart;
-  view->GetScene()->AddItem(chart.GetPointer());
+  view->GetScene()->AddItem(chart);
 
   // Create a table with some points in it...
   vtkNew<vtkTable> table;
   vtkNew<vtkDoubleArray> arrX;
   arrX->SetName("X");
-  table->AddColumn(arrX.Get());
+  table->AddColumn(arrX);
   vtkNew<vtkDoubleArray> arrC;
   arrC->SetName("f1");
-  table->AddColumn(arrC.Get());
+  table->AddColumn(arrC);
   vtkNew<vtkDoubleArray> arrS;
   arrS->SetName("f2");
-  table->AddColumn(arrS.Get());
+  table->AddColumn(arrS);
   vtkNew<vtkDoubleArray> arrS2;
   arrS2->SetName("f3");
-  table->AddColumn(arrS2.Get());
+  table->AddColumn(arrS2);
   vtkNew<vtkDoubleArray> arrColor;
   arrColor->SetName("color");
-  table->AddColumn(arrColor.Get());
+  table->AddColumn(arrColor);
   // Test charting with a few more points...
   int numPoints = 69;
   float inc = 7.5 / (numPoints - 1);
@@ -62,7 +63,7 @@ int TestChartDoubleColors(int, char *[])
   {
     double x(i * inc + 0.2);
     table->SetValue(i, 0, x);
-    table->SetValue(i, 1, 1.0e-80 * (cos(x - 1.0) + sin(x - 3.14 / 4.0)));
+    table->SetValue(i, 1, 1.0e-80 * (cos(x - 1.0) + sin(x - vtkMath::Pi() / 4.0)));
     table->SetValue(i, 2, 1.0e-80 * sin(x) * 1e-12);
     table->SetValue(i, 3, 1.0e-80 * sin(x - 1.0));
     table->SetValue(i, 4, cos(i * inc));
@@ -79,24 +80,24 @@ int TestChartDoubleColors(int, char *[])
 
   // Add multiple line plots, setting the colors etc
   vtkNew<vtkPlotPoints> points;
-  chart->AddPlot(points.Get());
-  points->SetInputData(table.Get(), 0, 1);
+  chart->AddPlot(points);
+  points->SetInputData(table, 0, 1);
   points->SetMarkerSize(10.0);
   points->ScalarVisibilityOn();
   points->SelectColorArray("color");
-  points->SetLookupTable(lut.Get());
+  points->SetLookupTable(lut);
   vtkNew<vtkPlotLine> line;
-  chart->AddPlot(line.Get());
-  line->SetInputData(table.Get(), 0, 2);
+  chart->AddPlot(line);
+  line->SetInputData(table, 0, 2);
   line->SetColor(1.0, 0.0, 0.0);
   // Put this plot in a different corner - it is orders of magnitude smaller.
-  chart->SetPlotCorner(line.Get(), 1);
+  chart->SetPlotCorner(line, 1);
   vtkNew<vtkPlotBar> bar;
-  chart->AddPlot(bar.Get());
-  bar->SetInputData(table.Get(), 0, 3);
+  chart->AddPlot(bar);
+  bar->SetInputData(table, 0, 3);
   bar->ScalarVisibilityOn();
   bar->SelectColorArray("color");
-  bar->SetLookupTable(lut.Get());
+  bar->SetLookupTable(lut);
   bar->GetPen()->SetLineType(vtkPen::NO_PEN);
 
   chart->GetAxis(vtkAxis::LEFT)->SetTitle("A tiny range");

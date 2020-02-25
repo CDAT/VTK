@@ -27,37 +27,37 @@
  * some objects that pass the bounding box test of vtkAreaPicker. This
  * will happen, for instance, when picking through a corner of the bounding
  * box when the data set does not have any visible geometry in that corner.
-*/
+ */
 
 #ifndef vtkRenderedAreaPicker_h
 #define vtkRenderedAreaPicker_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkAreaPicker.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkRenderer;
 
 class VTKRENDERINGCORE_EXPORT vtkRenderedAreaPicker : public vtkAreaPicker
 {
 public:
-  static vtkRenderedAreaPicker *New();
+  static vtkRenderedAreaPicker* New();
   vtkTypeMacro(vtkRenderedAreaPicker, vtkAreaPicker);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Perform pick operation in volume behind the given screen coordinates.
    * Props intersecting the selection frustum will be accessible via GetProp3D.
    * GetPlanes returns a vtkImplicitFunction suitable for vtkExtractGeometry.
    */
-  int AreaPick(double x0, double y0, double x1, double y1, vtkRenderer *) VTK_OVERRIDE;
+  int AreaPick(double x0, double y0, double x1, double y1, vtkRenderer*) override;
 
 protected:
   vtkRenderedAreaPicker();
-  ~vtkRenderedAreaPicker() VTK_OVERRIDE;
+  ~vtkRenderedAreaPicker() override;
 
 private:
-  vtkRenderedAreaPicker(const vtkRenderedAreaPicker&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkRenderedAreaPicker&) VTK_DELETE_FUNCTION;
+  vtkRenderedAreaPicker(const vtkRenderedAreaPicker&) = delete;
+  void operator=(const vtkRenderedAreaPicker&) = delete;
 };
 
 #endif

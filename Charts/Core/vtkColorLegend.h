@@ -19,15 +19,15 @@
  *
  * vtkColorLegend is an item that will display the vtkScalarsToColors
  * using a 1D texture, and a vtkAxis to show both the color and numerical range.
-*/
+ */
 
 #ifndef vtkColorLegend_h
 #define vtkColorLegend_h
 
-#include "vtkChartsCoreModule.h" // For export macro
 #include "vtkChartLegend.h"
-#include "vtkSmartPointer.h" // For SP ivars
-#include "vtkVector.h"       // For vtkRectf
+#include "vtkChartsCoreModule.h" // For export macro
+#include "vtkSmartPointer.h"     // For SP ivars
+#include "vtkVector.h"           // For vtkRectf
 
 class vtkAxis;
 class vtkContextMouseEvent;
@@ -35,17 +35,18 @@ class vtkImageData;
 class vtkScalarsToColors;
 class vtkCallbackCommand;
 
-class VTKCHARTSCORE_EXPORT vtkColorLegend: public vtkChartLegend
+class VTKCHARTSCORE_EXPORT vtkColorLegend : public vtkChartLegend
 {
 public:
   vtkTypeMacro(vtkColorLegend, vtkChartLegend);
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   static vtkColorLegend* New();
 
   /**
    * Enum of legend orientation types
    */
-  enum {
+  enum
+  {
     VERTICAL = 0,
     HORIZONTAL
   };
@@ -61,14 +62,14 @@ public:
    * The scene should take care of calling this on all items before their
    * Paint function is invoked.
    */
-  void Update() VTK_OVERRIDE;
+  void Update() override;
 
   /**
    * Paint the texture into a rectangle defined by the bounds. If
    * MaskAboveCurve is true and a shape has been provided by a subclass, it
    * draws the texture into the shape
    */
-  bool Paint(vtkContext2D *painter) VTK_OVERRIDE;
+  bool Paint(vtkContext2D* painter) override;
 
   //@{
   /**
@@ -76,13 +77,13 @@ public:
    * within this legend.
    */
   virtual void SetTransferFunction(vtkScalarsToColors* transfer);
-  virtual vtkScalarsToColors * GetTransferFunction();
+  virtual vtkScalarsToColors* GetTransferFunction();
   //@}
 
   /**
    * Set the point this legend is anchored to.
    */
-  void SetPoint(float x, float y) VTK_OVERRIDE;
+  void SetPoint(float x, float y) override;
 
   /**
    * Set the size of the scalar bar drawn by this legend.
@@ -109,7 +110,7 @@ public:
    * height being the total width/height required by the axis. In order to
    * ensure the numbers are correct, Update() should be called first.
    */
-  vtkRectf GetBoundingRect(vtkContext2D* painter) VTK_OVERRIDE;
+  vtkRectf GetBoundingRect(vtkContext2D* painter) override;
 
   //@{
   /**
@@ -124,7 +125,7 @@ public:
   /**
    * Get/set the title text of the legend.
    */
-  virtual void SetTitle(const vtkStdString &title);
+  virtual void SetTitle(const vtkStdString& title);
   virtual vtkStdString GetTitle();
   //@}
 
@@ -141,11 +142,11 @@ public:
   /**
    * Mouse move event.
    */
-  bool MouseMoveEvent(const vtkContextMouseEvent &mouse) VTK_OVERRIDE;
+  bool MouseMoveEvent(const vtkContextMouseEvent& mouse) override;
 
 protected:
   vtkColorLegend();
-  ~vtkColorLegend() VTK_OVERRIDE;
+  ~vtkColorLegend() override;
 
   /**
    * Need to be reimplemented by subclasses, ComputeTexture() is called at
@@ -158,10 +159,9 @@ protected:
    * Called whenever the ScalarsToColors function(s) is modified. It internally
    * calls Modified(). Can be reimplemented by subclasses.
    */
-  virtual void ScalarsToColorsModified(vtkObject* caller, unsigned long eid,
-                                       void* calldata);
-  static void OnScalarsToColorsModified(vtkObject* caller, unsigned long eid,
-                                        void *clientdata, void* calldata);
+  virtual void ScalarsToColorsModified(vtkObject* caller, unsigned long eid, void* calldata);
+  static void OnScalarsToColorsModified(
+    vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
   //@}
 
   /**
@@ -169,19 +169,19 @@ protected:
    */
   void UpdateAxisPosition();
 
-  vtkScalarsToColors*                 TransferFunction;
-  vtkSmartPointer<vtkImageData>       ImageData;
-  vtkSmartPointer<vtkAxis>            Axis;
+  vtkScalarsToColors* TransferFunction;
+  vtkSmartPointer<vtkImageData> ImageData;
+  vtkSmartPointer<vtkAxis> Axis;
   vtkSmartPointer<vtkCallbackCommand> Callback;
-  bool                                Interpolate;
-  bool                                CustomPositionSet;
-  bool                                DrawBorder;
-  vtkRectf                            Position;
-  int                                 Orientation;
+  bool Interpolate;
+  bool CustomPositionSet;
+  bool DrawBorder;
+  vtkRectf Position;
+  int Orientation;
 
 private:
-  vtkColorLegend(const vtkColorLegend &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkColorLegend &) VTK_DELETE_FUNCTION;
+  vtkColorLegend(const vtkColorLegend&) = delete;
+  void operator=(const vtkColorLegend&) = delete;
 };
 
 #endif

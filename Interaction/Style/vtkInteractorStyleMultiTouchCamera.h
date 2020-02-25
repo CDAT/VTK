@@ -23,38 +23,46 @@
  * @sa
  * vtkInteractorStyleTrackballActor vtkInteractorStyleJoystickCamera
  * vtkInteractorStyleJoystickActor
-*/
+ */
 
 #ifndef vtkInteractorStyleMultiTouchCamera_h
 #define vtkInteractorStyleMultiTouchCamera_h
 
 #include "vtkInteractionStyleModule.h" // For export macro
-#include "vtkRenderWindowInteractor.h" // for max pointers
 #include "vtkInteractorStyleTrackballCamera.h"
+#include "vtkRenderWindowInteractor.h" // for max pointers
 
-class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleMultiTouchCamera : public vtkInteractorStyleTrackballCamera
+class VTKINTERACTIONSTYLE_EXPORT vtkInteractorStyleMultiTouchCamera
+  : public vtkInteractorStyleTrackballCamera
 {
 public:
-  static vtkInteractorStyleMultiTouchCamera *New();
-  vtkTypeMacro(vtkInteractorStyleMultiTouchCamera,vtkInteractorStyleTrackballCamera);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkInteractorStyleMultiTouchCamera* New();
+  vtkTypeMacro(vtkInteractorStyleMultiTouchCamera, vtkInteractorStyleTrackballCamera);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
    * Event bindings for gestures
    */
-  void OnRotate() VTK_OVERRIDE;
-  void OnPinch() VTK_OVERRIDE;
-  void OnPan() VTK_OVERRIDE;
+  void OnStartRotate() override;
+  void OnRotate() override;
+  void OnEndRotate() override;
+  void OnStartPinch() override;
+  void OnPinch() override;
+  void OnEndPinch() override;
+  void OnStartPan() override;
+  void OnPan() override;
+  void OnEndPan() override;
+
   //@}
 
 protected:
   vtkInteractorStyleMultiTouchCamera();
-  ~vtkInteractorStyleMultiTouchCamera() VTK_OVERRIDE;
+  ~vtkInteractorStyleMultiTouchCamera() override;
 
 private:
-  vtkInteractorStyleMultiTouchCamera(const vtkInteractorStyleMultiTouchCamera&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkInteractorStyleMultiTouchCamera&) VTK_DELETE_FUNCTION;
+  vtkInteractorStyleMultiTouchCamera(const vtkInteractorStyleMultiTouchCamera&) = delete;
+  void operator=(const vtkInteractorStyleMultiTouchCamera&) = delete;
 };
 
 #endif

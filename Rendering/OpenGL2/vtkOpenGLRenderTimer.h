@@ -25,14 +25,14 @@
  * This uses GL_TIMESTAMP rather than GL_ELAPSED_TIME, since only one
  * GL_ELAPSED_TIME query may be active at a time. Since GL_TIMESTAMP is not
  * available on OpenGL ES, timings will not be available on those platforms.
- * Use the static IsSupported() method to determine if the timer is availble.
+ * Use the static IsSupported() method to determine if the timer is available.
  */
 
 #ifndef vtkOpenGLRenderTimer_h
 #define vtkOpenGLRenderTimer_h
 
 #include "vtkRenderingOpenGL2Module.h" // For export macro
-#include "vtkType.h" // For vtkTypeUint64, etc
+#include "vtkType.h"                   // For vtkTypeUint64, etc
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLRenderTimer
 {
@@ -144,8 +144,8 @@ protected:
   bool ReusableEnded;
 
 private:
-  vtkOpenGLRenderTimer(const vtkOpenGLRenderTimer&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkOpenGLRenderTimer&) VTK_DELETE_FUNCTION;
+  vtkOpenGLRenderTimer(const vtkOpenGLRenderTimer&) = delete;
+  void operator=(const vtkOpenGLRenderTimer&) = delete;
 };
 
 #endif // vtkOpenGLRenderTimer_h

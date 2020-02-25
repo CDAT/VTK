@@ -25,17 +25,18 @@
 #include "vtkNew.h"
 #include "vtkPointData.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
+#include "vtkRTAnalyticSource.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
-#include "vtkRTAnalyticSource.h"
+#include "vtkRenderer.h"
 #include "vtkSphereSource.h"
 #include "vtkUnstructuredGrid.h"
 
-namespace {
+namespace
+{
 
 template <typename DataSetT>
-void GenerateScalars(DataSetT *dataset, bool negate)
+void GenerateScalars(DataSetT* dataset, bool negate)
 {
   vtkIdType numPoints = dataset->GetNumberOfPoints();
 
@@ -48,10 +49,9 @@ void GenerateScalars(DataSetT *dataset, bool negate)
   for (vtkIdType i = 0; i < numPoints; ++i)
   {
     dataset->GetPoint(i, point);
-    scalars->SetTypedComponent(i, 0, (negate ?-point[0] - point[1]
-                                             : point[0] + point[1]));
+    scalars->SetTypedComponent(i, 0, (negate ? -point[0] - point[1] : point[0] + point[1]));
   }
-  dataset->GetPointData()->SetScalars(scalars.Get());
+  dataset->GetPointData()->SetScalars(scalars);
 }
 
 } // end anon namespace
@@ -66,7 +66,7 @@ int TestVTKMClip(int, char*[])
   sphereSource->SetThetaResolution(50);
   sphereSource->SetPhiResolution(50);
   sphereSource->Update();
-  vtkPolyData *sphere = sphereSource->GetOutput();
+  vtkPolyData* sphere = sphereSource->GetOutput();
   GenerateScalars(sphere, false);
 
   // Clip at zero:
@@ -86,10 +86,10 @@ int TestVTKMClip(int, char*[])
   sphereMapper->SetScalarRange(0, 1);
 
   vtkNew<vtkActor> sphereActor;
-  sphereActor->SetMapper(sphereMapper.Get());
+  sphereActor->SetMapper(sphereMapper);
   sphereActor->SetPosition(0.5, 0.5, 0.);
   sphereActor->RotateWXYZ(90., 0., 0., 1.);
-  renderer->AddActor(sphereActor.Get());
+  renderer->AddActor(sphereActor);
 
   // Second input is an unstructured grid with 3D cells. This should produce an
   // unstructured grid output from vtkmClip.
@@ -104,7 +104,7 @@ int TestVTKMClip(int, char*[])
   vtkNew<vtkDelaunay3D> tetrahedralizer;
   tetrahedralizer->SetInputConnection(imageToPoints->GetOutputPort());
   tetrahedralizer->Update();
-  vtkUnstructuredGrid *tets = tetrahedralizer->GetOutput();
+  vtkUnstructuredGrid* tets = tetrahedralizer->GetOutput();
   GenerateScalars(tets, true);
 
   // Clip at zero:
@@ -124,12 +124,12 @@ int TestVTKMClip(int, char*[])
   tetMapper->SetScalarRange(0, 10);
 
   vtkNew<vtkActor> tetActor;
-  tetActor->SetMapper(tetMapper.Get());
+  tetActor->SetMapper(tetMapper);
   tetActor->SetScale(1. / 5.);
-  renderer->AddActor(tetActor.Get());
+  renderer->AddActor(tetActor);
 
   // Third dataset tests imagedata. This should produce an unstructured grid:
-  vtkImageData *image = imageSource->GetOutput();
+  vtkImageData* image = imageSource->GetOutput();
   GenerateScalars(image, false);
 
   vtkNew<vtkmClip> imageClipper;
@@ -148,21 +148,21 @@ int TestVTKMClip(int, char*[])
   imageMapper->SetScalarRange(0, 10);
 
   vtkNew<vtkActor> imageActor;
-  imageActor->SetMapper(imageMapper.Get());
+  imageActor->SetMapper(imageMapper);
   imageActor->SetScale(1. / 5.);
   imageActor->SetPosition(1.0, 1.0, 0.);
-  renderer->AddActor(imageActor.Get());
+  renderer->AddActor(imageActor);
 
   vtkNew<vtkRenderWindowInteractor> iren;
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetMultiSamples(0);
-  iren->SetRenderWindow(renWin.Get());
-  renWin->AddRenderer(renderer.Get());
+  iren->SetRenderWindow(renWin);
+  renWin->AddRenderer(renderer);
 
-  renWin->SetSize(500,500);
-  renderer->GetActiveCamera()->SetPosition(0,0,1);
-  renderer->GetActiveCamera()->SetFocalPoint(0,0,0);
-  renderer->GetActiveCamera()->SetViewUp(0,1,0);
+  renWin->SetSize(500, 500);
+  renderer->GetActiveCamera()->SetPosition(0, 0, 1);
+  renderer->GetActiveCamera()->SetFocalPoint(0, 0, 0);
+  renderer->GetActiveCamera()->SetViewUp(0, 1, 0);
   renderer->ResetCamera();
 
   renWin->Render();

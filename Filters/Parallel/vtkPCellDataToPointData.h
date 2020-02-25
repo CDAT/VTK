@@ -21,48 +21,46 @@
  * ghost cells to make the results invariant to pieces.  There is a
  * "PieceInvariant" flag that lets the user change the behavior
  * of the filter to that of its superclass.
-*/
+ */
 
 #ifndef vtkPCellDataToPointData_h
 #define vtkPCellDataToPointData_h
 
-#include "vtkFiltersParallelModule.h" // For export macro
 #include "vtkCellDataToPointData.h"
+#include "vtkFiltersParallelModule.h" // For export macro
 
 class VTKFILTERSPARALLEL_EXPORT vtkPCellDataToPointData : public vtkCellDataToPointData
 {
 public:
-  vtkTypeMacro(vtkPCellDataToPointData,vtkCellDataToPointData);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkPCellDataToPointData, vtkCellDataToPointData);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkPCellDataToPointData *New();
+  static vtkPCellDataToPointData* New();
 
   //@{
   /**
    * To get piece invariance, this filter has to request an
    * extra ghost level.  By default piece invariance is on.
    */
-  vtkSetMacro(PieceInvariant, int);
-  vtkGetMacro(PieceInvariant, int);
-  vtkBooleanMacro(PieceInvariant, int);
+  vtkSetMacro(PieceInvariant, vtkTypeBool);
+  vtkGetMacro(PieceInvariant, vtkTypeBool);
+  vtkBooleanMacro(PieceInvariant, vtkTypeBool);
   //@}
 
 protected:
   vtkPCellDataToPointData();
-  ~vtkPCellDataToPointData() VTK_OVERRIDE {}
+  ~vtkPCellDataToPointData() override {}
 
   // Usual data generation method
-  int RequestData(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) VTK_OVERRIDE;
-  int RequestUpdateExtent(vtkInformation*,
-                                  vtkInformationVector**,
-                                  vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int PieceInvariant;
+  vtkTypeBool PieceInvariant;
+
 private:
-  vtkPCellDataToPointData(const vtkPCellDataToPointData&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPCellDataToPointData&) VTK_DELETE_FUNCTION;
+  vtkPCellDataToPointData(const vtkPCellDataToPointData&) = delete;
+  void operator=(const vtkPCellDataToPointData&) = delete;
 };
 
 #endif

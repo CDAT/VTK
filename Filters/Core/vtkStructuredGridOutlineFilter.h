@@ -19,7 +19,7 @@
  * vtkStructuredGridOutlineFilter is a filter that generates a wireframe
  * outline of a structured grid (vtkStructuredGrid). Structured data is
  * topologically a cube, so the outline will have 12 "edges".
-*/
+ */
 
 #ifndef vtkStructuredGridOutlineFilter_h
 #define vtkStructuredGridOutlineFilter_h
@@ -30,19 +30,19 @@
 class VTKFILTERSCORE_EXPORT vtkStructuredGridOutlineFilter : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkStructuredGridOutlineFilter *New();
-  vtkTypeMacro(vtkStructuredGridOutlineFilter,vtkPolyDataAlgorithm);
+  static vtkStructuredGridOutlineFilter* New();
+  vtkTypeMacro(vtkStructuredGridOutlineFilter, vtkPolyDataAlgorithm);
 
 protected:
   vtkStructuredGridOutlineFilter() {}
-  ~vtkStructuredGridOutlineFilter() VTK_OVERRIDE {}
+  ~vtkStructuredGridOutlineFilter() override {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) VTK_OVERRIDE;
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
-  vtkStructuredGridOutlineFilter(const vtkStructuredGridOutlineFilter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkStructuredGridOutlineFilter&) VTK_DELETE_FUNCTION;
+  vtkStructuredGridOutlineFilter(const vtkStructuredGridOutlineFilter&) = delete;
+  void operator=(const vtkStructuredGridOutlineFilter&) = delete;
 };
 
 #endif

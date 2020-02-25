@@ -16,24 +16,20 @@
 
 #include "vtkDataArray.h"
 #include "vtkImageData.h"
+#include "vtkInformation.h"
+#include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
-#include "vtkXMLDataElement.h"
-#include "vtkInformation.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkInformationVector.h"
+#include "vtkXMLDataElement.h"
 
 vtkStandardNewMacro(vtkXMLImageDataReader);
 
 //----------------------------------------------------------------------------
-vtkXMLImageDataReader::vtkXMLImageDataReader()
-{
-}
+vtkXMLImageDataReader::vtkXMLImageDataReader() = default;
 
 //----------------------------------------------------------------------------
-vtkXMLImageDataReader::~vtkXMLImageDataReader()
-{
-}
+vtkXMLImageDataReader::~vtkXMLImageDataReader() = default;
 
 //----------------------------------------------------------------------------
 void vtkXMLImageDataReader::PrintSelf(ostream& os, vtkIndent indent)
@@ -52,7 +48,6 @@ vtkImageData* vtkXMLImageDataReader::GetOutput(int idx)
 {
   return vtkImageData::SafeDownCast(this->GetOutputDataObject(idx));
 }
-
 
 //----------------------------------------------------------------------------
 const char* vtkXMLImageDataReader::GetDataSetName()
@@ -90,27 +85,40 @@ int vtkXMLImageDataReader::ReadPrimaryElement(vtkXMLDataElement* ePrimary)
     this->Spacing[2] = 1;
   }
 
+  // Get the image's direction.
+  if (ePrimary->GetVectorAttribute("Direction", 9, this->Direction) != 9)
+  {
+    this->Direction[0] = 1;
+    this->Direction[1] = 0;
+    this->Direction[2] = 0;
+    this->Direction[3] = 0;
+    this->Direction[4] = 1;
+    this->Direction[5] = 0;
+    this->Direction[6] = 0;
+    this->Direction[7] = 0;
+    this->Direction[8] = 1;
+  }
+
   return 1;
 }
 
 //----------------------------------------------------------------------------
 // Note that any changes (add or removing information) made to this method
 // should be replicated in CopyOutputInformation
-void vtkXMLImageDataReader::SetupOutputInformation(vtkInformation *outInfo)
+void vtkXMLImageDataReader::SetupOutputInformation(vtkInformation* outInfo)
 {
   this->Superclass::SetupOutputInformation(outInfo);
 
   outInfo->Set(vtkDataObject::ORIGIN(), this->Origin, 3);
   outInfo->Set(vtkDataObject::SPACING(), this->Spacing, 3);
+  outInfo->Set(vtkDataObject::DIRECTION(), this->Direction, 9);
 }
 
-
 //----------------------------------------------------------------------------
-void vtkXMLImageDataReader::CopyOutputInformation(vtkInformation *outInfo, int port)
+void vtkXMLImageDataReader::CopyOutputInformation(vtkInformation* outInfo, int port)
 {
   this->Superclass::CopyOutputInformation(outInfo, port);
-  vtkInformation *localInfo =
-    this->GetExecutive()->GetOutputInformation(port);
+  vtkInformation* localInfo = this->GetExecutive()->GetOutputInformation(port);
   if (localInfo->Has(vtkDataObject::ORIGIN()))
   {
     outInfo->CopyEntry(localInfo, vtkDataObject::ORIGIN());
@@ -119,8 +127,11 @@ void vtkXMLImageDataReader::CopyOutputInformation(vtkInformation *outInfo, int p
   {
     outInfo->CopyEntry(localInfo, vtkDataObject::SPACING());
   }
+  if (localInfo->Has(vtkDataObject::DIRECTION()))
+  {
+    outInfo->CopyEntry(localInfo, vtkDataObject::DIRECTION());
+  }
 }
-
 
 //----------------------------------------------------------------------------
 int vtkXMLImageDataReader::FillOutputPortInformation(int, vtkInformation* info)

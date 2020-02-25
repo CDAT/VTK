@@ -25,7 +25,7 @@
  *
  * This class is used mainly as a superclass for continuous value widgets
  *
-*/
+ */
 
 #ifndef vtkContinuousValueWidgetRepresentation_h
 #define vtkContinuousValueWidgetRepresentation_h
@@ -33,17 +33,16 @@
 #include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkWidgetRepresentation.h"
 
-class VTKINTERACTIONWIDGETS_EXPORT vtkContinuousValueWidgetRepresentation :
-  public vtkWidgetRepresentation
+class VTKINTERACTIONWIDGETS_EXPORT vtkContinuousValueWidgetRepresentation
+  : public vtkWidgetRepresentation
 {
 public:
   //@{
   /**
    * Standard methods for the class.
    */
-  vtkTypeMacro(vtkContinuousValueWidgetRepresentation,
-                       vtkWidgetRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkContinuousValueWidgetRepresentation, vtkWidgetRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   //@{
@@ -52,35 +51,34 @@ public:
    * assumes that the parameter bounds[6] specifies the location in display
    * space where the widget should be placed.
    */
-  void PlaceWidget(double bounds[6]) VTK_OVERRIDE;
-  void BuildRepresentation() VTK_OVERRIDE {}
-  void StartWidgetInteraction(double eventPos[2]) VTK_OVERRIDE = 0;
-  void WidgetInteraction(double eventPos[2]) VTK_OVERRIDE = 0;
-//  virtual void Highlight(int);
+  void PlaceWidget(double bounds[6]) override;
+  void BuildRepresentation() override {}
+  void StartWidgetInteraction(double eventPos[2]) override = 0;
+  void WidgetInteraction(double eventPos[2]) override = 0;
+  //  virtual void Highlight(int);
   //@}
 
   // Enums are used to describe what is selected
   enum _InteractionState
   {
-    Outside=0,
+    Outside = 0,
     Inside,
     Adjusting
   };
 
   // Set/Get the value
   virtual void SetValue(double value);
-  virtual double GetValue() {return this->Value;};
+  virtual double GetValue() { return this->Value; }
 
 protected:
   vtkContinuousValueWidgetRepresentation();
-  ~vtkContinuousValueWidgetRepresentation() VTK_OVERRIDE;
+  ~vtkContinuousValueWidgetRepresentation() override;
 
   double Value;
 
 private:
-  vtkContinuousValueWidgetRepresentation
-  (const vtkContinuousValueWidgetRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkContinuousValueWidgetRepresentation&) VTK_DELETE_FUNCTION;
+  vtkContinuousValueWidgetRepresentation(const vtkContinuousValueWidgetRepresentation&) = delete;
+  void operator=(const vtkContinuousValueWidgetRepresentation&) = delete;
 };
 
 #endif

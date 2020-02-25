@@ -18,15 +18,15 @@
  *
  * vtkPhyloXMLTreeWriter is writes a vtkTree to a PhyloXML formatted file
  * or string.
-*/
+ */
 
 #ifndef vtkPhyloXMLTreeWriter_h
 #define vtkPhyloXMLTreeWriter_h
 
 #include "vtkIOInfovisModule.h" // For export macro
-#include "vtkXMLWriter.h"
 #include "vtkSmartPointer.h"    // For SP ivars
 #include "vtkStdString.h"       // For get/set ivars
+#include "vtkXMLWriter.h"
 
 class vtkStringArray;
 class vtkTree;
@@ -35,9 +35,9 @@ class vtkXMLDataElement;
 class VTKIOINFOVIS_EXPORT vtkPhyloXMLTreeWriter : public vtkXMLWriter
 {
 public:
-  static vtkPhyloXMLTreeWriter *New();
-  vtkTypeMacro(vtkPhyloXMLTreeWriter,vtkXMLWriter);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkPhyloXMLTreeWriter* New();
+  vtkTypeMacro(vtkPhyloXMLTreeWriter, vtkXMLWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -50,7 +50,7 @@ public:
   /**
    * Get the default file extension for files written by this writer.
    */
-  const char* GetDefaultFileExtension() VTK_OVERRIDE;
+  const char* GetDefaultFileExtension() override;
 
   //@{
   /**
@@ -81,90 +81,83 @@ public:
    * of this writer.  Call this function once for each array that
    * you wish to ignore.
    */
-  void IgnoreArray(const char * arrayName);
+  void IgnoreArray(const char* arrayName);
 
 protected:
   vtkPhyloXMLTreeWriter();
-  ~vtkPhyloXMLTreeWriter() VTK_OVERRIDE {}
+  ~vtkPhyloXMLTreeWriter() override {}
 
-  int WriteData() VTK_OVERRIDE;
+  int WriteData() override;
 
-  const char* GetDataSetName() VTK_OVERRIDE;
-  int StartFile() VTK_OVERRIDE;
-  int EndFile() VTK_OVERRIDE;
+  const char* GetDataSetName() override;
+  int StartFile() override;
+  int EndFile() override;
 
   /**
    * Check for an optional, tree-level element and write it out if it is
    * found.
    */
-  void WriteTreeLevelElement(vtkTree *input,
-                             vtkXMLDataElement *rootElement,
-                             const char *elementName,
-                             const char *attributeName);
+  void WriteTreeLevelElement(vtkTree* input, vtkXMLDataElement* rootElement,
+    const char* elementName, const char* attributeName);
 
   /**
    * Search for any tree-level properties and write them out if they are found.
    */
-  void WriteTreeLevelProperties(vtkTree *input, vtkXMLDataElement *rootElement);
+  void WriteTreeLevelProperties(vtkTree* input, vtkXMLDataElement* rootElement);
 
   /**
    * Convert one vertex to PhyloXML.  This function calls itself recursively
    * for any children of the input vertex.
    */
-  void WriteCladeElement(vtkTree* const input, vtkIdType vertex,
-                   vtkXMLDataElement *parentElement);
+  void WriteCladeElement(vtkTree* const input, vtkIdType vertex, vtkXMLDataElement* parentElement);
 
   /**
    * Write the branch length attribute for the specified vertex.
    */
-  void WriteBranchLengthAttribute(vtkTree* const input, vtkIdType vertex,
-                                  vtkXMLDataElement *element);
+  void WriteBranchLengthAttribute(
+    vtkTree* const input, vtkIdType vertex, vtkXMLDataElement* element);
 
   /**
    * Write the name element for the specified vertex.
    */
-  void WriteNameElement(vtkIdType vertex, vtkXMLDataElement *element);
+  void WriteNameElement(vtkIdType vertex, vtkXMLDataElement* element);
 
   /**
    * Write the confidence element for the specified vertex.
    */
-  void WriteConfidenceElement(vtkTree* const input, vtkIdType vertex,
-                              vtkXMLDataElement *element);
+  void WriteConfidenceElement(vtkTree* const input, vtkIdType vertex, vtkXMLDataElement* element);
 
   /**
    * Write the color element and its subelements (red, green, blue)
    * for the specified vertex.
    */
-  void WriteColorElement(vtkTree* const input, vtkIdType vertex,
-                         vtkXMLDataElement *element);
+  void WriteColorElement(vtkTree* const input, vtkIdType vertex, vtkXMLDataElement* element);
 
   /**
    * Write a property element as a child of the specified vtkXMLDataElement.
    */
-  void WritePropertyElement(vtkAbstractArray *array, vtkIdType vertex,
-                            vtkXMLDataElement *element);
+  void WritePropertyElement(vtkAbstractArray* array, vtkIdType vertex, vtkXMLDataElement* element);
 
   /**
    * Get the value of the requested attribute from the specified array's
    * vtkInformation.
    */
-  const char* GetArrayAttribute(vtkAbstractArray *array,
-                                const char *attributeName);
+  const char* GetArrayAttribute(vtkAbstractArray* array, const char* attributeName);
 
-  int FillInputPortInformation(int port, vtkInformation *info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   vtkInformation* InputInformation;
 
   vtkStdString EdgeWeightArrayName;
   vtkStdString NodeNameArrayName;
 
-  vtkAbstractArray *EdgeWeightArray;
-  vtkAbstractArray *NodeNameArray;
+  vtkAbstractArray* EdgeWeightArray;
+  vtkAbstractArray* NodeNameArray;
   vtkSmartPointer<vtkStringArray> Blacklist;
 
 private:
-  vtkPhyloXMLTreeWriter(const vtkPhyloXMLTreeWriter&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkPhyloXMLTreeWriter&) VTK_DELETE_FUNCTION;
+  vtkPhyloXMLTreeWriter(const vtkPhyloXMLTreeWriter&) = delete;
+  void operator=(const vtkPhyloXMLTreeWriter&) = delete;
 };
 
 #endif

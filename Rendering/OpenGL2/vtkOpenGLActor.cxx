@@ -22,10 +22,12 @@
 #include "vtkMatrix3x3.h"
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
-#include "vtkOpenGLPolyDataMapper.h"
-#include "vtkOpenGLRenderer.h"
-#include "vtkProperty.h"
 #include "vtkOpenGLError.h"
+#include "vtkOpenGLPolyDataMapper.h"
+#include "vtkOpenGLRenderWindow.h"
+#include "vtkOpenGLRenderer.h"
+#include "vtkOpenGLState.h"
+#include "vtkProperty.h"
 #include "vtkRenderWindow.h"
 #include "vtkTransform.h"
 
@@ -33,7 +35,7 @@
 
 vtkStandardNewMacro(vtkOpenGLActor);
 
-vtkInformationKeyMacro(vtkOpenGLActor, GLDepthMaskOverride, Integer)
+vtkInformationKeyMacro(vtkOpenGLActor, GLDepthMaskOverride, Integer);
 
 vtkOpenGLActor::vtkOpenGLActor()
 {
@@ -49,40 +51,42 @@ vtkOpenGLActor::~vtkOpenGLActor()
   this->NormalTransform->Delete();
 }
 
-
 // Actual actor render method.
-void vtkOpenGLActor::Render(vtkRenderer *ren, vtkMapper *mapper)
+void vtkOpenGLActor::Render(vtkRenderer* ren, vtkMapper* mapper)
 {
   vtkOpenGLClearErrorMacro();
 
+  vtkOpenGLState* ostate = static_cast<vtkOpenGLRenderer*>(ren)->GetState();
+  vtkOpenGLState::ScopedglDepthMask dmsaver(ostate);
+
   // get opacity
-  bool opaque = (this->GetIsOpaque() != 0);
+  bool opaque = !this->IsRenderingTranslucentPolygonalGeometry();
   if (opaque)
   {
-    glDepthMask(GL_TRUE);
+    ostate->vtkglDepthMask(GL_TRUE);
   }
   else
   {
     vtkHardwareSelector* selector = ren->GetSelector();
-    bool picking = (ren->GetRenderWindow()->GetIsPicking() || selector != nullptr);
+    bool picking = (selector != nullptr);
     if (picking)
     {
-      glDepthMask(GL_TRUE);
+      ostate->vtkglDepthMask(GL_TRUE);
     }
     else
     {
-      // check for deptgh peeling
-      vtkInformation *info = this->GetPropertyKeys();
+      // check for depth peeling
+      vtkInformation* info = this->GetPropertyKeys();
       if (info && info->Has(vtkOpenGLActor::GLDepthMaskOverride()))
       {
         int maskoverride = info->Get(vtkOpenGLActor::GLDepthMaskOverride());
         switch (maskoverride)
         {
           case 0:
-            glDepthMask(GL_FALSE);
+            ostate->vtkglDepthMask(GL_FALSE);
             break;
           case 1:
-            glDepthMask(GL_TRUE);
+            ostate->vtkglDepthMask(GL_TRUE);
             break;
           default:
             // Do nothing.
@@ -91,7 +95,7 @@ void vtkOpenGLActor::Render(vtkRenderer *ren, vtkMapper *mapper)
       }
       else
       {
-        glDepthMask(GL_FALSE); // transparency with alpha blending
+        ostate->vtkglDepthMask(GL_FALSE); // transparency with alpha blending
       }
     }
   }
@@ -101,7 +105,7 @@ void vtkOpenGLActor::Render(vtkRenderer *ren, vtkMapper *mapper)
 
   if (!opaque)
   {
-    glDepthMask(GL_TRUE);
+    ostate->vtkglDepthMask(GL_TRUE);
   }
 
   vtkOpenGLCheckErrorMacro("failed after Render");
@@ -110,10 +114,10 @@ void vtkOpenGLActor::Render(vtkRenderer *ren, vtkMapper *mapper)
 //----------------------------------------------------------------------------
 void vtkOpenGLActor::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
 
-void vtkOpenGLActor::GetKeyMatrices(vtkMatrix4x4 *&mcwc, vtkMatrix3x3 *&normMat)
+void vtkOpenGLActor::GetKeyMatrices(vtkMatrix4x4*& mcwc, vtkMatrix3x3*& normMat)
 {
   // has the actor changed?
   if (this->GetMTime() > this->KeyMatrixTime)
@@ -129,8 +133,8 @@ void vtkOpenGLActor::GetKeyMatrices(vtkMatrix4x4 *&mcwc, vtkMatrix3x3 *&normMat)
     else
     {
       this->NormalTransform->SetMatrix(this->Matrix);
-      vtkMatrix4x4 *mat4 = this->NormalTransform->GetMatrix();
-      for(int i = 0; i < 3; ++i)
+      vtkMatrix4x4* mat4 = this->NormalTransform->GetMatrix();
+      for (int i = 0; i < 3; ++i)
       {
         for (int j = 0; j < 3; ++j)
         {

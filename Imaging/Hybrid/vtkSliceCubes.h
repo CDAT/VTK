@@ -44,7 +44,7 @@
  *
  * @sa
  * vtkMarchingCubes vtkContourFilter vtkMCubesReader vtkDividingCubes vtkVolumeReader
-*/
+ */
 
 #ifndef vtkSliceCubes_h
 #define vtkSliceCubes_h
@@ -57,12 +57,12 @@ class vtkVolumeReader;
 class VTKIMAGINGHYBRID_EXPORT vtkSliceCubes : public vtkObject
 {
 public:
-  static vtkSliceCubes *New();
-  vtkTypeMacro(vtkSliceCubes,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkSliceCubes* New();
+  vtkTypeMacro(vtkSliceCubes, vtkObject);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // methods to make it look like a filter
-  void Write() {this->Update();};
+  void Write() { this->Update(); }
   void Update();
 
   //@{
@@ -70,7 +70,7 @@ public:
    * Set/get object to read slices.
    */
   virtual void SetReader(vtkVolumeReader*);
-  vtkGetObjectMacro(Reader,vtkVolumeReader);
+  vtkGetObjectMacro(Reader, vtkVolumeReader);
   //@}
 
   //@{
@@ -85,8 +85,8 @@ public:
   /**
    * Set/get isosurface contour value.
    */
-  vtkSetMacro(Value,double);
-  vtkGetMacro(Value,double);
+  vtkSetMacro(Value, double);
+  vtkGetMacro(Value, double);
   //@}
 
   //@{
@@ -100,18 +100,18 @@ public:
 
 protected:
   vtkSliceCubes();
-  ~vtkSliceCubes() VTK_OVERRIDE;
+  ~vtkSliceCubes() override;
 
   void Execute();
 
-  vtkVolumeReader *Reader;
-  char *FileName;
+  vtkVolumeReader* Reader;
+  char* FileName;
   double Value;
-  char *LimitsFileName;
+  char* LimitsFileName;
 
 private:
-  vtkSliceCubes(const vtkSliceCubes&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkSliceCubes&) VTK_DELETE_FUNCTION;
+  vtkSliceCubes(const vtkSliceCubes&) = delete;
+  void operator=(const vtkSliceCubes&) = delete;
 };
 
 #endif

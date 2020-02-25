@@ -26,17 +26,16 @@
  *
  * @sa
  * vtkAngleWidget vtkHandleRepresentation
-*/
+ */
 
 #ifndef vtkAngleRepresentation2D_h
 #define vtkAngleRepresentation2D_h
 
-#include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkAngleRepresentation.h"
+#include "vtkInteractionWidgetsModule.h" // For export macro
 
 class vtkLeaderActor2D;
 class vtkProperty2D;
-
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkAngleRepresentation2D : public vtkAngleRepresentation
 {
@@ -44,20 +43,20 @@ public:
   /**
    * Instantiate class.
    */
-  static vtkAngleRepresentation2D *New();
+  static vtkAngleRepresentation2D* New();
 
   //@{
   /**
    * Standard VTK methods.
    */
-  vtkTypeMacro(vtkAngleRepresentation2D,vtkAngleRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkAngleRepresentation2D, vtkAngleRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
    * Satisfy the superclasses API.
    */
-  double GetAngle() VTK_OVERRIDE;
+  double GetAngle() override;
 
   //@{
   /**
@@ -65,15 +64,15 @@ public:
    * this representation. Note that methods are available for both
    * display and world coordinates.
    */
-  void GetPoint1WorldPosition(double pos[3]) VTK_OVERRIDE;
-  void GetCenterWorldPosition(double pos[3]) VTK_OVERRIDE;
-  void GetPoint2WorldPosition(double pos[3]) VTK_OVERRIDE;
-  void SetPoint1DisplayPosition(double pos[3]) VTK_OVERRIDE;
-  void SetCenterDisplayPosition(double pos[3]) VTK_OVERRIDE;
-  void SetPoint2DisplayPosition(double pos[3]) VTK_OVERRIDE;
-  void GetPoint1DisplayPosition(double pos[3]) VTK_OVERRIDE;
-  void GetCenterDisplayPosition(double pos[3]) VTK_OVERRIDE;
-  void GetPoint2DisplayPosition(double pos[3]) VTK_OVERRIDE;
+  void GetPoint1WorldPosition(double pos[3]) override;
+  void GetCenterWorldPosition(double pos[3]) override;
+  void GetPoint2WorldPosition(double pos[3]) override;
+  void SetPoint1DisplayPosition(double pos[3]) override;
+  void SetCenterDisplayPosition(double pos[3]) override;
+  void SetPoint2DisplayPosition(double pos[3]) override;
+  void GetPoint1DisplayPosition(double pos[3]) override;
+  void GetCenterDisplayPosition(double pos[3]) override;
+  void GetPoint2DisplayPosition(double pos[3]) override;
   //@}
 
   //@{
@@ -82,37 +81,37 @@ public:
    * By obtaining these leaders the user can set the appropriate
    * properties, etc.
    */
-  vtkGetObjectMacro(Ray1,vtkLeaderActor2D);
-  vtkGetObjectMacro(Ray2,vtkLeaderActor2D);
-  vtkGetObjectMacro(Arc,vtkLeaderActor2D);
+  vtkGetObjectMacro(Ray1, vtkLeaderActor2D);
+  vtkGetObjectMacro(Ray2, vtkLeaderActor2D);
+  vtkGetObjectMacro(Arc, vtkLeaderActor2D);
   //@}
 
   /**
    * Method defined by vtkWidgetRepresentation superclass and
    * needed here.
    */
-  void BuildRepresentation() VTK_OVERRIDE;
+  void BuildRepresentation() override;
 
   //@{
   /**
    * Methods required by vtkProp superclass.
    */
-  void ReleaseGraphicsResources(vtkWindow *w) VTK_OVERRIDE;
-  int RenderOverlay(vtkViewport *viewport) VTK_OVERRIDE;
+  void ReleaseGraphicsResources(vtkWindow* w) override;
+  int RenderOverlay(vtkViewport* viewport) override;
   //@}
 
 protected:
   vtkAngleRepresentation2D();
-  ~vtkAngleRepresentation2D() VTK_OVERRIDE;
+  ~vtkAngleRepresentation2D() override;
 
   // The pieces that make up the angle representations
-  vtkLeaderActor2D *Ray1;
-  vtkLeaderActor2D *Ray2;
-  vtkLeaderActor2D *Arc;
+  vtkLeaderActor2D* Ray1;
+  vtkLeaderActor2D* Ray2;
+  vtkLeaderActor2D* Arc;
 
 private:
-  vtkAngleRepresentation2D(const vtkAngleRepresentation2D&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkAngleRepresentation2D&) VTK_DELETE_FUNCTION;
+  vtkAngleRepresentation2D(const vtkAngleRepresentation2D&) = delete;
+  void operator=(const vtkAngleRepresentation2D&) = delete;
 };
 
 #endif

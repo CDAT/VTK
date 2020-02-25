@@ -27,9 +27,9 @@
 #include <vtkRectilinearGrid.h>
 #include <vtkRectilinearGridToTetrahedra.h>
 #include <vtkRegressionTestImage.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
 #include <vtkTesting.h>
 #include <vtkTransform.h>
@@ -53,17 +53,16 @@ vtkSmartPointer<vtkVolume> CubeVolume(double r, double g, double b)
   // Create the RectilinearGrid
   vtkNew<vtkRectilinearGrid> grid;
   grid->SetDimensions(2, 2, 2);
-  grid->SetXCoordinates(xArray.GetPointer());
-  grid->SetYCoordinates(yArray.GetPointer());
-  grid->SetZCoordinates(zArray.GetPointer());
+  grid->SetXCoordinates(xArray);
+  grid->SetYCoordinates(yArray);
+  grid->SetZCoordinates(zArray);
 
   // Obtain an UnstructuredGrid made of tetrahedras
   vtkNew<vtkRectilinearGridToTetrahedra> rectilinearGridToTetrahedra;
-  rectilinearGridToTetrahedra->SetInputData(grid.GetPointer());
+  rectilinearGridToTetrahedra->SetInputData(grid);
   rectilinearGridToTetrahedra->Update();
 
-  vtkSmartPointer<vtkUnstructuredGrid> ugrid
-    = rectilinearGridToTetrahedra->GetOutput();
+  vtkSmartPointer<vtkUnstructuredGrid> ugrid = rectilinearGridToTetrahedra->GetOutput();
 
   // Add scalars to the grid
   vtkNew<vtkDoubleArray> scalars;
@@ -71,7 +70,7 @@ vtkSmartPointer<vtkVolume> CubeVolume(double r, double g, double b)
   {
     scalars->InsertNextValue(0);
   }
-  ugrid->GetPointData()->SetScalars(scalars.GetPointer());
+  ugrid->GetPointData()->SetScalars(scalars);
 
   // Volume Rendering Mapper
   vtkNew<vtkProjectedTetrahedraMapper> mapper;
@@ -80,12 +79,12 @@ vtkSmartPointer<vtkVolume> CubeVolume(double r, double g, double b)
 
   // Create the volume
   vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
-  volume->SetMapper(mapper.GetPointer());
+  volume->SetMapper(mapper);
 
   // Apply a ColorTransferFunction to the volume
   vtkNew<vtkColorTransferFunction> colorTransferFunction;
   colorTransferFunction->AddRGBPoint(0.0, r, g, b);
-  volume->GetProperty()->SetColor(colorTransferFunction.GetPointer());
+  volume->GetProperty()->SetColor(colorTransferFunction);
 
   return volume;
 }
@@ -102,13 +101,12 @@ vtkSmartPointer<vtkActor> ConeActor(double r, double g, double b)
   // Create the actor
   vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
   actor->GetProperty()->SetColor(r, g, b);
-  actor->SetMapper(mapper.GetPointer());
+  actor->SetMapper(mapper);
 
   return actor;
 }
 
-
-int TestProjectedTetrahedraTransform(int argc, char *argv[])
+int TestProjectedTetrahedraTransform(int argc, char* argv[])
 {
   // Create the props
 
@@ -127,17 +125,17 @@ int TestProjectedTetrahedraTransform(int argc, char *argv[])
   // Translate the blue props by (2,2)
   vtkNew<vtkTransform> transform;
   transform->Translate(2, 2, 0);
-  volume2->SetUserTransform(transform.GetPointer());
-  actor2->SetUserTransform(transform.GetPointer());
+  volume2->SetUserTransform(transform);
+  actor2->SetUserTransform(transform);
 
   // Create a renderer, render window, and interactor
   vtkNew<vtkRenderer> renderer;
   vtkNew<vtkRenderWindow> renderWindow;
-  renderWindow->AddRenderer(renderer.GetPointer());
+  renderWindow->AddRenderer(renderer);
   renderWindow->SetSize(300, 300);
 
   vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
-  renderWindowInteractor->SetRenderWindow(renderWindow.GetPointer());
+  renderWindowInteractor->SetRenderWindow(renderWindow);
 
   // Add the props to the scene
   renderer->AddVolume(volume1);
@@ -152,7 +150,7 @@ int TestProjectedTetrahedraTransform(int argc, char *argv[])
   renderer->ResetCamera();
   renderWindow->Render();
 
-  int retVal = vtkTesting::Test(argc, argv, renderWindow.GetPointer(), 20);
+  int retVal = vtkTesting::Test(argc, argv, renderWindow, 20);
   if (retVal == vtkRegressionTester::DO_INTERACTOR)
   {
     renderWindowInteractor->Start();

@@ -28,20 +28,20 @@ vtkReebGraphSimplificationMetric::vtkReebGraphSimplificationMetric()
 }
 
 //----------------------------------------------------------------------------
-vtkReebGraphSimplificationMetric::~vtkReebGraphSimplificationMetric()
-{
-}
+vtkReebGraphSimplificationMetric::~vtkReebGraphSimplificationMetric() = default;
 
 //----------------------------------------------------------------------------
 void vtkReebGraphSimplificationMetric::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
   os << indent << "Upper Bound: " << this->UpperBound << "\n";
   os << indent << "Lower Bound: " << this->LowerBound << "\n";
 }
 
 //----------------------------------------------------------------------------
-double vtkReebGraphSimplificationMetric::ComputeMetric(vtkDataSet* vtkNotUsed(mesh), vtkDataArray* vtkNotUsed(scalarField), vtkIdType vtkNotUsed(startCriticalPoint), vtkAbstractArray* vtkNotUsed(vertexList), vtkIdType vtkNotUsed(endCriticalPoint))
+double vtkReebGraphSimplificationMetric::ComputeMetric(vtkDataSet* vtkNotUsed(mesh),
+  vtkDataArray* vtkNotUsed(scalarField), vtkIdType vtkNotUsed(startCriticalPoint),
+  vtkAbstractArray* vtkNotUsed(vertexList), vtkIdType vtkNotUsed(endCriticalPoint))
 {
   printf("too bad, wrong code\n");
   return 0;

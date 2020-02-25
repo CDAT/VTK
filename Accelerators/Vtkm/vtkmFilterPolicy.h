@@ -16,10 +16,13 @@
 
 #ifndef vtkmFilterPolicy_h
 #define vtkmFilterPolicy_h
+#ifndef __VTK_WRAP__
+#ifndef VTK_WRAPPING_CXX
 
 #include "vtkmConfig.h" //required for general vtkm setup
-#include "vtkmTags.h"
 
+#include <vtkm/List.h>
+#include <vtkm/cont/ArrayHandleCast.h>
 #include <vtkm/cont/ArrayHandlePermutation.h>
 #include <vtkm/cont/CellSetExplicit.h>
 #include <vtkm/cont/CellSetPermutation.h>
@@ -27,234 +30,120 @@
 #include <vtkm/cont/CellSetStructured.h>
 #include <vtkm/filter/PolicyDefault.h>
 
-// Forward declaration of types.
-namespace vtkm
-{
-namespace cont
-{
-class vtkmCellSetExplicitAOS;
-class vtkmCellSetSingleType;
-}
-}
-
 namespace tovtkm
 {
 
 //------------------------------------------------------------------------------
-struct SpecialGradientOutTypes
-    : vtkm::ListTagBase<
-                        vtkm::Vec< vtkm::Vec<vtkm::Float32,3>, 3>,
-                        vtkm::Vec< vtkm::Vec<vtkm::Float64,3>, 3>
-                        >
-{
-};
+// All scalar types in vtkType.h
+using VTKScalarTypes = vtkm::List< //
+  char,                            //
+  signed char,                     //
+  unsigned char,                   //
+  short,                           //
+  unsigned short,                  //
+  int,                             //
+  unsigned int,                    //
+  long,                            //
+  unsigned long,                   //
+  long long,                       //
+  unsigned long long,              //
+  float,                           //
+  double                           //
+  >;
 
-struct FieldTypeInVTK
-    : vtkm::ListTagJoin<
-        vtkm::TypeListTagVecCommon,
-        vtkm::TypeListTagScalarAll>
-{
-};
+using SpecialGradientOutTypes =
+  vtkm::List<vtkm::Vec<vtkm::Vec<vtkm::Float32, 3>, 3>, vtkm::Vec<vtkm::Vec<vtkm::Float64, 3>, 3> >;
 
-struct FieldTypeOutVTK
-    : vtkm::ListTagJoin<
-        vtkm::ListTagJoin<
-          vtkm::TypeListTagVecCommon,
-          SpecialGradientOutTypes
-          >,
-        vtkm::TypeListTagScalarAll
-      >
-{
-};
+using FieldTypeInVTK = vtkm::ListAppend<vtkm::TypeListVecCommon, VTKScalarTypes>;
 
-//------------------------------------------------------------------------------
-struct ArrayListInVTK : vtkm::ListTagBase<
-#if defined(VTKM_FILTER_INCLUDE_AOS)
-                                          tovtkm::vtkAOSArrayContainerTag
-#endif
-#if defined(VTKM_FILTER_INCLUDE_SOA)
-                                          ,tovtkm::vtkSOAArrayContainerTag
-#endif
-                                          >
-{
-};
-
-// Currently vtk-m doesn't offer an easy way to auto generate all these
-// permutation
-// tag types that are needed to handle the output of the Threshold algorithm
-struct TypeListTagPermutationVecCommon
-    : vtkm::ListTagBase<
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::UInt8, 2>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Int32, 2>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Int64, 2>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Float32, 2>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Float64, 2>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::UInt8, 3>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Int32, 3>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Int64, 3>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Float32, 3>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Float64, 3>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::UInt8, 4>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Int32, 4>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Int64, 4>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Float32, 4>>,
-          vtkm::cont::internal::StorageTagPermutation<
-              vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Vec<vtkm::Float64, 4>>>
-{
-};
-
-struct TypeListTagPermutationScalarAll
-    : vtkm::ListTagBase<vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Int8>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::UInt8>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Int16>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::UInt16>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Int32>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::UInt32>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Int64>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::UInt64>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Float32>,
-                        vtkm::cont::internal::StorageTagPermutation<
-                            vtkm::cont::ArrayHandle<vtkm::Id>, vtkm::Float64>>
-{
-};
-
-struct TypeListTagPermutationVTK
-    : vtkm::ListTagJoin<tovtkm::TypeListTagPermutationVecCommon,
-                        tovtkm::TypeListTagPermutationScalarAll>
-{
-};
-
-struct TypeListTagVTMOut : vtkm::ListTagBase<vtkm::cont::StorageTagBasic
-#if defined(VTKM_FILTER_INCLUDE_AOS)
-                                          ,tovtkm::vtkAOSArrayContainerTag
-#endif
-#if defined(VTKM_FILTER_INCLUDE_SOA)
-                                          ,tovtkm::vtkSOAArrayContainerTag
-#endif
-                                          >
-{
-};
-
-struct ArrayListOutVTK
-    : vtkm::ListTagJoin<TypeListTagVTMOut, TypeListTagPermutationVTK>
-{
-};
+using FieldTypeOutVTK =
+  vtkm::ListAppend<vtkm::TypeListVecCommon, SpecialGradientOutTypes, VTKScalarTypes>;
 
 //------------------------------------------------------------------------------
-struct PointListInVTK
-    : vtkm::ListTagBase<
-          vtkm::cont::ArrayHandleUniformPointCoordinates::StorageTag,
-          tovtkm::vtkAOSArrayContainerTag
-#if defined(VTKM_FILTER_INCLUDE_SOA)
-          ,
-          tovtkm::vtkSOAArrayContainerTag
-#endif
-          >
-{
-};
-struct PointListOutVTK
-    : vtkm::ListTagBase<
-          vtkm::cont::ArrayHandleUniformPointCoordinates::StorageTag,
-          vtkm::cont::StorageTagBasic,
-          tovtkm::vtkAOSArrayContainerTag>
-{
-};
+using CellListStructuredInVTK =
+  vtkm::List<vtkm::cont::CellSetStructured<3>, vtkm::cont::CellSetStructured<2> >;
+using CellListStructuredOutVTK =
+  vtkm::List<vtkm::cont::CellSetPermutation<vtkm::cont::CellSetStructured<3> >,
+    vtkm::cont::CellSetPermutation<vtkm::cont::CellSetStructured<2> > >;
+
+// vtkCellArray may use either 32 or 64 bit arrays to hold connectivity/offset
+// data, so we may be using ArrayHandleCast to convert to vtkm::Ids.
+#ifdef VTKM_USE_64BIT_IDS
+using Int32AOSHandle = vtkm::cont::ArrayHandle<vtkTypeInt32>;
+using Int32AsIdAOSHandle = vtkm::cont::ArrayHandleCast<vtkm::Id, Int32AOSHandle>;
+using Int32AsIdAOSStorage = typename Int32AsIdAOSHandle::StorageTag;
+
+using CellSetExplicit32Bit = vtkm::cont::CellSetExplicit<vtkm::cont::StorageTagBasic,
+  Int32AsIdAOSStorage, Int32AsIdAOSStorage>;
+using CellSetExplicit64Bit = vtkm::cont::CellSetExplicit<vtkm::cont::StorageTagBasic,
+  vtkm::cont::StorageTagBasic, vtkm::cont::StorageTagBasic>;
+using CellSetSingleType32Bit = vtkm::cont::CellSetSingleType<Int32AsIdAOSStorage>;
+using CellSetSingleType64Bit = vtkm::cont::CellSetSingleType<vtkm::cont::StorageTagBasic>;
+#else  // VTKM_USE_64BIT_IDS
+using Int64AOSHandle = vtkm::cont::ArrayHandle<vtkTypeInt64, vtkm::cont::StorageTagBasic>;
+using Int64AsIdAOSHandle = vtkm::cont::ArrayHandleCast<vtkm::Id, Int64AOSHandle>;
+using Int64AsIdAOSStorage = typename Int64AsIdAOSHandle::StorageTag;
+
+using CellSetExplicit32Bit = vtkm::cont::CellSetExplicit<vtkm::cont::StorageTagBasic,
+  vtkm::cont::StorageTagBasic, vtkm::cont::StorageTagBasic>;
+using CellSetExplicit64Bit = vtkm::cont::CellSetExplicit<vtkm::cont::StorageTagBasic,
+  Int64AsIdAOSStorage, Int64AsIdAOSStorage>;
+using CellSetSingleType32Bit = vtkm::cont::CellSetSingleType<vtkm::cont::StorageTagBasic>;
+using CellSetSingleType64Bit = vtkm::cont::CellSetSingleType<Int64AsIdAOSStorage>;
+#endif // VTKM_USE_64BIT_IDS
 
 //------------------------------------------------------------------------------
-struct CellListStructuredInVTK
-    : vtkm::ListTagBase<vtkm::cont::CellSetStructured<3>>
-{
-};
-struct CellListStructuredOutVTK
-    : vtkm::ListTagBase<
-          vtkm::cont::CellSetPermutation<vtkm::cont::CellSetStructured<3>>>
-{
-};
+using CellListUnstructuredInVTK = vtkm::List< //
+  CellSetExplicit32Bit,                       //
+  CellSetExplicit64Bit,                       //
+  CellSetSingleType32Bit,                     //
+  CellSetSingleType64Bit                      //
+  >;
+
+using CellListUnstructuredOutVTK = vtkm::List<                     //
+  vtkm::cont::CellSetExplicit<>,                                   //
+  vtkm::cont::CellSetSingleType<>,                                 //
+  CellSetExplicit32Bit,                                            //
+  CellSetExplicit64Bit,                                            //
+  CellSetSingleType32Bit,                                          //
+  CellSetSingleType64Bit,                                          //
+  vtkm::cont::CellSetPermutation<CellSetExplicit32Bit>,            //
+  vtkm::cont::CellSetPermutation<CellSetExplicit64Bit>,            //
+  vtkm::cont::CellSetPermutation<CellSetSingleType32Bit>,          //
+  vtkm::cont::CellSetPermutation<CellSetSingleType64Bit>,          //
+  vtkm::cont::CellSetPermutation<vtkm::cont::CellSetExplicit<> >,  //
+  vtkm::cont::CellSetPermutation<vtkm::cont::CellSetSingleType<> > //
+  >;
 
 //------------------------------------------------------------------------------
-struct CellListUnstructuredInVTK
-    : vtkm::ListTagBase<vtkm::cont::vtkmCellSetExplicitAOS,
-                        vtkm::cont::vtkmCellSetSingleType>
-{
-};
-struct CellListUnstructuredOutVTK
-    : vtkm::ListTagBase<
-          vtkm::cont::CellSetExplicit<>, vtkm::cont::CellSetSingleType<>,
-          vtkm::cont::vtkmCellSetExplicitAOS, vtkm::cont::vtkmCellSetSingleType,
-          vtkm::cont::CellSetPermutation<vtkm::cont::vtkmCellSetExplicitAOS>,
-          vtkm::cont::CellSetPermutation<vtkm::cont::vtkmCellSetSingleType>>
-{
-};
+using CellListAllInVTK = vtkm::ListAppend<CellListStructuredInVTK, CellListUnstructuredInVTK>;
+using CellListAllOutVTK = vtkm::ListAppend<CellListStructuredOutVTK, CellListUnstructuredOutVTK>;
+
+} // end namespace tovtkm
 
 //------------------------------------------------------------------------------
-struct CellListAllInVTK
-    : vtkm::ListTagJoin<CellListStructuredInVTK, CellListUnstructuredInVTK>
-{
-};
-struct CellListAllOutVTK
-    : vtkm::ListTagJoin<CellListStructuredOutVTK, CellListUnstructuredOutVTK>
-{
-};
-}
-
-//------------------------------------------------------------------------------
-class vtkmInputFilterPolicy
-    : public vtkm::filter::PolicyBase<vtkmInputFilterPolicy>
+class vtkmInputFilterPolicy : public vtkm::filter::PolicyBase<vtkmInputFilterPolicy>
 {
 public:
-  typedef tovtkm::FieldTypeInVTK FieldTypeList;
-  typedef tovtkm::ArrayListInVTK FieldStorageList;
+  using FieldTypeList = tovtkm::FieldTypeInVTK;
 
-  typedef tovtkm::CellListStructuredInVTK StructuredCellSetList;
-  typedef tovtkm::CellListUnstructuredInVTK UnstructuredCellSetList;
-  typedef tovtkm::CellListAllInVTK AllCellSetList;
-
-  typedef vtkm::TypeListTagFieldVec3 CoordinateTypeList;
-  typedef tovtkm::PointListInVTK CoordinateStorageList;
-
-  typedef vtkm::filter::PolicyDefault::DeviceAdapterList DeviceAdapterList;
+  using StructuredCellSetList = tovtkm::CellListStructuredInVTK;
+  using UnstructuredCellSetList = tovtkm::CellListUnstructuredInVTK;
+  using AllCellSetList = tovtkm::CellListAllInVTK;
 };
 
 //------------------------------------------------------------------------------
-class vtkmOutputFilterPolicy
-    : public vtkm::filter::PolicyBase<vtkmOutputFilterPolicy>
+class vtkmOutputFilterPolicy : public vtkm::filter::PolicyBase<vtkmOutputFilterPolicy>
 {
 public:
-  typedef tovtkm::FieldTypeOutVTK FieldTypeList;
-  typedef tovtkm::ArrayListOutVTK FieldStorageList;
+  using FieldTypeList = tovtkm::FieldTypeOutVTK;
 
-  typedef tovtkm::CellListStructuredOutVTK StructuredCellSetList;
-  typedef tovtkm::CellListUnstructuredOutVTK UnstructuredCellSetList;
-  typedef tovtkm::CellListAllOutVTK AllCellSetList;
-
-  typedef vtkm::TypeListTagFieldVec3 CoordinateTypeList;
-  typedef tovtkm::PointListOutVTK CoordinateStorageList;
-
-  typedef vtkm::filter::PolicyDefault::DeviceAdapterList DeviceAdapterList;
+  using StructuredCellSetList = tovtkm::CellListStructuredOutVTK;
+  using UnstructuredCellSetList = tovtkm::CellListUnstructuredOutVTK;
+  using AllCellSetList = tovtkm::CellListAllOutVTK;
 };
 
+#endif
+#endif
 #endif
 // VTK-HeaderTest-Exclude: vtkmFilterPolicy.h

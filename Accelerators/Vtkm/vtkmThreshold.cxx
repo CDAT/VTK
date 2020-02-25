@@ -26,97 +26,63 @@
 
 #include "vtkmlib/ArrayConverters.h"
 #include "vtkmlib/DataSetConverters.h"
-#include "vtkmlib/Storage.h"
 #include "vtkmlib/UnstructuredGridConverter.h"
 
-#include "vtkmCellSetExplicit.h"
-#include "vtkmCellSetSingleType.h"
 #include "vtkmFilterPolicy.h"
 
 #include <vtkm/filter/Threshold.h>
+#include <vtkm/filter/Threshold.hxx>
 
-vtkStandardNewMacro(vtkmThreshold)
-
-//------------------------------------------------------------------------------
-vtkmThreshold::vtkmThreshold()
-{
-}
+vtkStandardNewMacro(vtkmThreshold);
 
 //------------------------------------------------------------------------------
-vtkmThreshold::~vtkmThreshold()
-{
-}
+vtkmThreshold::vtkmThreshold() {}
 
 //------------------------------------------------------------------------------
-int vtkmThreshold::RequestData(vtkInformation* request,
-                               vtkInformationVector** inputVector,
-                               vtkInformationVector* outputVector)
+vtkmThreshold::~vtkmThreshold() {}
+
+//------------------------------------------------------------------------------
+int vtkmThreshold::RequestData(
+  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  vtkDataSet* input =
-      vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkDataSet* input = vtkDataSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  vtkUnstructuredGrid* output = vtkUnstructuredGrid::SafeDownCast(
-      outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkUnstructuredGrid* output =
+    vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  vtkm::filter::Threshold filter;
-
-  // set local variables
-  filter.SetLowerThreshold(this->GetLowerThreshold());
-  filter.SetUpperThreshold(this->GetUpperThreshold());
-
-  // convert the input dataset to a vtkm::cont::DataSet
-  vtkm::cont::DataSet in = tovtkm::Convert(input,
-                                           tovtkm::FieldsFlag::PointsAndCells);
-
-  // we need to map the given property to the data set
-  int association = this->GetInputArrayAssociation(0, inputVector);
   vtkDataArray* inputArray = this->GetInputArrayToProcess(0, inputVector);
-  vtkm::cont::Field field = tovtkm::Convert(inputArray, association);
-
-  const bool dataSetValid =
-      in.GetNumberOfCoordinateSystems() > 0 && in.GetNumberOfCellSets() > 0;
-  const bool fieldValid =
-      (field.GetAssociation() != vtkm::cont::Field::ASSOC_ANY);
-
-  vtkm::filter::ResultDataSet result;
-  bool convertedDataSet = false;
-  if (dataSetValid && fieldValid)
+  if (inputArray == nullptr || inputArray->GetName() == nullptr || inputArray->GetName()[0] == '\0')
   {
-    vtkmInputFilterPolicy policy;
-    result = filter.Execute(in, field, policy);
-
-    // convert other scalar arrays
-    if (result.IsValid())
-    {
-      vtkm::Id numFields = static_cast<vtkm::Id>(in.GetNumberOfFields());
-      for (vtkm::Id fieldIdx = 0; fieldIdx < numFields; ++fieldIdx)
-      {
-        const vtkm::cont::Field &field = in.GetField(fieldIdx);
-        try
-        {
-          filter.MapFieldOntoOutput(result, field, policy);
-        }
-        catch (vtkm::cont::Error &e)
-        {
-          vtkWarningMacro(<< "Unable to use VTKm to convert field( "
-                          << field.GetName() << " ) to the Threshold"
-                          << " output: " << e.what());
-        }
-      }
-
-      // now we are done the algorithm and conversion of arrays so
-      // convert back the dataset to VTK
-      convertedDataSet = fromvtkm::Convert(result.GetDataSet(), output, input);
-    }
+    vtkErrorMacro("Invalid input array.");
+    return 0;
   }
 
-  if (!result.IsValid() || !convertedDataSet)
+  try
   {
-    vtkWarningMacro(<< "Could not use VTKm to generate threshold. "
-                    << "Falling back to serial implementation.");
+    // convert the input dataset to a vtkm::cont::DataSet
+    auto in = tovtkm::Convert(input, tovtkm::FieldsFlag::PointsAndCells);
 
+    vtkmInputFilterPolicy policy;
+    vtkm::filter::Threshold filter;
+    filter.SetActiveField(inputArray->GetName());
+    filter.SetLowerThreshold(this->GetLowerThreshold());
+    filter.SetUpperThreshold(this->GetUpperThreshold());
+    auto result = filter.Execute(in, policy);
+
+    // now we are done the algorithm and conversion of arrays so
+    // convert back the dataset to VTK
+    if (!fromvtkm::Convert(result, output, input))
+    {
+      vtkErrorMacro(<< "Unable to convert VTKm DataSet back to VTK");
+      return 0;
+    }
+  }
+  catch (const vtkm::cont::Error& e)
+  {
+    vtkWarningMacro(<< "VTK-m error: " << e.GetMessage()
+                    << "Falling back to serial implementation");
     return this->Superclass::RequestData(request, inputVector, outputVector);
   }
 

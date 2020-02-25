@@ -26,7 +26,7 @@
  *
  * This class is used for creating groups of processes.  A vtkProcessGroup is
  * initialized by passing the controller or communicator on which the group is
- * based off of.  You can then use the group to subset and reorder the the
+ * based off of.  You can then use the group to subset and reorder the
  * processes.  Eventually, you can pass the group object to the
  * CreateSubController method of vtkMultiProcessController to create a
  * controller for the defined group of processes.  You must use the same
@@ -40,13 +40,13 @@
  * This class was originally written by Kenneth Moreland (kmorel@sandia.gov)
  * from Sandia National Laboratories.
  *
-*/
+ */
 
 #ifndef vtkProcessGroup_h
 #define vtkProcessGroup_h
 
-#include "vtkParallelCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkParallelCoreModule.h" // For export macro
 
 class vtkMultiProcessController;
 class vtkCommunicator;
@@ -55,8 +55,8 @@ class VTKPARALLELCORE_EXPORT vtkProcessGroup : public vtkObject
 {
 public:
   vtkTypeMacro(vtkProcessGroup, vtkObject);
-  static vtkProcessGroup *New();
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  static vtkProcessGroup* New();
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -64,8 +64,8 @@ public:
    * will be set to contain all of the processes in the controller/communicator
    * in the same order.
    */
-  void Initialize(vtkMultiProcessController *controller);
-  void Initialize(vtkCommunicator *communicator);
+  void Initialize(vtkMultiProcessController* controller);
+  void Initialize(vtkCommunicator* communicator);
   //@}
 
   //@{
@@ -82,7 +82,7 @@ public:
    * Note that this can lead to an invalid group if there are values in the
    * group that are not valid in the new communicator.
    */
-  void SetCommunicator(vtkCommunicator *communicator);
+  void SetCommunicator(vtkCommunicator* communicator);
 
   //@{
   /**
@@ -135,20 +135,20 @@ public:
   /**
    * Copies the given group's communicator and process ids.
    */
-  void Copy(vtkProcessGroup *group);
+  void Copy(vtkProcessGroup* group);
 
 protected:
   vtkProcessGroup();
-  ~vtkProcessGroup() VTK_OVERRIDE;
+  ~vtkProcessGroup() override;
 
-  int *ProcessIds;
+  int* ProcessIds;
   int NumberOfProcessIds;
 
-  vtkCommunicator *Communicator;
+  vtkCommunicator* Communicator;
 
 private:
-  vtkProcessGroup(const vtkProcessGroup &) VTK_DELETE_FUNCTION;
-  void operator=(const vtkProcessGroup &) VTK_DELETE_FUNCTION;
+  vtkProcessGroup(const vtkProcessGroup&) = delete;
+  void operator=(const vtkProcessGroup&) = delete;
 };
 
-#endif //vtkProcessGroup_h
+#endif // vtkProcessGroup_h

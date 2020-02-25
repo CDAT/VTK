@@ -13,10 +13,10 @@
 
 =========================================================================*/
 
-#include "vtkPruneTreeFilter.h"
 #include "vtkMutableDirectedGraph.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
+#include "vtkPruneTreeFilter.h"
 #include "vtkTree.h"
 
 //----------------------------------------------------------------------------
@@ -33,12 +33,12 @@ int TestPruneTreeFilter(int, char*[])
   graph->AddChild(a);
 
   vtkNew<vtkTree> tree;
-  tree->ShallowCopy(graph.GetPointer());
+  tree->ShallowCopy(graph);
 
   vtkNew<vtkPruneTreeFilter> filter;
-  filter->SetInputData(tree.GetPointer());
+  filter->SetInputData(tree);
   filter->SetParentVertex(internalTwo);
-  vtkTree *prunedTree = filter->GetOutput();
+  vtkTree* prunedTree = filter->GetOutput();
   filter->Update();
 
   if (prunedTree->GetNumberOfVertices() == 3)

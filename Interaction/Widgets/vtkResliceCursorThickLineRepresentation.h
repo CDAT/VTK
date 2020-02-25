@@ -24,7 +24,7 @@
  * the dataset.
  * @sa
  * vtkImageSlabReslice vtkResliceCursorLineRepresentation vtkResliceCursorWidget
-*/
+ */
 
 #ifndef vtkResliceCursorThickLineRepresentation_h
 #define vtkResliceCursorThickLineRepresentation_h
@@ -32,20 +32,21 @@
 #include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkResliceCursorLineRepresentation.h"
 
-class VTKINTERACTIONWIDGETS_EXPORT vtkResliceCursorThickLineRepresentation : public vtkResliceCursorLineRepresentation
+class VTKINTERACTIONWIDGETS_EXPORT vtkResliceCursorThickLineRepresentation
+  : public vtkResliceCursorLineRepresentation
 {
 public:
   /**
    * Instantiate the class.
    */
-  static vtkResliceCursorThickLineRepresentation *New();
+  static vtkResliceCursorThickLineRepresentation* New();
 
   //@{
   /**
    * Standard VTK methods.
    */
-  vtkTypeMacro(vtkResliceCursorThickLineRepresentation,vtkResliceCursorLineRepresentation);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkResliceCursorThickLineRepresentation, vtkResliceCursorLineRepresentation);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
   /**
@@ -54,7 +55,7 @@ public:
    * implementation and creates a vtkImageSlabReslice instead of a
    * vtkImageReslice.
    */
-  void CreateDefaultResliceAlgorithm() VTK_OVERRIDE;
+  void CreateDefaultResliceAlgorithm() override;
 
   /**
    * INTERNAL - Do not use
@@ -62,16 +63,15 @@ public:
    * user interactions.
    */
   void SetResliceParameters(
-      double outputSpacingX, double outputSpacingY,
-      int extentX, int extentY ) VTK_OVERRIDE;
+    double outputSpacingX, double outputSpacingY, int extentX, int extentY) override;
 
 protected:
   vtkResliceCursorThickLineRepresentation();
-  ~vtkResliceCursorThickLineRepresentation() VTK_OVERRIDE;
+  ~vtkResliceCursorThickLineRepresentation() override;
 
 private:
-  vtkResliceCursorThickLineRepresentation(const vtkResliceCursorThickLineRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkResliceCursorThickLineRepresentation&) VTK_DELETE_FUNCTION;
+  vtkResliceCursorThickLineRepresentation(const vtkResliceCursorThickLineRepresentation&) = delete;
+  void operator=(const vtkResliceCursorThickLineRepresentation&) = delete;
 };
 
 #endif

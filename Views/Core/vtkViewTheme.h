@@ -28,13 +28,13 @@
  * NOTICE: This class will be deprecated in favor of a more robust
  * solution based on style sheets.  Do not become overly-dependent on the
  * functionality of themes.
-*/
+ */
 
 #ifndef vtkViewTheme_h
 #define vtkViewTheme_h
 
-#include "vtkViewsCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkViewsCoreModule.h" // For export macro
 
 class vtkScalarsToColors;
 class vtkTextProperty;
@@ -44,7 +44,7 @@ class VTKVIEWSCORE_EXPORT vtkViewTheme : public vtkObject
 public:
   static vtkViewTheme* New();
   vtkTypeMacro(vtkViewTheme, vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
   /**
@@ -226,7 +226,7 @@ public:
 
   //@{
   /**
-   * The text property to use for labelling points/vertices.
+   * The text property to use for labeling points/vertices.
    */
   virtual void SetPointTextProperty(vtkTextProperty* tprop);
   vtkGetObjectMacro(PointTextProperty, vtkTextProperty);
@@ -234,7 +234,7 @@ public:
 
   //@{
   /**
-   * The text property to use for labelling edges/cells.
+   * The text property to use for labeling edges/cells.
    */
   virtual void SetCellTextProperty(vtkTextProperty* tprop);
   vtkGetObjectMacro(CellTextProperty, vtkTextProperty);
@@ -242,32 +242,44 @@ public:
 
   //@{
   /**
-   * The color to use for labelling graph vertices.
+   * The color to use for labeling graph vertices.
    * This is deprecated. Use GetPointTextProperty()->SetColor() instead.
    */
   virtual void SetVertexLabelColor(double r, double g, double b);
-  virtual void SetVertexLabelColor(double c[3])
-    { this->SetVertexLabelColor(c[0], c[1], c[2]); }
-  virtual double *GetVertexLabelColor();
-  virtual void GetVertexLabelColor(double &r, double &g, double &b)
-    { double* c = this->GetVertexLabelColor(); if (c) { r = c[0]; g = c[1]; b = c[2]; } }
-  virtual void GetVertexLabelColor(double c[3])
-    { this->GetVertexLabelColor(c[0], c[1], c[2]); }
+  virtual void SetVertexLabelColor(double c[3]) { this->SetVertexLabelColor(c[0], c[1], c[2]); }
+  virtual double* GetVertexLabelColor();
+  virtual void GetVertexLabelColor(double& r, double& g, double& b)
+  {
+    double* c = this->GetVertexLabelColor();
+    if (c)
+    {
+      r = c[0];
+      g = c[1];
+      b = c[2];
+    }
+  }
+  virtual void GetVertexLabelColor(double c[3]) { this->GetVertexLabelColor(c[0], c[1], c[2]); }
   //@}
 
   //@{
   /**
-   * The color to use for labelling graph edges.
+   * The color to use for labeling graph edges.
    * This is deprecated. Use GetCellTextProperty()->SetColor() instead.
    */
   virtual void SetEdgeLabelColor(double r, double g, double b);
-  virtual void SetEdgeLabelColor(double c[3])
-    { this->SetEdgeLabelColor(c[0], c[1], c[2]); }
-  virtual double *GetEdgeLabelColor();
-  virtual void GetEdgeLabelColor(double &r, double &g, double &b)
-    { double* c = this->GetEdgeLabelColor(); if (c) { r = c[0]; g = c[1]; b = c[2]; } }
-  virtual void GetEdgeLabelColor(double c[3])
-    { this->GetEdgeLabelColor(c[0], c[1], c[2]); }
+  virtual void SetEdgeLabelColor(double c[3]) { this->SetEdgeLabelColor(c[0], c[1], c[2]); }
+  virtual double* GetEdgeLabelColor();
+  virtual void GetEdgeLabelColor(double& r, double& g, double& b)
+  {
+    double* c = this->GetEdgeLabelColor();
+    if (c)
+    {
+      r = c[0];
+      g = c[1];
+      b = c[2];
+    }
+  }
+  virtual void GetEdgeLabelColor(double c[3]) { this->GetEdgeLabelColor(c[0], c[1], c[2]); }
   //@}
 
   //@{
@@ -292,7 +304,7 @@ public:
 
 protected:
   vtkViewTheme();
-  ~vtkViewTheme() VTK_OVERRIDE;
+  ~vtkViewTheme() override;
 
   double PointSize;
   double LineWidth;
@@ -323,9 +335,8 @@ protected:
   vtkTextProperty* CellTextProperty;
 
 private:
-  vtkViewTheme(const vtkViewTheme&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkViewTheme&) VTK_DELETE_FUNCTION;
+  vtkViewTheme(const vtkViewTheme&) = delete;
+  void operator=(const vtkViewTheme&) = delete;
 };
 
 #endif
-

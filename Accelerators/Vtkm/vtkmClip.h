@@ -27,61 +27,66 @@
 
 #include "vtkAcceleratorsVTKmModule.h" // For export macro
 #include "vtkUnstructuredGridAlgorithm.h"
-#include "vtkmlib/ImplicitFunctionConverter.h" // For ImplicitFunctionConverter
 
-#include <memory> // For std::shared_ptr
+#include <memory> // For std::unique_ptr
 
 class vtkImplicitFunction;
+
+namespace tovtkm
+{
+
+class ImplicitFunctionConverter;
+
+} // namespace tovtkm
 
 class VTKACCELERATORSVTKM_EXPORT vtkmClip : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkmClip* New();
-  vtkTypeMacro(vtkmClip, vtkUnstructuredGridAlgorithm)
-  void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+  vtkTypeMacro(vtkmClip, vtkUnstructuredGridAlgorithm);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * The scalar value to use when clipping the dataset. Values greater than
    * ClipValue are preserved in the output dataset. Default is 0.
    */
-  vtkGetMacro(ClipValue, double)
-  vtkSetMacro(ClipValue, double)
+  vtkGetMacro(ClipValue, double);
+  vtkSetMacro(ClipValue, double);
 
   /**
    * If true, all input point data arrays will be mapped onto the output
    * dataset. Default is true.
    */
-  vtkGetMacro(ComputeScalars, bool)
-  vtkSetMacro(ComputeScalars, bool)
+  vtkGetMacro(ComputeScalars, bool);
+  vtkSetMacro(ComputeScalars, bool);
 
   /**
    * Set the implicit function with which to perform the clipping. If set,
    * \c ClipValue is ignored and the clipping is performed using the implicit
    * function.
    */
-  void SetClipFunction(vtkImplicitFunction *);
+  void SetClipFunction(vtkImplicitFunction*);
   vtkGetObjectMacro(ClipFunction, vtkImplicitFunction);
 
-  vtkMTimeType GetMTime() VTK_OVERRIDE;
+  vtkMTimeType GetMTime() override;
 
 protected:
   vtkmClip();
-  ~vtkmClip();
+  ~vtkmClip() override;
 
-  int RequestData(vtkInformation*, vtkInformationVector**,
-                  vtkInformationVector*) VTK_OVERRIDE;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int FillInputPortInformation(int port, vtkInformation* info) VTK_OVERRIDE;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   double ClipValue;
   bool ComputeScalars;
 
-  vtkImplicitFunction *ClipFunction;
-  tovtkm::ImplicitFunctionConverter ClipFunctionConverter;
+  vtkImplicitFunction* ClipFunction;
+  std::unique_ptr<tovtkm::ImplicitFunctionConverter> ClipFunctionConverter;
 
 private:
-  vtkmClip(const vtkmClip&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkmClip&) VTK_DELETE_FUNCTION;
+  vtkmClip(const vtkmClip&) = delete;
+  void operator=(const vtkmClip&) = delete;
 };
 
 #endif // vtkmClip_h
