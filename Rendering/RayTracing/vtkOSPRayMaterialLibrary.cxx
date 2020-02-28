@@ -49,7 +49,7 @@ const std::map<std::string, std::map<std::string, std::string> > Aliases = {
   { "Glass",
     { { "etaInside", "eta" }, { "etaOutside", "eta" },
       { "attenuationColorOutside", "attenuationColor" } } },
-  { "Principled", {} }, { "CarPaint", {} }, { "Metal", {} }, { "Alloy", {} }
+  { "Principled", {} }, { "CarPaint", {} }, { "Metal", {} }, { "Alloy", {} }, { "Luminous", {} }
 };
 
 std::string FindRealName(const std::string& materialType, const std::string& alias)
@@ -489,7 +489,7 @@ bool vtkOSPRayMaterialLibrary::InternalParseMTL(
       {
         std::string vs = tstr.substr(key.size());
         size_t loc1 = vs.find(" ");
-        size_t loc2 = vs.find(" ", loc1);
+        size_t loc2 = vs.find(" ", loc1 + 1);
         std::string v1 = vs.substr(0, loc1);
         std::string v2 = vs.substr(loc1 + 1, loc2);
         std::string v3 = vs.substr(loc2 + 1);
@@ -500,8 +500,8 @@ bool vtkOSPRayMaterialLibrary::InternalParseMTL(
         try
         {
           d1 = std::stod(v1);
-          d2 = std::stod(v1);
-          d3 = std::stod(v1);
+          d2 = std::stod(v2);
+          d3 = std::stod(v3);
           OK = true;
         }
         catch (const std::invalid_argument&)
@@ -1106,6 +1106,12 @@ vtkOSPRayMaterialLibrary::GetParametersDictionary()
         { "map_baseColor.rotation", vtkOSPRayMaterialLibrary::ParameterType::FLOAT },
         { "map_baseColor.scale", vtkOSPRayMaterialLibrary::ParameterType::VEC2 },
         { "map_baseColor.translation", vtkOSPRayMaterialLibrary::ParameterType::VEC2 },
+      } },
+    { "Luminous",
+      {
+        { "color", vtkOSPRayMaterialLibrary::ParameterType::COLOR_RGB },
+        { "intensity", vtkOSPRayMaterialLibrary::ParameterType::NORMALIZED_FLOAT },
+        { "transparency", vtkOSPRayMaterialLibrary::ParameterType::NORMALIZED_FLOAT },
       } },
   };
   return dic;

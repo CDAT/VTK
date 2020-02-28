@@ -25,10 +25,13 @@
 #define vtkDIYKdTreeUtilities_h
 
 #include "vtkBoundingBox.h"               // for vtkBoundingBox
+#include "vtkDIYExplicitAssigner.h"       // for vtkDIYExplicitAssigner
 #include "vtkFiltersParallelDIY2Module.h" // for export macros
 #include "vtkObject.h"
 #include "vtkSmartPointer.h" // for vtkSmartPointer
-#include <vector>            // for std::vector
+
+#include <memory> // for std::shared_ptr
+#include <vector> // for std::vector
 
 class vtkDataObject;
 class vtkDataSet;
@@ -50,12 +53,16 @@ public:
    * cell-centers) into `number_of_partitions` requested. If `controller` is non-null,
    * the operation will be performed taking points on the multiple ranks into consideration.
    *
+   * `local_bounds` provides the local domain bounds. If not specified, domain
+   * bounds will be computed using the `dobj`.
+
    * Returns a vector a bounding boxes that can be used to partition the points
    * into load balanced chunks. The size of the vector is greater than or equal
    * to the `number_of_partitions`.
    */
   static std::vector<vtkBoundingBox> GenerateCuts(vtkDataObject* dobj, int number_of_partitions,
-    bool use_cell_centers, vtkMultiProcessController* controller = nullptr);
+    bool use_cell_centers, vtkMultiProcessController* controller = nullptr,
+    const double* local_bounds = nullptr);
 
   /**
    * Given a collection of points, this method will generate box cuts in the
@@ -86,9 +93,13 @@ public:
    * The returned vtkPartitionedDataSet will also have exactly as many
    * partitions as the input vtkPartitionedDataSet, however only the partitions
    * assigned to this current rank may be non-null.
+   *
+   * block_assigner is an optional parameter that should be set if the user wants
+   * to assign blocks in a custom way. The default assigner is the one returned
+   * by vtkDIYKdTreeUtilities::CreateAssigner.
    */
-  static vtkSmartPointer<vtkPartitionedDataSet> Exchange(
-    vtkPartitionedDataSet* parts, vtkMultiProcessController* controller);
+  static vtkSmartPointer<vtkPartitionedDataSet> Exchange(vtkPartitionedDataSet* parts,
+    vtkMultiProcessController* controller, std::shared_ptr<diy::Assigner> block_assigner = nullptr);
 
   /**
    * Generates and adds global cell ids to datasets in `parts`. One this to note
@@ -100,6 +111,23 @@ public:
    */
   static bool GenerateGlobalCellIds(vtkPartitionedDataSet* parts,
     vtkMultiProcessController* controller, vtkIdType* mb_offset = nullptr);
+
+  /**
+   * `GenerateCuts` returns a kd-tree with power of 2 nodes. Oftentimes, we want
+   * to generate rank assignments for a fewer number of ranks for the nodes such
+   * that each rank gets assigned a complete sub-tree. Use this function to
+   * generate such an assignment.  This has following constraints:
+   * 1. `num_blocks` must be a power of two.
+   * 2. `num_ranks` cannot be greater than num_blocks.
+   */
+  static std::vector<int> ComputeAssignments(int num_blocks, int num_ranks);
+
+  /**
+   * Returns an assigner that assigns power-of-two blocks to an arbitrary number
+   * of ranks such that each rank with a non-empty assignment gets a subtree --
+   * thus preserving the kd-tree ordering between ranks.
+   */
+  static vtkDIYExplicitAssigner CreateAssigner(diy::mpi::communicator& comm, int num_blocks);
 
 protected:
   vtkDIYKdTreeUtilities();

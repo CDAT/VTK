@@ -1,3 +1,9 @@
+# The TDx support has not been moved, this header is here to define nothing,
+# and so allow classes in other modules to safely include it and keep going.
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/vtkTDxConfigure.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h")
+
 set(classes
   vtkAbstractMapper
   vtkAbstractMapper3D
@@ -33,13 +39,13 @@ set(classes
   vtkFrustumCoverageCuller
   vtkGPUInfo
   vtkGPUInfoList
-  vtkGenericRenderWindowInteractor
   vtkGenericVertexAttributeMapping
   vtkGlyph3DMapper
   vtkGraphMapper
   vtkGraphToGlyphs
   vtkGraphicsFactory
   vtkHardwareSelector
+  vtkHardwareWindow
   vtkHierarchicalPolyDataMapper
   vtkImageActor
   vtkImageMapper
@@ -164,11 +170,13 @@ set(headers
   vtkPythagoreanQuadruples.h
   vtkRayCastStructures.h
   vtkRenderingCoreEnums.h
+  "${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h"
   vtkTDxMotionEventInfo.h)
 
 vtk_module_add_module(VTK::RenderingCore
   CLASSES ${classes}
-  HEADERS ${headers})
+  HEADERS ${headers}
+  )
 
 if (VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN)
   vtk_module_definitions(VTK::RenderingCore

@@ -621,6 +621,7 @@ OSPMaterial MakeActorMaterial(vtkOSPRayRendererNode* orn, OSPRenderer oRenderer,
     OSPMaterial oMaterial = vtkOSPRayMaterialHelpers::NewMaterial(orn, oRenderer, "Luminous");
     ospSet3fv(oMaterial, "color", diffusef);
     ospSetf(oMaterial, "intensity", lum);
+    ospSetf(oMaterial, "transparency", 1.0 - opacity);
     return oMaterial;
   }
 
@@ -852,7 +853,7 @@ void vtkOSPRayPolyDataMapperNode::ORenderPoly(void* renderer, vtkOSPRayActorNode
   int numPointValueTextureCoords = 0;
   float* pointValueTextureCoords = nullptr;
   //
-  // now ask mapper to do most of the work and provide use with
+  // now ask mapper to do most of the work and provide us with
   // colors per cell and colors or texture coordinates per point
   vtkUnsignedCharArray* vColors = nullptr;
   vtkFloatArray* vColorCoordinates = nullptr;

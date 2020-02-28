@@ -62,6 +62,7 @@ class vtkTimerIdMap;
 class vtkAbstractPicker;
 class vtkAbstractPropPicker;
 class vtkAssemblyPath;
+class vtkHardwareWindow;
 class vtkInteractorObserver;
 class vtkRenderWindow;
 class vtkRenderer;
@@ -161,6 +162,16 @@ public:
   vtkGetObjectMacro(RenderWindow, vtkRenderWindow);
   //@}
 
+  //@{
+  /**
+   * Set/Get the hardware window being controlled by this object.
+   * For opengl the hardware window is not used as the opengl
+   * subclasses of RenderWindow provide the functionality.
+   */
+  void SetHardwareWindow(vtkHardwareWindow* aren);
+  vtkGetObjectMacro(HardwareWindow, vtkHardwareWindow);
+  //@}
+
   /**
    * Event loop notification member for window size change.
    * Window size is measured in pixels.
@@ -196,7 +207,7 @@ public:
   int CreateRepeatingTimer(unsigned long duration);
 
   /**
-   * Create a one shot timer, with the specified duretion (in milliseconds).
+   * Create a one shot timer, with the specified duration (in milliseconds).
    * \return the timer id.
    */
   int CreateOneShotTimer(unsigned long duration);
@@ -794,6 +805,7 @@ protected:
   ~vtkRenderWindowInteractor() override;
 
   vtkRenderWindow* RenderWindow;
+  vtkHardwareWindow* HardwareWindow;
   vtkInteractorObserver* InteractorStyle;
 
   // Used as a helper object to pick instances of vtkProp

@@ -1391,3 +1391,25 @@ vtkObject* vtkVRMLImporter::GetVRMLDEFObject(const char* name)
   }
   return nullptr;
 }
+
+//----------------------------------------------------------------------------
+std::string vtkVRMLImporter::GetOutputsDescription()
+{
+  std::stringstream ss;
+  for (int i = 0; i < this->Internal->Heap.Count(); i++)
+  {
+    vtkObject* obj = this->Internal->Heap.Get(i);
+    vtkPoints* points = vtkPoints::SafeDownCast(obj);
+    vtkDataArray* array = vtkDataArray::SafeDownCast(obj);
+    if (points)
+    {
+      ss << "Points with " << points->GetNumberOfPoints() << " points\n";
+    }
+    else if (array)
+    {
+      ss << "Array with " << array->GetNumberOfTuples() << " tuples\n";
+      ss << vtkImporter::GetArrayDescription(array, vtkIndent(1));
+    }
+  }
+  return ss.str();
+}

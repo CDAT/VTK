@@ -2729,10 +2729,10 @@ endfunction ()
 @ingroup module
 @section module-autoinit Autoinit
 
-When a module contains a registry which may be populated by other modules,
-these registries need to be populated when the modules are loaded by the
-dynamic linker (for shared builds) or program load time (for static builds). To
-provide for this, the module system contains an autoinit "subsystem".
+When a module contains a factory which may be populated by other modules, these
+factories need to be populated when the modules are loaded by the dynamic linker
+(for shared builds) or program load time (for static builds). To provide for
+this, the module system contains an autoinit "subsystem".
 
 @subsection module-autoinit-leverage Leveraging the autoinit subsystem
 
@@ -2758,7 +2758,7 @@ The @ref vtk_module_autoinit function will generate an include file and provide
 its path via the `<module>_AUTOINIT_INCLUDE` define. once it has been included,
 if the `<module>_AUTOINIT` symbol is defined, a header is included which is
 intended to provide the `VTK_MODULE_AUTOINIT` macro. This macro is given the
-module name and should use `<module>_AUTOINIT` to fill in the registries in the
+module name and should use `<module>_AUTOINIT` to fill in the factories in the
 module with those from the `IMPLEMENTS` modules listed in that symbol.
 
 The `<module>_AUTOINIT` symbol's value is:
@@ -3059,7 +3059,8 @@ $<$<BOOL:${_vtk_hierarchy_genex_include_directories}>:\n-I\'$<JOIN:${_vtk_hierar
 
   add_custom_command(
     OUTPUT  "${_vtk_hierarchy_file}"
-    COMMAND "${_vtk_hierarchy_tool_target}"
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR}
+            "$<TARGET_FILE:${_vtk_hierarchy_tool_target}>"
             "@${_vtk_hierarchy_args_file}"
             -o "${_vtk_hierarchy_file}"
             "${_vtk_hierarchy_data_file}"

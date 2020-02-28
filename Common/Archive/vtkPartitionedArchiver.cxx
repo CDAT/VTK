@@ -64,7 +64,9 @@ void vtkPartitionedArchiver::InsertIntoArchive(
   archive_write_set_format_zip(a);
 
   // Avoid buffer exhausted errors by guaranteeing a sane minimum buffer size.
-  size_t bufferSize = (size > 512 ? size : 512);
+  // The value 10240 is libarchive's default buffer size when writing explicitly
+  // to file.
+  size_t bufferSize = (size > 10240 ? size : 10240);
 
   size_t used = 0;
   char* b = (char*)malloc(bufferSize);
@@ -115,6 +117,12 @@ void vtkPartitionedArchiver::InsertIntoArchive(
   }
 
   this->Internals->Buffers[relativePath] = std::make_pair(used, b);
+}
+
+//----------------------------------------------------------------------------
+bool vtkPartitionedArchiver::Contains(const std::string& relativePath)
+{
+  return this->Internals->Buffers.find(relativePath) != this->Internals->Buffers.end();
 }
 
 //----------------------------------------------------------------------------

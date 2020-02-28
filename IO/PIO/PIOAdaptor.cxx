@@ -41,10 +41,6 @@ using namespace std;
 
 namespace
 {
-// Multiprocessor information
-// int myProc;
-// int totProc;
-
 // Global size information
 int dimension = 0;
 int numberOfDaughters = 0;
@@ -88,7 +84,6 @@ PIOAdaptor::~PIOAdaptor()
 {
   if (this->pioData != 0)
     delete this->pioData;
-  delete[] this->variableName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,11 +92,6 @@ PIOAdaptor::~PIOAdaptor()
 //
 // DUMP_DIRECTORY dumps       (Default to .)
 // DUMP_BASE_NAME base        (Required)
-//
-// DATA_VARIABLES 3           (Default to standard vars)
-// "pres"
-// "tev"
-// "momentum"
 //
 // MAKE_HTG YES    (Default NO) means create unstructured grid
 // MAKE_TRACER NO  (Default NO) means don't create unstructured grid of particles
@@ -118,17 +108,18 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
     return 0;
   }
 
+  // Get the directory name from the full path of the .pio file
   string::size_type dirPos = this->descFileName.find_last_of(Slash);
   string dirName;
   if (dirPos == string::npos)
   {
-    dirName = ".";
+    std::cerr << "Bad input file name: " << PIOFileName << std::endl;
+    return 0;
   }
   else
   {
     dirName = this->descFileName.substr(0, dirPos);
   }
-  dirName = dirName + Slash;
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -139,7 +130,7 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
   string keyword;
   this->useHTG = false;
   this->useTracer = false;
-  this->dumpDirectory = ".";
+  this->dumpDirectory = dirName;
 
   while (inStr.getline(inBuf, 256))
   {
@@ -156,12 +147,14 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
         line >> rest;
         if (rest[0] == '/')
         {
+          // If a full path is given use it
           this->dumpDirectory = rest;
         }
         else
         {
+          // If partial path append to the dir of the .pio file
           ostringstream tempStr;
-          tempStr << dirName << rest;
+          tempStr << dirName << Slash << rest;
           this->dumpDirectory = tempStr.str();
         }
       }
@@ -182,30 +175,8 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
         if (rest == "YES")
           this->useTracer = true;
       }
-      if (keyword == "DATA_VARIABLES")
-      {
-        line >> this->numberOfVariables;
-        this->variableName = new string[this->numberOfVariables];
-        for (int i = 0; i < this->numberOfVariables; i++)
-        {
-          inStr.getline(inBuf, 256);
-          string variableLine(inBuf);
-          string::size_type lastPos = variableLine.rfind('"');
-          this->variableName[i] = variableLine.substr(1, lastPos - 1);
-        }
-      }
     }
   }
-
-  // If no variables were requested default to a standard set
-  this->numberOfVariables = 6;
-  this->variableName = new string[this->numberOfVariables];
-  this->variableName[0] = "mass";
-  this->variableName[1] = "tev";
-  this->variableName[2] = "pres";
-  this->variableName[3] = "rade";
-  this->variableName[4] = "cell_energy";
-  this->variableName[5] = "cell_momentum";
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -268,33 +239,41 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
 
   /////////////////////////////////////////////////////////////////////////////
   //
-  // Verify that requested variables exist in dump files (use first file)
-  // Collect information about the number of components
+  // Collect variables having a value for every cell from dump file
   //
-  std::list<std::string> varFields;
-  for (int i = 0; i < this->numberOfVariables; i++)
-  {
-    varFields.push_back(this->variableName[i]);
-  }
-
-  this->pioData = new PIO_DATA(this->dumpFileName[0].c_str(), &varFields);
-  int validCount = 0;
+  this->pioData = new PIO_DATA(this->dumpFileName[0].c_str());
   if (this->pioData->good_read())
   {
-    for (int i = 0; i < this->numberOfVariables; i++)
+    // Get the number of cells in the first dump file available
+    std::valarray<int> histsize;
+    this->pioData->set_scalar_field(histsize, "hist_size");
+    int numberOfCells = histsize[histsize.size() - 1];
+    int numberOfFields = this->pioData->get_pio_num();
+    PIO_FIELD* pioField = this->pioData->get_pio_field();
+
+    for (int i = 0; i < numberOfFields; i++)
     {
-      if (this->pioData->VarMMap.find(this->variableName[i].c_str()) !=
-        this->pioData->VarMMap.end())
+      if (pioField[i].length == numberOfCells && pioField[i].cdata_len == 0)
       {
-        this->variableName[validCount] = this->variableName[i];
-        validCount++;
-      }
-      else
-      {
-        std::cerr << "Variable is not in PIO file: " << this->variableName[i] << std::endl;
+        // index = 0 is scalar, index = 1 is vector, index = -1 is request from input deck
+        int index = pioField[i].index;
+        if (index == 0 || index == 1 || index == -1)
+        {
+          // Discard names used in geometry and variables with too many components
+          // which are present for use in tracers
+          char* pioName = pioField[i].pio_name;
+          size_t numberOfComponents = this->pioData->VarMMap.count(pioName);
+          if ((numberOfComponents <= 9) && (strcmp(pioName, "cell_index") != 0) &&
+            (strcmp(pioName, "cell_level") != 0) && (strcmp(pioName, "cell_mother") != 0) &&
+            (strcmp(pioName, "cell_daughter") != 0) && (strcmp(pioName, "cell_center") != 0) &&
+            (strcmp(pioName, "cell_active") != 0) && (strcmp(pioName, "amr_tag") != 0))
+          {
+            this->variableName.push_back(pioName);
+          }
+        }
       }
     }
-    this->numberOfVariables = validCount;
+    sort(this->variableName.begin(), this->variableName.end());
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -310,6 +289,7 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
   this->fieldsToRead.push_back("global_numcell");
   this->fieldsToRead.push_back("hist_cycle");
   this->fieldsToRead.push_back("hist_time");
+  this->fieldsToRead.push_back("hist_size");
   this->fieldsToRead.push_back("l_eap_version");
 
   if (this->useTracer == true)
@@ -324,7 +304,7 @@ int PIOAdaptor::initializeGlobal(const char* PIOFileName)
   }
 
   // Requested variable fields from pio meta file
-  for (int i = 0; i < this->numberOfVariables; i++)
+  for (unsigned int i = 0; i < this->variableName.size(); i++)
   {
     this->fieldsToRead.push_back(this->variableName[i]);
   }
@@ -346,6 +326,7 @@ int PIOAdaptor::initializeDump(int timeStep)
     delete this->pioData;
     this->pioData = 0;
   }
+  this->currentTimeStep = timeStep;
 
   // Create one PIOData which accesses the PIO file to fetch data
   if (this->pioData == 0)
@@ -361,9 +342,6 @@ int PIOAdaptor::initializeDump(int timeStep)
 
       if (amhc_i != 0 && amhc_r8 != 0 && amhc_l != 0)
       {
-        // bool cylin = (amhc_l[Ncylin] != 0.0) ? true : false;
-        // bool sphere = (amhc_l[Nsphere] != 0.0) ? true : false;
-
         dimension = uint32_t(amhc_i[Nnumdim]);
         numberOfDaughters = (int)pow(2.0, dimension);
 
@@ -448,19 +426,20 @@ void PIOAdaptor::create_geometry(vtkMultiBlockDataSet* grid)
   }
 
   // Collect geometry information from PIOData files
+  std::valarray<int> histsize;
   std::valarray<int> level;
   std::valarray<int> numcell;
   std::valarray<double> simCycle;
   std::valarray<double> simTime;
   std::valarray<std::valarray<double> > center;
 
+  this->pioData->set_scalar_field(histsize, "hist_size");
   this->pioData->set_scalar_field(daughter, "cell_daughter");
   this->pioData->set_scalar_field(level, "cell_level");
   this->pioData->set_scalar_field(numcell, "global_numcell");
   this->pioData->set_vector_field(center, "cell_center");
 
-  int numberOfCells = static_cast<int>(daughter.size());
-  // int numberOfDaughters = (int)pow(2.0, dimension);
+  int numberOfCells = histsize[histsize.size() - 1];
   int numProc = static_cast<int>(numcell.size());
 
   int64_t* cell_daughter = &daughter[0];
@@ -1040,7 +1019,6 @@ void PIOAdaptor::create_amr_HTG(vtkMultiBlockDataSet* grid,
   {
     if (cell_level[i] == 1)
     {
-
       // Calculate which tree because the XRAGE arrangement does not match the HTG
       int xIndx = gridSize[0] * ((cell_center[0][i] - minLoc[0]) / (maxLoc[0] - minLoc[0]));
       int yIndx = gridSize[1] * ((cell_center[1][i] - minLoc[1]) / (maxLoc[1] - minLoc[1]));
@@ -1110,7 +1088,7 @@ void PIOAdaptor::load_variable_data(vtkMultiBlockDataSet* grid)
 {
   int64_t* cell_daughter = &daughter[0];
 
-  for (int var = 0; var < this->numberOfVariables; var++)
+  for (unsigned int var = 0; var < this->variableName.size(); var++)
   {
     int numberOfComponents =
       static_cast<int>(this->pioData->VarMMap.count(this->variableName[var].c_str()));
